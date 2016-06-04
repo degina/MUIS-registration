@@ -1,0 +1,14 @@
+<script>
+    $(function () {
+        var ftypeDiv = $('div#fileShareControl');
+    #{if users.size()>0}
+        ftypeDiv.find('div#sendUserTag').html('<ul></ul>');
+        ftypeDiv = ftypeDiv.find('div#sendUserTag ul');
+        #{list items:users,as:'us'}
+            ftypeDiv.append("<li id='u-${us.id}' seltype=u uid=${us.id}>" +
+                    "<span onclick=sendToUserRemoveSelection('u',${us.id})><i class='fa fa-minus-circle asterisk'></i></span>&nbsp;${us}" +
+                    "</li>");
+        #{/list}
+    #{/if}
+    });
+</script>

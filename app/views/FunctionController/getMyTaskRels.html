@@ -1,0 +1,26 @@
+#{if type==0}
+<div class="exp1-${tid}">
+    #{list items:assignRels,as:'rel'}
+        <li id=1-${rel.projectObject.id} class="selTaskTr" expand="0"
+            onclick="clickTaskLi(${rel.projectObject.id},1)"
+            style="padding-left: 25px">
+        %{getCount=rel.getCount(uid,percent);}%
+            <span class="projectObject">${rel.projectObject.name}#{if getCount>0}&nbsp;(${getCount})#{/if}</span><span
+                class="loadget"></span>
+        </li>
+    #{/list}
+</div>
+#{/if}
+#{else }
+<div class="exp2-${tid}">
+    #{list items:assignRels,as:'rel'}
+        <li id=2-${rel.task.id} class="selTaskTr" onclick="clickTaskLi(${rel.task.id},2)"
+            style="padding-left: 40px">
+        %{getCount=rel.getCount(uid,percent);}%
+            <span class="loadget"></span><span class="task"
+                                               style="margin-left: 2px">${rel.task.name}</span>#{if getCount>0}
+            &nbsp;(${getCount})#{/if}
+        </li>
+    #{/list}
+</div>
+#{/else}

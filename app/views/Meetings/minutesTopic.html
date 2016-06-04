@@ -1,0 +1,74 @@
+#{list items:meetingTopics,as:'topic'}
+<tr id="trMeTopic${topic.id}">
+    <td class="no-print">
+        <button data-rel="tooltip" title="Дэлгэрэнгүй" onclick="showMore(${topic.id})"
+                class="view btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-search"></i></button>
+    </td>
+    <td>${topic_index}</td>
+    <td>${topic.title}</td>
+    <td>${topic.owner.lastnameFirstCharacter}.${topic.owner.firstName}</td>
+    <td>
+        <div data-rel="tooltip" data-placement="bottom" title="${topic.getRelUsers()}">
+        ${topic.getFristRelUser().raw()}
+        </div>
+    </td>
+    <td>${topic.task?.name}</td>
+    %{ongo=""; if (topic.priority.id == 1)ongo='danger';
+    else if (topic.priority.id==2) ongo='warning';
+    else ongo='primary';}%
+    <td class="text-center"><span class="label label-${ongo} w-300"
+                                  style="display: inline-block; width: 45px;">${topic.priority.priority}</span></td>
+    %{ongo=""; if (topic.status.id == 1)ongo='success';
+    else if (topic.status.id==2) ongo='primary';
+    else ongo='warning';}%
+    <td id="topic-status-${topic.id}" class="text-center">
+        <span class="label label-${ongo} w-300" style="display: inline-block; width: 66px;">${topic.status.status}</span>
+    </td>
+    <td class="text-center">${topic.newOld.newOld}</td>
+    #{if meeting.owner.id == user.id || permissionType == 3 }
+        <td class="text-center no-print">
+            <button onclick="deleteTopic(${topic.id})" data-rel="tooltip" title="Устгах"
+                    class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                    class="fa fa-times"></i></button>
+        </td>
+    #{/if}
+</tr>
+<tr id="trMeTopicNote${topic.id}" class="trTopicNote">
+    <td colspan="2" class="no-print">Хурлын тэмдэглэл</td>
+    <td colspan="8">
+        <div#{if meeting.owner.id == user.id || permissionType == 3 } contenteditable="true"
+            class="cke-editor editableDiv"#{/if}
+            #{else }contenteditable="false" #{/else} >
+        ${topic?.minutes?.raw()}
+        </div>
+        <div class="save col-md-12 m-t-10 m-b-5 hidden">
+            <div class="pull-left">
+                <ul class="uploadBox" id="topicAttach${topic.id}">
+                    #{list items:topic?.topicAttachments, as:'attach'}
+                        <li>
+                    <span>
+                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}
+                        ${controllers.Functions.handleDocumentAttachmentDel(attach.dir,attach.name,attach.extension).raw()}
+                    </span>
+                        </li>
+                    #{/list}
+                ${controllers.Functions.handleDocumentAttachmentImgGallery("topicAttach"+topic.id).raw()}
+                    <li>
+                <span> <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                               data-rel="tooltip" title="Хавсаргах">
+                    <i class="fa fa-cloud-upload"></i></button></span>
+                    </li>
+                </ul>
+            </div>
+            <div class="pull-right">
+                <span class="m-r-10">Хадгалах байдал:  </span>
+                <button class="m-r-10 btn btn-primary btn-small" onclick="saveTopic('${topic.id}',2)">Шийдвэр</button>
+                <button class="m-r-10 btn btn-success btn-small" onclick="saveTopic('${topic.id}',1)">Нээлттэй</button>
+                <button class="btn btn-warning btn-small" onclick="saveTopic('${topic.id}',3)">Даалгавар</button>
+            </div>
+        </div>
+    </td>
+</tr>
+#{/list}
+

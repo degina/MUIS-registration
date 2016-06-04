@@ -1,0 +1,22 @@
+<script>
+    $('table#tableIncomeResult td#tdTaxActual').html("${controllers.Functions.getDecimal(budget.taxActual)}");
+    $('table#tableIncomeResult td#tdTaxBudget').html("${controllers.Functions.getDecimal(budget.taxBudget)}");
+    var currentTd= $('table#tableIncomeResult td#tdNetIncomeActual');
+    %{ value = budget.netIncomeActual;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+    currentTd= $('table#tableIncomeResult td#tdNetIncomeBudget');
+    %{ value = budget.netIncomeBudget;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    currentTd= $('table#tableIncomeResult td#tdEbitdaActual');
+    %{ value = budget.ebitdaActual;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    currentTd= $('table#tableIncomeResult td#tdEbitdaBudget');
+    %{ value = budget.ebitdaBudget;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+</script>

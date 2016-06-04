@@ -1,0 +1,92 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: 'Тайлан'/}
+#{set activeMenu: 'Reports'/}
+#{set baseClass: 'tables'/}
+<div id="main-content" style="padding: 5px;background-color: white">
+    <div id="chartData1"></div>
+    <table cellpadding="0" cellspacing="0" border="0" id="cellTable" style="width: 100%">
+        <td class="title" style="text-align: right">${month} -р сарын</td>
+    %{for(controllers.ReportClass.ReportDate rdate:reportDates){}%
+        <td class="tcell empty ${dateS.compareTo(rdate.dateS)==0?'today':''}"
+            style="text-align: center;font-size: 11px">${rdate.text}</td>
+    %{}}%
+        <td class="none"></td>
+    #{list items:project.getProjectObjects(),as:'group'}
+        <tr style="line-height: 10px">
+            <td>&nbsp;</td>
+        %{for(controllers.ReportClass.ReportDate rdate:reportDates){}%
+            <td class="${dateS.compareTo(rdate.dateS)==0?'today':''}"></td>
+        %{}}%
+            <td></td>
+        </tr>
+        <tr>
+        %{ mustPercent=controllers.MonitoringFunction.mustPercent(project,dateS,group.startDate,group.duration);}%
+            <td class="title" style="border-right: none">${group.name} (${group.completedPercent}) ${mustPercent}</td>
+        %{ historyObjects=controllers.MonitoringFunction.getHistoryObjects(dateBetween,group);
+            def isStarted=false;
+            for(controllers.ReportClass.ReportDate rdate:reportDates){
+            if(!isStarted)isStarted=controllers.MonitoringFunction.checkStart(group.startDate,rdate.dateS,group.finishDate);
+            percent =controllers.MonitoringFunction.getPercentObjects(historyObjects,rdate.dateS);
+            }%
+            <td class="tcell empty ${isStarted?'started':''} ${dateS.compareTo(rdate.dateS)==0?'today1':''}"
+                title="${controllers.Functions.getFloatFormat((float)percent,2)}"></td>
+        %{
+            if(isStarted)if(controllers.MonitoringFunction.checkFinish(rdate.dateS,group.finishDate,percent))isStarted=false;
+            }}%
+            <td class="none"></td>
+        </tr>
+    #{/list}
+    </table>
+</div>
+<style>
+    div#main-content table#cellTable td.title {
+        border: 1px solid lightgray;
+        padding: 1px 10px;
+    }
+
+    div#main-content table#cellTable td.tcell {
+        height: 20px;
+        width: 23px;
+        padding: 1px;
+    }
+
+    div#main-content table#cellTable td.empty {
+        border: 1px solid lightgray;
+        border-right: none;
+    }
+
+    div#main-content table#cellTable {
+        border: 1px solid lightgray;
+    }
+
+    div#main-content table#cellTable td.started {
+        border: 1px solid lawngreen;
+    }
+
+    div#main-content table#cellTable td.today {
+        border-right: 2px solid darkgrey;
+    }
+</style>
+#{set 'moreStyles'}
+<link href="/assets/plugins/c3-master/c3.css" rel="stylesheet" type="text/css">
+<link href="/public/jquery-ui-1.11.2.custom/jquery-ui.css" rel="stylesheet">
+<link rel="stylesheet" type="text/css" media="all" href="/public/stylesheets/portfolio.css"/>
+#{/set}
+#{set 'moreScripts'}
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+<script src="/assets/plugins/bootstrap-progressbar/bootstrap-progressbar.js"></script>
+<!-- PAGE LEVEL SCRIPTS -->
+<script src="/assets/plugins/visible/jquery.visible.js"></script>
+<script src="/assets/plugins/d3/d3.min.js" charset="utf-8"></script>
+<script src="/assets/plugins/c3-master/c3.min.js"></script>
+#{/set}

@@ -1,0 +1,519 @@
+div.fc-content {
+    cursor: pointer;
+}
+
+div#todoListDiv li {
+    list-style: none;
+}
+
+#weather i {
+    color: #fff;
+    font-family: weather;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1.0;
+}
+
+div.post-images img {
+    height: 25px !important;
+    width: 25px !important;
+    margin: 5px 1px 0 0 !important;
+}
+
+ul.uploadBox {
+    padding: 0;
+    margin-top: 0px;
+    margin-top: -2px;
+}
+
+ul.uploadBox li span img.imgIcon {
+    height: 25px !important;
+    width: 25px !important;
+    border-radius: 4px !important;
+}
+
+ul.uploadBox li span img.deleteUploadedImage {
+    left: 10px !important;
+    top: 10px !important;
+}
+
+ul.uploadBox li span img.deleteImage {
+    left: 10px !important;
+    top: 10px !important;
+    height: 18px !important;
+    position: absolute;
+    width: 18px;
+}
+
+.fc-event-icons {
+    width: 45px !important;
+    height: auto;
+}
+
+.carousel-inner img {
+    width: 100%;
+    margin: auto;
+}
+
+button.upload:hover {
+    background-color: #18a689;
+    color: #fff !important
+}
+
+div#postArea .post-like {
+    height: 30px;
+    margin: 10px 0 0 0;
+    padding: 0 0 20px 12px;
+}
+
+div#postArea .Sbhd {
+    -webkit-animation: ozShareboxSlide .5s ease-out;
+    animation: ozShareboxSlide .5s ease-out;
+    -webkit-border-radius: 0;
+    border-radius: 0;
+    -webkit-box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.4);
+    box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.4);
+    -webkit-transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+    transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+    border: 0;
+    border-color: transparent;
+    z-index: 4;
+}
+
+div#postArea .small-comment {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    color: #999;
+    cursor: text;
+    font-size: 12px;
+    height: auto;
+    margin: 0 0 0 0;
+    padding: 6px 8px;
+}
+
+div#postArea .message-item {
+    border: 0 !important;
+    margin: 0;
+    padding: 0 0 15px 0px;;
+    display: block;
+    position: relative;
+}
+
+div#postArea .post-comment {
+    overflow: hidden;
+    zoom: 1;
+}
+
+.post-comment > .pull-left {
+    margin-right: 10px;
+}
+
+.deleteCommentIcon {
+    top: 0;
+    font-size: 13px;
+    font-weight: 100;
+    position: absolute;
+    display: none;
+    right: 0;
+    color: #737373;
+}
+
+div#postArea .message-item:hover .deleteCommentIcon {
+    display: block
+}
+
+div#postArea .post-comments {
+    padding: 0px 20px 10px 20px;
+    background-color: #f5f5f5;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+div#postArea .post-add-comment {
+    padding: 20px 20px 20px 20px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+}
+
+div#postArea .post-head {
+    padding: 15px 15px 10px 15px;
+    position: relative;
+    border-bottom: 1px solid transparent;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+}
+
+div#postArea .post {
+    border: 1px solid #d8d8d8;
+    -webkit-border-radius: 3px;
+    border-radius: 4px !important;
+    background-color: #fff;
+    border-bottom-width: 2px;
+    margin-bottom: 20px;
+}
+
+div#postArea .post:hover .deletePostIcon {
+    display: block
+}
+
+div#postArea .deletePostIcon {
+    position: absolute;
+    display: none;
+    top: 10px;
+    right: 15px;
+    font-size: 18px;
+    color: #737373;
+}
+
+div#postArea .post-body {
+    padding: 0 20px 0 20px;
+    background-color: #FFF;
+}
+
+div#postArea .post-add-comment .full-comment {
+    display: none;
+}
+
+div#postArea .textComment {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    margin-bottom: 7px;
+    min-height: 4.9em;
+    padding: 6px 6px;
+    width: 100%;
+}
+
+div#postArea .show-more-comment {
+    cursor: pointer;
+    color: #262626;
+    font-size: 12px;
+    padding: 10px 20px 10px 20px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #ddd;
+}
+
+div#postArea .show-more-comment:hover {
+    color: #427fed;
+
+}
+
+div#postArea .btn-post {
+    background-color: #53a93f;
+    color: #fff;
+}
+
+div#postArea .RR {
+    display: inline-block;
+}
+
+div#postArea .btn-white {
+    background-color: #fff;
+}
+
+div#postArea .btn {
+    padding: 4px 23px;
+}
+
+div#postArea div.post-new {
+    margin-bottom: 20px;
+    min-width: 320px;
+    -webkit-box-shadow: 0 2px 40px 0 rgba(0, 0, 0, .4);
+    box-shadow: 0 2px 40px 0 rgba(0, 0, 0, .4);
+    -webkit-transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+    transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+}
+
+div#postArea div.post-new-body {
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+div#postArea div.post-new-footer {
+    padding: 15px;
+    background-color: #fff;
+    display: none;
+}
+
+.Rd {
+    color: #404040;
+    cursor: text;
+    padding: 10px;
+    position: relative;
+    vertical-align: top;
+    background-color: white;
+    border: 1px solid #e4e4e4;
+    -webkit-box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, .08);
+    box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, .08);
+}
+
+.Rd:hover {
+    box-shadow: inset 2px 2px 4px 0 rgba(0, 0, 0, .04);
+    -webkit-box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, .04);
+}
+
+.eg {
+    -webkit-box-shadow: inset 2px 2px 4px 0 rgba(0, 0, 0, .04);
+    box-shadow: inset 2px 2px 4px 0 rgba(0, 0, 0, .04);
+    background-color: white;
+    border-top: 1px solid #e4e4e4;
+    cursor: text;
+    display: none;
+    height: 15px;
+    left: -15px;
+    position: absolute;
+    top: -1px;
+    width: 20px;
+}
+
+.oo {
+    border-bottom: 16px solid #e4e4e4;
+    border-right: 16px solid transparent;
+    left: -1px;
+    top: -1px;
+}
+
+.yw {
+    height: 0;
+    position: absolute;
+    width: 0;
+}
+
+.VK {
+    border-bottom: 15px solid #f5f5f5;
+    border-right: 15px solid transparent;
+    left: -1px;
+}
+
+.textPostSmall {
+    background: transparent;
+    position: relative;
+    min-height: 3.9em;
+    z-index: 1;
+    color: #999;
+    cursor: text;
+}
+
+.textPostFull {
+    background: transparent;
+    min-height: 3.9em;
+    z-index: 1;
+}
+
+div #postArea .seeUserPost {
+    background-color: #fff;
+    border: 1px solid #ccc;
+    margin-bottom: 7px;
+    min-height: 2.9em;
+    padding: 6px 6px;
+    display: block;
+    margin-right: 40px;
+    overflow: hidden;
+}
+
+div#sendUserTag li {
+    list-style-type: none;
+    padding: 2px 4px;
+    border-bottom: 0 !important;
+    display: inline;
+    list-style-type: none;
+}
+
+div.post-select-user-icon {
+    width: 31px;
+    right: 0px;
+    top: 3px;
+    position: absolute;
+}
+
+.textareaDiv {
+    font-family: Consolas, monospace;
+    text-align: center;
+    vertical-align: baseline;
+}
+
+div#main-content ul.itemsSource {
+    display: none;
+}
+
+.load-more-animation {
+    display: none;
+    text-align: center;
+    vertical-align: middle;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+div#postArea .triangle {
+    width: 0;
+    height: 0;
+    border-top: 170px solid #000;
+    border-left: 170px solid transparent;
+}
+
+div#postArea .post-content {
+    padding-bottom: 10px;
+}
+
+div#postArea span.post-read-more {
+    -webkit-user-select: none;
+    color: #999;
+    display: inline-block;
+    font-size: 12px;
+    margin-top: 2px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+div#postArea .post:hover span.post-read-more {
+    text-decoration: underline;
+    color: #427fed;
+    cursor: pointer;
+}
+
+div#calendar h2 {
+    width: 100%;
+    margin: 6px 0;
+}
+
+div#calendar .fc-clear {
+    display: none;
+}
+
+div.post .tooltip-inner {
+    white-space: pre-wrap;
+}
+
+div.post-area-small {
+    /*width: 500px;*/
+    margin-left: auto;
+    margin-right: auto;
+}
+
+div.post-attach-all {
+    width: 100%;
+    margin-top: 2px;
+    margin-left: -10px;
+    margin-right: -10px;
+    cursor: pointer;
+}
+
+div.post-attach {
+    margin-left: -10px;
+    margin-right: -10px;
+    cursor: pointer;
+}
+
+div.post-plus-attach {
+    width: 19%;
+    font-size: 24px;
+    display: inline-flex;
+}
+
+button.modal-fullscreen-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1001;
+    background-color: transparent;
+    border: 0;
+}
+
+.post-comment-owner {
+    color: #404040;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.post-comment-created-time {
+    font-size: 12px;
+    color: #8f8f8f;
+}
+
+.modal.modal-fullscreen .modal-dialog,
+.modal.modal-fullscreen .modal-content {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.modal.modal-fullscreen .modal-dialog {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.modal.modal-fullscreen .modal-content {
+    border: none;
+    -moz-border-radius: 0;
+    border-radius: 0;
+    -webkit-box-shadow: inherit;
+    -moz-box-shadow: inherit;
+    -o-box-shadow: inherit;
+    box-shadow: inherit;
+    background-color: #191919;
+    overflow: auto;
+    width: 100%;
+    height: 100%;
+}
+
+.modal.modal-fullscreen .modal-body, .modal.modal-fullscreen table, .modal.modal-fullscreen td {
+    height: 100%;
+}
+
+.dropdown-menu > li > a {
+    cursor: pointer;
+}
+
+.carousel-control {
+    width: 10%;
+    font-size: 24px;
+}
+
+.modal-body .glyphicon-remove {
+    color: #ffffff !important;
+}
+
+.carousel-control-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 5;
+    display: inline-block;
+}
+
+.carousel-control.right, .carousel-control.left {
+    background-image: none;
+}
+
+.img-responsive-my {
+    width: auto;
+    height: auto;
+    max-height: 500px;
+    max-width: 100%;
+}
+
+.img-responsive-my-small {
+    width: auto;
+    height: auto;
+    max-height: 100px;
+    max-width: 19%;
+}
+
+.img-responsive-full {
+    width: auto !important;
+    height: auto !important;
+    max-width: 100% !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+}
+
+.carousel, .carousel-inner, .carousel-inner > .item {
+    height: 100%;
+}

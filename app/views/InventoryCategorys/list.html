@@ -1,0 +1,798 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Inventory'/}
+#{set activeMenuSub:'InventoryCategory'/}
+#{jqueryui-config /}
+#{ckeditor-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+#{flashCrud /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script src="/public/javascripts/jquery.resizableColumns.min.js"></script>
+
+%{inventoryPermission = user.getUserPermissionType(controllers.Consts.permissionInventory);}%
+<div id="main-content" class="dhidden" ${inventoryPermission>0 ? "" : "hidden=\"true\""}>
+    <div>
+        <div class="m-b-0 clearfix">
+            <div class="page-title pull-left">
+                <h3 class="pull-left"><strong>&{'Category'}</strong></h3>
+            </div>
+            <div class="pull-right">
+            #{if inventoryPermission==3}
+                <button class="btn btn-success m-t-10" data-toggle="modal" data-target="#modal-addcategory"><i
+                        class="fa fa-plus p-r-10"></i> &{'add_new_category'}</button>
+            #{/if}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                <table id="category-list-table" class="table table-tools table-hover"
+                                       data-resizable-columns-id="inventorycategory-resizalbe-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 100px" data-resizable-column-id="#">
+                                        </th>
+                                        <th style="width: 200px" data-resizable-column-id="name">
+                                            <strong>&{'name'}</strong>
+                                        </th>
+                                        <th style="width: auto" data-resizable-column-id="subcategory">
+                                            <strong>&{'subcategory'}</strong>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:Categorys, as: 'category'}
+                                    <tr>
+                                        <td><strong>${category.id}</strong></td>
+                                        <td>${category.name}</td>
+                                        <td style="max-width: 500px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">
+                                            #{list items:category.subCategories, as: 'subcategory'}
+                                                #{if subcategory_isLast}
+                                                ${subcategory.name}.
+                                                #{/if}
+                                                #{else}
+                                                ${subcategory.name} ,
+                                                #{/else}
+                                            #{/list}
+                                        </td>
+                                    </tr>
+                                    #{/list}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    #{if MaxPageNumber>1}
+                        <div class="page-navigation" style="width: 100%; text-align: right;">
+                            <a style="text-decoration: none;"
+                               href="@{InventoryCategorys.list(CurrentPageNumber-1)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber - 1 <= 0 ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="<"/>
+                            </a>
+                        %{
+                            int threeDots = 0;
+                            for(int i = 1; i <= MaxPageNumber; i++){
+                            if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                            (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                            (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                            }%
+                            <a style="text-decoration: none;"
+                               #{if CurrentPageNumber != i}href="@{InventoryCategorys.list(i)}"#{/if}>
+                                <input
+                                        class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="${i}"/>
+                            </a>
+                        %{ }else{
+                            if( i == 2 || i == MaxPageNumber - 1 ){
+                            threeDots = 1;
+                            }
+                            if(threeDots == 1){
+                            }%
+                            <span style="font-size: x-large;"><strong>...</strong></span>
+                        %{
+                            threeDots = 0;
+                            }
+                            }
+                            }
+                            }%
+                            <a style="text-decoration: none;"
+                               href="@{InventoryCategorys.list(CurrentPageNumber+1)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber >= MaxPageNumber ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value=">"/>
+                            </a>
+                        </div>
+                    #{/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-addcategory" aria-hidden="true" style="z-index: 6000">
+        <div class="modal-dialog modal-lg" style="width: 700px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'new_category'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventoryCategorys.newCategory()}" class="form-horizontal" method="get"
+                          accept-charset="utf-8" id="category_form_add"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in" id="product_general_add">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        </br>
+
+                                                        <label class="col-sm-3 control-label"
+                                                               style="font-size: larger">&{'category_name'} <span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-5">
+                                                            <input hidden="true" id="category_id_add" name="id">
+
+                                                            <div id="selectcat">
+                                                                <select data-live-search="true" id="category"
+                                                                        class="form-control " data-
+                                                                        title="&{'category'}" name="selectcat">
+                                                                    <option value="" id="empty"></option>
+                                                                #{list items:Categories,as:'category'}
+                                                                    <option value="${category.name}">
+                                                                    ${category.name}
+                                                                    </option>
+                                                                #{/list}
+                                                                </select>
+                                                            </div>
+                                                            <div id="inputcat" class="hidden">
+                                                                <input type="text" class="form-control small"
+                                                                       id="inputcategory_add"
+                                                                       name="inputcat">
+                                                            </div>
+
+                                                            <input type="text" hidden="true" required="true" name="is"
+                                                                   id="is" value="0">
+                                                        </div>
+                                                        <div class="col-sm-2">
+                                                            <div id="add">
+                                                                <button type="button" class="btn btn-info"
+                                                                        data-toggle="modal"
+                                                                        id="add">&{'input_category'}</button>
+                                                            </div>
+                                                            <div id="select" class="hidden">
+                                                                <button type="button" class="btn btn-info"
+                                                                        data-toggle="modal"
+                                                                        id="select">&{'select_category'}</button>
+                                                            </div>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            </br>
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="panel-body">
+                                                        <div class="row">
+                                                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive table-blue">
+                                                                <table class="table table-striped table-hover dataTable"
+                                                                       id="table-editable_add">
+                                                                    <thead>
+                                                                    <tr>
+                                                                        <th style="width: auto">&{'subcategory'}</th>
+                                                                        <th style="width: 92px"></th>
+                                                                    </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                    </tbody>
+                                                                    <tfoot>
+                                                                    <tr>
+                                                                        <td></td>
+                                                                        <td class="text-center"><a
+                                                                                style="height: 24px!important; padding-top: 1px!important;"
+                                                                                id="table-edit_new_add"
+                                                                                class="add btn btn-icon-sm btn-rounded btn-default"
+                                                                                href="#"><i class="fa fa-plus"></i></a>
+                                                                        </td>
+                                                                    </tr>
+                                                                    </tfoot>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                                <button type="button" class="btn btn-success m-t-10" id="category_add"><i
+                                        class="fa fa-check"></i> &{'save'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-editcategory" aria-hidden="true" style="z-index: 6000">
+        <div class="modal-dialog modal-lg" style="width: 700px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'edit_category'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventoryCategorys.saveCategory()}" class="form-horizontal" method="get"
+                          accept-charset="utf-8" id="category_form_edit"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in" id="product_general_edit">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'category_name'} <span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div id="inputcat" class="col-sm-5">
+                                                            <input hidden="true" id="category_id_edit" name="id">
+
+                                                            <input type="text" class="form-control small"
+                                                                   id="inputcategory_edit"
+                                                                   name="inputcat">
+                                                        </div>
+
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </br>
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="row">
+                                                    <div class="col-md-12 col-sm-12 col-xs-12 table-responsive table-blue">
+                                                        <table class="table table-striped table-hover dataTable"
+                                                               id="table-editable_edit">
+                                                            <thead>
+                                                            <tr>
+                                                                <th style="width: auto">&{'subcategory'}</th>
+                                                                <th style="width: 92px"></th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tfoot>
+                                                            <tr>
+                                                                <td></td>
+                                                                <td class="text-center"><a
+                                                                        style="height: 24px!important; padding-top: 1px!important;"
+                                                                        id="table-edit_new_edit"
+                                                                        class="add btn btn-icon-sm btn-rounded btn-default"
+                                                                        href="#"><i class="fa fa-plus"></i></a></td>
+                                                            </tr>
+                                                            </tfoot>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                                <button type="button" class="btn btn-success m-t-10 dhidden" id="edit_save"><i
+                                        class="fa fa-check"></i> &{'save'}
+                                </button>
+                                <button type="button" id="edit_delete"
+                                        class="btn btn-danger m-t-10 dhidden"><i
+                                        class="fa fa-times-circle"></i> &{'delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+    $(window).load(function () {
+    #{if message=="newsuccess"}
+        showSuccessMessage("Амжилттай нэмэгдлээ.");
+    #{/if}
+    #{if message=="newfailed"}
+        showErrorMessage("Амжилтгүй боллоо.");
+    #{/if}
+    #{if message=="savesuccess"}
+        showSuccessMessage("Амжилттай хадгалагдлаа.");
+    #{/if}
+    #{if message=="savefailed"}
+        showErrorMessage("Амжилтгүй боллоо.");
+    #{/if}
+    #{if message=="subpersistent"}
+        showErrorMessage("Ашиглагдаж байгаа дэд ангилал устгах боломжгүй.");
+    #{/if}
+        $('div#main-content').removeClass('dhidden');
+        $(function () {
+            $("table").resizableColumns({
+                store: window.store
+            });
+        });
+    });
+
+    $(document).ready(function () {
+
+        var permission = 0;
+        $.ajax({
+            type: "POST",
+            data: {},
+            url: "/inventorycheckpermission"
+        }).success(
+                function (data) {
+                    permission = data;
+                });
+
+        var oTable_add = $('#table-editable_add').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [0]
+            }
+            ]
+        });
+
+        function editableTable_add() {
+
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#table-edit_new_add').click(function (e) {
+                e.preventDefault();
+
+                oTable_add.fnAddData(['<input type="text" hidden="true" required="true" name="ids" value="0"><input type="text" class="form-control" required="true" name="subcategorys">',
+                    '<div class="text-center"><a style="height: 24px!important; padding-top: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+
+            });
+
+            $('#table-editable_add a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parent().parent().parent();
+                oTable_add.fnDeleteRow(nRow);
+
+
+                // alert("Deleted! Do not forget to do some ajax to sync with backend :)");
+            });
+
+            $('select#category').change(function () {
+                $.ajax({
+                    type: "POST",
+                    data: {name: $(this).val()},
+                    url: "/inventoryShowSubCategory"
+                }).success(
+                        function (data) {
+                            for (var j = 0; j < prev_size / 2; j++)
+                                oTable_add.fnDeleteRow(0);
+                            dat = data;
+                            prev_size = dat.length;
+                            for (var i = 0; i < dat.length; i = i + 2) {
+                                oTable_add.fnAddData(['<input type="text" hidden="true" name="ids" required="true" value="' + dat[i + 1] + '"><input type="text" class="form-control" required="true" name="subcategorys" value="' + dat[i] + '">',
+                                    '<div class="text-center"><a style="height: 24px!important; padding-top: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                                ]);
+                            }
+                            oTable_add.fnDraw();
+
+                        });
+
+
+            });
+
+            $('input#inputcategory_add').change(function () {
+                $.ajax({
+                    type: "POST",
+                    data: {category: $(this).val()},
+                    url: "/inventoryCheckCategory"
+                }).success(
+                        function (data) {
+                            if (data == "false") {
+                                $('input#inputcategory_add').val("");
+                                showErrorMessage("Ангилалын нэр давхцаж байна.");
+                            }
+                        });
+            });
+
+            $('button#add').click(function () {
+                var select = $("div#selectcat");
+                select.addClass("hidden");
+                $('select#category').selectpicker('val', '');
+
+                var input = $("div#inputcat");
+                input.removeClass("hidden");
+                input.attr("required", "true");
+
+                var add = $("div#add");
+                add.addClass("hidden");
+
+                var select = $("div#select");
+                select.removeClass("hidden");
+
+                var is = $("input#is");
+                is.val("1");
+                for (var j = 0; j < prev_size; j++)
+                    oTable_add.fnDeleteRow(1);
+
+
+            });
+            $('button#select').click(function () {
+                var select = $("div#selectcat");
+                select.removeClass("hidden");
+
+                var input = $("div#inputcat");
+                input.addClass("hidden");
+                input.attr("required", "false");
+
+                var add = $("div#add");
+                add.removeClass("hidden");
+
+                var select = $("div#select");
+                select.addClass("hidden");
+
+                var is = $("input#is");
+                is.val("0");
+                $("input#inputcategory_add").val("");
+            });
+
+            $('button#category_add').click(function () {
+
+
+                var is = 0;
+                var rowCount = 0;
+                $('div#modal-addcategory table#table-editable_add tbody tr').each(function () {
+                    if ($(this).find("td.dataTables_empty").val() == null) {
+                        if ($(this).find('td:first-child input:nth-child(2)').val() == "")
+                            is = 1;
+                        rowCount++;
+                    }
+                });
+
+                if ($("input#is").val() == "0" && $("select#category option#empty").val() == $("select#category option:selected").val()) {
+                    showErrorMessage("Ангилал сонгоно уу?");
+                } else if ($("input#is").val() == "1" && $("input#inputcategory_add").val() == "") {
+                    showErrorMessage("Ангилал нэр оруулна уу?");
+                }
+                else if (rowCount == 0) {
+                    showErrorMessage("Мөр нэмнэ үү?");
+                }
+                else if (is == 1) {
+                    showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+                } else {
+
+                    $.ajax({
+                        type: "POST",
+                        data: $('div#modal-addcategory form#category_form_add').serialize(),
+                        url: "/inventorycategorysnewcategory"
+                    }).complete(
+                            function () {
+                                location.reload();
+                            });
+                }
+
+            });
+
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+        };
+
+
+        editableTable_add();
+
+
+        var oTable_edit = $('#table-editable_edit').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [0]
+            }
+            ]
+        });
+
+
+        function editableTable_edit() {
+
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#table-edit_new_edit').live('click', function (e) {
+                e.preventDefault();
+                oTable_edit.fnAddData(['<input type="text" hidden="true" required="true" name="ids" value="0"><input type="text" class="form-control" required="true" name="subcategorys" value="">',
+                    '<div class="text-center"><a style="height: 24px!important; padding-top: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+
+            });
+
+            $('#table-editable_edit a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parent().parent().parent();
+                oTable_edit.fnDeleteRow(nRow);
+
+            });
+
+            $('input#inputcategory_edit').change(function () {
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        category: $(this).val(),
+                        id: $('input#category_id_edit').val()
+                    },
+                    url: "/inventoryCheckCategoryEdit"
+                }).success(
+                        function (data) {
+                            if (data == "false") {
+                                $('input#inputcategory_edit').val("");
+                                showErrorMessage("Ангилалын нэр давхцаж байна.");
+                            }
+                        });
+            });
+
+            $('button#edit_save').click(function () {
+
+                var is = 0;
+                var rowCount = 0;
+                $('div#modal-editcategory table#table-editable_edit tbody tr').each(function () {
+                    if ($(this).find("td.dataTables_empty").val() == null) {
+                        if ($(this).find('td:first-child input:nth-child(2)').val() == "")
+                            is = 1;
+                        rowCount++;
+                    }
+                });
+
+                if (rowCount == 0) {
+                    showErrorMessage("Мөр нэмнэ үү?");
+                }
+                else if (is == 1) {
+                    showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+                }
+                else if ($("input#inputcategory_edit").val() == "") {
+                    showErrorMessage("Агилалын нэр оруулна уу?");
+                }
+                else {
+                    $.ajax({
+                        type: "POST",
+                        data: $('div#modal-editcategory form#category_form_edit').serialize(),
+                        url: "/inventorycategoryssavecategory"
+                    }).complete(
+                            function () {
+                                location.reload();
+                            });
+                }
+
+            });
+
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+        };
+
+
+        editableTable_edit();
+
+        var opt = {};
+
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", 'sEmptyTable': "Үр дүн байхгүй байна."} ,
+                opt.iDisplayLength = 40,
+
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["csv", "xls", "pdf", "print"]
+                };
+        opt.aaSorting = [[0, 'desc']],
+                opt.aoColumnDefs = [
+                    {'bSortable': false, 'aTargets': []}
+                ];
+
+        var dat = [""];
+        var prev_size = 0;
+
+
+        var oTable_list = $('#category-list-table').dataTable(opt);
+        oTable_list.fnDraw();
+
+        $('.dataTables_filter input').attr("placeholder", "Search a product...");
+
+        /* Delete a product */
+        $('div#modal-editcategory button#edit_delete').on('click', function (e) {
+            e.preventDefault();
+            if (confirm("&{'are_you_sure_to_remove_category'}") == false) {
+                return;
+            }
+
+            var index = $('input#category_id_edit').val();
+
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorycategorysdeletecategory"
+            }).success(
+                    function (data) {
+                        if (data == "persistent") {
+                            showErrorMessage("Ашиглагдаж байгаа тул устгах боломжгүй.");
+                        }
+                        if (data == "deletesuccess") {
+                            showSuccessMessage("Ангилал устгал амжилттай боллоо.");
+                            $('#category-list-table tbody tr').each(function () {
+                                if ($(this).find('strong:first-child').html() == index) {
+                                    oTable_list.fnDeleteRow($(this).find('td').parents('tr')[0]);
+                                }
+                            });
+                            $('div#modal-editcategory').modal('hide');
+                            location.reload();
+                        }
+                        if (data == "deletefailed") {
+                            showErrorMessage("Ангилал устгал амжилтгүй боллоо.");
+                        }
+
+                    });
+
+            // alert("Deleted! Do not forget to do some ajax to sync with backend :)");
+        });
+
+
+        $('table#category-list-table tbody tr').on('click', function (e) {
+            e.preventDefault();
+            var nRow = $(this);
+
+            $('div#modal-editcategory button#edit_edit').addClass("dhidden");
+            $('div#modal-editcategory button#edit_save').addClass("dhidden");
+            $('div#modal-editcategory button#edit_delete').addClass("dhidden");
+            $('div#modal-editcategory button#table-edit_new_edit').addClass("dhidden");
+
+
+            var index = $(nRow).find('td:nth-child(1) strong').html();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorycategoryeditcategory"
+            }).success(
+                    function (data) {
+                        $('div#modal-editcategory input#category_id_edit').val(index);
+                        $('div#modal-editcategory input#inputcategory_edit').val(data[0]);
+                        $('div#modal-editcategory input#inputcategory_edit').attr('readonly', true);
+
+                        for (var j = 0; j < prev_size / 2; j++)
+                            oTable_edit.fnDeleteRow(0);
+                        dat = data;
+                        prev_size = dat.length;
+                        if (permission == 3) {
+                            $('div#modal-editcategory button#edit_save').removeClass("dhidden");
+                            $('div#modal-editcategory button#edit_delete').removeClass("dhidden");
+                            $('div#modal-editcategory button#table-edit_new_edit').removeClass("dhidden");
+                            for (var i = 1; i < dat.length; i = i + 2) {
+                                oTable_edit.fnAddData(['<input type="text" hidden="true" name="ids" required="true" value="' + dat[i + 1] + '"><input type="text" class="form-control" required="true" value="' + dat[i] + '" name="subcategorys">', '<div class="text-center"><a style="height: 24px!important; padding-top: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                                ]);
+                            }
+                            $('div#modal-editcategory input#inputcategory_edit').attr('readonly', false);
+                        }
+                        else {
+                            for (var i = 1; i < dat.length; i = i + 2) {
+                                oTable_edit.fnAddData(['<input type="text" hidden="true" name="ids" required="true" value="' + dat[i + 1] + '"><input type="text" class="form-control" readonly required="true" value="' + dat[i] + '" name="subcategorys">', ''
+                                ]);
+                            }
+                            $('div#modal-editcategory table#table-editable_edit thead tr th:nth-child(2)').remove();
+                            $('div#modal-editcategory table#table-editable_edit tbody tr').each(function () {
+                                $(this).find('td:nth-child(2)').remove();
+                            });
+                        }
+                        oTable_edit.fnDraw();
+                        $('div#modal-editcategory').modal('show');
+
+                    });
+        });
+
+
+    })
+    ;
+
+</script>
+<style>
+    .panel-body {
+        background-color: #FFF;
+        padding: 0px;
+        padding-left: 0px;
+    }
+
+    div#main-content body, div#main-content ul, div#main-content li {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 21px;
+        text-align: left;
+    }
+</style>
+
+
+#{inventory-config /}

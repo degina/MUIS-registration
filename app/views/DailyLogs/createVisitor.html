@@ -1,0 +1,55 @@
+#{if isList}
+#{list items:visitors,as:'visitor'}
+<tr id="trVisitor${visitor.id}">
+    <td></td>
+    <td>${(visitor.task)?(visitor.task?.name):(visitor.myPlan?.name)}</td>
+    <td>${visitor.visitor}</td>
+    <td>${visitor.fromVisitor}</td>
+    <td >${visitor.startHour.format("HH:mm")}</td>
+    <td >${visitor.endHour.format("HH:mm")}</td>
+    <td>${visitor.description}</td>
+    <td>
+    #{if visitor.attaches.size()>0}
+        <div class="post-images" id="post-images-visitor-${visitor.id}">
+            #{list items:visitor.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+        </div>
+    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-visitor-"+visitor.id).raw()}
+    #{/if}
+    </td>
+    <td >
+        <button onclick="deleteVisitor(${visitor.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/list}
+#{/if}
+
+#{else }
+<tr id="trVisitor${visitor.id}">
+    <td></td>
+    <td>${(visitor.task)?(visitor.task?.name):(visitor.myPlan?.name)}</td>
+    <td>${visitor.visitor}</td>
+    <td>${visitor.fromVisitor}</td>
+    <td >${visitor.startHour.format("HH:mm")}</td>
+    <td >${visitor.endHour.format("HH:mm")}</td>
+    <td>${visitor.description}</td>
+    <td>
+        #{if visitor.attaches.size()>0}
+            <div class="post-images" id="post-images-visitor-${visitor.id}">
+                #{list items:visitor.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-visitor-"+visitor.id).raw()}
+        #{/if}
+    </td>
+    <td >
+        <button onclick="deleteVisitor(${visitor.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

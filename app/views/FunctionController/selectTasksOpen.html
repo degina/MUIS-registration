@@ -1,0 +1,21 @@
+%{zeroCount = 0;}%
+#{list items:projectObRels,as:'rel'}
+%{getCount=rel.getCount(uid,percent);}%
+    #{if getCount > 0}
+    <li id=1-${rel.projectObject.id} class="selTaskTr" expand="0"
+        onclick="clickTaskLi(${rel.projectObject.id},1)"
+        style="padding-left: 25px">
+        <span class="projectObject">${rel.projectObject.name}&nbsp;(${getCount})</span><span
+            class="loadget"></span>
+    </li>
+    #{/if}
+    #{else}
+    %{zeroCount++}%
+    #{/else}
+#{/list}
+#{if zeroCount == projectObRels.size()}
+<li class="selTaskTr" expand="0"
+    style="padding-left: 25px">
+    <span >&{'noJob'}</span><span
+        class="loadget"></span>
+#{/if}

@@ -1,0 +1,68 @@
+#reportLoadData .panel {
+    margin-bottom: 4px;
+}
+
+#reportLoadData div.panel-heading {
+    padding: 10px 15px 0 15px;
+}
+
+#reportLoadData div.panel-body {
+    padding: 5px 26px;
+}
+
+#reportLoadData div.odd-tr .panel-heading {
+    border-color: #f9f9f9;
+    background-color: #f9f9f9;
+}
+
+#reportLoadData div.odd-tr .panel-default,
+#reportLoadData div.odd-tr .table,
+#reportLoadData div.odd-tr .panel-body {
+    background-color: #f9f9f9;
+}
+
+#reportLoadData div.panel-body th {
+    font-size: 12px;
+}
+
+#reportLoadData table.rangeTable td {
+    text-align: center;
+}
+
+#reportLoadData td.myhoveredTD:hover,
+#reportLoadData table.myhovered td:hover {
+    background-color: rgba(211, 211, 211, 0.28);
+    cursor: pointer;
+}
+
+#reportLoadData table td.rightBorder {
+    border-right: 1px solid #ddd;
+}
+
+#reportLoadData div.notes {
+    text-align: justify;
+}
+
+#reportLoadData div.post-images {
+    border-top: 1px solid #ddd;
+    margin-top: 6px;
+    padding-top: 4px;
+}
+
+.firstHide {
+    /*display: none;*/
+}
+
+#reportLoadData td.weekendDay {
+    background: #fff5e6;
+}
+#reportLoadData {
+    margin-left: -10px;
+}
+
+#reportLoadData .panel-title {
+    width: 100%;
+}
+body{
+    overflow-x: auto;
+}

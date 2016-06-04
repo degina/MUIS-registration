@@ -1,0 +1,349 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'RFI'/}
+#{alertMessages /}
+<style>
+    .btn {
+        font-size: 13px !important;
+    }
+
+    .bold {
+        font-weight: 500;
+    }
+
+    table#posts-table thead tr th {
+        font-size: 15px !important;
+        line-height: 2px !important;
+    }
+
+    table#posts-table tbody tr td {
+        line-height: 30px !important;
+        padding-top: 2px !important;
+        padding-bottom: 2px !important;
+    }
+
+    table#posts-table tbody tr td {
+        transition: background-color 0.3s;
+    }
+
+    table#posts-table tbody tr:hover td {
+        cursor: pointer;
+        background-color: #e3e5e8 !important;
+    }
+
+    a.btn-default:hover {
+        background-color: #2b2e33 !important;
+        color: white !important;
+    }
+
+    .notification {
+        z-index: 5000;
+        right: 20px;
+        bottom: 20px;
+        position: fixed;
+        width: 150px;
+        padding: 8px;
+        min-height: 100px;
+        border-radius: 3px;
+        opacity: 0;
+        transition: opacity 0.5s;
+    }
+
+    .notfOn {
+        opacity: 1;
+        transition: opacity 0.5s;
+    }
+
+    .kamikaze {
+        margin-bottom: 10px;
+    }
+</style>
+<div id="main-content" style="font-weight: 500;padding-top: 20px">
+    <div class="row tengu kamikaze">
+        <div class="col-md-12">
+            <div id="status-row">
+                <div class="col-md-2 cate" style=" padding: 0; padding-right: 6px;width: 13%">
+                    <button onclick="list('All','0','0','',1,'0');"
+                            class="btn btn-${status=="All" ? 'dark bold' : 'default'}"
+                            style="width: 100%; padding-left: 0; padding-right: 0;">&{'All'} <span
+                            class="label label-${status=="All" ? 'primary' : 'default'}">${all}</span>
+                    </button>
+                </div>
+                <div class="col-md-2 cate" style=" padding: 0; padding-right: 6px;width: 13%">
+                    <button onclick="list('Open','0','0','',1,'0');"
+                            class="btn btn-${status=="Open"  ? 'dark bold' : 'default'}"
+                            style="width: 100%; padding-left: 0; padding-right: 0;">&{'Open'} <span
+                            class="label label-${status=="Open" ? 'primary' : 'default'}">${open}</span>
+                    </button>
+                </div>
+                <div class="col-md-2 cate" style=" padding: 0; padding-right: 6px;width: 13%">
+                    <button onclick="list('Closed','0','0','',1,'0');"
+                            class="btn btn-${status=="Closed" ? 'dark bold' : 'default'}"
+                            style="width: 100%;; padding-left: 0; padding-right: 0;">&{'Closed'} <span
+                            class="label label-${status=="Closed" ? 'primary' : 'default'}">${close}</span>
+                    </button>
+                </div>
+            #{if user.getPermissionType(controllers.Consts.permissionRFI) > 0}
+                <div class="col-md-2 cate" style=" padding: 0; padding-right: 6px;width: 13%">
+                    <button onclick="list('Draft','0','0','',1,'0');"
+                            class="btn btn-${status=="Draft" ? 'dark bold' : 'default'}"
+                            style="width: 100%; padding-left: 0; padding-right: 0;">&{'Draft'} <span
+                            class="label label-${status=="Draft" ? 'primary' : 'default'}">${draft}</span>
+                    </button>
+                </div>
+                <div class="col-md-2 cate" style=" padding: 0; padding-right: 6px;width: 13%">
+                    <button onclick="loadGraphic();"
+                            class="btn btn-${status=="Graphic" ? 'dark bold' : 'default'}"
+                            style="width: 100%; padding-left: 0; padding-right: 0;">График</span>
+                    </button>
+                </div>
+            #{/if}
+            #{if user.getPermissionType(controllers.Consts.permissionRFI) > 0}
+                <div class="col-mid-2" style="float: right;margin-left: 6px; padding-right: 0!important;">
+                    <button type="button" class="btn btn-success" onclick="newRFI(0,0,0,'',0)"
+                            style="float: right;width: 110px"><i class="fa fa-plus p-r-10"></i>&{'Add'}
+                    </button>
+                </div>
+            #{/if}
+                <div class="col-md-2" style="float: right; padding-right: 0!important;">
+                    <button type="button" id="filter-plus" class="btn btn-effect btn-primary" data-modal="filter"
+                            style="float: right;width: 110px">
+                        <i class="fa fa-search-plus p-r-10"></i>&{'Filter'}
+                    </button>
+                </div>
+            </div>
+            <div id="filter-row" class="dhidden">
+                <div id="filterForm">
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select id="filterSender" class="form-control" data-live-search="true">
+                            <option value="0">&{'BySender'}</option>
+                            <option data-divider="true"></option>
+                            <option value="${user.id}">&{'Me'}</option>
+                        #{list items:teams, as:'team'}
+                            #{if team.organizationCharts.size() > 0}
+                                <optgroup label="${team.name}">
+                                    #{list items:team.organizationCharts, as:'usr'}
+                                        #{if usr.user.id != user.id}
+                                            <option style="padding-left: 35px;"
+                                                    value="${usr.user.id}">
+                                            ${usr.user}
+                                            </option>
+                                        #{/if}
+                                    #{/list}
+                                </optgroup>
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select id="filterAssignee" class="form-control selectpicker" data-live-search="true">
+                            <option value="0">&{'ByAssignee'}</option>
+                            <option data-divider="true"></option>
+                            <option value="${user.id}" ${status=="Me"?'selected':''}>&{'Mine'}</option>
+                        #{list items:teams, as:'team'}
+                            #{if team.organizationCharts.size() > 0}
+                                <optgroup label="${team.name}">
+                                    #{list items:team.organizationCharts, as:'usr'}
+                                        #{if usr.user.id != user.id}
+                                            <option style="padding-left: 35px;"
+                                                    value="${usr.user.id}">
+                                            ${usr.user}
+                                            </option>
+                                        #{/if}
+                                    #{/list}
+                                </optgroup>
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select id="filterTasky" class="form-control" data-live-search="true">
+                            <option value="0">&{'ByTask'}</option>
+                            <option data-divider="true"></option>
+                        #{list items:projectObjects, as:'object'}
+                            #{if object.tasks.size()}
+                                <option value="o-${object.id}"
+                                        style="font-weight: bold!important;">${object.name}</option>
+                                #{list items:object.tasks, as:'task'}
+                                    #{if task.rfis.size() > 0}
+                                        <option style="padding-left: 35px;"
+                                                value="t-${task.id}">
+                                        ${task.name}
+                                        </option>
+                                    #{/if}
+                                #{/list}
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <select id="filterStatus" title="Choose one" class="form-control selectpicker">
+                            <option value="All" ${status == "All" ? 'selected' : ''}>&{'ByStatus'}</option>
+                            <option value="Open" ${status == "Open" ? 'selected' : (status == "Me" ? 'selected' : '')}>&{'Open'}</option>
+                            <option value="Closed" ${status == "Closed" ? 'selected' : ''}>&{'Closed'}</option>
+                            <option value="Replied" ${status == "Replied" ? 'selected' : ''}>&{'Replied'}</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                        <input type="text" id="filterKey" class="form-control" style=";"
+                               placeholder="&{'Search'}!" name="keyword" value=""/>
+                        <input type="hidden" id="filterPage" value="1"/>
+                    </div>
+                    <div class="col-md-2" style="padding: 0;">
+                        <button type="button" onclick="filterSearch()" class="btn btn-primary"><i
+                                class="fa fa-search"></i></button>
+                        <button type="button" id="filter-minus" class="btn btn-effect btn-default"
+                                style="float: right;">&{'Back'}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="List">
+
+    </div>
+</div>
+<script>
+    function showRFI(id) {
+        window.open("/rfi/show?id=" + id, '_blank');
+    }
+    function sendRFIAfter(data) {
+        if (data.status == "Open"){
+            var count = $("div#status-row div.cate:nth-child(1) button").find("span").html();
+            $("div#status-row div.cate:nth-child(1) button").find("span").html(parseInt(count) + 1);
+            var count = $("div#status-row div.cate:nth-child(2) button").find("span").html();
+            $("div#status-row div.cate:nth-child(2) button").find("span").html(parseInt(count) + 1);
+            $("div#status-row div.cate:nth-child(2) button").click();
+        }
+        else{
+            var count = $("div#status-row div.cate:nth-child(4) button").find("span").html();
+            $("div#status-row div.cate:nth-child(4) button").find("span").html(parseInt(count) + 1);
+            $("div#status-row div.cate:nth-child(4) button").click();
+        }
+    }
+    //    function closePunchListAfter(id) {
+    //        list($("div#listForm").find("input#listStatus").val(),
+    //                $("div#listForm").find("input#listSender").val(),
+    //                $("div#listForm").find("input#listAssignee").val(),
+    //                $("div#listForm").find("input#listKeyword").val(),
+    //                $("div#listForm").find("input#listPageNumber").val(),
+    //                $("div#listForm").find("input#listTasky").val());
+    //    }
+    function deletePunchListAfter() {
+        var count = $("div#status-row div.cate:nth-child(4) button").find("span").html();
+        $("div#status-row div.cate:nth-child(4) button").find("span").html(parseInt(count) - 1);
+        $("div#status-row div.cate:nth-child(4) button").click();
+    }
+    $(window).load(function () {
+    *{list('${status}', '0', '0', '', 1, '0');}*
+        list('Me', '0', '${user.id}', '', 1, '0');
+    });
+    var idSort = 0;
+    $("th#id").click(function () {
+        if (!idSort) {
+            var wid = $("th#id").css('width');
+            $("th#id").css('width', (parseInt(wid.substr(0, wid.length - 2)) + 7) + wid.substr(wid.length - 2, 2));
+            idSort++;
+        }
+    });
+    $("button#filter-plus").click(function () {
+        $("div#status-row").addClass("dhidden");
+        $("div#filter-row").removeClass("dhidden");
+        $("div.tengu").removeClass("kamikaze");
+    });
+    $("button#filter-minus").click(function () {
+        $("div#status-row").removeClass("dhidden");
+        $("div#filter-row").addClass("dhidden");
+        $("div.tengu").addClass("kamikaze");
+        $("div#status-row").find("div.cate").each(function () {
+            if ($(this).find("button").hasClass("btn-dark")) {
+                $(this).find("button").click();
+                return 0;
+            }
+        });
+    });
+    function list(status_, sender_, assignee_, keyword_, page_, task_) {
+        $.ajax({
+            type: "POST",
+            data: {
+                status: status_,
+                sender: sender_,
+                assignee: assignee_,
+                keyword: keyword_,
+                CurrentPageNumber: page_,
+                tasky: task_
+            },
+            url: "/rfiQueueAjax",
+            beforeSend: function () {
+                $("div#List").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#List").html(data);
+        });
+    }
+    #{if user.getPermissionType(controllers.Consts.permissionRFI) > 0}
+    function loadGraphic() {
+        $.ajax({
+            type: "POST",
+            url: "/rfiLoadGraphic",
+            beforeSend: function () {
+                $("div#List").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#List").html(data);
+        });
+    }
+    function loadGraphicUser(uid) {
+        list('Open', '0', uid, '', 1, '0');
+        if (!$('div#status-row').hasClass('dhidden')) {
+            $('button#filter-plus').click();
+        }
+        $('select#filterStatus').val('Open');
+        $('select#filterAssignee').val(uid + '');
+        $('.selectpicker').selectpicker('refresh')
+    }
+    #{/if}
+    function filterSearch() {
+        list($("div#filterForm").find("#filterStatus").val(),
+                $("div#filterForm").find("#filterSender").val(),
+                $("div#filterForm").find("#filterAssignee").val(),
+                $("div#filterForm").find("#filterKey").val(),
+                1,
+                $("div#filterForm").find("#filterTasky").val());
+    }
+    $("div#status-row div.cate button").click(function () {
+        var current = $(this);
+        $("div#status-row div.cate button").each(function () {
+            $(this).removeClass("btn-dark");
+            $(this).removeClass("bold");
+            $(this).addClass("btn-default");
+
+            $(this).find("span").removeClass("label-primary");
+            $(this).find("span").addClass("label-default");
+        });
+        current.removeClass("btn-default");
+        current.addClass("btn-dark");
+        current.addClass("bold");
+
+        current.find("span").removeClass("label-default");
+        current.find("span").addClass("label-primary");
+    });
+</script>
+
+<style>
+    div.rfiLast-image img {
+        height: 25px;
+        width: 25px;
+        cursor: pointer;
+        margin: 5px 5px 0 0;
+        box-shadow: 0 0 1px gray;
+        border: 1px solid #333;
+        border-radius: 2px;
+        background: white;
+    }
+
+</style>
+#{include '/Drawings/modal.html'/}
+#{add-PunchList-RFI /}
+#{PunchList-RFI-upload /}
+#{punchList-rfi-config name:'RFI' /}

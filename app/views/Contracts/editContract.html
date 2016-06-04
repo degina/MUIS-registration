@@ -1,0 +1,591 @@
+#{extends 'CRUD/layout.html' /}
+#{contract-blank-config /}
+%{
+edit=true;
+if (contract == null) {
+edit=false;
+}
+}%
+
+<div id="main-content">
+    <div class="page-title">
+        <i class="icon-custom-left"></i>
+
+        <h3><strong>Гэрээ засах</strong></h3>
+        <a href="@{controllers.Contracts.list()}">
+            <i class="fa fa-angle-left"></i> <span>Жагсаалтруу буцах</span>
+        </a>
+        <br>
+    </div>
+    <form id=addContract action="@{controllers.Contracts.create()}" method="post" accept-charset="utf-8" enctype="multipart/form-data">
+        <input type="hidden" name="contractId" value="${contract.id}"/>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="tabcordion">
+                    <ul id="myTab" class="nav nav-tabs">
+                        <li class="active"><a href="#post_general" data-toggle="tab">&{'GeneralInformation'}</a></li>
+                        <li><a href="#post_financial" data-toggle="tab">&{'FinancialInformation'}</a></li>
+                        <li><a href="#post_date" data-toggle="tab">&{'DateInformation'}</a></li>
+                        <li><a href="#post_reviews" data-toggle="tab">&{'WarrantyItem'}<span
+                                class="m-l-10 badge badge-primary" id="numWarItem">${warrantyItems?.size()}</span></a></li>
+                    </ul>
+                    <div id="myTabContent" class="tab-content">
+                        <div class="tab-pane fade active in" id="post_general">
+                            <div class="row">
+                                <div class="col-md-8 post-column-left">
+                                    <div class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Гарчиг <span
+                                                    class="asterisk">*</span></label>
+                                            <div class="col-sm-10"><input type="text" class="form-control" name="title" value="${contract?.title}"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'Contract#'} <span
+                                                    class="asterisk">*</span></label>
+
+                                            <div class="col-sm-10"><input type="text" class="form-control" name="contractName" value="${contract?.name}"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'ContractorCompanyName'}<span
+                                                    class="asterisk">*</span></label>
+
+                                            <div class="col-sm-10"><input type="text" class="form-control" name="contractCompanyName" value="${contract?.companyName}"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5> Тэмдэглэл (гэрээтэй холбоотэй тэмдэглэлээ бичинэ үү)</h5>
+                                            <textarea id="cke-editor" name="editor1" class="ckeditor">
+                                                 ${contract.notes}
+                                            </textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <h5>Хавсралт</h5>
+                                    #{include "SharedView/Attachs.html"/}
+                                    #{ImgThumbnail /}
+                                        <div id="attachs"></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 ">
+                                    <div class="post-column-right">
+                                        <div class="form-group">
+                                            <div>
+                                                <h5 class="pull-left m-t-0">&{'Category'} <span class="asterisk">*</span>
+                                                </h5>
+                                                <a href="#" class="pull-right c-gray"><i class="fa fa-plus"></i> <strong>Шинийг
+                                                    нэмэх</strong></a>
+                                            </div>
+                                            <select class="form-control" name="category">
+                                            #{list items:categories,as:'cate'}
+                                                <option value="${cate.id}" #{if cate.id==contract.category.id} selected #{/if}>${cate.category}</option>
+                                            #{/list}
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <h5>&{'Status'}</h5>
+                                            <select class="form-control" name="status">
+
+                                            #{list items:statuses,as:'status'}
+                                            %{ ongo="";
+                                                if (status.id == 1)ongo='danger';
+                                                else if (status.id==2) ongo='success';
+                                                else ongo='dark';
+                                                }%
+                                                <option value="${status.id}"
+                                                        data-content="<span class='label label-${ongo}'>${status.status}</span>"
+                                                    #{if status.id==contract.status.id}
+                                                        selected
+                                                    #{/if}}
+                                                        >${status.status}
+                                                </option>
+                                            #{/list}
+                                            </select>
+                                        </div>
+                                        <h3>Гэрээлэгч хүмүүс</h3>
+                                        <div class="form-group">
+                                            <h5>&{'ApprovedBy'} <span class="asterisk">*</span></h5>
+                                            <input type="text" class="form-control" name="approvedBy"
+                                                   %{if (contractUser !=null && contractUser.size()>0) { }%
+                                            value="${contractUser?.get(0)?.user}"
+                                        %{ }}% />
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="approvedBy"
+                                                   %{if (contractUser !=null && contractUser.size()>1) {}%
+                                            value="${contractUser.get(1).user}"
+                                        %{ }}% />
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="approvedBy" %{ if ((edit)&&contractUser.size()>2) {}%
+                                            value=" ${contractUser.get(2).user}"%{ }}% />
+                                        </div>
+
+                                        <div class="form-group">
+                                            <h5>&{'ContractorRepresentative'}<span class="asterisk">*</span></h5>
+                                            <input type="text" class="form-control" name="contractorRepresentative"
+                                                   %{if (contractUserRepresentative !=null && contractUserRepresentative.size()>0) { }%
+                                            value="${contractUserRepresentative?.get(0)?.user}"
+                                        %{ }}% />
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="contractorRepresentative"
+                                                   %{if (contractUserRepresentative!=null && contractUserRepresentative.size()>1) {}%
+                                            value="${contractUserRepresentative.get(1).user}"
+                                        %{ }}% />
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="text" class="form-control" name="contractorRepresentative"
+                                                   %{if (contractUserRepresentative!=null && contractUserRepresentative.size()>2) { }%
+                                            value="${contractUserRepresentative.get(2).user}"
+                                        %{ }}% />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="post_financial">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div id="form1" class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'ContractAmount'}<span
+                                                    class="asterisk">*</span>
+                                            </label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control numberic" name="contractAmount"
+                                                       %{ if(edit){ }% value="${controllers.Functions.getDecimal(contract.totalAmount.amount)}" %{ } }%
+                                                        >
+                                            </div>
+                                            <div class="col-sm-2" style="display: inline-flex">
+                                                <input type="number" min="0" max="100"step="0.1" style="width: 70px" class="form-control numberic" name="contractAmountHuvi" placeholder="Хувь"
+                                                       %{ if(edit){ }% value="${contract?.totalAmount?.huvi}" %{ } }% ><span class="control-label"> %</span>
+                                            </div>
+                                            <label class="col-sm-1 control-label">&{'Date'}</label>
+                                            <div class="col-sm-2">
+                                                <input class="pickadate form-control " name="contractAmountDate" type="text" placeholder="дараад огноо сонгоно уу" style="cursor:pointer;"
+                                                       %{ if(edit){ }% value="${contract.totalAmount?.date?.format('yyyy-MM-dd')}" %{ } }% >
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'InitialDeposit'}<span>:</span>
+                                            </label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control numberic" name="initialDeposit"
+                                                       %{ if(edit){ }% value="${controllers.Functions.getDecimal(initialDeposit?.amount)}" %{ } }%>
+                                            </div>
+                                            <div class="col-sm-2" style="display: inline-flex">
+                                                <input type="number" min="0" max="100" step="0.1" style="width: 70px"class="form-control numberic" name="initialDepositHuvi" placeholder="Хувь"
+                                                       %{ if(edit){ }% value="${initialDeposit?.huvi}" %{ } }% ><span class="control-label"> %</span>
+                                            </div>
+                                            <label class="col-sm-1 control-label">&{'Date'}</label>
+                                            <div class="col-sm-2">
+                                                <input class="pickadate form-control" type="text"  name="initialDepositDate" placeholder="Урдчилсан төлбөр төлсөн огноо" style="cursor:pointer;"
+                                                       %{ if(edit){ }% value="${initialDeposit?.date?.format('yyyy-MM-dd')}" %{ } }% >
+                                            </div>
+
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'ProgressPayment'}<span> 1</span>
+                                            </label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control numberic" name="progressPayment"  id="progressPayment1"
+                                                       value="${controllers.Functions.getDecimal(progressPayment?.get(0)?.amount)}"/>
+                                            </div>
+                                            <div class="col-sm-2" style="display: inline-flex">
+                                                <input type="number" min="0" max="100" step="0.1" style="width: 70px" class="form-control numberic" name="progressPaymentHuvi" placeholder="Хувь"
+                                                       id="progressPayment1Huvi" value="${progressPayment?.get(0)?.huvi}" ><span class="control-label"> %</span>
+                                            </div>
+                                            <label class="col-sm-1 control-label">&{'Date'}</label>
+                                            <div class="col-sm-2">
+                                                <input class="pickadate form-control" type="text"  style="cursor:pointer;"  name="progressPaymentDate" placeholder="Явц төлсөн огноо"
+                                                       value="${progressPayment?.get(0)?.date?.format('yyyy-MM-dd')}">
+                                            </div>
+                                            <button type="button" class="btn btn-primary btn-transparent" onclick="addProgress()">&{'AddProgress'}</button>
+                                        </div>
+                                    %{ if (progressPayment != null && edit) {
+                                        for(int i = 1; i < progressPayment.size() ; i++) {
+                                        dugaar=i+1;
+                                        }%
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'ProgressPayment'}<span>${dugaar}</span>
+                                            </label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control numberic" name="progressPayment" id="progressPayment${dugaar}"
+                                                       value="${controllers.Functions.getDecimal(progressPayment?.get(i).amount)}"/>
+                                            </div>
+                                            <div class="col-sm-2" style="display: inline-flex">
+                                                <input type="number" min="0" max="100" step="0.1" style="width: 70px" class="form-control numberic" name="progressPaymentHuvi" placeholder="Хувь"
+                                                       id="progressPayment${dugaar}Huvi" value="${progressPayment.get(i).huvi}" ><span class="control-label"> %</span>
+                                            </div>
+                                            <label class="col-sm-1 control-label">&{'Date'}</label>
+                                            <div class="col-sm-2">
+                                                <input class="pickadate form-control" type="text"  style="cursor:pointer;"  name="progressPaymentDate" placeholder="Явц төлсөн огноо"
+                                                       value="${progressPayment.get(i)?.date?.format('yyyy-MM-dd')}">
+                                            </div>
+                                        </div>
+                                    %{}}}%
+                                        <div class="form-group" id="finalUld">
+                                            <label class="col-sm-2 control-label">&{'Final'}<span
+                                                    class="asterisk">:</span>
+                                            </label>
+                                            <div class="col-sm-2" >
+                                                <input type="text" class="form-control numberic" name="finalUld"
+                                                       %{ if(finalTolbor!=null){ }% value="${controllers.Functions.getDecimal(finalTolbor.amount)}" %{ } }%>
+                                            </div>
+                                            <div class="col-sm-2" style="display: inline-flex">
+                                                <input type="number" step="0.1" style="width: 70px"  class="form-control numberic" name="FinalHuvi" placeholder="Хувь"
+                                                       %{ if(finalTolbor!=null){ }% value="${finalTolbor.huvi}" %{ } }%><span class="control-label"> %</span>
+                                            </div>
+                                            <label class="col-sm-1 control-label">&{'Date'}</label>
+                                            <div class="col-sm-2">
+                                                <input class="pickadate form-control" name="finalDate" type="text" placeholder="үлдэгдэл"  style="cursor:pointer;"
+                                                       %{ if(finalTolbor!=null){ }% value="${finalTolbor?.date?.format('yyyy-MM-dd')}" %{ } }%>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'Retention'}<span>1</span>
+                                            </label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control numberic" name="retention" id="retention1"
+                                                       value="#{if retention.size() > 0}${controllers.Functions.getDecimal(retention?.get(0)?.amount)}#{/if}">
+                                            </div>
+                                            <div class="col-sm-2" style="display: inline-flex">
+                                                <input type="number" step="0.1" style="width: 70px" class="form-control numberic" name="retentionHuvi" placeholder="Хувь" id="retention1Huvi"
+                                                       value="#{if retention.size() > 0}${retention?.get(0)?.huvi}" #{/if}><span class="control-label"> %</span>
+                                            </div>
+                                            <label class="col-sm-1 control-label">&{'Date'}</label>
+                                            <div class="col-sm-2">
+                                                <input class="pickadate form-control" name="retentionDate" type="text" placeholder="барьцаа огноо" style="cursor:pointer;"
+                                                       value="#{if retention.size() > 0}${retention?.get(0)?.date?.format('yyyy-MM-dd')} #{/if}">
+                                            </div>
+                                            <button type="button" class="btn btn-warning btn-transparent" onclick="addRetention()">&{'AddRetention'}</button>
+                                        </div>
+                                    %{ if (retention != null && edit && retention.size() > 2) {
+                                        for(int i = 1; i < retention.size() ; i++) {
+                                         dugaarRetention=i+1;
+                                        }%
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'Retention'}<span> ${dugaarRetention}</span>
+                                            </label>
+                                            <div class="col-sm-2">
+                                                <input type="text" class="form-control numberic" name="retention" id="retention${dugaar}"
+                                                       value="${controllers.Functions.getDecimal(retention?.get(i)?.amount) }">
+                                            </div>
+                                            <div class="    col-sm-2" style="display: inline-flex">
+                                                <input type="number" step="0.1" style="width: 70px" class="form-control numberic" name="retentionHuvi" placeholder="Хувь" id="retention${dugaar}Huvi"
+                                                       value="${retention?.get(i)?.huvi}"><span class="control-label"> %</span>
+                                            </div>
+                                            <label class="col-sm-1 control-label">&{'Date'}</label>
+                                            <div class="col-sm-2">
+                                                <input class="pickadate form-control" name="retentionDate" type="text" placeholder="барьцаа огноо" style="cursor:pointer;"
+                                                       value="${retention?.get(i)?.date?.format('yyyy-MM-dd')}">
+                                            </div>
+                                        </div>
+                                    %{}}}%
+                                        <div class="form-group" id="paymentmodeid">
+                                            <label class="col-sm-2 control-label">&{'PaymentMode'} <span>:</span></label>
+                                            <div class="col-sm-7">
+                                                <select class="form-control" name="paymentMode">
+                                                #{list items:payments,as:'payment'}
+                                                    <option value="${payment.id}"
+                                                            >${payment.payment}</option>
+                                                #{/list}
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Төлбөрийн нэгж<span>:</span></label>
+                                            <div class="col-sm-7">
+                                                #{if }#{/if}
+                                                <input name="tolborNegj" type="checkbox"  #{if contract.negj=="₮"} checked #{/if} data-on-color="primary" data-off-color="info" class="switch"
+                                                       data-on-text="₮"
+                                                       data-off-text="$">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="post_date">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Баталсан огноо<span class="asterisk">*</span>
+                                            </label>
+                                            <div class="col-sm-7">
+                                                <input class="pickadate form-control picker__input" name="approvedDate" type="text" placeholder="Баталсан огноог сонгох" readonly=""
+                                                        value="${contract?.approvedDate?.format('yyyy-MM-dd')}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'StartDate'}<span class="asterisk">*</span>
+                                            </label>
+                                            <div class="col-sm-7">
+                                                <input class="pickadate form-control picker__input" name="startDate" type="text" placeholder="Эхэлсэн огноог сонгох" readonly=""
+                                                       value="${contract?.startDate?.format('yyyy-MM-dd')}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'EndDate'}<span class="asterisk">*</span>
+                                            </label>
+                                            <div class="col-sm-7">
+                                                <input class="pickadate form-control picker__input" name="endDate" type="text" placeholder="Дуусах огноог сонгох" readonly=""
+                                                       value="${contract.endDate?.format('yyyy-MM-dd')}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">&{'ReviewDate'}<span class="asterisk">*</span>
+                                            </label>
+                                            <div class="col-sm-7">
+                                                <input class="pickadate form-control picker__input" name="reviewDate" type="text" placeholder="Дүгнэх огноог сонгох" readonly=""
+                                                       value="${contract?.reviewDate?.format('yyyy-MM-dd')}">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Дуусахаас</label>
+                                            <div class="col-sm-1">
+                                                <input type="number" name="notifyMe1" class="form-control" value="${contract.notifyMeBeforeEndDay}"/>
+                                            </div>
+                                            <label class="col-sm-4">өдрийн өмнө надад сануулах</label>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-sm-2 control-label">Дүгнэхээс</label>
+                                            <div class="col-sm-1">
+                                                <input type="number" name="notifyMe2" class="form-control"  value="${contract.notifyMeBeforeReview}" >
+                                            </div>
+                                            <label class="col-sm-4">өдрийн өмнө надад сануулах</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="post_reviews">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <table id="post-review" class="table table-tools table-hover">
+                                        <thead>
+                                        <tr>
+                                            <th style="min-width:70px"><strong>Дугаар</strong>
+                                            <th><strong>&{'WarrantyItem'}</strong></th>
+                                            <th><strong>&{'StartDate'}</strong></th>
+                                            <th><strong>&{'EndDate'}</strong></th>
+                                            <th class="text-center"><strong>Сануулах</strong></th>
+                                            <th class="text-center"><strong></strong></th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        %{ if (warrantyItems != null && edit) {
+                                        for(int i = 0; i < warrantyItems.size() ; i++) {
+                                        }%
+                                        <tr  id="WarrantyItems${i}">
+                                            <td><input type="text" class="form-control" name="warrantyItemDugaar" style="max-width: 50px" value=""></td>
+                                            <td><input type="text" class="form-control" name="warrantyItem" value="${warrantyItems.get(i).name}"></td>
+                                            <td><input class="pickadate form-control picker__input" name="warrantyItemstartDate" type="text" placeholder="Эхэлсэн огноог сонгох" readonly=""
+                                                       value="${warrantyItems.get(i).startDate?.format('yyyy-MM-dd')}"></td>
+                                            <td><input class="pickadate form-control picker__input" name="warrantyItemendDate" type="text" placeholder="Дуусах огноог сонгох" readonly=""
+                                                       value="${warrantyItems.get(i).endDate?.format('yyyy-MM-dd')}"></td>
+                                            <td class="text-center">  <input type="number" name="warrantyItemnotifyMe" style="max-width: 50px;padding: 8px 2px;" class="form-control"
+                                                                                 value="${warrantyItems.get(i).getNotifyDay()}"/><span > өдрийн өмнө</span> </td>
+                                            <td class="text-center">
+                                                <button type="button" class="delete btn btn-sm btn-default" onclick="deleteWarItem(${i})"><i class="fa fa-times-circle"></i> Устгах</button>
+                                            </td>
+                                        </tr>
+                                        %{}}}%
+                                        <tr id="AddMoreWarrantyItemTr"></tr>
+                                        </tbody>
+                                    </table>
+                                    <button type="button" class="btn btn-primary btn-transparent" style="float: right" onclick="AddMoreWarrantyItemFunc()">&{'AddMoreWarrantyItem'}</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                <a href="@{controllers.Contracts.show(contract.id)}" class="btn btn-default m-r-10 m-t-10"><i class="fa fa-reply"></i> &{'Cancel'}</a>
+                <button type="button" id="draft" class="btn btn-default m-r-10 m-t-10"><i class="fa fa-edit"></i> Ноороглох</button>
+                <input id="draft-input" type="hidden" name="isDraft" value="0"/>
+                <a href="@{controllers.Contracts.deleteContract(contract.id)}" class="btn btn-danger m-r-10 m-t-10"><i class="fa fa-times"></i> Устгах</a>
+                <button type="submit" class="btn btn-success m-t-10"> <i class="fa fa-check"></i> Хадгалах </button>
+            </div>
+        </div>
+    </form>
+
+</div>
+#{set activeMenu: 'Contract'/}
+#{set activeMenuSub: 'ContractList'/}
+#{checkFileExtension /}
+#{AttachScript uploadPath:controllers.Consts.uploadContractPath /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script>
+    $('input.numberic').forceNumericOnly(true);
+    var idWarranty = '${warrantyItems?.size()}';
+    var retention = '${dugaarRetention}';
+    var progress = '${dugaar}';
+    var  picOpt={
+        monthsFull: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+        monthsShort:  [ "1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар" ],
+        weekdaysFull: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+        weekdaysShort: ["Ня","Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+
+        // Today and clear
+        today: 'Өнөөдөр',
+        clear: 'Цэвэрлэх',
+
+        // The format to show on the `input` element
+        format: 'yyyy-mm-d'
+
+    };
+    function AddMoreWarrantyItemFunc() {
+        idWarranty++;
+        $('tr#AddMoreWarrantyItemTr').before("<tr id=WarrantyItems" + idWarranty + ">" +
+                "<td><input type=text class=form-control name=warrantyItemDugaar style='max-width: 50px' value=" + idWarranty + " ></td>" +
+                "<td><input type=text class=form-control name=warrantyItem ></td>" +
+                "<td><input class='pickadate form-control' style='cursor:pointer;' name=warrantyItemstartDate type=text placeholder='Эхэлсэн огноог сонгох' ></td>" +
+                "<td><input class='pickadate form-control' style='cursor:pointer;' name=warrantyItemendDate type=text placeholder='Дуусах огноог сонгох'></td>" +
+                "<td class=text-center >  <input type=text name=warrantyItemnotifyMe style='max-width: 50px;padding: 8px 2px;' class=form-control  ><span >" + "өдрийн өмнө" + "</span> </td>" +
+                "<td class=text-center> <button type=button class='delete btn btn-sm btn-default' onclick=deleteWarItem(" + idWarranty + ") > <i class='fa fa-times-circle' ></i>Устгах</button> </td> </tr>"
+        );
+        $('.pickadate').pickadate(picOpt);
+    }
+    function deleteWarItem(idWaritem) {
+        $("tr#WarrantyItems" + idWaritem).remove();
+    }
+
+    function addRetention() {
+        retention++;
+        $('div#paymentmodeid').before("<div class=form-group > <label class='col-sm-2 control-label' >&{'Retention'} <span>" + retention + "</span> </label>" +
+                "<div class=col-sm-2 > <input id=retention" + retention + " type=text class='form-control numberic' name=retention > </div>" +
+                "<div class=col-sm-2 style='display: inline-flex' > <input id='retention" + retention + "Huvi' type=number step=0.1 style='width: 70px;' class='form-control' name=retentionHuvi placeholder=Хувь><span class='control-label'> %</span></div> <label class='col-sm-1 control-label' >&{'Date'}</label>" +
+                "<div class=col-sm-2 > <input  class='pickadate form-control' style='cursor:pointer;' name=retentionDate type=text placeholder='барьцаа огноо' > </div> ");
+        $('.pickadate').pickadate(picOpt);
+        $('input.numberic').forceNumericOnly(true);
+        bind();
+    }
+    function addProgress() {
+        progress++;
+        $('div#finalUld').before("<div class=form-group > <label class='col-sm-2 control-label' > &{'ProgressPayment'} <span>" + progress + "</span> </label>" +
+                "<div class=col-sm-2 > <input id=progressPayment" + progress + " type=text class='form-control numberic' name=progressPayment > </div>" +
+                "<div class=col-sm-2 style='display: inline-flex' > <input id='progressPayment" + progress + "Huvi' type=number step=0.1 style='width: 70px;' class='form-control' name=progressPaymentHuvi placeholder=Хувь><span class='control-label'> %</span> </div> <label class='col-sm-1 control-label' >&{'Date'}</label>" +
+                "<div class=col-sm-2 > <input class='pickadate form-control' style='cursor:pointer;' name=progressPaymentDate type=text placeholder='Явц төлсөн огноо' > </div> ");
+        $('.pickadate').pickadate(picOpt);
+        $('input.numberic').forceNumericOnly(true);
+        bind();
+    }
+    $(document).ready(function() {
+        $('.pickadate').each(function () {
+            $(this).pickadate(picOpt);
+        });
+        $('button#draft').click( function(){
+            $('input#draft-input').val('1');
+            $('div#main-content form').submit();
+        });
+        $("input[name$='contractAmount']").blur(findUldegdel);
+        $("input[name$='initialDeposit']").blur(update_initial);
+        $("input[name$='initialDepositHuvi']").blur(update_initialHuvi);
+        bind();
+    });
+
+    $('div#main-content form').submit(function () {
+        var obj = $('div#attachs');
+        $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type=hidden name=filename value=" + $(this).attr('filename') + ">" +
+            "<input type=hidden name=filedir value=" + $(this).attr('filedir') + ">" +
+            "<input type=hidden name=extension value=" + $(this).attr('extension') + ">");
+        });
+        return true;
+    });
+    // huvi bodoh heseg
+    function getDecimal (val) {
+        var c = 1;
+        var vv = "", value ="";
+        if (val!=null) value=val.toString();
+        var i=0;
+        for ( i = (value.length - 1); i >= 0; i--) {
+            if (i != 0 && c == 3) {
+                vv += value.charAt(i) + "'";
+                c = 1;
+            } else {
+                vv += value.charAt(i);
+                c++;
+            }
+        }
+        value = "";
+        for ( i = vv.length - 1; i >= 0; i--) {
+            value += vv.charAt(i);
+        }
+        return value;
+    }
+    function bind() {
+        $("input[name$='progressPayment']").each(function () {
+            $(this).blur(function(){
+                var total = $("input[name$='contractAmount']").val().replace(/'/g,"");
+                var huvi = $(this).val().replace(/'/g,"") * 100 / total;
+                $("input#"+this.id+"Huvi").val(huvi);
+                findUldegdel();
+            });
+        });
+        $("input[name$='progressPaymentHuvi']").each(function () {
+            $(this).blur(function(){
+                var id="input#";
+                id +=(this.id).substring(0,(this.id).length - 4);
+                var total = $("input[name$='contractAmount']").val().replace(/'/g,"");
+                var huvi = $(this).val().replace(/'/g,"") * total / 100;
+                $(id).val(getDecimal(huvi));
+                findUldegdel();
+            });
+        });
+        $("input[name$='retention']").each(function () {
+            $(this).blur(function(){
+                var total = $("input[name$='contractAmount']").val().replace(/'/g,"");
+                var huvi = $(this).val().replace(/'/g,"") * 100 / total;
+                $("input#"+this.id+"Huvi").val(huvi);
+            });
+        });
+        $("input[name$='retentionHuvi']").each(function () {
+            $(this).blur(function(){
+                var id="input#";
+                id +=(this.id).substring(0,(this.id).length - 4);
+                var total = $("input[name$='contractAmount']").val().replace(/'/g,"");
+                var huvi = $(this).val().replace(/'/g,"") * total / 100;
+                $(id).val(getDecimal(huvi));
+                findUldegdel();
+            });
+        });
+    }
+    function update_initial() {
+        var total = $("input[name$='contractAmount']").val().replace(/'/g,"");
+        var huvi = $("input[name$='initialDeposit']").val().replace(/'/g,"") * 100 / total;
+        $("input[name$='initialDepositHuvi']").val(huvi);
+        findUldegdel();
+    }
+    function update_initialHuvi() {
+        var total = $("input[name$='contractAmount']").val().replace(/'/g,"");
+        var huvi = $("input[name$='initialDepositHuvi']").val().replace(/'/g,"") * total / 100;
+        $("input[name$='initialDeposit']").val(getDecimal(huvi));
+        findUldegdel();
+    }
+    function findUldegdel(){
+        var total = $("input[name$='contractAmount']").val().replace(/'/g,"");
+        var ywts = 0;
+        $("input[name$='progressPayment']").each(function(){
+            ywts = ywts + (parseInt($(this).val().replace(/'/g,"")) || 0 );
+        });
+        console.log(" ywts: "+ywts);
+        var uldegdel = total - ywts - $("input[name$='initialDeposit']").val().replace(/'/g,"");
+        $("input[name$='finalUld']").val(getDecimal(uldegdel));
+        uldegdel=uldegdel*100/total;
+        $("input[name$='FinalHuvi']").val(uldegdel);
+    }
+
+    var obj=$("div#attachContainer ul#uploadBox li");
+    #{list items:contract.contractAttachments, as:'attach'}
+    obj.before("<li><span>${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}"+
+    "${controllers.Functions.handleDocumentAttachmentDel(attach.dir,attach.name,attach.extension).raw()}"+
+    "</span></li>");
+    #{/list}
+
+</script>

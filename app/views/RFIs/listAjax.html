@@ -1,0 +1,183 @@
+#{if status == "All" || status == "Open"}
+<div class="col-md-12">
+    <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px!important;
+            line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+        #{if firstload}Надад хамааралтай:#{/if}
+        <i class="fa fa-square" style="color: #d9534f;"></i> Хугацаа хэтэрсэн (${overdue})
+        <i class="fa fa-square" style="color: #f0ad4e;margin-left: 10px"></i> < Долоо хоног (${weeker})
+        <i class="fa fa-square" style="color:#5cb85c;margin-left: 10px"></i> > Долоо хоног (${nextWeeker})
+    </div>
+</div>
+<div class="row" style="padding-bottom: 10px!important"></div>
+#{/if}
+<div class="col-md-12 col-sm-12 col-xs-12 table-responsive" style=" text-align: left;">
+    <table id="posts-table" class="table table-tools table-striped"
+           style="font-size: 13px!important; margin-top: 0!important;">
+        <thead>
+        <tr>
+            <th id="id" class="text-center">
+                #
+            </th>
+            <th>
+            &{'Subject'}
+            </th>
+            <th style="padding: 0">
+
+            </th>
+        #{if status != "Draft"}
+            <th>
+            &{'QuestionReceivedFrom'}
+            </th>
+        #{/if}
+            <th style="width: 200px">
+            &{'Assignee'}
+            </th>
+        #{if status == "All"}
+            <th class="text-center">
+            &{'CreatedDate'}
+            </th>
+        #{/if}
+        #{if status == "Open"|| status == "Me"  || status == "Replied"}
+            <th class="text-center">
+            &{'CreatedDate'}
+            </th>
+            <th class="text-center">
+            &{'DueDate'}
+            </th>
+        #{/if}
+        #{if status == "Closed"}
+            <th class="text-center">
+            &{'CreatedDate'}
+            </th>
+            <th class="text-center">
+            &{'ClosedDate'}
+            </th>
+        #{/if}
+        #{if status == "Draft"}
+            <th class="text-center">
+            &{'CreatedDate'}
+            </th>
+        #{/if}
+            <th class="text-center"></th>
+        </tr>
+        </thead>
+        <tbody style="font-weight: 500">
+        #{list items:rfis, as:'rfi'}
+        <tr
+            onclick="${rfi.status.status == "Draft" ? 'editRFI(' + rfi.id + ')' : 'showRFI(' + rfi.id + ')'}"
+            class="${(rfi.status.status == "Open" || status == "Me" )? (!now.after(rfi.dueDate) ? (!week.after(rfi.dueDate) ? "success" : "warning") : "danger") : "black"}"
+            title="${rfi.subject}">
+            #{if status != "Draft"}
+                <td class="text-center">${rfi.No}</td>
+            #{/if}
+            #{else}
+                <td class="text-center">${rfi_index}</td>
+            #{/else}
+            #{if status == "All"}
+                <td>${(rfi.subject.size() > 70 ? rfi.subject.substring(0,70) + "...": rfi.subject)} </td>
+            #{/if}
+            #{if status == "Open" || status == "Me" || status == "Replied"}
+                <td>${(rfi.subject.size() > 40 ? rfi.subject.substring(0,40) + "...": rfi.subject)} </td>
+            #{/if}
+            #{if status == "Closed"}
+                <td>${(rfi.subject.size() > 40 ? rfi.subject.substring(0,40) + "...": rfi.subject)} </td>
+            #{/if}
+            #{if status == "Draft"}
+                <td>${(rfi.subject.size() > 110 ? rfi.subject.substring(0,110) + "...": rfi.subject)} </td>
+            #{/if}
+            <td class="text-center" style="padding: 0;">
+                <label class="label label-danger">${controllers.RFIs.checkNewRFIandTracking(rfi.id)}</label>
+            </td>
+            #{if status != "Draft"}
+                <td>${rfi.questionReceivedFrom}</td>
+            #{/if}
+            <td>
+            ${rfi.assignee}</td>
+            #{if status == "All"}
+                <td class="text-center" style="width: 130px;">
+                ${rfi.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+            #{/if}
+            #{if status == "Open" || status == "Me" || status == "Replied"}
+                <td class="text-center" style="width: 130px;">
+                ${rfi.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+                <td class="text-center" style="width: 130px;">
+                ${rfi.dueDate.format("yyyy-MM-dd")}
+                </td>
+            #{/if}
+            #{if status == "Closed"}
+                <td class="text-center" style="width: 130px;">
+                ${rfi.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+                <td class="text-center" style="width: 130px;">
+                ${rfi.closedDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+            #{/if}
+            #{if status == "Draft"}
+                <td class="text-center" style="width: 130px;">
+                ${rfi.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+            #{/if}
+            <td class="text-center" style="width:  20px;">
+                #{if rfi.attaches.size()}
+                    <div class="rfiLast-image">
+                    ${controllers.Functions.handleDocumentAttachment(rfi.attaches.get(0).dir,rfi.attaches.get(0).name,rfi.attaches.get(0).extension,rfi.attaches.get(0).filesize).raw()}
+                    </div>
+                #{/if}
+            </td>
+        </tr>
+        #{/list}
+        </tbody>
+    </table>
+
+    <div id="listForm" class="dhidden">
+        <input type="hidden" id="listStatus" value="${status}"/>
+        <input type="hidden" id="listSender" value="${sender}"/>
+        <input type="hidden" id="listAssignee" value="${assignee}"/>
+        <input type="hidden" id="listKeyword" value="${keyword}"/>
+        <input type="hidden" id="listPageNumber" value="${CurrentPageNumber}"/>
+        <input type="hidden" id="listTasky" value="${tasky}"/>
+    </div>
+
+#{if MaxPageNumber>1}
+    #{include '/SharedView/pageNavigation.html'/}
+#{/if}
+    <script>
+        #{if MaxPageNumber>1}
+        $(".page-navigation input.number-button").click(function () {
+            var obj = $(this).attr('pagenumber');
+            if (obj != ${CurrentPageNumber})
+                list($("div#listForm").find("input#listStatus").val(),
+                        $("div#listForm").find("input#listSender").val(),
+                        $("div#listForm").find("input#listAssignee").val(),
+                        $("div#listForm").find("input#listKeyword").val(),
+                        obj,
+                        $("div#listForm").find("input#listTasky").val());
+        });
+        #{/if}
+        $(document).ready(function () {
+            var opt = {};
+            // Tools: export to Excel, CSV, PDF & Print
+            opt.sDom = "",
+                    opt.oLanguage = {"sSearch": "", "sZeroRecords": "Үр дүн байхгүй байна."} ,
+                    opt.oTableTools = {
+
+                        "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                        "aButtons": ["pdf"]
+                    };
+            opt.iDisplayLength = 100;
+            opt.aaSorting = [[${status != "Draft" ? 5: 4}, 'desc']];
+            opt.aoColumnDefs = [
+                {'bSortable': false, 'aTargets': [${status == "All" ? 6 : (status != "Draft" ? 7: 5)}]}
+            ];
+            var oTable = $('#posts-table').dataTable(opt);
+            oTable.fnDraw();
+        });
+        $("table#posts-table tbody tr").click(function () {
+            $(this).find("label.label").remove();
+        });
+    </script>
+</div>
+#{ImgThumbnail div:'div.rfiLast-image', divid:'rfip' /}
+

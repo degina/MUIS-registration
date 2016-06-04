@@ -1,0 +1,1306 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Inventory'/}
+#{set activeMenuSub:'InventoryOrder'/}
+#{flashCrud /}
+
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script src="/public/javascripts/jquery.resizableColumns.min.js"></script>
+
+%{inventoryPermission = user.getUserPermissionType(controllers.Consts.permissionInventory);}%
+%{inventoryProjectPermission = user.getPermissionType(controllers.Consts.permissionInventory);}%
+%{inventoryPermissionOther = user.getUserPermissionType(controllers.Consts.permissionInventoryOther);}%
+<div id="main-content"
+     class="dhidden" ${inventoryProjectPermission>0 || inventoryPermissionOther>0 ? "" : "hidden=\"true\""}>
+    <div>
+        <div class="m-b-0 clearfix">
+            <div class="page-title pull-left">
+                <h3 class="pull-left"><strong>&{'MaterialRequest'}</strong></h3>
+            </div>
+            <div class="pull-right">
+            #{if inventoryProjectPermission==1 || inventoryProjectPermission==3}
+                <button class="btn btn-success m-t-10" id="addorder" data-toggle="modal" data-target="#modal-addorder">
+                    <i
+                            class="fa fa-plus p-r-10"></i> &{'add_new_order'}</button>
+            #{/if}
+            </div>
+        </div>
+        <div class="row"
+             id="status-row">
+            <div class="col-md-2  m-b-10" style=" padding: 0; padding-right: 6px;">
+                <a href="@{controllers.InventoryOrders.viewAll()}"
+                   class="btn btn-${status=="0" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'dark ' : 'default'}"
+                   style="width: 100%">&{'All'}
+                    <span class="label label-${status=="0" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'primary' : 'default'} m-l-10">#{if all<100}${all}#{/if}#{else}
+                        +99#{/else}</span></a>
+            </div>
+            <div class="col-md-2  m-b-10" style=" padding: 0; padding-right: 6px">
+                <a href="@{controllers.InventoryOrders.list(1,null,null, "", "0", "0", "1", message)}"
+                   class="btn btn-${status=="1" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'dark ' : 'default'}"
+                   style="width: 100%">&{'ordered'} <span
+                        class="label label-${status=="1" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'primary' : 'default'} m-l-10">#{if ordered<100}${ordered}#{/if}#{else}
+                    +99#{/else}</span></a>
+            </div>
+            <div class="col-md-2  m-b-10" style=" padding: 0; padding-right: 6px">
+                <a href="@{controllers.InventoryOrders.list(1,null,null, "", "0", "0", "2", message)}"
+                   class="btn btn-${status=="2" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'dark ' : 'default'}"
+                   style="width: 100%">&{'approved'} <span
+                        class="label label-${status=="2" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'primary' : 'default'} m-l-10">#{if approved<100}${approved}#{/if}#{else}
+                    +99#{/else}</span></a>
+            </div>
+            <div class="col-md-2  m-b-10" style=" padding: 0; padding-right: 6px">
+                <a href="@{controllers.InventoryOrders.list(1,null,null, "", "0", "0",  "4", message)}"
+                   class="btn btn-${status=="4" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'dark ' : 'default'}"
+                   style="width: 100%">&{'ready'} <span
+                        class="label label-${status=="4" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'primary' : 'default'} m-l-10">#{if ready<100}${ready}#{/if}#{else}
+                    +99#{/else}</span></a>
+            </div>
+            <div class="col-md-2  m-b-10" style=" padding: 0; padding-right: 6px">
+                <a href="@{controllers.InventoryOrders.list(1,null,null, "", "0", "0",  "5", message)}"
+                   class="btn btn-${status=="5" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'dark ' : 'default'}"
+                   style="width: 100%">&{'recieved'} <span
+                        class="label label-${status=="4" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'primary' : 'default'} m-l-10">#{if recieved<100}${recieved}#{/if}#{else}
+                    +99#{/else}</span></a>
+            </div>
+            <div class="col-md-2  m-b-10" style=" padding: 0; padding-right: 6px">
+                <a href="@{controllers.InventoryOrders.list(1,null,null, "", "0", "0",  "6", message)}"
+                   class="btn btn-${status=="6" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'dark ' : 'default'}"
+                   style="width: 100%">&{'cancelled'} <span
+                        class="label label-${status=="4" && location_filter == "0"&& orderer_filter == "0" && keyword == "" ? 'primary' : 'default'} m-l-10">#{if cancelled<100}${cancelled}#{/if}#{else}
+                    +99#{/else}</span></a>
+            </div>
+        </div>
+        <div class="row" class=" m-b-10"
+             id="filter-row">
+            <form id="filterForm" action="@{InventoryOrders.list()}" method="get">
+                <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                    <div id="reportrange" class="form-control m-b-10" style="padding-left: 10px;padding-right: 10px;">
+                        <i class="fa fa-calendar fa-lg p-r-0"></i><span>#{if filterStartDate=="" && filterEndDate==""}
+                        Өдрөөр хайх...#{/if}#{else}${filterStartDate}
+                        -${filterEndDate}#{/else}</span>
+                        <input type="text" hidden="true" name="filterStartDate" id="filter_start"
+                               value="${filterStartDate}"/>
+                        <input type="text" hidden="true" name="filterEndDate" id="filter_end"
+                               value="${filterEndDate}"/>
+                    </div>
+                </div>
+                <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                    <select data-live-search="true" id="location_filter"
+                            class="form-control" name="location_filter">
+                        <option value="0">&{'AllLocation'}</option>
+                        <option data-divider="true"></option>
+                    #{list items:Locations,as: 'location'}
+                        <option value="${location.id}" ${location.id.toString() == location_filter ? 'selected' : ''}>${location.name}</option>
+                    #{/list}
+                    </select>
+                </div>
+                <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                    <select data-live-search="true" id="orderer_filter"
+                            class="form-control" name="orderer_filter">
+                        <option value="0">&{'AllOrderer'}</option>
+                        <option data-divider="true"></option>
+                    #{list items:Orderer,as: 'orderer'}
+                        <option value="${orderer.id}" ${orderer.id.toString() == orderer_filter ? 'selected' : ''}>${orderer.lastnameFirstCharacter}
+                            . ${orderer.firstName}</option>
+                    #{/list}
+                    </select>
+                </div>
+                <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                    <input type="text" class="form-control" style=";"
+                           placeholder="&{'Search'}!" name="keyword" value="${keyword}"/>
+                </div>
+                <div class="col-md-2" style="padding: 0;">
+                    <button type="submit" id="filter_submit" class="btn btn-default"><i class="fa fa-search"></i>
+                    </button>
+                </div>
+                <div class="col-md-2" style="padding: 0;">
+                    <input type="hidden" name="CurrentPageNumber" value="1"/>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                <table style="font-weight: 500;" id="products-table"
+                                       class="table table-tools table-hover"
+                                       data-resizable-columns-id="inventoryorder-resizalbe-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 90px;text-align: center" data-resizable-column-id="#">
+                                            #
+                                        </th>
+                                        <th hidden="true"
+                                            style="width: auto;text-align: center" data-resizable-column-id="orderer">
+                                            <strong>&{'orderer'}</strong>
+                                        </th>
+                                        <th
+                                                style="width: auto;text-align: center" data-resizable-column-id="items">
+                                            <strong>&{'items'}</strong>
+                                        </th>
+                                        <th style="width: 250px;text-align: center" data-resizable-column-id="location">
+                                            <strong>&{'location'}</strong>
+                                        </th>
+                                        <th style="width: 250px;text-align: center" data-resizable-column-id="job">
+                                            <strong>&{'job'}</strong>
+                                        </th>
+                                        <th style="width: 150px;text-align: center" data-resizable-column-id="orderer">
+                                            <strong>&{'orderer'}</strong>
+                                        </th>
+                                        <th style="width: 100px;text-align: center" data-resizable-column-id="status">
+                                            <strong>&{'status'}</strong>
+                                        </th>
+                                        <th style="width: 75px;text-align: center" data-resizable-column-id="date">
+                                            <strong>&{'date'}</strong>
+                                        </th>
+                                        <th style="width: 75px;text-align: center" data-resizable-column-id="due">
+                                            <strong>&{'due'}</strong>
+                                        </th>
+                                        <th style="width: 95px;text-align: center" data-resizable-column-id="due">
+                                            <strong>&{'recieved_short'}</strong>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:Orders, as: 'order'}
+                                    <tr ${user==order.orderer || (order.location.is_main=="false" && controllers.InventoryOrders.getProjectInventoryOrderPermissionType(order.location.project.id)>1) || (order.location.is_main=="true" && inventoryPermissionOther>1) ? " " :"hidden=\"true\""}>
+                                        <td><strong>${order.id}</strong></td>
+                                        <td hidden="true"></td>
+                                        <td>
+                                            #{list items:order.inventorys, as: 'inventory'}
+                                                #{if inventory_index<10}
+                                                    #{if inventory_isLast}
+                                                    ${inventory.inventory.item}.
+                                                    #{/if}
+                                                    #{else}
+                                                    ${inventory.inventory.item},
+                                                    #{/else}
+                                                #{/if}
+                                                #{if inventory_index==10}
+                                                ${inventory.inventory.item}.
+                                                #{/if}
+                                            #{/list}
+                                        </td>
+                                        <td>${order.location.name}</td>
+                                        <td>#{if order.task!=null}${order.task.name}#{/if}</td>
+                                        <td>
+                                        ${order.orderer.getLastnameFirstCharacter()}.${order.orderer.firstName}
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <span class="${order.status.id==1 ? "col-md-12 label label-default" : (order.status.id==2 ? "col-md-12 label label-info": (order.status.id==3 ? "col-md-12 label label-info" : (order.status.id==4 ? "col-md-12 label label-primary" : (order.status.id==5 ? "col-md-12 label label-success" : (order.status.id==6 ? "col-md-12 label label-danger" :"col-md-12 label label-default")))))}">${order.status.status}</span>
+                                            </div>
+                                        </td>
+                                        <td>${order.date.format("yy/MM/dd")}</td>
+                                        <td>${order.due == null ?   "" : order.due.format("yy/MM/dd")}</td>
+                                        <td>${order.recieved_date == null ?   "" :order.recieved_date.format("yy/MM/dd")}</td>
+                                    </tr>
+                                    #{/list}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    #{if MaxPageNumber>1}
+                        <div class="page-navigation" style="width: 100%; text-align: right;">
+                            <a style="text-decoration: none;"
+                               href="@{controllers.InventoryOrders.list(CurrentPageNumber-1,filterStartDate,filterEndDate,keyword,location_filter,orderer_filter,status,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber - 1 <= 0 ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="<"/>
+                            </a>
+                        %{
+                            int threeDots = 0;
+                            for(int i = 1; i <= MaxPageNumber; i++){
+                            if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                            (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                            (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                            }%
+                            <a style="text-decoration: none;"
+                               #{if CurrentPageNumber != i}href="@{controllers.InventoryOrders.list(i,filterStartDate,filterEndDate,keyword,location_filter,orderer_filter,status,message)}"#{/if}>
+                                <input
+                                        class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="${i}"/>
+                            </a>
+                        %{ }else{
+                            if( i == 2 || i == MaxPageNumber - 1 ){
+                            threeDots = 1;
+                            }
+                            if(threeDots == 1){
+                            }%
+                            <span style="font-size: x-large;"><strong>...</strong></span>
+                        %{
+                            threeDots = 0;
+                            }
+                            }
+                            }
+                            }%
+                            <a style="text-decoration: none;"
+                               href="@{controllers.InventoryOrders.list(CurrentPageNumber+1,filterStartDate,filterEndDate,keyword,location_filter,orderer_filter,status,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber >= MaxPageNumber ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value=">"/>
+                            </a>
+                        </div>
+                    #{/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-addorder" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 80%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'add_new_order'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventoryOrders.newOrder()}" class="form-horizontal" method="get"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in" id="product_general">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+                                                        <div class="col-md-12">
+                                                            <div class="panel-body">
+                                                                <div class="row">
+                                                                    <div class="col-md-12 m-b-20">
+                                                                        <div class="pull-right">
+                                                                            <select data-live-search="true"
+                                                                                    name="plan"
+                                                                                    id="plan_add"
+                                                                                    data-width="300px"
+                                                                                    title="&{'job'}"
+                                                                                    required="true">
+                                                                                <option value="">&{'job'}</option>
+                                                                            #{list items:Plans,as:"plan"}
+                                                                                <option value="${plan.task.id}">
+                                                                                ${plan.task.name}
+                                                                                </option>
+                                                                            #{/list}
+                                                                            </select>
+                                                                            <select data-live-search="true"
+                                                                                    name="location"
+                                                                                    id="location_add"
+                                                                                    title="&{'location'}"
+                                                                                    data-width="300px"
+                                                                                    required="true">
+                                                                                <option></option>
+                                                                            #{list items:permissions,as:"loc"}
+                                                                                <option value="${loc}">
+                                                                                ${loc}
+                                                                                </option>
+                                                                            #{/list}</select>
+                                                                            <input required="true"
+                                                                                   class="pickadate form-control picker__input"
+                                                                                   style="width: auto"
+                                                                                   id="datepick_add" name="due"
+                                                                                   type="text"
+                                                                                   placeholder="&{'due_date_choose'}"
+                                                                                   readonly/>
+                                                                            <input type="text" hidden="true"
+                                                                                   id="order_id_add" name="id"/>
+                                                                            <input type="text" hidden="true"
+                                                                                   id="order_orderer_add"
+                                                                                   name="orderer"/>
+                                                                            <input type="text" hidden="true"
+                                                                                   id="order_status_add"
+                                                                                   name="status"/>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-md-12 col-sm-12 col-xs-12 table-responsive table-red">
+                                                                        <table class="table table-striped table-hover dataTable"
+                                                                               id="table-editable_add"
+                                                                                >
+                                                                            <thead>
+                                                                            <tr>
+                                                                                <th style="width: 400px"
+                                                                                        >&{'item'}</th>
+                                                                                <th style="width: auto"
+                                                                                        >&{'quantity'}</th>
+                                                                                <th style="width: auto"
+                                                                                        >&{'location_quantity'}</th>
+                                                                                <th style="width: auto"
+                                                                                        >&{'measure'}</th>
+                                                                                <th style="width: 120px"></th>
+                                                                            </tr>
+                                                                            </thead>
+                                                                            <tbody>
+
+                                                                            </tbody>
+                                                                            <tfoot>
+                                                                            <tr>
+                                                                                <td><select data-live-search="true"
+                                                                                            id="add_item"
+                                                                                            class="form-control small"
+                                                                                            title="&{'inventory_choose'}"
+                                                                                            required="true">
+                                                                                    <option value=""></option>
+                                                                                </select></td>
+                                                                                <td><input type="text" id="add_quantity"
+                                                                                           class="form-control small"
+                                                                                           value="">
+                                                                                </td>
+                                                                                <td><input type="text" id="add_location"
+                                                                                           readonly
+                                                                                           class="form-control small"
+                                                                                           value="">
+                                                                                </td>
+                                                                                <td><input type="text" id="add_measure"
+                                                                                           readonly
+                                                                                           class="form-control small"
+                                                                                           value=""></td>
+                                                                                <td>
+                                                                                    <div class="text-center "><a
+                                                                                            style="padding-right: 10px;padding-left: 10px"
+                                                                                            data-rel="tooltip"
+                                                                                            title="Нэмэх"
+                                                                                            class="edit btn btn-icon-sm btn-rounded btn-default"
+                                                                                            href=""><i
+                                                                                            class="fa fa-check"></i></a>
+                                                                                    </div>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td colspan="8">
+                                                                                    <strong>
+                                                                                    &{'note'}
+                                                                                    </strong>
+                                                                                </td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td colspan="8">
+                                                                                    <textarea class="form-control valid"
+                                                                                              rows="6"
+                                                                                              id="add_note"
+                                                                                              style="width: 100%;resize: none;"></textarea>
+                                                                                </td>
+                                                                            </tr>
+                                                                            </tfoot>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-0 m-b-20 align-center">
+                                <button type="button" id="add_submit" class="btn btn-success m-t-10"><i
+                                        class="fa fa-check"></i> &{'save'}
+                                </button>
+                                <button type="button" id="add_delete"
+                                        class="btn btn-danger m-t-10 dhidden"><i
+                                        class="fa fa-times-circle"></i> &{'delete'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-editorder" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 80%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'order'}</strong></h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-ordercomment" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 50%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'Comment'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="#" class="form-horizontal" method="get"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <input id="comment-row" hidden="true"/>
+
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">&{'orderer'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                    <textarea class="form-control valid" id="view-orderer-comment"
+                                                              rows="5"
+                                                              readonly style="resize: none;"
+                                                              name="comment"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">&{'approver'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                    <textarea class="form-control valid"
+                                                              id="view-approver-comment" rows="5" readonly
+                                                              style="resize: none;"
+                                                              name="comment"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">&{'issuer'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                    <textarea class="form-control valid"
+                                                              id="view-issuer-comment" rows="5" readonly
+                                                              style="resize: none;"
+                                                              name="comment"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 m-t-0 m-b-0 align-center">
+                                                <button type="button" id="save_comment" class="btn btn-success dhidden">
+                                                    <i
+                                                            class="fa fa-check"></i> &{'save'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var picOpt = {
+        monthsFull: ["Нэгдүгээр сар", "Хоёрдугаар сар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долдугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Арав дугаар сар", "Арван нэгдүгээр сар", "Арван хоёрдугаар сар"],
+        monthsShort: ["1 сар", "2 сар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар"],
+        weekdaysFull: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+        weekdaysShort: ["Да", "Мя", "Лха", "Пү", "Ба", "Бя", "Ня"],
+
+        // Today and clear
+        today: 'Өнөөдөр',
+        clear: 'Арилгах',
+
+        // The format to show on the `input` element
+        format: 'yyyy-mm-d',
+        min: '0'
+
+    };
+    $(window).load(function () {
+        $('div#main-content').removeClass('dhidden');
+        $(function () {
+            $("table").resizableColumns({
+                store: window.store
+            });
+        });
+    });
+    $(document).ready(function () {
+
+
+        $('select#add_item').on('change', function () {
+            var measure = $(this).parents('tr').find("td:nth-child(4) input");
+            if ($('select#add_item').val() != "") {
+                $.ajax({
+                    type: "POST",
+                    data: {inv: $('select#add_item').val()},
+                    url: "/inventoryordersgetmeasure"
+                }).success(
+                        function (data) {
+                            measure.val(data);
+                            $('div#modal-addorder table tbody tr').each(function () {
+                                $(this).parents('tr').find("td:nth-child(4) input").val(data);
+                            })
+                        });
+            }
+            var location_quantity = $(this).parents('tr').find("td:nth-child(3) input");
+            if ($('select#add_item').val() != "" && $('select#location_add option:selected').val() != "")
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        inv: $('select#add_item').val(),
+                        loc: $('select#location_add option:selected').val()
+                    },
+                    url: "/inventoryordersgetlocationquantity"
+                }).success(
+                        function (data) {
+                            location_quantity.val(data);
+                            $('div#modal-addorder table tbody tr').each(function () {
+                                $(this).parents('tr').find("td:nth-child(3) input").val(data);
+                            })
+                        });
+        });
+
+
+        $('div#modal-addorder select#location_add').on('change', function () {
+
+            $.ajax({
+                type: "POST",
+                data: {
+                    loc: $('div#modal-addorder select#location_add option:selected').val()
+                },
+                url: "/inventoryordersgetlocationinventorys"
+            }).success(
+                    function (data) {
+                        $('div#modal-addorder select#add_item').html("<option value=''></option>");
+                        for (var i = 0; i < data.length; i++) {
+
+                            $('div#modal-addorder select#add_item').append("<option value='" + data[i] + "'>" + data[i] + " </option>");
+                        }
+                        $('div#modal-addorder select#add_item').selectpicker('refresh');
+
+                    });
+
+
+            $('div#modal-addorder table#table-editable_add tbody tr').each(function () {
+                var row = $(this);
+                if ($(this).find("td.dataTables_empty").val() == null) {
+                    var location_quantity = row.find("td:nth-child(3) input");
+
+                    var item = $('input:nth-child(2)', row.find("td:first-child")).val();
+                    $.ajax({
+                        type: "POST",
+                        data: {
+                            inv: item,
+                            loc: $('select#location_add option:selected').val()
+                        },
+                        url: "/inventoryordersgetlocationquantity"
+                    }).success(
+                            function (data) {
+                                location_quantity.val(data);
+
+                                if (parseFloat(data) < parseFloat($('input', row.find("td:nth-child(2)")).val())) {
+                                    showErrorMessage("Хүсэх хэмжээ агуулхын улдэгдлээс их байж болохгүй.")
+                                    $('input', row.find("td:nth-child(2)")).val("0");
+                                }
+
+                            });
+                }
+            });
+
+            var row = $('div#modal-addorder table#table-editable_add tfoot tr:first-child');
+            var location_quantity = row.find("td:nth-child(3) input");
+            if ($('select#location_add option:selected').val() != null && row.find("td:first-child select option:selected").val() != null) {
+
+                var item = row.find("td:first-child select option:selected").val();
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        inv: item,
+                        loc: $('select#location_add option:selected').val()
+                    },
+                    url: "/inventoryordersgetlocationquantity"
+                }).success(
+                        function (data) {
+                            location_quantity.val(data);
+
+                            if (parseFloat(data) < parseFloat($('input', row.find("td:nth-child(2)")).val())) {
+                                showErrorMessage("Хүсэх хэмжээ агуулхын улдэгдлээс их байж болохгүй.")
+                                $('input', row.find("td:nth-child(2)")).val("");
+                            }
+
+                        });
+            }
+
+        });
+
+
+        $('input#add_quantity').find('td:nth-child(2) input').forceNumericOnly();
+        $('select').selectpicker();
+
+
+        var id =${user.id};
+
+        $('.pickadate').each(function () {
+            $(this).pickadate(picOpt);
+        });
+        var opt = {};
+
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", 'sEmptyTable': "Үр дүн байхгүй байна."} ,
+                opt.iDisplayLength = 40,
+
+
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["csv", "xls", "pdf", "print"]
+                };
+        opt.aaSorting = [[0, 'desc']]
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': [0,1,2,3,4,5,6,7,8,9]}
+        ];
+
+        var Rows_add = 0;
+        var nEditing_add = null;
+        var nEditing_edit = null;
+        var data = ["", "", ""];
+        var oTable = $('#products-table').dataTable(opt);
+        oTable.fnDraw();
+
+        var oTable_edit = $('#table-editable_editorder').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [2]
+            }
+            ]
+        });
+        var oTable_add = $('#table-editable_add').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 30,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [3]
+            }
+            ]
+        });
+        /* Add a placeholder to searh input */
+        $('.dataTables_filter input').attr("placeholder", "Search a order...");
+
+        /* Delete a product */
+
+
+        var dat = [""];
+        var prev_size_add = 0;
+        var prev_size_edit = 0;
+        $('button#addorder').on('click', function (e) {
+            e.preventDefault();
+            $("div#modal-addorder select#location_add").selectpicker("refresh");
+            $("div#modal-addorder input#datepick_add").val("");
+            $("div#modal-addorder input#order_orderer_add").val("");
+            $("div#modal-addorder input#order_id_add").val("");
+            $("div#modal-addorder input#order_status_add").val("");
+            $("div#modal-addorder table#table-editable_add tbody tr").each(function () {
+                oTable_add.fnDeleteRow($(this));
+            });
+            $("div#modal-addorder table#table-editable_add tfoot tr:first-child td:first-child select").selectpicker("refresh");
+            $("div#modal-addorder table#table-editable_add tfoot tr:first-child td:nth-child(2) input").val("");
+            $("div#modal-addorder table#table-editable_add tfoot tr:first-child td:nth-child(3) input").val("");
+            $("div#modal-addorder table#table-editable_add tfoot tr:first-child td:nth-child(4) input").val("");
+            $("div#modal-addorder table#table-editable_add tfoot tr:nth-child(2) textarea").html("");
+            $('div#modal-addorder button#add_delete').addClass("dhidden");
+
+        });
+
+        $('#products-table tbody tr').on('click', function (e) {
+            e.preventDefault();
+            var nRow = $(this);
+            var index = $(nRow).find('td:nth-child(1) strong').html();
+
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventoryorderseditorder",
+                beforeSend: function () {
+                    $("div#modal-editorder").find("div.modal-body").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+                    $('div#modal-editorder').modal('show');
+                }
+            }).success(
+                    function (data) {
+                        $('div#modal-editorder div.modal-body').html(data);
+
+
+                        $('div#modal-editorder select#location_edit').attr("disabled");
+                        $('div#modal-editorder input#datepick_edit').attr("disabled");
+                        $('div#modal-editorder div#add_new_button').attr('hidden', true);
+                        $('div#modal-editorder select#location_edit').attr("disabled");
+                        $('div#modal-editorder select#location_edit').selectpicker('render');
+                        $('div#modal-editorder table#table-editable_editorder tbody tr').each(function () {
+                            var location_quantity = $(this).find("td:nth-child(5) input");
+                            var item = $('select option:selected', $(this).find("td:first-child")).val();
+                            if (item == null) {
+                                item = $('input:nth-child(2)', $(this).find("td:first-child")).val();
+                            }
+                            $.ajax({
+                                type: "POST",
+                                data: {
+                                    inv: item,
+                                    loc: $('select#location_edit option:selected').val()
+                                },
+                                url: "/inventoryordersgetlocationquantity"
+                            }).success(
+                                    function (data) {
+                                        location_quantity.val(data);
+                                    });
+
+                            $(this).find("td:nth-child(3) input:first-child").change(function () {
+                                var approver_quantity = $(this);
+                                var item = $(this).parent("td").parent("tr").find("td:first-child input:nth-child(2)").val();
+                                $.ajax({
+                                    type: "POST",
+                                    data: {
+                                        inv: item,
+                                        loc: $('select#location_edit option:selected').val()
+                                    },
+                                    url: "/inventoryordersgetlocationquantity"
+                                }).success(
+                                        function (data) {
+                                            if (parseFloat(data) < parseFloat(approver_quantity.val())) {
+                                                showErrorMessage("Зөвшөөрөх хэмжээ агуулахын нөөцөөс их байж болохгүй.");
+                                                approver_quantity.val("");
+                                            }
+                                        });
+
+                            });
+                            $(this).find("td:nth-child(4) input:first-child").change(function () {
+                                var issuer_quantity = $(this).parent("td").parent("tr").find("td:first-child input:nth-child(2)").val();
+                                var item = $(this).parent("td").parent("tr").find("td:first-child input:nth-child(2)").val();
+                                if (parseFloat(data) < parseFloat(issuer_quantity.val())) {
+                                    showErrorMessage("Олгох хэмжээ зөвшөөрсөн хэмжээнээс их байж болохгүй.");
+                                    issuer_quantity.val("");
+                                }
+
+                            });
+
+                        });
+
+                    });
+
+        });
+
+
+        $('div#modal-editorder button#edit_approve').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            var is = 0;
+            $('div#modal-editorder table tbody tr').each(function () {
+                if ($(this).find('td:nth-child(3) input').val() == "")
+                    is++;
+            });
+            if (is == 0) {
+                $.ajax({
+                    type: "POST",
+                    data: $("div#modal-editorder form").serialize(),
+                    url: "/inventoryordersapproveorder"
+                }).success(
+                        function () {
+                            location.reload();
+                        });
+            } else {
+                showErrorMessage("Бүх нүдийг бөглөнө үү?");
+            }
+        });
+
+        $('div#modal-editorder button#edit_ready').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            var is = 0;
+            $('div#modal-editorder table tbody tr').each(function () {
+                if ($(this).find('td:nth-child(4) input').val() == "")
+                    is++;
+            });
+            if (is == 0) {
+                $.ajax({
+                    type: "POST",
+                    data: $("div#modal-editorder form").serialize(),
+                    url: "/inventoryordersreadyorder"
+                }).success(
+                        function () {
+                            location.reload();
+                        });
+            } else {
+                showErrorMessage("Бүх нүдийг бөглөнө үү?");
+            }
+
+        });
+
+        $('div#modal-editorder button#edit_recieve').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventoryordersrecieveorder"
+            }).success(
+                    function () {
+                        location.reload();
+                    });
+
+        });
+
+        $('div#modal-editorder button#edit_cancel').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventoryorderscancelorder"
+            }).success(
+                    function () {
+                        location.reload();
+                    });
+
+        });
+
+        function editableTable_add() {
+
+            function saveRow(oTable_add, nRow) {
+
+                if ($('select#add_item option:selected').val() == null || $('input#add_quantity').val() == "") {
+                    alert("&{'please_fill'}");
+                }
+                else {
+                    var comm = $("textarea#add_note").val();
+                    if (comm.length > 0)
+                        oTable_add.fnAddData(['<input type="text" style="max-width:200px;white-space: nowrap; overflow: hidden;text-overflow: ellipsis;" hidden="true" readonly name="ids" value="0"><input type="text" readonly class="form-control small" name="item" value="' + $('select#add_item option:selected').val() + '">', '<input type="text" readonly class="form-control small" name="quantity" value="' + $('input#add_quantity').val() + '"><textarea type="text" hidden="true" name="note" >' + $('textarea#add_note').val() + '</textarea>',
+                            '<input type="text" readonly class="form-control small" name="location_quantity" value="' + $('input#add_location').val() + '">', '<input type="text" readonly class="form-control small" name="measure" value="' + $('input#add_measure').val() + '">',
+                            '<div class="text-center"><a style="padding-right: 11px;padding-left: 11px" data-rel="tooltip" title="Тэмдэглэл" class="comment btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-comment"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                        ]);
+                    else
+                        oTable_add.fnAddData(['<input type="text" style="max-width:200px;white-space: nowrap; overflow: hidden;text-overflow: ellipsis;" hidden="true" readonly name="ids" value="0"><input type="text" readonly class="form-control small" name="item" value="' + $('select#add_item option:selected').val() + '">', '<input type="text" readonly class="form-control small" name="quantity" value="' + $('input#add_quantity').val() + '"><textarea type="text" hidden="true" name="note" >' + $('textarea#add_note').val() + '</textarea>',
+                            '<input type="text" readonly class="form-control small" name="location_quantity" value="' + $('input#add_location').val() + '">', '<input type="text" readonly class="form-control small" name="measure" value="' + $('input#add_measure').val() + '">',
+                            '<div class="text-center"><a style="padding-right: 11px;padding-left: 11px" data-rel="tooltip" title="Тэмдэглэл" class="comment btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-comment-o"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                        ]);
+                    $('.comment').tooltip();
+
+                    $('select#add_item').selectpicker('val', '');
+                    $('select#add_item').selectpicker('render');
+                    $('input#add_quantity').val('');
+                    $('input#add_location').val('');
+                    $('input#add_measure').val('');
+                    $('textarea#add_note').val('');
+                    $('select').selectpicker();
+                }
+            }
+
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#table-editable_add a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parents('tr')[0];
+                oTable_add.fnDeleteRow(nRow);
+                nEditing_add = null;
+                Rows_add--;
+
+            });
+
+            $('#table-editable_add a.edit').live('click', function (e) {
+
+                e.preventDefault();
+                var nRow = $(this).parents('tr')[0];
+
+                var jqInputs = $('input', nRow);
+                if ($('select#add_item option:selected').val() == null || $('select#add_item option:selected').val() == "" || jqInputs[1].value == "") {
+                    showErrorMessage("Бүх нүдийг бөглөнө үү?");
+                }
+                else {
+                    saveRow(oTable_add, nEditing_add);
+                    nEditing_add = null;
+                    Rows_add++;
+                }
+            });
+
+            $('div#modal-addorder table#table-editable_add input#add_quantity').change(function () {
+                if (parseFloat($(this).val()) > parseFloat($('div#modal-addorder table#table-editable_add input#add_location').val())) {
+                    showErrorMessage("Захиалах утга агуулахын нөөцөөс их байж болохгүй.");
+                    $(this).val("");
+                }
+            });
+
+            var commentRow = null;
+            $('div#modal-addorder #table-editable_add a.comment').live('click', function (e) {
+                e.preventDefault();
+                var nRow = $(this).parent().parent().parent();
+                commentRow = nRow;
+                var orderer_comment = nRow.find("td:nth-child(2) textarea:nth-child(2)");
+                if (orderer_comment.html() == "") {
+                    showErrorMessage("Тэмдэглэл алга.");
+                }
+                else {
+                    $('div#modal-ordercomment textarea#view-orderer-comment').html(orderer_comment.html());
+                    $('div#modal-ordercomment button#save_comment').removeClass("dhidden");
+                    $('div#modal-ordercomment').modal('show');
+                }
+            });
+            $('div#modal-editorder #table-editable_editorder a.comment').live('click', function (e) {
+                e.preventDefault();
+                $('div#modal-ordercomment textarea#view-orderer-comment').html("");
+                $('div#modal-ordercomment textarea#view-approver-comment').html("");
+                $('div#modal-ordercomment textarea#view-issuer-comment').html("");
+                var nRow = $(this).parent('div').parent('td').parent("tr");
+                var orderer_comment = nRow.find("td:nth-child(2) input:nth-child(2)");
+                var approver_comment = nRow.find("td:nth-child(3) input:nth-child(2)");
+                var issuer_comment = nRow.find("td:nth-child(4) input:nth-child(2)");
+                var permission = $('div#modal-editorder input#order_permission_edit').val();
+                var status = $('div#modal-editorder input#order_status_edit').val();
+                commentRow = $(this).parent('div').parent('td').parent("tr");
+                $('div#modal-ordercomment input#comment-row').val();
+
+                if (orderer_comment.innerHTML == "" && approver_comment.innerHTML == "" && issuer_comment.innerHTML == "") {
+                    showErrorMessage("Тэмдэглэл алга.");
+                }
+                else {
+                    $('div#modal-ordercomment textarea#view-orderer-comment').val(orderer_comment.val());
+                    $('div#modal-ordercomment textarea#view-approver-comment').val(approver_comment.val());
+                    $('div#modal-ordercomment textarea#view-issuer-comment').val(issuer_comment.val());
+                    $('div#modal-ordercomment').modal('show');
+                }
+                if ((permission == "2" || permission == "3") && status == "1") {
+                    $('div#modal-ordercomment textarea#view-approver-comment').removeAttr("readonly");
+                    $('div#modal-ordercomment button#save_comment').removeClass("dhidden");
+                }
+                if ((permission == "4" || permission == "5") && status == "2") {
+                    $('div#modal-ordercomment textarea#view-issuer-comment').removeAttr("readonly");
+                    $('div#modal-ordercomment button#save_comment').removeClass("dhidden");
+                }
+
+            });
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+            $('div#modal-ordercomment button#save_comment').live('click', function (e) {
+                e.preventDefault();
+                var permission = $('div#modal-editorder input#order_permission_edit').val();
+                var status = $('div#modal-editorder input#order_status_edit').val();
+
+                $('div#modal-editorder table#table-editable_editorder tbody tr').each(function () {
+                    if (this.innerHTML == commentRow.html()) {
+                        if ((permission == "2" || permission == "3") && status == "1") {
+                            $(this).find("td:nth-child(3) input:nth-child(2)").val($('div#modal-ordercomment textarea#view-approver-comment').val());
+                            $(this).find("td:nth-child(7) div a").html('<i class="fa fa-comment">');
+                            $('div#modal-ordercomment').modal('hide');
+                        }
+                        if ((permission == "4" || permission == "5") && status == "2") {
+                            $(this).find("td:nth-child(4) input:nth-child(2)").val($('div#modal-ordercomment textarea#view-issuer-comment').val());
+                            $(this).find("td:nth-child(7) div a").html('<i class="fa fa-comment">');
+                            $('div#modal-ordercomment').modal('hide');
+                        }
+                    }
+                });
+            });
+        };
+
+
+        var Rows_edit = 0;
+        editableTable_add();
+
+
+        $('div#modal-addorder select#location_edit').live('change', function () {
+            $('div#modal-addorder table#table-editable_add tbody tr').each(function () {
+                var location_quantity = $(this).find("td:nth-child(5) input");
+
+                var item = $('select option:selected', $(this).find("td:first-child")).val();
+                if (item == null) {
+                    item = $('input', $(this).find("td:first-child")).val();
+                }
+
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        inv: item,
+                        loc: $('select#location_edit option:selected').val()
+                    },
+                    url: "/inventoryordersgetlocationquantity"
+                }).success(
+                        function (data) {
+                            location_quantity.val(data);
+                        });
+            });
+
+        });
+
+        function editableTable_edit() {
+
+            function editRow(oTable_edit, nRow) {
+                var jqTds = $('>td', nRow);
+
+                var jqInputs = $('input', nRow);
+            #{if inventoryProjectPermission==3}
+                jqTds[0].innerHTML = '<input type="text" hidden="true" name="ids" value="' + jqInputs[0].value + '"><select disabled data-live-search="true" name="item" class="form-control" title="&{'item'}" required="true">#{list items:Inventorys,as:"inventory"}<option value="${inventory.item}" >${inventory.item}</option>#{/list}</select>';
+            #{/if}
+            #{else}
+                jqTds[0].innerHTML = '<input type="text" hidden="true" name="ids" value="' + jqInputs[0].value + '"><select data-live-search="true" name="item" class="form-control" title="&{'item'}" required="true">#{list items:Inventorys,as:"inventory"}<option value="${inventory.item}" >${inventory.item}</option>#{/list}</select>';
+            #{/else}
+
+                jqTds[1].innerHTML = '<input type="text" class="form-control small" name="quantity" value="' + jqInputs[2].value + '">';
+                $('select', jqTds[0]).val(jqInputs[1].value);
+                $('select', jqTds[0]).selectpicker('render');
+
+                $('select', jqTds[0]).on('change', function () {
+                    var measure = $(this).parents('tr').find("td:nth-child(5) input");
+                    if ($('select option:selected', jqTds[0]).val() != "")
+                        $.ajax({
+                            type: "POST",
+                            data: {inv: $('select option:selected', jqTds[0]).val()},
+                            url: "/inventoryordersgetmeasure"
+                        }).success(
+                                function (data) {
+                                    measure.val(data);
+                                });
+                });
+
+                $('div#modal-editorder tbody tr').each(function () {
+                    $(this).find('td:nth-child(2) input').forceNumericInt();
+                });
+                jqTds[2].innerHTML = '<input type="text" readonly class="form-control small" name="main_quantity" value="' + jqInputs[3].value + '">';
+                jqTds[3].innerHTML = '<input type="text" readonly class="form-control small" name="location_quantity" value="' + jqInputs[4].value + '">';
+
+                $('select', jqTds[0]).on('change', function () {
+                    var location_quantity = $(this).parents('tr').find("td:nth-child(4) input");
+                    $.ajax({
+                        type: "POST",
+                        data: {
+                            inv: $('select option:selected', jqTds[0]).val(),
+                            loc: $('select#location_edit option:selected').val()
+                        },
+                        url: "/inventoryordersgetlocationquantity"
+                    }).success(
+                            function (data) {
+                                location_quantity.val(data);
+                            });
+                });
+                $('select', jqTds[0]).on('change', function () {
+                    var main_quantity = $(this).parents('tr').find("td:nth-child(3) input");
+                    $.ajax({
+                        type: "POST",
+                        data: {
+                            inv: $('select option:selected', jqTds[0]).val(),
+                            loc: 'main'
+                        },
+                        url: "/inventoryordersgetlocationquantity"
+                    }).success(
+                            function (data) {
+                                main_quantity.val(data);
+                            });
+                });
+                jqTds[4].innerHTML = '<input type="text" readonly class="form-control small" name="measure" value="' + jqInputs[5].value + '">';
+
+                jqTds[5].innerHTML = '<div style="width: 92px" class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-success" href=""><i class="fa fa-check"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>';
+
+
+                $('select', nRow).selectpicker();
+
+            }
+
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#modal-editorder #table-edit_new').live('click', function (e) {
+                e.preventDefault();
+                oTable_edit.fnAddData(['<input type="text" hidden="true" name="ids" value="0"><input type="text" class="form-control small" name="item">', '<input type="text" class="form-control small" name="quantity" value="">',
+                    '<input type="text" class="form-control small" name="main_quantity">', '<input type="text" class="form-control small" name="location_quantity">', '<input type="text" class="form-control small" name="measure">',
+                    '<div class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-dark" href=""><i class="fa fa-pencil-square-o"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+                var nRow = $('#table-editable_editorder tbody tr:last-child td').parents('tr')[0];
+                nEditing_edit = nRow;
+                editRow(oTable_edit, nRow);
+                Rows_edit++;
+                oTable_edit.fnDraw();
+            });
+
+            $('#table-editable_editorder a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parents('tr')[0];
+                oTable_edit.fnDeleteRow(nRow);
+                nEditing_edit = null;
+                Rows_edit--;
+
+            });
+
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+        }
+        ;
+
+        editableTable_edit();
+
+        $('button#add_submit').click(function () {
+            if ($('input#datepick_add').val() == "" && confirm("&{'are_you_sure_to_continue'}") == false) {
+                return;
+            }
+            else if (Rows_add == 0) {
+                showErrorMessage("Мөр нэмнэ үү?");
+                return;
+            }
+            else if ($('#location_add').val() != null && $('#location_add').val() != "") {
+                $.ajax({
+                    type: "POST",
+                    data: $('div#modal-addorder form').serialize(),
+                    url: "/inventoryordersneworder"
+                }).complete(
+                        function () {
+                            location.reload();
+                        });
+            }
+            else
+                showErrorMessage("Бүх нүдийг бөглөнө үү?");
+
+        });
+        $('button#edit_save').click(function () {
+            if (nEditing_edit != null) {
+                showErrorMessage("Бүх нүдийг бөглөнө үү?");
+            }
+            else {
+                $('div#modal-editorder form#save').submit();
+            }
+        });
+
+        var startDate = $('input#filter_start');
+        var endDate = $('input#filter_end');
+
+
+        $('#reportrange').daterangepicker({
+                    ranges: {
+                        'Өнөөдөр': [moment(), moment()],
+                        'Өчигдөр': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                        'Сүүлийн 7 хоног': [moment().subtract('days', 6), moment()],
+                        'Сүүлийн 30 хоног': [moment().subtract('days', 29), moment()],
+                        'Энэ сар': [moment().startOf('month'), moment().endOf('month')],
+                        'Өнгөрсөн сар': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                    },
+                    startDate: moment().subtract('days', 29),
+                    endDate: moment(),
+                    format: 'YYYY/MM/DD',
+                    locale: {
+                        applyLabel: 'Болсон',
+                        cancelLabel: 'Болих',
+                        fromLabel: 'Аас',
+                        toLabel: 'Хүртэл',
+                        customRangeLabel: 'Өөрөөр сонгох',
+                        dayNames: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+                        daysOfWeek: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+                        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+                        firstDay: 1
+                    }
+                },
+                function (start, end) {
+                    $('#reportrange span').html(start.format('YYYY/MM/DD') + '-' + end.format('YYYY/MM/DD'));
+                }
+        );
+        $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+            console.log("apply event fired, start/end dates are "
+                    + picker.startDate.format('YYYY/MM/DD')
+                    + "-"
+                    + picker.endDate.format('YYYY/MM/DD')
+            );
+            startDate.val(picker.startDate.format('YYYY/MM/DD'));
+            endDate.val(picker.endDate.format('YYYY/MM/DD'));
+        });
+        $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
+            console.log("cancel event fired");
+            $('#reportrange span').html("Өдрөөр хайх...");
+            startDate.val("");
+            endDate.val("");
+        });
+
+
+    })
+    ;
+</script>
+<style>
+
+    div#main-content body, div#main-content ul, div#main-content li {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 21px;
+        text-align: left;
+    }
+
+    .panel-default {
+        border-color: transparent;
+    }
+
+    .panel-body {
+        background-color: #FFF;
+        padding: 0px;
+        padding-left: 0px;
+    }
+
+</style>
+
+#{inventory-config /}
+#{ImgThumbnail /}

@@ -1,0 +1,297 @@
+#{extends 'CRUD/layout.html' /}
+#{fancybox-config /}
+<style>
+    tbody#topic-table-tbody .tooltip-inner {
+        white-space: pre-wrap;
+    }
+    button.edit:hover ,a.edit:hover{
+        background-color: #18a689;
+        color: #fff !important
+    }
+    button.delete:hover{
+        background-color: #c75757;
+        color: #fff !important
+    }
+    button.view:hover{
+        background-color: #428bca;
+        color: #fff !important
+    }
+    table div.post-images img {
+        height: 50px;
+        width: 50px;
+        cursor: pointer;
+        margin: 5px 5px 0 0;
+        box-shadow: 0 0 1px gray;
+        border: 1px solid #333;
+        border-radius: 2px;
+        background: white;
+    }
+    tbody#topic-table-tbody div.post-images img {
+        height: 30px;
+        width: 30px;
+
+    }
+</style>
+<div id="main-content">
+    <div class="m-b-20 clearfix no-print">
+        <div class="page-title pull-left">
+            <a href="@{controllers.Meetings.list()}"><i class="fa fa-angle-left"></i> <span>Жагсаалт руу буцах</span></a>
+        </div>
+        <div class="pull-right m-t-20">
+            <a href="@{controllers.Meetings.blank( meeting.id , true)}" class="btn btn-success m-r-10 m-b-10">Үргэлжлэл хурал зарлах</a>
+            <button type="button" class="btn btn-white m-r-10 m-b-10" onclick="window.print();"><i
+                    class="fa fa-file-text m-r-10"></i> PDF болгох</button>
+            <a href="@{controllers.Meetings.deleteMeeting(meeting.id)}" class="btn btn-danger m-r-10 m-b-10"><i class="fa fa-times m-r-10"></i> Устгах</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div id="myTabContent" class="tab-content">
+                <div class="tab-pane fade active in" id="meeting_general">
+                    <div class="row p-20">
+                        <div class="col-md-12">
+                            <h1 class="text-center"
+                                style="font-weight: bold; font-size: 14px;font-weight: 600!important;">ХУРЛЫН
+                                ТЭМДЭГЛЭЛ</h1>
+                            <table class="table table-tools" id="general">
+                                <thead>
+                                <tr>
+                                    <th colspan="3">&{'GeneralInformation'}</th>
+                                    <th class="text-right">
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td style="width:150px"><strong>Хурал #:</strong></td>
+                                    <td style="min-width:200px">${meeting.id}</td>
+                                    <td style="width:150px"><strong>Байршил:</strong></td>
+                                    <td style="min-width:200px">${meeting?.location}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Гарчиг:</strong></td>
+                                    <td>${meeting?.title}</td>
+                                    <td><strong>Харагдах байдал:</strong></td>
+                                    <td>#{if meeting.viewMeeting}Бүгдэд #{/if}
+                                    #{else }Оролцогчдод#{/else}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Ангилал:</strong></td>
+                                    <td>${meeting.status.status}</td>
+                                    <td><strong>Сэдэв дэвшүүлэх:</strong></td>
+                                    <td>#{if meeting.privateMeeting} Нээлттэй#{/if}
+                                    #{else } Хаалттай#{/else}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Товлосон өдөр:</strong></td>
+                                    <td >${meeting?.meetingDate?.format("yyyy-MM-dd")}</td>
+                                    <td><strong>Зарласан:</strong></td>
+                                    <td>${meeting.owner.lastnameFirstCharacter}.${meeting.owner.firstName}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Эхлэх цаг:</strong></td>
+                                    <td>${meeting.meetingDate.format("HH:mm")}</td>
+                                    <td><strong>Дуусах цаг:</strong></td>
+                                    <td>${meeting.finishDate.format("HH:mm")}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Тойм:</strong></td>
+                                    <td colspan="3">${meeting.overview.raw()}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Хавсралт:</strong></td>
+                                    <td colspan="3">
+                                    #{if meeting.meetingAttachments.size()>0}
+                                        <div class="post-images" id="post-images-meeting-${meeting}">
+                                            #{list items:meeting.meetingAttachments, as:'attach'}
+                                                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                                #{/list}
+                                        </div>
+                                    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-meeting-"+meeting.id).raw()}
+                                    #{/if}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row p-20">
+                        <div class="col-md-12">
+                            <h4>Хуралд оролцсон гишүүд</h4>
+                            <table class="table table-bordered">
+                                <thead style="font-size: 12px;">
+                                <tr>
+                                    <th style="width:30%" class="text-center">Нэр</th>
+                                    <th style="width:25%" class="text-center">Баг</th>
+                                    <th style="width:15%" class="text-center">Ирсэн</th>
+                                    <th style="width:15%" class="text-center">Ирээгүй</th>
+                                    <th style="width:15%" class="text-center">Чөлөөтэй</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                #{list items:userRels,as:'userR'}
+                                <tr>
+                                    <td>${userR.user.lastnameFirstCharacter}.${userR.user.firstName} (${userR.user.userPosition})</td>
+                                    <td>${userR.user.userTeam.name}</td>
+                                    <td class="text-center" id="td1${userR.id}">
+                                        #{if userR?.irts?.id == 1}
+                                            <span class="glyphicon glyphicon-ok" style="color:#5cb85c;"></span>
+                                        #{/if}
+                                        #{else }
+                                            <span class="glyphicon glyphicon-remove" ></span>
+                                        #{/else}
+                                    </td>
+                                    <td class="text-center" id="td2${userR.id}">
+                                        #{if userR?.irts?.id == 2}
+                                            <span class="glyphicon glyphicon-ok" style="color:#5cb85c;"></span>
+                                        #{/if}
+                                        #{else }
+                                            <span class="glyphicon glyphicon-remove" ></span>
+                                        #{/else}
+                                    </td>
+                                    <td class="text-center" id="td3${userR.id}">
+                                        #{if userR?.irts?.id == 3}
+                                            <span class="glyphicon glyphicon-ok" style="color:#5cb85c;"></span>
+                                        #{/if}
+                                        #{else }
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        #{/else}
+                                    </td>
+                                </tr>
+                                #{/list}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row p-20">
+                        <div class="col-md-12">
+                            <h4>Хэлэлцсэн асуудал</h4>
+                            <table id="event-review" class="table table-tools table-striped table-bordered">
+                                <thead style="font-size: 12px;">
+                                <tr>
+                                    <th class="text-center" style="width:20px"></th>
+                                    <th class="text-center" style="width:20px">#</th>
+                                    <th style="width:30%">Гарчиг</th>
+                                    <th>Дэвшүүлсэн</th>
+                                    <th>Хариуцагч</th>
+                                    <th>Хамаарал</th>
+                                    <th class="text-center">Ач холбогдол</th>
+                                    <th class="text-center">Төлөв</th>
+                                    <th class="text-center">Ш/Х</th>
+                                </tr>
+                                </thead>
+                                <tbody id="topic-table-tbody">
+                                #{list items:meetingTopics,as:'topic'}
+                                <tr>
+                                    <td >
+                                        <button data-rel="tooltip" title="Дэлгэрэнгүй" onclick="showMore(${topic.id})"
+                                                class="view btn btn-icon-sm btn-rounded btn-default"><i
+                                                class="fa fa-search"></i></button>
+                                    </td>
+                                    <td>${topic_index}</td>
+                                    <td>${topic.title}</td>
+                                    <td>${topic.owner.lastnameFirstCharacter}.${topic.owner.firstName}</td>
+                                    <td>
+                                        <div data-rel="tooltip" data-placement="bottom" title="${topic.getRelUsers()}">
+                                        ${topic.getFristRelUser().raw()}
+                                        </div>
+                                    </td>
+                                    <td>${topic.task?.name}</td>
+                                %{ongo="";
+                                    if (topic.priority.id == 1)ongo='danger';
+                                    else if (topic.priority.id==2) ongo='warning';
+                                    else ongo='primary';
+                                    }%
+                                    <td class="text-center"><span class="label label-${ongo} w-300">${topic.priority.priority}</span></td>
+                                %{ongo="";
+                                    if (topic.status.id == 1)ongo='success';
+                                    else if (topic.status.id==2) ongo='primary';
+                                    else ongo='warning';
+                                    }%
+                                    <td id="topic-status-${topic.id}" class="text-center"><span class="label label-${ongo} w-300">${topic.status.status}</span></td>
+                                    <td class="text-center">${topic.newOld.newOld}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">Хурлын тэмдэглэл</td>
+                                    <td colspan="8">
+                                        <div style="width: 100%">${topic?.minutes?.raw()}</div>
+                                        <div style="width: 100%">
+                                            #{if topic.topicAttachments.size()>0}
+                                                <div class="post-images" id="post-images-topic-${topic.id}">
+                                                    #{list items:topic.topicAttachments, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()} #{/list}
+                                                </div>
+                                            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-topic-"+topic.id).raw()}
+                                            #{/if}
+                                        </div>
+                                    </td>
+                                </tr>
+                                #{/list}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" style="padding-left: 30px;padding-right: 30px; padding-bottom: 30px;">
+                            <strong> Тэмдэглэл хөтөлсөн: </strong>${meeting.closedUser} (${meeting.closedUser?.userPosition?.name}) </br>
+                            <strong style="margin-left: 102px;"> Огноо: </strong>${meeting.minuteDate?.format("yyyy/MM/dd HH:mm")}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 m-t-20 m-b-80 align-center">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-basic" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="padding: 15px;">
+            <h4 class="modal-title text-center" ><strong>Хэлэлцэх сэдэв</strong></h4>
+            <div class="modal-body" id="modal-body-div">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+            </div>
+        </div>
+    </div>
+</div>
+#{meeting-minute-closed-config/}
+#{set activeMenu: 'Meeting'/}
+#{set activeMenuSub: 'MeetingList'/}
+#{ImgThumbnail div:'div.post-images'/}
+<script>
+    function showMore(id) {
+        $('#modal-basic').modal('show');
+        loading2('div#modal-body-div');
+        $.ajax({
+            type: "POST",
+            data: {
+                topicId: id
+            }, url: "/meetingShowModal"
+        }).success(
+                function (data) {
+                    $("div#modal-body-div").html(data);
+                });
+    }
+
+//    function print(){
+//        var data= $('div#myTabContent').html();
+//        var mywindow = window.open('', 'my div', 'height=1200,width=900');
+//        mywindow.document.write('<html><head><title>my div</title>');
+//      //  mywindow.document.write("<link rel='stylesheet' href='/assets/plugins/datatables/dataTables.css' >");
+//        mywindow.document.write('</head><body >');
+//        mywindow.document.write(data);
+//        mywindow.document.write('</body></html>');
+//        mywindow.document.close(); // necessary for IE >= 10
+//        mywindow.focus(); // necessary for IE >= 10
+//
+//        mywindow.print();
+//        mywindow.close();
+//    }
+
+</script>

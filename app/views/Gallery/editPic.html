@@ -1,0 +1,95 @@
+<script>
+    function modal_btn_cancel(){
+        var modalDiv = $('div#edit_file');
+        modalDiv.find('.modal-content').html("");
+        modalDiv.modal('hide');
+    }
+    function modal_btn_save(){
+        var id = ${picture.id};
+        var name = $('div#edit_file input#name').val();
+        var byTask = $('div#edit_file select#byTask').val();
+        var description = $('div#edit_file textarea#description').val();
+
+        if(name==""){
+            showErrorMessageCustom("Нэрийг оруулна уу!", "center", "top", 2000);
+        }
+        else{
+            $.ajax({
+                type: "POST",
+                data: {id: id,name: name,byTask:byTask,description:description },
+                url: "/gallery_save_pic"
+            }).success( function (data) {
+                var modalDiv = $('div#edit_file');
+                modalDiv.find('.modal-content').html("");
+                modalDiv.modal('hide');
+
+                $('div#gal_pic_'+id+' a#gal_pic_title_'+id).html(data.name_max);
+                $('div#gal_pic_'+id+' a#fancyBox_data_'+id).attr("title",data.name);
+                $('div#gal_pic_'+id+' a#fancyBox_data_'+id).attr("alt",data.desc);
+            });
+        }
+    }
+</script>
+
+<div class="modal-header">
+    <button type="button" onclick="modal_btn_cancel()" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    <h4 class="modal-title" id="myModalLabel">Зураг засварлах</h4>
+</div>
+<div class="modal-body">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="croppable-image">
+                        <img src="${picture.path}.${picture.extension}" class="img-responsive" alt="image crop">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="field-1" class="control-label">Зургийн нэр:</label>
+                        <input type="text" class="form-control" id="name" name="name" placeholder="Зургийн нэр..." value="${picture.name}">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <select name="byTask" id="byTask" class="form-control" data-live-search="true" >
+                        <option value="0" ${picture.task==null?'selected':''}>Ажилд хамааралгүй</option>
+                    #{list items:projectObjects, as:'object'}
+                        #{if object.tasks.size()}
+                            <optgroup label="${object.name}">
+                                #{list items:object.tasks, as:'task'}
+                                    #{if picture.task==null}
+                                        <option value="${task.id}">${task.name}</option>
+                                    #{/if}
+                                    #{else }
+                                        <option value="${task.id}" #{if picture.task!=null}${task.id==picture.task.id?'selected':''}#{/if} >
+                                            ${task.name}
+                                        </option>
+                                    #{/else}
+                                #{/list}
+                            </optgroup>
+                        #{/if}
+                    #{/list}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="field-1" class="control-label">Тайлбар</label>
+                        <textarea class="form-control autogrow" id="description" name="description" placeholder="Зургийн тайлбар оруулах хэсэг..." style="min-height: 120px; overflow: hidden; word-wrap: break-word; resize: horizontal; height: 120px;">${picture.description}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-footer text-center">
+    <button onclick="modal_btn_cancel()" type="button" class="btn btn-default"><i class="fa fa-times"></i> Болих</button>
+    <button onclick="modal_btn_save()" type="button" class="btn btn-success" ><i class="fa fa-check"></i> Хадгалах</button>
+</div>

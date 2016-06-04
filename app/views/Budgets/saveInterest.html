@@ -1,0 +1,11 @@
+<script>
+    $('input#interestActual').val("${controllers.Functions.getDecimal(budget.interestActual)}");
+    $('input#interestBudget').val("${controllers.Functions.getDecimal(budget.interestBudget)}");
+    $('input#interestDescription').val("${budget.interestDescription}");
+    $('td#tdInterestVariancePercent').html("${budget.interestVariancePercent}%");
+    var currentTd = $('td#tdInterestVariance');
+    %{ value = budget.interestVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+</script>
+#{include "Budgets/calculateResultScript.html"/}

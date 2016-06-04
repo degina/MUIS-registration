@@ -1,0 +1,117 @@
+#{extends 'CRUD/layout.html' /}
+#{blankConfig title:'Системийн тохиргоо'/}
+<div id="main-content">
+    <div class="row">
+    #{form action:@controllers.AccountSettings.saveSettings(uid), enctype:'multipart/form-data'}
+        <div class="col-lg-12">
+            <div style="border-radius: 4px;border: 1px solid #a9a9a9;padding: 18px;display: inline-block;text-align: center">
+                Системийн өнгө
+                #{list items:themeColors,as:'theme'}
+                    <div style="margin: 4px;" id="themeChange">
+                        #{if user.accountSetting==null}
+                            <button type="button" data-style="${theme.color}" id="${theme.id}"
+                                    class="btn ${theme.id==1L?'btn-warning':'btn-default'}"
+                                    style="width: 120px!important;">${theme.name}</button>
+                        #{/if}
+                        #{else }
+                            <button type="button" data-style="${theme.color}" id="${theme.id}"
+                                    class="btn ${user.accountSetting.themeColor.id==theme.id?'btn-warning':'btn-default'}"
+                                    style="width: 120px!important;">${theme.name}</button>
+                        #{/else}
+                    </div>
+                #{/list}
+            </div>
+        </div>
+        <input type="hidden" name="theme" id="theme"/>
+        <input style="margin-left: 38px" type="submit" class="btn btn-success m-t-10" value="Хадгалах">
+    #{/form}
+    </div>
+
+</div>
+<script>
+
+    //******************************** SKIN COLORS SWITCH ******************************//
+    var setColor = function (color) {
+        var color_ = 'color-' + color;
+        $('#theme-color').attr("href", "/assets/css/colors/" + color_ + ".css");
+//        if ($.cookie) {
+//            $.cookie('style-color', color);
+//        }
+    }
+
+
+    /* Change theme color onclick on menu */
+    $('div#themeChange button').click(function (e) {
+        $('div#themeChange button').each(function () {
+            $(this).removeClass("btn-warning").addClass("btn-default");
+        });
+        $(this).removeClass("btn-default").addClass("btn-warning");
+        e.preventDefault();
+        var color = $(this).attr("data-style");
+        setColor(color);
+
+        if (color == 'dark') {
+            sparkline1_color = '#159077';
+            sparkline2_color = '#00699e';
+            sparkline3_color = '#9e494e';
+        }
+        if (color == 'red') {
+            sparkline1_color = '#E0A832';
+            sparkline2_color = '#4AB2F8';
+            sparkline3_color = '#121212';
+        }
+        if (color == 'blue') {
+            sparkline1_color = '#E0A832';
+            sparkline2_color = '#D9534F';
+            sparkline3_color = '#121212';
+        }
+        if (color == 'green') {
+            sparkline1_color = '#E0A832';
+            sparkline2_color = '#D9534F';
+            sparkline3_color = '#121212';
+        }
+        if (color == 'cafe') {
+            sparkline1_color = '#159077';
+            sparkline2_color = '#00699e';
+            sparkline3_color = '#9e494e';
+        }
+
+        /* We update Sparkline colors */
+        $('.dynamicbar1').sparkline(myvalues1, {
+            type: 'bar',
+            barColor: sparkline1_color,
+            barWidth: 4,
+            barSpacing: 1,
+            height: '28px'
+        });
+        $('.dynamicbar2').sparkline(myvalues2, {
+            type: 'bar',
+            barColor: sparkline2_color,
+            barWidth: 4,
+            barSpacing: 1,
+            height: '28px'
+        });
+        $('.dynamicbar3').sparkline(myvalues3, {
+            type: 'bar',
+            barColor: sparkline3_color,
+            barWidth: 4,
+            barSpacing: 1,
+            height: '28px'
+        });
+
+    });
+
+    // If skin color selected in menu, we display it
+    //    if ($.cookie('style-color')) {
+    //        var color_ = 'color-' + $.cookie('style-color');
+    //        $('#theme-color').attr("href", "/assets/css/colors/" + color_ + ".css");
+    //    }
+    //    else {
+    //        $('#theme-color').attr("href", "/assets/css/colors/color-dark.css");
+    //    }
+    $('div#main-content form').submit(function () {
+
+        $('div#main-content input#theme').val($('div#main-content button.btn-warning').attr('id'));
+        return true;
+    });
+</script>

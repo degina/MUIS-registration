@@ -1,0 +1,586 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu: 'Event'/}
+#{set activeMenuSub: 'EventList'/}
+#{event-blank-config /}
+#{checkFileExtension /}
+<style>
+    div#mainContainer .eventPeopleHead {
+        text-align: center;
+    }
+
+    .eventPeopleStatus a {
+        cursor: pointer;
+    }
+
+    div#mainContainer .left-side {
+        background-color: #FFF;
+        margin-left: 15px;
+        top: 0;
+        position: relative;
+    }
+
+    div#mainContainer ul.groupUl {
+        height: 40px;
+        margin-top: 5px;
+    }
+
+    div#mainContainer ul.groupUl li {
+        cursor: pointer;
+        margin-left: 20px;
+        display: inline;
+        padding-left: 10px;
+        height: 39px;
+    }
+
+    div#mainContainer ul.groupUl li .groupsCleanLink {
+        text-decoration: none;
+        color: #366992;
+    }
+
+    div#mainContainer ul.groupUl li .glyphicon {
+        height: 30px;
+        vertical-align: middle;
+    }
+
+    div#mainContainer .right-side {
+        border: 1px solid #d8d8d8;
+        -webkit-border-radius: 3px;
+        border-radius: 4px !important;
+        background-color: #fff;
+        padding: 15px;
+    }
+
+    div#mainContainer .coverphoto {
+        height: 300px;
+        position: relative;
+        width: 100%;
+    }
+
+    div#mainContainer .coverPlus {
+        border: 1px solid #d8d8d8;
+        -webkit-border-bottom-left-radius: 3px;
+        -webkit-border-bottom-right-radius: 3px;
+        border-bottom-left-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
+        background-color: #fff;
+        border-bottom-width: 2px;
+        height: 70px;
+    }
+
+    div#mainContainer .additionalNews {
+        border: 1px solid #d8d8d8;
+        -webkit-border-radius: 3px;
+        border-radius: 4px !important;
+        background-color: #fff;
+        border-bottom-width: 2px;
+        margin-left: 15px;
+        margin-top: 10px;
+        height: auto;
+        padding: 10px;
+    }
+
+    #textPostFull {
+        border: none;
+        resize: none;
+        background: transparent;
+        min-height: 3.9em;
+        z-index: 1;
+    }
+
+    #eventList {
+        border: 1px solid #d8d8d8;
+        -webkit-border-radius: 3px;
+        border-radius: 4px !important;
+        background-color: #fff;
+        border-bottom-width: 2px;
+        margin-top: 10px;
+        padding: 10px;
+    }
+
+    .eventDescription {
+        border: 1px solid #d8d8d8;
+        -webkit-border-radius: 3px;
+        border-radius: 4px !important;
+        background-color: #fff;
+        border-bottom-width: 2px;
+        padding: 10px;
+        margin-left: 15px;
+        margin-top: 10px;
+    }
+
+    div#mainContainer #eventOwner {
+        margin-left: 15px;
+        margin-top: 13px;
+        vertical-align: middle;
+    }
+
+    div#mainContainer #eventTitle {
+        position: absolute;
+        margin-top: -65px;
+        left: 90px;
+        color: white;
+        text-transform: uppercase;
+        font-size: large;
+        text-shadow: -1px 0 darkgray, 0 1px darkgray, 1px 0 darkgray, 0 -1px darkgray;
+    }
+
+    div#mainContainer #eventPeople {
+        border: 1px solid #d8d8d8;
+        -webkit-border-radius: 3px;
+        border-radius: 4px !important;
+        background-color: #fff;
+        border-bottom-width: 2px;
+        margin-top: 10px;
+        padding: 10px;
+    }
+
+    div#mainContainer #eventAnswer {
+        background-color: #FFF;
+        margin-top: 15px;
+        height: auto;
+        padding: 10px;
+    }
+
+    #eventAnswer button {
+        float: right;
+        margin-top: 2px;
+        font-size: 13px;
+    }
+
+    #dropdownMenu2 {
+        float: right;
+        margin: 15px 15px 0px 0px;
+        font-size: 13px;
+    }
+
+    div#mainContainer .event-date {
+        margin: auto;
+        background-color: rgba(0, 0, 0, .15);
+        /*border-bottom: 10px solid #FFF;*/
+        border: 3px solid white;
+        width: 65px;
+        padding: 0;
+        text-align: center;
+        vertical-align: middle;
+        text-transform: uppercase;
+        float: left;
+        margin-right: 10px;
+        margin-top: -90px;
+        margin-left: 10px;
+        position: absolute;
+        border-radius: 4px;
+        /*opacity: 0.7;*/
+    }
+
+    div#mainContainer .event-month {
+        font-size: 12px;
+        padding-top: 2px;
+        color: white;
+    }
+
+    div#mainContainer .event-day {
+        font-size: 25px;
+        line-height: 24px;
+        color: white;
+    }
+
+    div#mainContainer .event-day-txt {
+        font-size: 12px;
+        font-weight: 700;
+        color: white;
+        padding-bottom: 3px;
+    }
+
+    div#mainContainer .event-dots {
+        color: #acacac
+    }
+</style>
+<div id="mainContainer">
+    <div class="modal fade modal-fullscreen" id="imageShowModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+                <div class="modal-body">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-8">
+            <div class="left-side">
+                <div class="coverphoto"></div>
+                <div class="coverPlus">
+                    <div class="event-date">
+                        <div class="event-month">
+                            <span class="dots">&nbsp;</span>
+                            <span title="June">${controllers.Functions.monthNameShort[event.startDate.format("MM").toInteger()-1]}</span>
+                            <span class="dots">&nbsp;</span>
+                        </div>
+                        <div class="event-day">${event.startDate.format("dd")}</div>
+                        <div class="event-day-txt">${controllers.Functions.dayName2[event.startDate.format("u").toInteger()-1]}</div>
+                    </div>
+                    <div id="eventTitle">${event.title}</div>
+                    <div id="ariaHiddenDropDown" class="dropdown"
+                         #{if event.getUserEventRel() == 0}style="display: none"#{/if}>
+                        <button class="btn dropdown-toggle" style="" type="button" id="dropdownMenu2"
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        #{if event.getUserEventRel() == 1}Магадгүй#{/if}
+                        #{elseif event.getUserEventRel() == 2}
+                            Оролцоно
+                        #{/elseif}
+                        #{else }
+                            Оролцохгүй
+                        #{/else}
+                            <i class="fa fa-caret-down" style=""></i>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenu2"
+                            style="right:0px; left: auto!important; top: 50px;">
+                            <li><a onclick="eventCome(1,false)">Магадгүй</a></li>
+                            <li><a onclick="eventCome(2,false)">Оролцоно</a></li>
+                            <li><a onclick="eventCome(3,false)">Оролцохгүй</a></li>
+                        </ul>
+                    </div>
+                #{if user.id == event.owner.id}
+                    <button type="button" class="btn btn-white " data-toggle="modal" data-target="#modal-select"
+                            id="selectSendUserButton"
+                            style="float: right; margin:15px 15px 0px 0px">
+                        <i class="fa fa-envelope-o"></i> Урих
+                    </button>
+
+                    <button type="button" class="btn btn-white btn-effect"
+                            style="float: right; margin: 15px 15px 0px 0px"
+                            onclick="editEvent(${event.id})">
+                        <i class="fa fa-edit"></i>
+                        Засах
+                    </button>
+                #{/if}
+                    <h4 id="eventOwner"><span style="font-size: 14px">Үйл ажиллагаа зарласан:</span>
+
+                        <div style="white-space: nowrap">${event.owner.toString()}</div>
+                    </h4>
+                </div>
+            </div>
+        #{if event.getUserEventRel() == 0 && user.id != event.owner.id}
+            <div class="additionalNews" id="eventAnswer">
+                <img src="${event.owner.profilePicture}" alt="eventOwner" style="width: 30px"/>
+                <b>${user}</b> таныг урьсан байна
+                <button type="button" class="btn btn-sm btn-primary" onclick="eventCome(1,true)">
+                    <i class="fa fa-question"></i> Магадгүй
+                </button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="eventCome(2,true)">
+                    <i class="fa fa-check"></i> Тийм
+                </button>
+                <button type="button" class="btn btn-sm btn-primary" onclick="eventCome(3,true)">
+                    <i class="fa fa-times"></i> Үгүй
+                </button>
+            </div>
+        #{/if}
+
+            <div class="additionalNews">
+                <div id="startDate">Эхлэх огноо : ${event.startDate.format('dd/MM/yyyy HH:mm')}</div>
+            #{if event.endDate!=null}
+                <span>
+                    Дуусах огноо : ${event.endDate.format('dd/MM/yyyy HH:mm')}
+                </span>
+            #{/if}
+                <div class="eventlocation">Байршил : ${event.location}</div>
+            </div>
+            <div class="eventDescription"> Тайлбар : ${event.description}</div>
+        #{include '/Events/Post-heseg.html'/}
+        </div>
+        <div class="col-md-4" style="padding-left:0px">
+            <div class="right-side">
+                <h4>Үйл ажиллагаа</h4>
+
+                <div class="dropdown">
+                    <button class="btn btn-default fa fa-filter dropdown-toggle" style="" type="button"
+                            id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Шүүх
+                        <i class="fa fa-caret-down" style=""></i>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                        <li><a onclick="eventListData(1,1)">Өнгөрсөн</a></li>
+                        <li><a onclick="eventListData(1,2)">Болох</a></li>
+                        <li><a onclick="eventListData(1,3)">Бүгд</a></li>
+                    </ul>
+                    <button type="button" data-dismiss="modal" class="btn btn-primary" onclick="newEventModalOpen()">
+                        <i class="fa fa-plus"></i>
+                        Шинээр зарлах
+                    </button>
+                </div>
+            </div>
+            <div id="eventList"></div>
+            <div>
+                <div id="eventPeople">
+                    <div class="dhidden" id="sendUserTag1">
+                        <ul>
+                        #{list items:eventPeoples ,as:'people'}
+                        <li id="u-${people.user.id}"></li>
+                            #{/list}
+                        </ul>
+                    </div>
+                    <input type="hidden" name="distribution" id="distribution" value=""
+                           placeholder="eventPeople's IDs"/>
+                    <b><p style="text-transform: uppercase">${event.startDate.format("yyyy-MM-dd HH:mm")}-д
+                        болох ${event.title}-д <span>оролцох</span> хүмүүс </p></b>
+                    <hr/>
+                    <div id="eventPeopleImage" style="text-align: center">
+                    #{list items:event.peoples, as:'people'}
+                        #{if people.status == 2}
+                            <span title="${people.getUser()}"> <img src="${people.user.profilePicture}"
+                                                                    alt="eventPeople"
+                                                                    style="width:33px" data-rel="tooltip"
+                                                                    data-original-title="${people.user.toString()}"/></span>
+                        #{/if}
+                    #{/list}
+                    </div>
+                    <hr/>
+                    <table>
+                        <tr>
+                            <th class="eventPeopleHead" id="status2">${event.get2StatusSize()}</th>
+                            <th class="eventPeopleHead" id="status1">${event.get1StatusSize()}</th>
+                            <th class="eventPeopleHead" id="status0">${event.get0StatusSize()}</th>
+                        </tr>
+                        <tr>
+                            <td class="eventPeopleHead">
+                                <div class="eventPeopleStatus"><a onclick="myModalCome(2)">Оролцох</a></div>
+                            </td>
+                            <td class="eventPeopleHead">
+                                <div class="eventPeopleStatus"><a onclick="myModalCome(1)">Магадгүй</a></div>
+                            </td>
+                            <td class="eventPeopleHead">
+                                <div class="eventPeopleStatus"><a onclick="myModalCome(0)">Урьсан</a></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+#{addQuestionBox par:'event', id: event.id /}
+#{include '/Events/editEventModal.html'/}
+#{include '/Events/eventModal.html'/}
+#{include '/Events/myModalCome.html'/}
+#{selectSentUsers containTag:"div#sendUserTag1", title:'Хүн сонгох',showTeam:true, effect:13 /}
+#{include "SharedView/AttachsMulti.html"/}
+#{checkFileExtension /}
+#{AttachScriptMulti uploadPath:controllers.Consts.uploadEventPostPath /}
+#{ImgThumbnail div:'div.post-images'/}
+<script>
+    function myModalCome(status) {
+        if ($('#status' + status).html() != 0) {
+            $('div#eventPeopleImage').html("<img src='/public/images/loading.gif' alt='Loading'/>");
+            $.ajax({
+                type: "POST",
+                data: {
+                    status: status,
+                    eventId: '${event.id}'
+                },
+                url: "/event/eventGuests"
+            }).success(function (data) {
+                $('div#eventPeopleImage').html(data);
+                if (status == 0)
+                    $('div#eventPeople b').find('span').html("уригдсан");
+                else if (status == 1)
+                    $('div#eventPeople b').find('span').html("оролцож магадгүй");
+                else
+                    $('div#eventPeople b').find('span').html("оролцох");
+            });
+        }
+    }
+
+    $('div#postArea div.post-new div.textPostSmall').click(function () {
+        $(this).hide();
+        $('div#postArea div.post-new div.post-new-footer').show("slow");
+        $('div#postArea div.post-new textarea#textPostFull').show().focus();
+        $('div#postArea div.post-new div#postHidden').show("slow");
+        $('div#postArea div.post-new div#postHidden').find('div#attachPost').hide();
+    });
+
+    function eventCome(status, flag) {
+        var temp;
+        if (status == 1)
+            temp = "Магадгүй";
+        else if (status == 2)
+            temp = "Оролцоно";
+        else
+            temp = "Оролцохгүй";
+        $.ajax({
+            type: "POST",
+            data: {
+                status: status,
+                eventId: '${event.id}'
+            },
+            url: "/event/eventCome"
+        }).success(function (data) {
+            if (flag) {
+                $('div#eventAnswer').hide();
+                $('div#ariaHiddenDropDown').show();
+                $('#dropdownMenu2').html(temp + ' <i class="fa fa-caret-down" style=""></i>');
+                $('#status' + status).html(parseInt($('#status' + status).html(), 10) + 1);
+                myModalCome(status);
+            }
+            else {
+                $('#dropdownMenu2').html(temp + ' <i class="fa fa-caret-down" style=""></i>');
+                $('#status' + status).html(parseInt($('#status' + status).html(), 10) + 1);
+                $('#status' + data).html(parseInt($('#status' + data).html(), 10) - 1);
+                myModalCome(status);
+            }
+        });
+    }
+
+    $('#modal-select').on('hidden.bs.modal', function (e) {
+        var userIds = [];
+        $("div#sendUserTag1").find("li").each(function () {
+            userIds.push(this.id);
+        });
+        if (userIds != null && userIds != "") {
+            $.ajax({
+                type: "POST",
+                url: "/event/people",
+                data: {
+                    eventId: '${event.id}',
+                    userIds: userIds
+                },
+            }).success(
+                    function (data) {
+                        if (parseInt(data, 10) > 0)
+                            $('#status0').html(parseInt($('#status0').html(), 10) + parseInt(data, 10));
+                    });
+        }
+    });
+    function eventDelete(id) {
+        if (confirm("Та энэ үйл ажиллагааг устгах уу?") == true) {
+            $.ajax({
+                type: "POST",
+                data: {id: id},
+                url: "/event/eventDelete"
+            }).success(function () {
+                window.location.replace('/dashboard/index');
+            });
+        }
+    }
+    $(function () {
+        $(".coverphoto").CoverPhoto({
+            postUrl: '/upload',
+            currentImage: '${event.imageDir!=null?event.imageDir:'/public/images/simple.jpg'}',
+            editable: ${user.id == event.owner.id?true:false}
+        });
+        $(".coverphoto").bind('coverPhotoUpdated', function (evt, dataUrl) {
+            $(".output").empty();
+            $("<img>").attr("src", dataUrl).replaceAll(".coverphoto");
+            $.ajax({
+                type: "POST",
+                data: {
+                    fileData: dataUrl,
+                    id: '${event.id}'
+                }, url: "/eventEventPicture"
+            });
+        });
+    });
+
+    function saveEditedEvent(id) {
+        if ($("div#myEditModal input#title").val() == '') {
+            alert("Гарчиг оруулна уу ?");
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/event/saveEditedEvent",
+                data: {
+                    id: id,
+                    title: $("div#myEditModal input#title").val(),
+                    desc: $("div#myEditModal textarea#desc").val(),
+                    location: $("div#myEditModal input#location").val(),
+                    startDate: $("div#myEditModal input#date_timepicker_start6").val(),
+                    endDate: $("div#myEditModal input#date_timepicker_end6").val(),
+                }
+            }).success(
+                    function () {
+                        $('#eventTitle').html($("div#myEditModal input#title").val());
+                        var myString = $('div.col-md-8').find('div.eventDescription').html();
+                        var arr = myString.split(':');
+                        $('div.col-md-8').find('div.eventDescription').html(arr[0] + ": " + $("div#myEditModal textarea#desc").val());
+                        myString = $('div.additionalNews').find('div.eventlocation').html();
+                        arr = myString.split(':');
+                        $('div.additionalNews').find('div.eventlocation').html(arr[0] + ": " + $("div#myEditModal input#location").val());
+                        myString = $('div.additionalNews div#startDate').html();
+                        arr = myString.split(':');
+                        $('div.additionalNews div#startDate').html(arr[0] + ": " + $("div#myEditModal input#date_timepicker_start6").val());
+                        myString = $('div.additionalNews').find('span').html();
+                        arr = myString.split(':');
+                        $('div.additionalNews').find('span').html(arr[0] + ": " + $("div#myEditModal input#date_timepicker_end6").val());
+                    });
+            $('#myEditModal').modal('toggle');
+        }
+    }
+
+    function searchFilter() {
+        loading2("div#eventList");
+        $.ajax({
+            type: "POST",
+            data: {
+                searchName: $('input#searchName').val(),
+            }, url: "/event/eventFilter"
+        }).success(
+                function (data) {
+                    $("div#eventList").html(data);
+                });
+    }
+
+    function eventListData(page, flag) {
+        $.ajax({
+            type: "POST",
+            data: {
+                flag: flag,
+                CurrentPageNumber: page
+            }, url: "/event/eventListData",
+            beforeSend: function () {
+                $("div#eventList").html("Loading...");
+            }
+        }).success(
+                function (data) {
+                    $("div#eventList").html(data);
+                });
+    }
+
+    $(window).load(function () {
+        eventListData(1);
+    });
+
+    $(document).ready(function () {
+        var total_groups = '${total_groups}';
+        var track_load = 1; //total loaded record group(s)
+        var loading = false; //to prevents multipal ajax loads
+        //total record group(s)
+        $(window).scroll(function () { //detect page scroll
+            if ($(window).scrollTop() + $(window).height() == $(document).height())  //user scrolled to bottom of the page?
+            {
+                if (track_load <= total_groups && loading == false) //there's more data to load
+                {
+                    loading = true; //prevent further ajax loading
+                    $('.load-more-animation').show(); //show loading image
+                    $.ajax({
+                        type: "POST",
+                        data: {
+                            groupNumber: track_load
+                        }, url: "/event/loadMorePost"
+                    }).success(
+                            function (data) {
+                                $('div#postArea div#postAreaPadding').append(data);
+                                $('.load-more-animation').hide(); //hide loading image once data is received
+                                track_load++; //loaded group increment
+                                loading = false;
+
+                            }).error(function (thrownError) {
+                                alert(thrownError); //alert with HTTP error
+                                $('.load-more-animation').hide(); //hide loading image
+                                loading = false;
+                            });
+                }
+            }
+        });
+    });
+    // duusav post heseg
+</script>

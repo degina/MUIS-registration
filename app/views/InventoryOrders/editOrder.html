@@ -1,0 +1,207 @@
+<form action="@{InventoryOrders.saveOrder()}" class="form-horizontal" method="get"
+      accept-charset="utf-8" id="save"
+      enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="form-group">
+                <div class="col-md-12 m-b-20">
+                    <div class="col-md-3 m-t-10"
+                         style="overflow-wrap: hyphenate;font-size:larger"
+                         id="location_name">
+                        <strong>Байршил: </strong> ${order.location.name}
+                    </div>
+                    <div class="col-md-3 m-t-10"
+                         style="overflow-wrap: hyphenate;font-size:larger"
+                         id="job_name">
+                    #{if order.task!=null}
+                        <strong>Ажил: </strong> ${order.task.name}
+                    #{/if}
+                    </div>
+                    <div class="col-md-5 m-t-10"
+                         style="overflow-wrap: hyphenate;font-size:larger"
+                         id="duedate_edit">
+                    #{if order.due!=null}<strong>Товлосон
+                        огноо: </strong> ${order.due.format("yyyy-MM-dd")}#{/if}
+                    </div>
+                    <div hidden="hidden">
+                        <select data-live-search="true"
+                                class="dhidden"
+                                name="location"
+                                id="location_edit"
+                                title="Choose one"
+                                required="true">#{list items:Locations,as:"location"}
+                            <option value="${location.name}"
+                                    #{if order.location.id==location.id}selected#{/if}>
+                            ${location.name}
+                            </option>#{/list}</select>
+                        <input required="true"
+                               class="dhidden pickadate form-control picker__input"
+                               style="width: auto;"
+                               id="datepick_edit" name="due"
+                               type="text" value="${order.due}"
+                               placeholder="Өдрөө сонгоно уу..."
+                               readonly/>
+                        <input type="text" hidden="true"
+                               id="order_id_edit" name="id" value="${order.id}"/>
+                        <input type="text" hidden="true"
+                               id="order_orderer_edit"
+                               name="orderer" value="${order.orderer.id}"/>
+                        <input type="text" hidden="true"
+                               id="order_status_edit"
+                               name="status" value="${order.status.id}"/>
+                        <input type="text" hidden="true"
+                               id="order_permission_edit"
+                               name="permission"
+                               value="${order.location.project!=null ? controllers.InventoryOrders.getProjectInventoryOrderPermissionType(order.location.project.id) : controllers.Users.getUser().getUserPermissionType(controllers.Consts.permissionInventoryOther)}"/>
+                    </div>
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12 table-responsive table-red">
+                    <table class="table table-striped table-hover dataTable"
+                           id="table-editable_editorder">
+                        <thead>
+                        <tr>
+                            <th style="width: 300px">
+                                <div style="overflow-wrap: hyphenate;"
+                                     id="order_id_show">#${order.id}</div>
+                            </th>
+                            <th style="width: 190px">
+                                <div style="overflow-wrap: hyphenate;"
+                                     id="order_ordered_show">
+                                    <small class="muted text-muted">${order.date.format("yyyy-MM-dd HH:mm")}</small>
+                                    </br>&{'ordered'}</div>
+                            </th>
+                            <th style="width: 190px">
+                                <div style="overflow-wrap: hyphenate;"
+                                     id="order_approved_show">#{if order.approved_date!=null}
+                                    <small class="muted text-muted">${order.approved_date.format("yyyy-MM-dd HH:mm")}</small>#{/if}
+                                    </br>&{'approved'}</div>
+                            </th>
+                            <th style="width: 190px;">
+                                <div style="overflow-wrap: hyphenate;"
+                                     id="order_issued_show">#{if order.issued_date!=null}
+                                    <small class="muted text-muted">${order.issued_date.format("yyyy-MM-dd HH:mm")}</small>#{/if}
+                                    </br>&{'issued'}</div>
+                            </th>
+                            <th style="width: auto;align-content: center"></th>
+                            <th style="width: 100px;align-content: center"></th>
+                            <th style="width: 50px;align-content: center"></th>
+                        </tr>
+                        <tr>
+                            <th style="width: 300px;align-content: center">&{'item'}</th>
+                            <th style="width: auto;align-content: center">
+                                <div style="overflow-wrap: hyphenate;"
+                                     id="order_orderer_show">${order.orderer}</div>
+                            </th>
+                            <th style="width: auto;align-content: center">
+                                <div style="overflow-wrap: hyphenate;"
+                                     id="order_approver_show">#{if order.approver!=null}${order.approver}#{/if}</div>
+                            </th>
+                            <th style="width: auto;align-content: center">
+                                <div style="overflow-wrap: hyphenate;"
+                                     id="order_issuer_show">#{if order.issuer!=null}${order.issuer}#{/if}</div>
+                            </th>
+                            <th style="width: auto;align-content: center">&{'location_quantity'}</th>
+                            <th style="width: 100px;align-content: center">&{'measure'}</th>
+                            <th style="width: 50px;align-content: center"></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        #{list items:order.inventorys,as:'items'}
+                        <tr>
+                            <td>
+                                <input type="text"
+                                       style="max-width:200px;white-space: nowrap; overflow: hidden;text-overflow: ellipsis;"
+                                       hidden="true" readonly name="ids"
+                                       value="${items.id}"> <input type="text"
+                                                                   readonly
+                                                                   class="form-control"
+                                                                   name="item"
+                                                                   required="true"
+                                                                   value="${items.inventory.item}">
+                            </td>
+                            <td>
+                                <input type="text" style="width:91%;"
+                                       class="form-control" readonly required="true"
+                                       value="${items.quantity}" name="quantity">
+                                <input type="text" class="dhidden"
+                                       value="${items.orderer_comment}"
+                                       name="orderer_comment">
+                            </td>
+                            <td>
+                                <input type="text"
+                                       style="width:91%;" #{if order.status.id==1L && (controllers.InventoryOrders.orderPermissionType(order.id)==2 || controllers.InventoryOrders.orderPermissionType(order.id)==3 || controllers.InventoryOrders.orderPermissionType(order.id)==5)}#{/if}#{else}readonly#{/else}
+                                       class="form-control" required="true"
+                                       value="#{if order.status.id==1L && (controllers.InventoryOrders.orderPermissionType(order.id)==2 || controllers.InventoryOrders.orderPermissionType(order.id)==3 || controllers.InventoryOrders.orderPermissionType(order.id)==5)}${items.quantity}#{/if}#{else}${items.approved}#{/else}"
+                                       name="approved">
+                                <input type="text" class="dhidden"
+                                       value="${items.approver_comment}"
+                                       name="approver_comment">
+                            </td>
+                            <td>
+                                <input style="width:91%;"
+                                       type="text" #{if order.status.id==2L && (controllers.InventoryOrders.orderPermissionType(order.id)==4 || controllers.InventoryOrders.orderPermissionType(order.id)==5)}#{/if}#{else}readonly#{/else}
+                                       class="form-control" required="true"
+                                       value="#{if order.status.id==2L && (controllers.InventoryOrders.orderPermissionType(order.id)==4 || controllers.InventoryOrders.orderPermissionType(order.id)==5)}${items.quantity}#{/if}#{else}${items.issued}#{/else}"
+                                       name="issued"> <input
+                                    type="text" class="dhidden"
+                                    value="${items.issuer_comment}"
+                                    name="issuer_comment">
+                            </td>
+                            <td>
+                                <input type="text" readonly class="form-control"
+                                       required="true" value=""
+                                       name="location_quantity">
+                            </td>
+                            <td>
+                                <input type="text" readonly class="form-control"
+                                       required="true"
+                                       value="${items.inventory.inventoryMeasure.measure}"
+                                       name="measure">
+                            </td>
+                            <td>
+                                <div class="text-center"><a
+                                        style="padding-right: 11px;padding-left: 11px"
+                                        data-rel="tooltip" title="Тэмдэглэл"
+                                        class="comment btn btn-icon-sm btn-rounded btn-default"
+                                        href="#"><i
+                                        class="fa fa-comment#{if (items.approver_comment == null || items.approver_comment.size() <= 0) && (items.orderer_comment == null || items.orderer_comment.size() <= 0) && (items.issuer_comment == null || items.issuer_comment.size() <= 0)}-o#{/if}"></i></a>
+                                </div>
+                            </td>
+                        </tr>
+                        #{/list}
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 m-b-40 align-center">
+        #{if order.status.id==1L && (controllers.InventoryOrders.orderPermissionType(order.id)==2 || controllers.InventoryOrders.orderPermissionType(order.id)==3 || controllers.InventoryOrders.orderPermissionType(order.id)==5)}
+            <button type="button" id="edit_approve"
+                    class="btn btn-warning m-t-10 ">
+                <i class="fa fa-check"></i> &{'approve'}
+            </button>
+        #{/if}
+        #{if order.status.id==2L && (controllers.InventoryOrders.orderPermissionType(order.id)==4 || controllers.InventoryOrders.orderPermissionType(order.id)==5)}
+            <button type="button" id="edit_ready"
+                    class="btn btn-primary m-t-10">
+                <i class="fa fa-check"></i> &{'ready'}
+            </button>
+        #{/if}
+        #{if order.orderer==controllers.Users.getUser() && order.status.id==4L}
+            <button type="button" id="edit_recieve"
+                    class="btn btn-success m-t-10 ">
+                <i class="fa fa-check"></i> &{'recieve'}
+            </button>
+        #{/if}
+        #{if ((controllers.Users.getUser()==order.orderer || controllers.InventoryOrders.orderPermissionType(order.id)==2 || controllers.InventoryOrders.orderPermissionType(order.id)==3 || controllers.InventoryOrders.orderPermissionType(order.id)==4 || controllers.InventoryOrders.orderPermissionType(order.id)==5)&& order.status.id==1L) || ((controllers.InventoryOrders.orderPermissionType(order.id)==4 || controllers.InventoryOrders.orderPermissionType(order.id)==5 || controllers.Users.getUser()==order.orderer)&& order.status.id==2L) || (controllers.Users.getUser()==order.orderer && order.status.id==4L)}
+            <button type="button" id="edit_cancel"
+                    class="btn btn-danger m-t-10 ">
+                <i class="fa fa-times-circle"></i> &{'cancel'}
+            </button>
+        #{/if}
+        </div>
+    </div>
+</form>

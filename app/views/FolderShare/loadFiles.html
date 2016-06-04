@@ -1,0 +1,107 @@
+#{if fileShares.size()==0}
+<h3>Хоосон</h3>
+#{/if}
+#{else }
+%{count=1;}%
+<table id="products-table" class="table table-tools table-hover" style="margin-bottom: 8px">
+    <thead>
+    <tr>
+        <th style="width:40px"><strong>#</strong>
+        <th><strong>Файлын нэр</strong>
+        <th></th>
+        </th>
+        <th class="text-center"><strong>Хуулсан</strong>
+        </th>
+        <th class="text-center"><strong>Үзсэн</strong>
+        </th>
+        <th style="width:10%;text-align:center"><strong>Төрөл</strong>
+        </th>
+        <th style="text-align: center"><strong>Үйлдэл</strong>
+        </th>
+    </tr>
+    </thead>
+    <tbody id="loadData">
+        #{list items:fileShares,as:'file'}
+        <tr>
+            <td>${count}</td>
+            <td>${file.name}${controllers.Functions.handleDocumentIcon(file.dir,file.name,file.extension).raw()}</td>
+            <td><span class="downloadTag label label-dark w-300" fileId="${file.id}" fileDir="${file.dir}"
+                      fileName="${file.name}" filesize="${file.fileSizeM}"
+                      extension="${file.extension}" openType="0"
+                      style="cursor: pointer">Нээх</span>
+        <span class="downloadTag label label-warning w-300" fileId="${file.id}" fileDir="${file.dir}"
+              fileName="${file.name}"
+              extension="${file.extension}" openType="1"
+              style="cursor: pointer">Татах</span>
+            </td>
+            <td style="text-align: center">${file.uploader}</td>
+            <td style="text-align: center"><span class="receivedUser btn btn-sm btn-default" fileId="${file.id}"><i
+                    class="fa fa-search"></i> ${file.downloadCount}</span></td>
+            <td style="text-align: center">
+                #{if file.ftype==0}
+                    <span class="label label-success w-300">Нийтийн</span>
+                #{/if}
+                #{elseif file.ftype==1}
+                    <span class="label label-danger w-300">Миний</span>
+                #{/elseif}
+                #{else }
+                    <span class="label label-primary w-300">Сонголттой</span>
+                #{/else}
+            </td>
+            <td style="text-align: center">
+                #{if user.id==file.uploader.id}
+                    <span class="edit btn btn-sm btn-default" fileId="${file.id}" style="font-size: 11px"><i
+                            class="fa fa-pencil"></i> Засах</span>
+        <span class="delete btn btn-sm btn-default" fileId="${file.id}" style="font-size: 11px"><i
+                class="fa fa-times-circle"></i>
+            Устгах</span>
+                #{/if}
+                <span class="view btn btn-sm btn-default" fileId="${file.id}" style="font-size: 11px"><i
+                        class="fa fa-search"
+                        style="margin-right: 2px"></i>дэлгэрэнгүй</span>
+            </td>
+        </tr>
+        %{count++}%
+        #{/list}
+    </tbody>
+</table>
+    #{if MaxPageNumber>1}
+        #{include '/SharedView/pageNavigation.html'/}
+    #{/if}
+<script>
+    $('tbody#loadData span.downloadTag').on('click', function () {
+        handleAttachmentClickFileCenter($(this));
+    });
+    $('tbody#loadData span.delete').on('click', function (e) {
+        e.preventDefault();
+        if (confirm("Файлыг устгах уу ?") == false) {
+            return;
+        }
+        var nRow = $(this).parents('tr')[0];
+        nRow.remove();
+        deleteFiles($(this));
+    });
+    $('tbody#loadData span.view').on('click', function () {
+        showMoreInfo($(this), 1);
+    });
+    $('tbody#loadData span.receivedUser').on('click', function () {
+        showMoreInfo($(this), 2);
+    });
+    $('tbody#loadData span.edit').on('click', function () {
+        editShow($(this));
+    });
+        #{if MaxPageNumber>1}
+        $("div#loaderDiv input.number-button").click(function () {
+            var pagenumber = $(this).attr('pagenumber');
+            if (pagenumber != ${CurrentPageNumber}) {
+                #{if loadType==1}
+                    loadFiles(selectedFolder, pagenumber);
+                #{/if}
+                #{else}
+                    searchFile('${search}', pagenumber);
+                #{/else}
+            }
+        });
+        #{/if}
+</script>
+#{/else}

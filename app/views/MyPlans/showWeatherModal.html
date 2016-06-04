@@ -1,0 +1,44 @@
+#{if isWeather}
+        #{list items:weathers,as:'weather'}
+        <tr id="weather${weather.id}">
+            <td> ${weather_index}</td>
+            <td>
+                #{if weather.task!=null}${weather.task.name}#{/if}
+        #{else }${weather.myPlan.name}#{/else}
+            </td>
+            <td>${weather?.weatherCondition?.conditionWeather?.raw()}</td>
+            <td colspan="2">
+            ${weather?.startDate?.format("HH:mm")}
+            </td>
+            <td colspan="2">
+            ${weather?.finishDate?.format("HH:mm")}
+            </td>
+            <td>${weather?.notes?.raw()}</td>
+        </tr>
+        #{/list}
+<script>
+    $('div#show-weather-modal div.modal-header h4 strong').html("Цаг агаарын саатал");
+</script>
+#{/if}
+#{else }
+        #{list items:technicalDelays,as:'technical'}
+        <tr id="technical${technical.id}">
+            <td>${technical_index}</td>
+            <td>
+                #{if technical.task!=null}${technical.task.name}#{/if}
+            #{else }${technical.myPlan.name}#{/else}
+            </td>
+            <td>${technical?.conditionTechnical}</td>
+            <td colspan="2">
+            ${technical?.startDate?.format("HH:mm")}
+            </td>
+            <td colspan="2">
+            ${technical?.finishDate?.format("HH:mm")}
+            </td>
+            <td>${technical?.notes?.raw()}</td>
+        </tr>
+        #{/list}
+<script>
+    $('div#show-weather-modal div.modal-header h4 strong').html("Техникийн саатал");
+</script>
+#{/else}

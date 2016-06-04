@@ -1,0 +1,172 @@
+<div class="col-md-12">
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title"><strong>Ерөнхий мэдээлэл</strong></h3>
+    </div>
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <table class="table table-bordered" style="margin-bottom: 0">
+                    <tbody>
+                    <tr>
+                        <td style="width:20%;"><strong>Ажлын бүлэг</strong></td>
+                        <td style="width:30%">${task.projectObject.name}</td>
+                        <td style="width:20%;"><strong>Эхэлсэн хугацаа</strong></td>
+                        <td style="width:30%">${task.startDate.format('yyyy-MM-dd')}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Ажлын нэр</strong></td>
+                        <td>${task.name}</td>
+                        <td><strong>Дуусах хугацаа</strong></td>
+                        <td>${task.finishDate.format('yyyy-MM-dd')}</td>
+                    </tr>
+                    <tr>
+                    %{progressPercent=0;
+                        scheduledWork=controllers.ReportClass.ReportFunction.getDailyLogScheduledWork(task.id,0,dateBetween.dateS);
+                        if(scheduledWork!=null)progressPercent=scheduledWork.progressPercent;}%
+                        <td><strong>Гүйцэтгэл
+                            &nbsp;${controllers.ReportClass.ReportFunction.getPercentHtml(task.startDate,dateBetween.dateS,task.actualFinish,progressPercent,true,"%").raw()}</strong>
+                        </td>
+                        <td class="color-success">
+                            <div class="progress">
+                            %{completedPercent = (scheduledWork!=null?scheduledWork.completedPercent==100?100:0:0);}%
+                                <div class="progress-bar progress-bar-success"
+                                     data-aria-valuetransitiongoal="${completedPercent}">
+                                ${completedPercent}%</div>
+                            </div>
+                        </td>
+                        <td><strong>Үргэлжилсэн хоног</strong></td>
+                        <td>${task.continuedDuration(dateBetween.dateS).raw()}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Хариуцагч</strong></td>
+                        <td>
+                        %{count=1;
+                            listData=controllers.ReportClass.ReportFunction.getAssignedTasks(task.id,false);
+                            for(models.TaskAssignRel rel:listData){}%
+                            <a class="selectInfoView" type="1" oid="${rel.user.id}"
+                               style="cursor: pointer"
+                               onclick="changeDateReport('User',2,'${dateBetween.dateS.format('yyyy-MM-dd')}',${rel.user.id})">${rel.user}</a>
+                        %{if(count!=listData.size()){}%
+                            ,&nbsp;
+                        %{}
+                            count++;}}%
+                        </td>
+                    #{if controllers.CompanyConf.type==0}
+                        <td><strong>Гүйцэтгэгч</strong></td>
+                        <td>%{count=1;
+                            listData=controllers.ReportClass.ReportFunction.getAssignedTasks(task.id,true);
+                            for(models.TaskAssignRel rel:listData){}%
+                            <a class="selectInfoView" type="1" oid="${rel.user.id}"
+                               style="cursor: pointer">${rel.user}</a>
+                        %{if(count!=listData.size()){}%
+                            ,&nbsp;
+                        %{}
+                            count++;}}%
+                        </td>
+                    #{/if}
+                    #{else }
+                        <td></td>
+                        <td></td>
+                    #{/else}
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+%{
+count=1;
+dataListSub=controllers.ReportClass.ReportFunction.getDailyLogWorkNotes(task.id,null,dateBetween.dateS,dateBetween.dateF);
+    if(dataListSub.size()>0){}%
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Тэмдэглэл</h3>
+        </div>
+        <div class="panel-body">
+            <table class="table table-hover">
+                <tbody>
+                %{count2=1;}%
+                #{list items:dataListSub,as:'dailyNote'}
+                <tr>
+                    <td>${count2}</td>
+                    <td><a class="selectInfoView" type="1" oid="${dailyNote.owner.id}"
+                           style="cursor: pointer;white-space: nowrap"
+                           onclick="changeDateReport('User',2,'${dateBetween.dateS.format('yyyy-MM-dd')}',${dailyNote.owner.id})">${dailyNote.owner}
+                        :</a></td>
+                <td>
+                    <div class="notes">${controllers.ReportClass.ReportFunctionLocal.getBreakLine(dailyNote.notes).raw()}</div>
+                    #{if dailyNote.attaches.size()>0}
+                        <div id="post-images-${dailyNote.id}" class="post-images">
+                        #{list items:dailyNote.attaches, as:'attach'}
+                         ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                        #{/list}
+                        </div>
+                    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-"+dailyNote.id).raw()}
+                    </td>
+                    #{/if}
+                </tr>
+                %{count2++}%
+                #{/list}
+            </table>
+        </div>
+    </div>
+%{}
+if(controllers.CompanyConf.type==0){
+dataListSub=controllers.ReportClass.ReportFunction.getDailyLogManPowers(scheduledWork?scheduledWork.id:0);
+    if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogManPowers.html'/}%{}
+dataListSub=controllers.ReportClass.ReportFunction.getDailyLogMaterials(scheduledWork?scheduledWork.id:0);
+    if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogMaterials.html'/}%{}
+dataListSub=controllers.ReportClass.ReportFunction.getDailyLogEquipments(scheduledWork?scheduledWork.id:0);
+    if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogEquipments.html'/}%{}
+}
+dataListSub=controllers.ReportClass.ReportFunction.getDailyLogWeathers(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogWeathers.html'/}%{}}%
+%{dataListSub=controllers.ReportClass.ReportFunction.getDailyLogTechnicalDelays(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogTechnicalDelays.html'/}%{}}%
+%{
+if(controllers.CompanyConf.type==0){
+dataListSub=controllers.ReportClass.ReportFunction.getDailyLogDumpsters(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogDumpsters.html'/}%{}}%
+%{dataListSub=controllers.ReportClass.ReportFunction.getDailyLogSafetys(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogSafetys.html'/}%{}
+}}%
+%{dataListSub=controllers.ReportClass.ReportFunction.getDailyLogInspections(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogInspections.html'/}%{}}%
+%{dataListSub=controllers.ReportClass.ReportFunction.getDailyLogDeliverys(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogDeliverys.html'/}%{}}%
+%{dataListSub=controllers.ReportClass.ReportFunction.getDailyLogNotes(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogNotes.html'/}%{}}%
+%{dataListSub=controllers.ReportClass.ReportFunction.getDailyLogSanaachlagas(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogSanaachlagas.html'/}%{}}%
+%{dataListSub=controllers.ReportClass.ReportFunction.getDailyLogVisitors(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogVisitors.html'/}%{}}%
+%{
+if(controllers.CompanyConf.type==0){
+dataListSub=controllers.ReportClass.ReportFunction.getDailyLogWastes(task.id,null,null,dateBetween.dateS,dateBetween.dateF);
+if(dataListSub.size()>0){}%
+#{include '/Reports/getDailyLogWastes.html'/}%{}}}%
+</div>
+#{userInfoConfig/}
+#{ImgThumbnail div:'#reportLoadData',divid:'report'/}
+<script>
+    if ($('body').data('page') == 'tables') {
+        $('.progress-bar').progressbar();
+    }
+</script>
+#{include '/Reports/reportFooter.html'/}
+

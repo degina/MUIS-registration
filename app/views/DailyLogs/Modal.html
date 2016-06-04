@@ -1,0 +1,212 @@
+<div class="modal fade" id="modal-Equipment" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Техник,Тоног төхөөрөмж</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <table class="table table-bordered" id="tableEquipment">
+                            <thead>
+                            <th style="width: 25px;">#</th>
+                            <th>Төрөл</th>
+                            <th>Оператор</th>
+                            <th>Байршил</th>
+                            <th style="width: 60px;">Эхэлсэн</th>
+                            <th style="width: 60px;">Дууссан</th>
+                            <th>Тайлбар</th>
+                            <th style="width: 67px;"><i class="fa fa-paperclip fa-2x"></i></th>
+                            <th style="width: 35px;"></th>
+                            </thead>
+                            <tbody>
+                            <tr id="trEquipmentInput">
+                                <td>1</td>
+                                <td>
+                                    <select class="form-control" id="equipmentType" data-container="body" data-none-selected-text="Сонгох"></select>
+                                </td>
+                                <td><input id="equipmentOperator" class="form-control" type="text"/>
+                                </td>
+                                <td>
+                                    <input id="equipmentLocation" class="form-control" type="text"/>
+                                </td>
+                                <td>
+                                    <input id="equipmentStartHour" class="form-control dateTimePickerHour"
+                                           name="startHour" type="text"/>
+                                </td>
+                                <td>
+                                    <input id="equipmentFinishHour" class="form-control dateTimePickerHour"
+                                           name="finishHour" type="text"/>
+                                </td>
+                                <td><textarea class="form-control" id="equipmentComments" cols="30"
+                                              rows="1"></textarea></td>
+                                <td>
+                                    <ul class="uploadBox" id="uEquipment">
+                                        <li>
+                                    <span> <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                   data-rel="tooltip"
+                                                   title="Хавсаргах"><i class="fa fa-cloud-upload"></i></button></span>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <button onclick="addEquipment()"
+                                            data-rel="tooltip" title="Нэмэх"
+                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                            class="fa fa-plus"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="padding: 6px 12px;font-size: 15px;">Болсон</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-ManPower" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Ажиллах хүч</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <table class="table table-bordered" id="tableManPower">
+                            <thead>
+                            <th style="width: 25px;">#</th>
+                            <th style="width: 100px;">Харъяалал</th>
+                            <th style="width: 85px;">Мэргэжил</th>
+                            <th style="width: 85px;">Ажилчид</th>
+                            <th style="width: 75px;">Цаг</th>
+                            <th style="width: 75px;">Хүн-цаг</th>
+                            <th style="width: 95px;">Байршил</th>
+                            <th>Тэмдэглэл</th>
+                            <th style="width: 67px;"><i class="fa fa-paperclip fa-2x"></i></th>
+                            <th style="width: 35px;"></th>
+                            </thead>
+                            <tbody>
+                            <tr id="trManPowerInput">
+                                <td>1</td>
+                                <td>
+                                    <select class="form-control" id="manPowerContact" data-container="body" data-none-selected-text="Сонгох">
+                                    </select>
+                                </td>
+                                <td>
+                                    <select class="form-control" id="manPowerMergejil" data-container="body" data-none-selected-text="Сонгох"></select>
+                                </td>
+                                <td><input class="form-control numberic" id="manPowerWorkers" type="number" min="0"/></td>
+                                <td><input class="form-control numberic" id="manPowerHours" type="number" min="0"/></td>
+                                <td id="tdManPowerManHours"></td>
+                                <input class="form-control numberic" id="manPowerManHours" type="hidden"/>
+                                <td><input class="form-control" id="manPowerLocation" type="text"/></td>
+                                <td><textarea class="form-control" id="manPowerNote" id="" cols="40"
+                                              rows="1"></textarea></td>
+                                <td>
+                                    <ul class="uploadBox" id="uManPower">
+                                        <li>
+                                    <span> <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                   data-rel="tooltip"
+                                                   title="Хавсаргах"><i class="fa fa-cloud-upload"></i></button></span>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td id="manPowerbutton">
+                                    <button onclick="addManPower()" data-rel="tooltip" title="Хадгалах"
+                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                            class="fa fa-save"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="padding: 6px 12px;font-size: 15px;">Болсон</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-Material" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Материал</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <table class="table table-bordered" id="tableMaterial" style="border: none;">
+                            <thead>
+                            <th style="width: 25px;">#</th>
+                            <th style="width: 155px;">Материалын нэр</th>
+                            <th style="width: 100px;">Тоо хэмжээ</th>
+                            <th style="width: 70px;">Нэгж</th>
+                            <th>Тэмдэглэл</th>
+                            <th style="width: 67px;"><i class="fa fa-paperclip fa-2x"></i></th>
+                            <th style="width: 35px;"></th>
+                            </thead>
+                            <tbody>
+                            <tr id="trMaterialInput">
+                                <td>1</td>
+                                <td>Материал нэмэх</td>
+                                <td colspan="4">
+                                    <select id="selectMaterial" data-container="body" data-live-search="true" data-width="auto">
+                                    #{list items:inventoryCategories,as:'inventoryCategory'}
+                                        <optgroup label="${inventoryCategory.name}">
+                                            #{list items:inventoryCategory.subCategories,as:'subCategory'}
+                                                #{list items:subCategory.inventories,as:'inventory'}
+                                                    <option data-subtext="${inventory.inventoryMeasure.measure}"
+                                                 value="${inventory.id}">${inventory.item}</option>
+                                                #{/list}
+                                            #{/list}
+                                        </optgroup>
+                                    #{/list}
+                                    </select>
+                                </td>
+                                <td id="manMaterial">
+                                    <button onclick="addMaterial()" data-rel="tooltip" title="Нэмэх"
+                                            style="margin: auto;"
+                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                            class="fa fa-plus"></i></button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" style="padding: 6px 12px;font-size: 15px;">Болсон</button>
+                <button type="button" onclick="saveMaterial()" id="buttonSaveMaterial" class="btn btn-success" style="padding: 6px 12px;font-size: 15px;"><i class="fa fa-check"></i> Хадгалах</button>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+    .modal-body {
+        padding: 5px;
+    }
+    .modal-footer {
+        padding: 19px 20px 20px;
+        margin-top: 0;
+        text-align: right;
+        border-top: 1px solid #e5e5e5;
+    }
+    .modal-title {
+        text-align: center;
+    }
+</style>

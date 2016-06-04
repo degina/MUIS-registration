@@ -1,0 +1,34 @@
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <table class="table" id="tableDetails">
+            <tbody>
+            <tr>
+                <td style="border-top: none; width: 80px; "><strong>Ажил:</strong></td>
+                <td style="border-top: none;" colspan="3">${task.name}</td>
+            </tr>
+            <tr>
+                <td style="width: 80px;"><strong>Гүйцэтгэл:</strong></td>
+                <td>${task.completedPercent}%</td>
+                <td style="width: 80px;"><strong>Хоцролт:</strong></td>
+                <td>${diffDays}</td>
+            </tr>
+            <tr>
+                <td style="width: 80px;"><strong>Эхэлсэн:</strong></td>
+                <td>${oneDay?task.startDate.format("HH:mm"):task.startDate.format("yyyy-MM-dd")}</td>
+                <td style="width: 80px;"><strong>Дууссан:</strong></td>
+                <td>${oneDay?task.finishDate.format("HH:mm"):task.finishDate.format("yyyy-MM-dd")}</td>
+            </tr>
+            <tr>
+                <td style="width: 80px;"><strong>Тайлбар:</strong></td>
+                <td colspan="3">${task.description}%</td>
+
+            </tr>
+            <tr>
+                <td colspan="4"><a
+                        href="@{controllers.MyPlans.gotoProjectPage("ReportMyPlan",task.owner.id,dateSelected.format('yyyy-MM-dd'),1)}">Тайлан
+                    үзэх</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

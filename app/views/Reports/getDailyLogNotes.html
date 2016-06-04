@@ -1,0 +1,50 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Тэмдэглэл/Асуудал</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Ач холбогдол</th>
+                <th>Тэмдэглэл</th>
+            </tr>
+            </thead>
+            <tbody>
+            %{count2=1;}%
+            #{list items:dataListSub,as:'dailyLogNote'}
+            <tr>
+                <td>${count2}</td>
+                <td>
+                    #{if dailyLogNote.issue==1}
+                        <span class='label label-danger'
+                              style='display: inline-block; width: 54px;'>Өндөр</span>
+                    #{/if}
+                    #{elseif dailyLogNote.issue==2}
+                        <span class='label label-warning'
+                              style='display: inline-block; width: 54px;'>Дунд</span>
+                    #{/elseif}
+                    #{elseif dailyLogNote.issue==3}
+                        <span class='label label-primary'
+                              style='display: inline-block; width: 54px;'>Бага</span>
+                    #{/elseif}
+                </td>
+                <td>
+                    <div class="notes">${controllers.ReportClass.ReportFunctionLocal.getBreakLine(dailyLogNote.comment).raw()}</div>
+                    #{if dailyLogNote.attaches.size()>0}
+                        <div class="post-images" id="post-images-dailyLogNote-${dailyLogNote.id}">
+                            #{list items:dailyLogNote.attaches, as:'attach'}
+                             ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                            #{/list}
+                        </div>
+                    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-dailyLogNote-"+dailyLogNote.id).raw()}
+                    #{/if}
+                </td>
+            </tr>
+            %{count2++}%
+            #{/list}
+            </tbody>
+        </table>
+    </div>
+</div>

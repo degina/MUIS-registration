@@ -1,0 +1,197 @@
+#{extends 'CRUD/layout.html' /}
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu: 'Event'/}
+#{set activeMenuSub: 'EventBlank'/}
+#{event-blank-config /}
+<div id="main-content">
+    <div class="page-title">
+        <i class="icon-custom-left"></i>
+
+        <h3><strong> #{if event == 'NULL' }Шинэ үйл ажиллагаа Зарлах #{/if}
+        #{else}Үйл ажиллагаа Засах#{/else}</strong></h3>
+        <a href="@{controllers.Events.list()}">
+            <i class="fa fa-angle-left"></i> <span>Жагсаалт руу буцах</span>
+        </a>
+        <br>
+    </div>
+    <form id=addContract action="@{controllers.Events.create()}" method="post" accept-charset="utf-8"
+          enctype="multipart/form-data" data-parsley-validate>
+        <input name="eventEdit" type="hidden" value="${event?.id}"/>
+
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="meeting_general">
+                <div class="row">
+                    <div class="col-md-8 post-column-left">
+
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Гарчиг <span
+                                        class="asterisk">*</span></label>
+
+                                <div class="col-sm-10"><input type="text" class="form-control" name="title"
+                                                              value="${event?.title}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Эхлэх өдөр<span
+                                        class="asterisk">*</span></label>
+
+                                <div class="col-sm-4">
+                                    <input class="form-control pickerDate" type="text" name="startDate"
+                                           placeholder="Эхлэх өдөр"
+                                           value="${event?.startDate?.format("yyyy/MM/dd HH:mm")}">
+                                </div>
+                                <label class="col-sm-2 control-label">Дуусах өдөр<span
+                                        class="asterisk">*</span></label>
+
+                                <div class="col-sm-4">
+                                    <input class="form-control pickerDate" type="text" name="endDate"
+                                           placeholder="Дуусах өдөр"
+                                           value="${event?.endDate?.format("yyyy/MM/dd HH:mm")}">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Хаана<span
+                                        class="asterisk">*</span></label>
+
+                                <div class="col-sm-10"><input type="text" class="form-control"
+                                                              name="location" value="${event?.location}" required></div>
+                            </div>
+
+                            <div class="form-group">
+                                <h5> Ерөнхий тойм (энэ үйл ажиллагаатай холбоотой тойм мэдээлэл бичнэ үү!)</h5>
+                                            <textarea id="editor1" name="description" class="ckeditor">
+                                                 ${event?.description?.raw()}
+                                            </textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 ">
+                        <div class="post-column-right">
+                            <div class="form-group">
+                                <div>
+                                %{attach=event?.getFirstAttach();}%
+                                    <input type="hidden" name="filename" value="${attach?.name}"/>
+                                    <input type="hidden" name="filedir" value="${attach?.dir}"/>
+                                    <h5 class="pull-left m-t-0">Зураг <span class="asterisk">*</span></h5>
+
+                                    <button type="button" onclick="uploadImageButton()" class="pull-right c-gray"><i
+                                            class="col-md-12"></i> <strong>Хуулах</strong></button>
+
+                                    <div class="row">
+                                        <div id="eventPicture" class="crudField crud_text">
+                                        <span>
+                                           <img
+                                           #{if attach == null}src="/public/images/no-image-logo.jpg" #{/if}
+                                           #{else  }src="${attach.dir}.${attach.extension}"#{/else}
+                                           class="img-responsive">
+                                        </span>
+                                            <h4 id="uploadProgress"></h4>
+
+                                            <div id="file-uploader-demo2"
+                                                 style="visibility:hidden;height:0;width:0;float:left;">
+                                                <noscript>
+                                                    <p>Please enable JavaScript to use file uploader.</p>
+                                                </noscript>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div>
+                                    <h5 class="pull-left m-t-0">Ангилал <span class="asterisk">*</span></h5>
+                                </div>
+                                <select class="form-control" name="category">
+                                #{list items:categories,as:'category'}
+                                    <option data-icon="fa-square ${category.colorClass}"
+                                            value="${category.id}">${category.name}</option>
+                                #{/list}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <h5>Төлөв <span class="asterisk">*</span></h5>
+
+                                <div class="row">
+                                #{list items:statuses,as:'status'}
+                                    <div class="col-md-6">
+                                        <label>
+                                            <input type="radio" name="status" ${status_isFirst?'checked':''}
+                                                   value="${status.id}">${status.name}
+                                        </label>
+                                    </div>
+                                #{/list}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 m-t-20 m-b-40 align-center">
+            #{if event!=null}
+                <a href="@{controllers.Events.deleteEvent(event?.id)}" class="btn btn-danger m-r-10 m-t-10"><i
+                        class="fa fa-times"></i> Устгах</a>
+            #{/if}
+                <button type="button" class="btn btn-default m-r-10 m-t-10"><i class="fa fa-edit"></i> Ноороглох
+                </button>
+                <button type="submit" class="btn btn-success m-t-10"><i class="fa fa-check"></i> Зарлах</button>
+            </div>
+        </div>
+    </form>
+</div>
+<script>
+    var uploader;
+    var nowDate = new Date();
+    function createUploader() {
+        uploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo2'),
+            action: '@{FileUploader.uploadFileCustom}',
+            onSubmit: function (id, fileName) {
+                uploader.setParams({
+                    uploadPath: "${controllers.Consts.uploadEventPath}", filename: fileName,
+                    upfilename: nowDate.getTime(), ratio: "800x604"
+                });
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var d = new Date();
+                var profileUrl = responseJSON['filedir'] + responseJSON['filename'];
+                $("#eventPicture span img").attr('src', profileUrl + ".jpg?" + d.getTime());
+                $("div#main-content #uploadProgress").text('');
+                $("div#main-content input[name='filename']").val(responseJSON['filename']);
+                $("div#main-content input[name='filedir']").val(profileUrl);
+            }
+        });
+    }
+    $(document).ready(function () {
+        jQuery('input[name=startDate]').datetimepicker({
+            lang: 'mn', step: 15,
+            onShow: function (ct) {
+                this.setOptions({
+                    maxDate: jQuery('input[name=endDate]').val() ? jQuery('input[name=endDate]').val() : false
+                });
+            }
+        });
+        jQuery('input[name=endDate]').datetimepicker({
+            lang: 'mn', step: 15,
+            onShow: function (ct) {
+                this.setOptions({
+                    minDate: jQuery('input[name=startDate]').val() ? jQuery('input[name=startDate]').val() : false
+                })
+            }
+        });
+        createUploader();
+        $('div#eventPicture span img').click(function () {
+            $(".qq-upload-button input").click();
+        });
+    });
+    function uploadImageButton() {
+        $(".qq-upload-button input").click();
+    }
+</script>

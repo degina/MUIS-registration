@@ -1,0 +1,12 @@
+<tr id="trOpex${opexDetail.id}">
+    <td>${opexDetail.name}</td>
+    <td>${controllers.Functions.getDecimal(opexDetail.actual)}</td>
+    <td>${controllers.Functions.getDecimal(opexDetail.budget)}</td>
+    <td>${opexDetail.description}</td>
+    <td class="text-center">
+        <button onclick="deleteOpex(${opexDetail.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{include "Budgets/deleteOpex.html"/}

@@ -1,0 +1,175 @@
+#{if type==0}
+    #{list items:notifications,as:'notification'}
+    <a href="@{controllers.Notifications.notificationSee(notification.id)}"
+       style="text-decoration: none;cursor: pointer">
+        <li class="${notification.seen?'':'unseen'}" id="noti${notification.id}">
+            #{if notification.meeting!=null}
+                <i class="fa fa-group f-18 c-orange"></i>
+                <label> ${notification.message}</label>
+                <div style="color: #C4C4C4;font-size: 12px; font-weight: 400;"> ${notification.sender}
+                    <span class="dropdown-time" style="float: right;">${notification.lateDate()}</span></div>
+            #{/if}
+            #{elseif notification.event!=null}
+                <i class="fa fa-group f-18 c-orange"></i>
+                <label> ${notification.event.title}</label>
+
+                <div style="color: #C4C4C4;font-size: 12px; font-weight: 400;"> ${notification.event.owner}
+                    <span class="dropdown-time" style="float: right;">${notification.lateDate()}</span></div>
+            #{/elseif}
+        </li>
+    </a>
+    #{/list}
+#{/if}
+#{else }
+    #{list items:notifications,as:'notification'}
+    <li class="${notification.seen?'':'notiunseen'}" id="noti${notification.id}">
+        #{if notification.rfi!=null}
+            <a href="@{controllers.RFIs.show(notification.rfi.id)}" target="_blank"
+            *{onclick="showRFI('r',${notification.rfi.id}, ${notification.id})"}*
+                    >
+        <span class="pull-left p-r-5">
+        <img src="${notification.sender.profilePicture}" style="height: 30px;margin-top: -5px;">
+        </span>
+
+                <div class="clearfix">
+                    <div>
+                        <strong>${notification.sender}</strong> <span
+                            style="font-size: 12px">-c мэдээлэл хүсэлт ирсэн</span>
+                        <small class="pull-right text-muted">${notification.lateDate()}</small>
+                    </div>
+                    <p style="font-size: 12px;font-style: italic;margin: 5px 0">${notification.rfi.subject}</p>
+                </div>
+            </a>
+        #{/if}
+        #{if notification.tracking!=null}
+            <a href="@{controllers.RFIs.show(notification.tracking.rfi.id)}" target="_blank"
+            *{onclick="showRFI('t',${notification.tracking.id}, ${notification.id})"}*
+                    >
+        <span class="pull-left p-r-5">
+        <img src="${notification.sender.profilePicture}" style="height: 30px;margin-top: -5px;">
+        </span>
+
+                <div class="clearfix">
+                    <div>
+                        <strong>${notification.sender}</strong> <span
+                            style="font-size: 12px">-c мэдээлэл хүсэлтэнд хариу ирсэн</span>
+                        <small class="pull-right text-muted">${notification.lateDate()}
+                        </small>
+                    </div>
+                </div>
+            </a>
+        #{/if}
+        #{if notification.punchList!=null}
+            <a href="@{controllers.PunchLists.show(notification.punchList.id)}" target="_blank"
+            *{onclick="showPunchList('p',${notification.punchList.id}, ${notification.id})"}*
+                    >
+        <span class="pull-left p-r-5">
+        <img src="${notification.sender.profilePicture}" style="height: 30px;margin-top: -5px;">
+        </span>
+
+                <div class="clearfix">
+                    <div>
+                        <strong>${notification.sender}</strong><span
+                            style="font-size: 12px">-c ${notification.punchList.No}
+                        дугаартай үүрэг даалгавар ирлээ.</span>
+                        <small class="pull-right text-muted">${notification.lateDate()}
+                        </small>
+                    </div>
+                </div>
+            </a>
+        #{/if}
+        #{if notification.reply!=null}
+            <a href="@{controllers.PunchLists.show(notification.reply.punchList.id)}" target="_blank"
+            *{onclick="showPunchList('r',${notification.reply.id}, ${notification.id})"}*
+                    >
+        <span class="pull-left p-r-5">
+        <img src="${notification.sender.profilePicture}" style="height: 30px;margin-top: -5px;">
+        </span>
+
+                <div class="clearfix">
+                    <div>
+                        <strong>${notification.sender}</strong> <span
+                            style="font-size: 12px">-c ${notification.reply.punchList.No} дугаартай үүрэг даалгаварт хариу ирлээ.</span>
+                        <small class="pull-right text-muted">${notification.lateDate()}</small>
+                    </div>
+                    <p style="font-size: 12px;font-style: italic;margin: 5px 0">${notification.reply.punchList.name}</p>
+                </div>
+            </a>
+        #{/if}
+        #{if notification.order!=null}
+            <div onclick="showInventoryOrder(${notification.order.id}, ${notification.id})">
+        <span class="pull-left p-r-5">
+        <img src="${notification.sender.profilePicture}" style="height: 30px;margin-top: -5px;">
+        </span>
+
+                <div class="clearfix">
+                    <div>
+                        #{if notification.orderStatus==1}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px">-c ${notification.order.id}
+                            дугаартай материал хүсэлт ирлээ.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+                        #{if notification.orderStatus==2}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px"> ${notification.order.id}
+                            дугаартай материал хүсэлтийг зөвшөөрлөө.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+                        #{if notification.orderStatus==4}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px"> ${notification.order.id}
+                            дугаартай материал хүсэлтийг олгоход бэлэн боллоо.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+                        #{if notification.orderStatus==5}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px"> ${notification.order.id}
+                            дугаартай материал хүсэлтийг хүлээн авлаа.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+                        #{if notification.orderStatus==6}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px"> ${notification.order.id}
+                            дугаартай материал хүсэлтийг цуцаллаа.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+
+                    </div>
+                </div>
+            </div>
+        #{/if}
+        #{if notification.transfer!=null}
+            <div onclick="showInventoryTransfer(${notification.transfer.id}, ${notification.id})">
+        <span class="pull-left p-r-5">
+        <img src="${notification.sender.profilePicture}" style="height: 30px;margin-top: -5px;">
+        </span>
+
+                <div class="clearfix">
+                    <div>
+                        #{if notification.transferStatus==1}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px">-c ${notification.transfer.id} дугаартай шилжүүлэг ирлээ.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+                        #{if notification.transferStatus==2}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px"> ${notification.transfer.id} дугаартай шилжүүлэгийг хүлээн авлаа.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+                        #{if notification.transferStatus==3}
+                            <strong>${notification.sender}</strong> <span
+                                style="font-size: 12px"> ${notification.transfer.id}
+                            дугаартай шилжүүлэгийг цуцаллаа.</span>
+                            <small class="pull-right text-muted">${notification.lateDate()}</small>
+                        #{/if}
+                    </div>
+                </div>
+            </div>
+        #{/if}
+    </li>
+    #{/list}
+#{/else}
+<script>
+    customScroll();
+</script>

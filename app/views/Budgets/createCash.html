@@ -1,0 +1,23 @@
+<tr class="success" id="trCash${budgetCash.id}" class="trCash${budgetCash.id}">
+    <td>${budgetCash.name}</td>
+    <td id="tdTotalInflow${budgetCash.id}"></td>
+    <td id="tdTotalOutflow${budgetCash.id}"></td>
+    <td id="tdTotalNetFlow${budgetCash.id}"></td>
+    <td class="text-right">
+        <button onclick="deleteCash(${budgetCash.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+<tr id="trCashSubInput${budgetCash.id}" class="trCash${budgetCash.id}">
+    <td class="text-right"><input style="width: 80%;" id="cashSubContractorName${budgetCash.id}" type="text" placeholder="гэрээлэгч"/></td>
+    <td><input id="cashSubContractorInflow${budgetCash.id}" type="text" class="numberic"
+               placeholder="Зардал"/></td>
+    <td><input id="cashSubContractorOutflow${budgetCash.id}" type="text" class="numberic"
+               placeholder="Зардал"/></td>
+    <td class="text-right" colspan="2">
+        <button onclick="addCashSubContractor(${budgetCash.id})" data-rel="tooltip" title="Нэмэх"
+                class="add btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-plus"></i></button>
+    </td>
+</tr>

@@ -1,0 +1,78 @@
+#{if isList}
+    #{list items:manpowers,as:'manpower'}
+    %{contractor=manpower.owner.userTeam.contractor && !user.userTeam.contractor;}%
+    <tr id="trManPower${manpower.id}" class="trManPowerClass ${contractor?'warning':''}">
+        <td></td>
+        <td teamId="${manpower.orgTeam.id}">${manpower.orgTeam.name}</td>
+        <td mergejilId="${manpower.mergejil.id}">${manpower.mergejil.name}</td>
+        <td class="tdClassManPowerWorkers">${manpower.workers}</td>
+        <td>${manpower.hours}</td>
+        <td class="tdClassManPowerManHours">${manpower.manHours}</td>
+        <td>${manpower.location}</td>
+        <td><strong>${contractor?(manpower.owner.toString() +":  "):''}</strong> <span>${manpower.note}</span></td>
+        <td>
+            #{if manpower.attaches.size()>0}
+                <div class="post-images" id="post-images-manpower-${manpower.id}">
+                    #{list items:manpower.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                    #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-manpower-"+manpower.id).raw()}
+            #{/if}
+        </td>
+        <td class="manPowerbutton">
+            #{if contractor}
+                <button onclick="copyManPower(${manpower.id})" data-rel="tooltip" title="Хуулах"
+                        class="add btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-check"></i></button>
+            #{/if}
+            #{else }
+                <button onclick="deleteManPower(${manpower.id})" data-rel="tooltip" title="Устгах"
+                        class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                        class="fa fa-times"></i></button>
+            #{/else }
+        </td>
+    </tr>
+    #{/list}
+<script>
+    var options = "";
+        #{list items:orgTeams, as:'team'}
+        options += "<option value=${team.id}>${team.name}</option> ";
+        #{/list}
+    $('div#modal-ManPower select#manPowerContact').html(options).selectpicker('refresh');
+    var options = "";
+        #{list items:projectManPowers, as:'manpower'}
+        options += "<option value=${manpower.id}>${manpower.name}</option> ";
+        #{/list}
+    $('div#modal-ManPower select#manPowerMergejil').html(options).selectpicker('refresh');
+</script>
+#{/if}
+#{else }
+<tr id="trManPower${manpower.id}" class="trManPowerClass">
+    <td></td>
+    <td>${manpower.orgTeam.name}</td>
+    <td>${manpower.mergejil.name}</td>
+    <td class="tdClassManPowerWorkers">${manpower.workers}</td>
+    <td>${manpower.hours}</td>
+    <td class="tdClassManPowerManHours">${manpower.manHours}</td>
+    <td>${manpower.location}</td>
+    <td>${manpower.note}</td>
+    <td>
+        #{if manpower.attaches.size()>0}
+            <div class="post-images" id="post-images-manpower-${manpower.id}">
+                #{list items:manpower.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-manpower-"+manpower.id).raw()}
+        #{/if}
+    <td class="manPowerbutton">
+        <button onclick="deleteManPower(${manpower.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+    </td>
+</tr>
+<script>
+    (function () {
+        $("button#showManPowerModal${taskId}").html("Ажилчид: ${totalWorkers} </br> Хүн-цаг: ${totalManHours}");
+    })();
+</script>
+#{/else}

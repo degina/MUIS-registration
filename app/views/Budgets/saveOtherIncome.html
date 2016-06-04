@@ -1,0 +1,11 @@
+<script>
+    $('input#otherIncomeActual').val("${controllers.Functions.getDecimal(budget.otherIncomeActual)}");
+    $('input#otherIncomeBudget').val("${controllers.Functions.getDecimal(budget.otherIncomeBudget)}");
+    $('input#otherIncomeDescription').val("${budget.otherIncomeDescription}");
+    $('td#tdOtherIncomeVariancePercent').html("${budget.otherIncomeVariancePercent}%");
+    var currentTd = $('td#tdOtherIncomeVariance');
+    %{ value = budget.otherIncomeVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+</script>
+#{include "Budgets/calculateResultScript.html"/}

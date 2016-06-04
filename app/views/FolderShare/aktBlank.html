@@ -1,0 +1,825 @@
+<div class="modal fade" id="galleryModal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="gallery">
+        </div>
+    </div>
+</div>
+
+<script>
+    var ratio;
+    var aktuploader;
+    var aktLogoDir;
+    var date = '${currentDate.format("yyyy-MM-dd")}';
+
+    function cancelled() {
+        var modalDiv = $("div#modalAkt");
+        modalDiv.modal('hide');
+        modalDiv.find('#akt').html("");
+    }
+
+    function createAktStyleUploader() {
+        if(${aktStyle.aktType.id==1})
+            ratio="1070x760";
+        if(${aktStyle.aktType.id==2})
+            ratio="1070x360";
+        if(${aktStyle.aktType.id==3})
+            ratio="520x360";
+
+        aktuploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-akt'),
+            action: '@{FileUploader.uploadFileCustom}',
+            allowedExtensions: ["png","jpg"],
+            onSubmit: function (id, fileName) {
+                aktuploader.setParams({
+                    uploadPath: "${controllers.Consts.uploadAktImagePath}",
+                    filename: fileName,
+                    upfilename: "uploaded", ratio: ratio
+                });
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var profileUrl = responseJSON['filedir'] + responseJSON['filename'] + ".jpg";
+                $(aktLogoDir+"_img").attr('src', profileUrl);
+                $("#uploadProgress").text('');
+                $(aktLogoDir+"_input").val(profileUrl);
+            }
+        });
+    }
+
+    function aktImageClick() {
+        $("#type1_1").click(function () {
+            $("#aktuploaderdiv .qq-upload-button input").click();
+            aktLogoDir= "#type1_1";
+        });
+
+        $("#img_type1_1").click(function () {
+            aktLogoDir= "#type1_1";
+            $.ajax({
+                type: "POST",
+                data: {dir:aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success(
+                    function (data) {
+                        var modalAkt = $('div#modalAkt');
+                        modalAkt.modal('hide');
+
+                        var modalDiv = $("div#galleryModal");
+                        modalDiv.modal('show');
+                        modalDiv.find("div.modal-content").html(data);
+                    });
+        });
+
+        $("#type2_1").click(function () {
+            $("#aktuploaderdiv .qq-upload-button input").click();
+            aktLogoDir= "#type2_1";
+        });
+
+        $("#img_type2_1").click(function () {
+            aktLogoDir= "#type2_1";
+            $.ajax({
+                type: "POST",
+                data: {dir:aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success(
+                    function (data) {
+                        var modalAkt = $('div#modalAkt');
+                        modalAkt.modal('hide');
+
+                        var modalDiv = $("div#galleryModal");
+                        modalDiv.modal('show');
+                        modalDiv.find("div.modal-content").html(data);
+                    });
+        });
+
+        $("#type2_2").click(function () {
+            $("#aktuploaderdiv .qq-upload-button input").click();
+            aktLogoDir= "#type2_2";
+        });
+
+        $("#img_type2_2").click(function () {
+            aktLogoDir= "#type2_2";
+            $.ajax({
+                type: "POST",
+                data: {dir:aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success(
+                    function (data) {
+
+                        var modalAkt = $('div#modalAkt');
+                        modalAkt.modal('hide');
+
+                        var modalDiv = $("div#galleryModal");
+                        modalDiv.modal('show');
+                        modalDiv.find("div.modal-content").html(data);
+                    });
+        });
+
+        $("#type4_1").click(function () {
+            $("#aktuploaderdiv .qq-upload-button input").click();
+            aktLogoDir= "#type4_1";
+        });
+
+        $("#img_type4_1").click(function () {
+            aktLogoDir= "#type4_1";
+            $.ajax({
+                type: "POST",
+                data: {dir:aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success(
+                    function (data) {
+                        var modalAkt = $('div#modalAkt');
+                        modalAkt.modal('hide');
+
+                        var modalDiv = $("div#galleryModal");
+                        modalDiv.modal('show');
+                        modalDiv.find("div.modal-content").html(data);
+                    });
+        });
+
+        $("#type4_2").click(function () {
+            $("#aktuploaderdiv .qq-upload-button input").click();
+            aktLogoDir= "#type4_2";
+        });
+
+        $("#img_type4_2").click(function () {
+            aktLogoDir= "#type4_2";
+            $.ajax({
+                type: "POST",
+                data: {dir:aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success(
+                    function (data) {
+                        var modalAkt = $('div#modalAkt');
+                        modalAkt.modal('hide');
+
+                        var modalDiv = $("div#galleryModal");
+                        modalDiv.modal('show');
+                        modalDiv.find("div.modal-content").html(data);
+                    });
+        });
+
+        $("#type4_3").click(function () {
+            $("#aktuploaderdiv .qq-upload-button input").click();
+            aktLogoDir= "#type4_3";
+        });
+
+        $("#img_type4_3").click(function () {
+            aktLogoDir= "#type4_3";
+            $.ajax({
+                type: "POST",
+                data: {dir:aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success(
+                    function (data) {
+                        var modalAkt = $('div#modalAkt');
+                        modalAkt.modal('hide');
+
+                        var modalDiv = $("div#galleryModal");
+                        modalDiv.modal('show');
+                        modalDiv.find("div.modal-content").html(data);
+                    });
+        });
+
+        $("#type4_4").click(function () {
+            $("#aktuploaderdiv .qq-upload-button input").click();
+            aktLogoDir= "#type4_4";
+        });
+
+        $("#img_type4_4").click(function () {
+            aktLogoDir= "#type4_4";
+            $.ajax({
+                type: "POST",
+                data: {dir:aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success(
+                    function (data) {
+                        var modalAkt = $('div#modalAkt');
+                        modalAkt.modal('hide');
+
+                        var modalDiv = $("div#galleryModal");
+                        modalDiv.modal('show');
+                        modalDiv.find("div.modal-content").html(data);
+                    });
+        });
+    }
+
+    function addAkt() {
+
+        var div = $('#aktuploaderdiv');
+       // alert("addAkt:"+datapdf);
+        if(${aktStyle.aktType.id==1}){
+            $.ajax({
+                type: "POST",
+                data: {
+                    queue: div.find('#queue').val(),
+                    img1_date: div.find('#type1_1_date').val(),
+                    img1_txt: div.find('#type1_1_txt').val(),
+                    img1_img: div.find('#type1_1_input').val(),
+                    agentStaffName: div.find('#agentStaffName').val(),
+                    clientStaffName: div.find('#clientStaffName').val(),
+                    agentStaffPos: div.find('#agentStaffPos').val(),
+                    clientStaffPos: div.find('#clientStaffPos').val(),
+                    agentStaffName1: div.find('#agentStaffName1').val(),
+                    clientStaffName1: div.find('#clientStaffName1').val(),
+                    agentStaffPos1: div.find('#agentStaffPos1').val(),
+                    clientStaffPos1: div.find('#clientStaffPos1').val(),
+                    name: div.find('#style_name').val(),
+                    fid: ${fid},
+                    sid: ${aktStyle.id},
+                    ftype:${ftype},
+                    aid:${aid}
+                },
+                url: "/aktCreate",
+                beforeSend: function () {
+                    $("div#modalAkt").find("div.modal-content").html("<div style='width:100%; text-align: center'><img src='/public/images/activity-indicator.gif'/></div>");
+                }
+            }).success(function (data) {
+                    $('div#pdfmake').html(data);
+                    var modalDiv = $("div#modalAkt");
+                    modalDiv.modal('hide');
+                    modalDiv.find('#akt').html("");
+                    showSuccessMessage("Амжилттай хадгаллаа", "center", "top", 2000);
+            });
+        }
+        else if(${aktStyle.aktType.id==2}){
+            $.ajax({
+                type: "POST",
+                data: {
+                    queue: div.find('#queue').val(),
+                    img1_date: div.find('#type2_1_date').val(),
+                    img1_txt: div.find('#type2_1_txt').val(),
+                    img1_img: div.find('#type2_1_input').val(),
+                    img2_date: div.find('#type2_2_date').val(),
+                    img2_txt: div.find('#type2_2_txt').val(),
+                    img2_img: div.find('#type2_2_input').val(),
+                    agentStaffName: div.find('#agentStaffName').val(),
+                    clientStaffName: div.find('#clientStaffName').val(),
+                    agentStaffPos: div.find('#agentStaffPos').val(),
+                    clientStaffPos: div.find('#clientStaffPos').val(),
+                    agentStaffName1: div.find('#agentStaffName1').val(),
+                    clientStaffName1: div.find('#clientStaffName1').val(),
+                    agentStaffPos1: div.find('#agentStaffPos1').val(),
+                    clientStaffPos1: div.find('#clientStaffPos1').val(),
+                    name: div.find('#style_name').val(),
+                    fid: ${fid},
+                    sid: ${aktStyle.id},
+                    ftype:${ftype},
+                    aid:${aid}
+                },
+                url: "/aktCreate",
+                beforeSend: function () {
+                    $("div#modalAkt").find("div.modal-content").html("<div style='width:100%; text-align: center'><img src='/public/images/activity-indicator.gif'/></div>");
+                }
+            }).success(function (data) {
+                $('div#pdfmake').html(data);
+                //$.fancybox.close();
+                var modalDiv = $("div#modalAkt");
+                modalDiv.modal('hide');
+                modalDiv.find('#akt').html("");
+                loadFiles(${fid},1); //Invoking your data function
+                showSuccessMessage("Амжилттай хадгаллаа", "center", "top", 2000);
+            });
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                data: {
+                    queue: div.find('#queue').val(),
+                    img1_date: div.find('#type4_1_date').val(),
+                    img1_txt: div.find('#type4_1_txt').val(),
+                    img1_img: div.find('#type4_1_input').val(),
+                    img2_date: div.find('#type4_2_date').val(),
+                    img2_txt: div.find('#type4_2_txt').val(),
+                    img2_img: div.find('#type4_2_input').val(),
+                    img3_date: div.find('#type4_3_date').val(),
+                    img3_txt: div.find('#type4_3_txt').val(),
+                    img3_img: div.find('#type4_3_input').val(),
+                    img4_date: div.find('#type4_4_date').val(),
+                    img4_txt: div.find('#type4_4_txt').val(),
+                    img4_img: div.find('#type4_4_input').val(),
+                    agentStaffName: div.find('#agentStaffName').val(),
+                    clientStaffName: div.find('#clientStaffName').val(),
+                    agentStaffPos: div.find('#agentStaffPos').val(),
+                    clientStaffPos: div.find('#clientStaffPos').val(),
+                    agentStaffName1: div.find('#agentStaffName1').val(),
+                    clientStaffName1: div.find('#clientStaffName1').val(),
+                    agentStaffPos1: div.find('#agentStaffPos1').val(),
+                    clientStaffPos1: div.find('#clientStaffPos1').val(),
+                    name: div.find('#style_name').val(),
+                    fid: ${fid},
+                    sid: ${aktStyle.id},
+                    ftype:${ftype},
+                    aid:${aid}
+                },
+                url: "/aktCreate",
+                beforeSend: function () {
+                    $("div#modalAkt").find("div.modal-content").html("<div style='width:100%; text-align: center'><img src='/public/images/activity-indicator.gif'/></div>");
+                }
+            }).success(function (data) {
+                $('div#pdfmake').html(data);
+                //$.fancybox.close();
+                var modalDiv = $("div#modalAkt");
+                modalDiv.modal('hide');
+                modalDiv.find('#akt').html("");
+                loadFiles(${fid},1); //Invoking your data function
+                showSuccessMessage("Амжилттай хадгаллаа", "center", "top", 2000);
+            });
+        }
+    }
+
+    $(function () {
+        jQuery('#type1_1_date').datetimepicker({lang: 'mn', step: 15,timepicker: false, format: "Y-m-d"});
+
+        jQuery('#type2_1_date').datetimepicker({lang: 'mn', step: 15,timepicker: false, format: "Y-m-d"});
+        jQuery('#type2_2_date').datetimepicker({lang: 'mn', step: 15,timepicker: false, format: "Y-m-d"});
+
+        jQuery('#type4_1_date').datetimepicker({lang: 'mn', step: 15,timepicker: false, format: "Y-m-d"});
+        jQuery('#type4_2_date').datetimepicker({lang: 'mn', step: 15,timepicker: false, format: "Y-m-d"});
+        jQuery('#type4_3_date').datetimepicker({lang: 'mn', step: 15,timepicker: false, format: "Y-m-d"});
+        jQuery('#type4_4_date').datetimepicker({lang: 'mn', step: 15,timepicker: false, format: "Y-m-d"});
+    });
+
+    $(document).ready(function () {
+        createAktStyleUploader();
+        aktImageClick();
+    });
+
+</script>
+
+<form action="javascript:addAkt()">
+    <div class="modal-header bg-dark" style="height: 50px;!important;">
+        <span style="color: white; font-weight: 500; font-size: 16px;">Хавсралт оруулах цонх!!!</span>
+        <i class="fa fa-times" onclick="cancelled()" style="float:right; margin-right: 10px;"></i>
+    </div>
+    <div class="modal-body" >
+        <center>
+            <div id="aktuploaderdiv" >
+
+                <!-- upload hiihed ashiglagdana -->
+                <div >
+                    <h3 id="uploadProgress"></h3>
+
+                    <div id="file-uploader-akt" style="visibility:hidden;height:0;width:0;float:left;">
+                        <noscript>
+                            <p>Please enable JavaScript to use file uploader.</p>
+                            <!-- or put a simple form for upload here -->
+                        </noscript>
+                    </div>
+                </div>
+
+                <div style="display:none">
+                    <div id="showUploadImages"></div>
+                    <a id="showUploadImagesA" href="#showUploadImages"></a>
+                </div>
+
+
+                <div style="width:595px;height:842px;border: solid 1px black" class="panel panel-default">
+                    <!--header-->
+                    <table style="width:100%;height: 13%;">
+                        <tr>
+                            <td style = "width:25%;padding-top: 30px;padding-left:20px;">
+                                <img id="agentLogoImg"  src="${aktStyle.logoAgent}" style = "float:left;width:120px;height:70px;">
+                            </td>
+                            <td style = "width:50%;padding-top: 20px;">
+                                <center>
+                                    <h5 style = "width:100%;">${aktStyle.project.name}</h5>
+                                </center>
+                            </td>
+                            <td style = "width:25%;padding-top: 30px;padding-right:20px;">
+                                <img id="clientLogoImg" src="${aktStyle.logoClient}" style = "float:right;width:120px;height:70px;">
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!--sub header-->
+                    <table style="width:100%;height:3%;font-size: small;">
+                        <tr>
+                            <td colspan="3" style = "width:50%;font-size: x-small">
+                                <center>
+                                #{if ftype==2}
+                                    №<input type="text" id="queue" name="queue" placeholder="Актын дугаар..." oninvalid="this.setCustomValidity('Актын дугаарыг оруулна уу!!!')" oninput="setCustomValidity('')" required/>
+                                #{/if}
+                                #{else }
+                                    №<input type="text" value="${akt.queue}" id="queue" name="queue" placeholder="Актын дугаар..." oninvalid="this.setCustomValidity('Актын дугаарыг оруулна уу!!!')" oninput="setCustomValidity('')" required/>
+                                #{/else}
+                                </center>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="width:100%;">
+                                <center>
+                                    <input id="style_name" name="style_name" type="text" placeholder="Ажлын нэр..."
+                                           value="${aktStyle.name}" style="width:50%; font-size: x-small; margin-top:5px; " required
+                                           oninvalid="this.setCustomValidity('Ажлийн нэрийг оруулна уу!!!')"
+                                           oninput="setCustomValidity('')">
+                                </center>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!--main-content or images-and-description-->
+                    #{if aktStyle.aktType.id==1}
+                    <div id="type1" style="display:block;margin:4% 3%;width:94%;height: 60%;">
+                        <table style="width:100%;height: 100%;">
+                            <tr>
+                                <td style="">
+                                    #{if ftype==2}
+                                        <input class="form-control" id="type1_1_date" name="type1_1_date"
+                                               style="cursor:pointer; text-align: center;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                                    #{/if}
+                                    #{else }
+                                        <input class="form-control" id="type1_1_date" name="type1_1_date"
+                                               style="cursor:pointer; text-align: center;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${akt.aktImage1.date}">
+                                    #{/else}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style = "width:100%;">
+                                    <div class="thumbnail" style = "width:100%;margin:0px;padding:0px">
+                                        <div class="overlay">
+                                            <div class="thumbnail-actions">
+                                                <a href="#" id="type1_1" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-upload"></i></a>
+                                                <a href="#" id="img_type1_1" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-image"></i></a>
+                                            </div>
+                                        </div>
+                                    #{if ftype==2}
+                                        <img src="/public/images/akt/akt_image${aktStyle.aktType.id}.jpg" id="type1_1_img" name="type1_1_img" style = "width:535px;height:380px;">
+                                        <input type="hidden" id="type1_1_input" name="type1_1_input" value="/public/images/akt/akt_image${aktStyle.aktType.id}.jpg" />
+                                    #{/if}
+                                    #{else }
+                                        <img src="${akt.aktImage1.image}" id="type1_1_img" name="type1_1_img" style = "width:535px;height:380px;">
+                                        <input type="hidden" id="type1_1_input" name="type1_1_input" value="${akt.aktImage1.image}" />
+                                    #{/else}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style = "width:100%;font-size: x-small;height: 10%;">
+                                #{if ftype==2}
+                                    <textarea maxlength="250" id="type1_1_txt" name="type1_1_txt" type="text" placeholder="Тайлбар/250 тэмдэгт/..." style = "width:100%;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required ></textarea>
+                                #{/if}
+                                #{else }
+                                    <textarea maxlength="250" id="type1_1_txt" name="type1_1_txt" type="text" placeholder="Тайлбар/250 тэмдэгт/..." style = "width:100%;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required >${akt.aktImage1.description}</textarea>
+                                #{/else}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    #{/if}
+                    #{if aktStyle.aktType.id==2}
+                        <div id="type2" style="display:block;margin:2% 3%;width:94%;height: 60%;">
+                        <table style="width:100%;height: 100%;">
+                            <tr>
+                                <td>
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage1==null)}
+                                        <input class="form-control" id="type2_1_date" name="type2_1_date"
+                                           style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                           type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                                    #{/if}
+                                    #{else }
+                                        <input class="form-control" id="type2_1_date" name="type2_1_date"
+                                           style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                           type="text" value="${akt.aktImage1.date}">
+                                    #{/else}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 100%;">
+                                    <div class="thumbnail" style = "width:100%; height:100%; margin: 0px;">
+                                        <div class="overlay">
+                                            <div class="thumbnail-actions">
+                                                <a href="#" id="type2_1" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-upload"></i></a>
+                                                <a href="#" id="img_type2_1" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-image"></i></a>
+                                            </div>
+                                        </div>
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage1==null)}
+                                        <img src="/public/images/akt/akt_image${aktStyle.aktType.id}_1.jpg" style="width: 557px;height:186px" id="type2_1_img" name="type2_1_img" >
+                                        <input type="hidden" value="/public/images/akt/akt_image${aktStyle.aktType.id}_1.jpg" id="type2_1_input" name="type2_1_input" />
+                                    #{/if}
+                                    #{else }
+                                        <img src="${akt.aktImage1.image}" style="width: 557px;height:186px" id="type2_1_img" name="type2_1_img" >
+                                        <input type="hidden" value="${akt.aktImage1.image}" id="type2_1_input" name="type2_1_input" />
+                                    #{/else}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style = "width:100%;font-size: x-small;height: 10%;">
+                                #{if ftype==2 || (ftype==1 && akt.aktImage1==null)}
+                                    <textarea maxlength="220" id="type2_1_txt" name="type2_1_txt" type="text" placeholder="Тайлбар/220 тэмдэгт/..." style = "width:100%;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required ></textarea>
+                                #{/if}
+                                #{else }
+                                    <textarea maxlength="220" id="type2_1_txt" name="type2_1_txt" type="text" placeholder="Тайлбар/220 тэмдэгт/..." style = "width:100%;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required >${akt.aktImage1.description}</textarea>
+                                #{/else}
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td>
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage2==null)}
+                                        <input class="form-control"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               id="type2_2_date" name="type2_2_date"
+                                               type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                                    #{/if}
+                                    #{else }
+                                        <input class="form-control"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               id="type2_2_date" name="type2_2_date"
+                                               type="text" value="${akt.aktImage2.date}">
+                                    #{/else}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="width: 100%;">
+                                    <div class="thumbnail" style = "width:100%; margin: 0px;height: 100%;">
+                                        <div class="overlay">
+                                            <div class="thumbnail-actions">
+                                                <a href="#" id="type2_2" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-upload"></i></a>
+                                                <a href="#" id="img_type2_2" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-image"></i></a>
+                                            </div>
+                                        </div>
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage2==null)}
+                                        <img src="/public/images/akt/akt_image${aktStyle.aktType.id}_2.jpg" style="width: 557px;height:186px" id="type2_2_img" name="type2_2_img">
+                                        <input type="hidden" value="/public/images/akt/akt_image${aktStyle.aktType.id}_2.jpg" id="type2_2_input" name="type2_2_input" />
+                                    #{/if}
+                                    #{else }
+                                        <img src="${akt.aktImage2.image}" style="width: 557px;height:186px" id="type2_2_img" name="type2_2_img">
+                                        <input type="hidden" value="${akt.aktImage2.image}" id="type2_2_input" name="type2_2_input" />
+                                    #{/else}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style = "width:100%;font-size: x-small;">
+                                #{if ftype==2 || (ftype==1 && akt.aktImage2==null)}
+                                    <textarea maxlength="220" id="type2_2_txt" name="type2_2_txt" type="text" placeholder="Тайлбар/220 тэмдэгт/..." style = "width:100%;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required ></textarea>
+                                #{/if}
+                                #{else }
+                                    <textarea maxlength="220" id="type2_2_txt" name="type2_2_txt" type="text" placeholder="Тайлбар/220 тэмдэгт/..." style = "width:100%;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required >${akt.aktImage2.description}</textarea>
+                                #{/else}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    #{/if}
+                    #{if aktStyle.aktType.id==3}
+                        <div id="type3" style="display:block;margin:2% 3%;width:94%;height: 60%;">
+                        <table style="width:100%;height: 100%;">
+                            <tr>
+                                <td style="padding: 0px 5px;">
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage1==null)}
+                                        <input class="form-control" id="type4_1_date" name="type4_1_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                                    #{/if}
+                                    #{else }
+                                        <input class="form-control" id="type4_1_date" name="type4_1_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${akt.aktImage1.date}">
+                                    #{/else}
+                                </td>
+                                <td style="padding: 0px 5px;" >
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage2==null)}
+                                        <input class="form-control" id="type4_2_date" name="type4_2_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                                    #{/if}
+                                    #{else }
+                                        <input class="form-control" id="type4_2_date" name="type4_2_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${akt.aktImage2.date}">
+                                    #{/else}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px;">
+                                    <div class="thumbnail" style = "width:100%; height: 100%; margin: 0px;">
+                                        <div class="overlay">
+                                            <div class="thumbnail-actions">
+                                                <a href="#" id="type4_1" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-upload"></i></a>
+                                                <a href="#" id="img_type4_1" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-image"></i></a>
+                                            </div>
+                                        </div>
+                                        #{if ftype==2 || (ftype==1 && akt.aktImage1==null)}
+                                            <img src="/public/images/akt/akt_image${aktStyle.aktType.id}_1.jpg" id="type4_1_img" name="type4_1_img" style = "width:264px; height:186px;">
+                                            <input id="type4_1_input" name="type4_1_input" type="hidden" value="/public/images/akt/akt_image${aktStyle.aktType.id}_1.jpg" />
+                                        #{/if}
+                                        #{else }
+                                            <img src="${akt.aktImage1.image}" id="type4_1_img" name="type4_1_img" style = "width:264px; height:186px;">
+                                            <input id="type4_1_input" name="type4_1_input" type="hidden" value="${akt.aktImage1.image}" />
+                                        #{/else}
+                                    </div>
+                                </td>
+                                <td style="padding: 5px;">
+                                    <div class="thumbnail" style = "width:100%; height:100%; margin: 0px;">
+                                        <div class="overlay">
+                                            <div class="thumbnail-actions">
+                                                <a href="#" id="type4_2" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-upload"></i></a>
+                                                <a href="#" id="img_type4_2" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-image"></i></a>
+                                            </div>
+                                        </div>
+                                        #{if ftype==2 || (ftype==1 && akt.aktImage2==null)}
+                                            <img src="/public/images/akt/akt_image${aktStyle.aktType.id}_2.jpg" id="type4_2_img" name="type4_2_img" style = "width:264px; height:186px;">
+                                            <input value="/public/images/akt/akt_image${aktStyle.aktType.id}_2.jpg" id="type4_2_input" name="type4_2_input" type="hidden"/>
+                                        #{/if}
+                                        #{else }
+                                            <img src="${akt.aktImage2.image}" id="type4_2_img" name="type4_2_img" style = "width:264px; height:186px;">
+                                            <input value="${akt.aktImage2.image}" id="type4_2_input" name="type4_2_input" type="hidden"/>
+                                        #{/else}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style = "padding: 0px 5px;font-size: x-small;">
+                                #{if ftype==2|| (ftype==1 && akt.aktImage1==null)}
+                                    <textarea maxlength="110" type="text" id="type4_1_txt" name="type4_1_txt" placeholder="Тайлбар/110 тэмдэгт/..."  class="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required ></textarea>
+                                #{/if}
+                                #{else }
+                                    <textarea maxlength="110" type="text" id="type4_1_txt" name="type4_1_txt" placeholder="Тайлбар/110 тэмдэгт/..."  class="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required >${akt.aktImage1.description}</textarea>
+                                #{/else}
+                                </td>
+                                <td style = "padding: 0px 5px;font-size: x-small;">
+                                #{if ftype==2 || (ftype==1 && akt.aktImage2==null)}
+                                    <textarea maxlength="110" type="text" id="type4_2_txt" name="type4_2_txt" placeholder="Тайлбар/110 тэмдэгт/..." class="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required ></textarea>
+                                #{/if}
+                                #{else }
+                                    <textarea maxlength="110" type="text" id="type4_2_txt" name="type4_2_txt" placeholder="Тайлбар/110 тэмдэгт/..." class="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required >${akt.aktImage2.description}</textarea>
+                                #{/else}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 0px 5px;">
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage3==null)}
+                                        <input class="form-control" id="type4_3_date" name="type4_3_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                                    #{/if}
+                                    #{else }
+                                        <input class="form-control" id="type4_3_date" name="type4_3_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${akt.aktImage3.date}">
+                                    #{/else}
+                                </td>
+                                <td style="padding: 0px 5px;">
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage4==null)}
+                                        <input class="form-control" id="type4_4_date" name="type4_4_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                                    #{/if}
+                                    #{else }
+                                        <input class="form-control" id="type4_4_date" name="type4_4_date"
+                                               style="cursor:pointer; text-align: center;margin:0px;border-radius: 11px;width:100%;height:19px;"
+                                               type="text" value="${akt.aktImage4.date}">
+                                    #{/else}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 5px;" >
+                                    <div class="thumbnail" style = "width:100%; height:100%; margin: 0px;">
+                                        <div class="overlay">
+                                            <div class="thumbnail-actions">
+                                                <a href="#" id="type4_3" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-upload"></i></a>
+                                                <a href="#" id="img_type4_3" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-image"></i></a>
+                                            </div>
+                                        </div>
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage3==null)}
+                                        <img src="/public/images/akt/akt_image${aktStyle.aktType.id}_3.jpg" id="type4_3_img" name="type4_3_img" style = "width:264px; height:186px;">
+                                        <input type="hidden" id="type4_3_input" name="type4_3_input"  value="/public/images/akt/akt_image${aktStyle.aktType.id}_3.jpg" />
+                                    #{/if}
+                                    #{else }
+                                        <img src="${akt.aktImage3.image}" id="type4_3_img" name="type4_3_img" style = "width:264px; height:186px;">
+                                        <input type="hidden" id="type4_3_input" name="type4_3_input"  value="${akt.aktImage3.image}" />
+                                    #{/else}
+                                    </div>
+                                </td>
+                                <td style="padding: 5px;" >
+                                    <div class="thumbnail" style = "width:100%; height:100%; margin: 0px;">
+                                        <div class="overlay">
+                                            <div class="thumbnail-actions">
+                                                <a href="#" id="type4_4" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-upload"></i></a>
+                                                <a href="#" id="img_type4_4" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-image"></i></a>
+                                            </div>
+                                        </div>
+                                    #{if ftype==2 || (ftype==1 && akt.aktImage4==null)}
+                                        <img src="/public/images/akt/akt_image${aktStyle.aktType.id}_4.jpg" id="type4_4_img" name="type4_4_img" style = "width:264px; height:186px;">
+                                        <input type="hidden" id="type4_4_input" name="type4_4_input" value="/public/images/akt/akt_image${aktStyle.aktType.id}_4.jpg" />
+                                    #{/if}
+                                    #{else }
+                                        <img src="${akt.aktImage4.image}" id="type4_4_img" name="type4_4_img" style = "width:264px; height:186px;">
+                                        <input type="hidden" id="type4_4_input" name="type4_4_input" value="${akt.aktImage4.image}" />
+                                    #{/else}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style = "font-size: x-small;padding: 0px 5px;">
+                                #{if ftype==2 || (ftype==1 && akt.aktImage3==null)}
+                                    <textarea maxlength="110" type="text" id="type4_3_txt" name="type4_3_txt" placeholder="Тайлбар/110 тэмдэгт/..." class="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required ></textarea>
+                                #{/if}
+                                #{else }
+                                    <textarea maxlength="110" type="text" id="type4_3_txt" name="type4_3_txt" placeholder="Тайлбар/110 тэмдэгт/..." class="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required >${akt.aktImage3.description}</textarea>
+                                #{/else}
+                                </td>
+                                <td style = "font-size: x-small;padding: 0px 5px;">
+                                #{if ftype==2 || (ftype==1 && akt.aktImage4==null)}
+                                    <textarea maxlength="110" type="text" id="type4_4_txt" name="type4_4_txt" placeholder="Тайлбар/110 тэмдэгт/..." class="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required ></textarea>
+                                #{/if}
+                                #{else }
+                                    <textarea maxlength="110" type="text" id="type4_4_txt" name="type4_4_txt" placeholder="Тайлбар/110 тэмдэгт/..." clasыыs="form-control"  style = "width:100%;font-size: x-small;padding: 0px;" oninvalid="this.setCustomValidity('Тайлбар оруулна уу!!!')" oninput="setCustomValidity('')" required >${akt.aktImage4.description}</textarea>
+                                #{/else}
+                               </td>
+                            </tr>
+                        </table>
+                    </div>
+                    #{/if}
+
+                    <!--sub footer-->
+                    <table style="margin:2% 3%;width:94%;height: 9%;">
+                        <tr>
+                            <td style="width: 50%;padding:3px;">
+                                <p>Гүйцэтгэгчийг төлөөлж:</p>
+
+                                <div style="border:solid 1px black">
+                                    <div style="padding:7px;width: 100%;">
+                                        <input id="agentStaffPos" value="${aktStyle.agentStaffPos}" name="agentStaffPos"
+                                               type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required
+                                               oninvalid="this.setCustomValidity('Албан тушаалыг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="agentStaffName" value="${aktStyle.agentStaffName}"
+                                               name="agentStaffName" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required oninvalid="this.setCustomValidity('Нэрийг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+                                    </div>
+                                    <div style="padding:7px;width: 100%;">
+                                        <input id="agentStaffPos1" value="${aktStyle.agentStaffPos1}"
+                                               name="agentStaffPos1" type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="agentStaffName1" value="${aktStyle.agentStaffName1}"
+                                               name="agentStaffName1" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="width: 50%;padding:3px;">
+                                <p>Захиалагчийг төлөөлж:</p>
+
+                                <div style="border:solid 1px black">
+                                    <div style="padding:7px;width: 100%;">
+                                        <input id="clientStaffPos" value="${aktStyle.clientStaffPos}"
+                                               name="clientStaffPos" type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required
+                                               oninvalid="this.setCustomValidity('Албан тушаалыг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="clientStaffName" value="${aktStyle.clientStaffName}"
+                                               name="clientStaffName" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required oninvalid="this.setCustomValidity('Нэрийг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+                                    </div>
+                                    <div style="padding:7px;width: 100%;">
+                                        <input id="clientStaffPos1" value="${aktStyle.clientStaffPos1}"
+                                               name="clientStaffPos1" type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="clientStaffName1" value="${aktStyle.clientStaffName1}"
+                                               name="clientStaffName1" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                </div>
+
+            </div>
+        </center>
+    </div>
+    <div class="modal-footer bg-dark" style="height: 50px;!important;">
+        <button onclick="cancelled()" style="height: 30px !important;padding:3px 20px;float:right;margin:-10px 10px;" type="button" class="btn btn-default close" data-dismiss="modal" aria-hidden="true">
+            <i class="fa fa-times m-r-10"></i> Болих
+        </button>
+
+        <button onclick="" style="height: 30px !important;padding:3px 20px;float:right;margin:-10px 10px;" type="submit" class="btn btn-success" >
+            <i class="fa fa-save m-r-10"></i> Хадгалах
+        </button>
+    </div>
+</form>

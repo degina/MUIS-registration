@@ -1,0 +1,83 @@
+<div class="p-20">
+    <h2 class="w-500" style="margin-top: 0">${emailData.subject}</h2>
+
+    <div class="message-item media">
+        <div class="message-item-right">
+            <div class="media">
+                <div class="media-body">
+                    <small class="pull-right">${emailData.dateReceived.format('yyyy-MM-dd HH:ss')}</small>
+                %{recipient=emailData.getRecipientsFrom();}%
+                    <h5 class="c-dark"><span class="mailAddress" title="${recipient.address}">${recipient.mail}</span>
+                    </h5>
+                %{recipients=emailData.getRecipientsTo();}%
+                    <p class="c-gray" style="font-size: 12px">To: #{list items:recipients,as:'recip'}
+                        <span class="mailAddress" title="${recip.address}">${recip.mail}</span>
+                        #{if !recip_isLast},&nbsp;#{/if}
+                    #{/list}</p>
+                %{recipients=emailData.getRecipientsCc();}%
+                #{if recipients.size()>0}
+                    <p class="c-gray" style="font-size: 12px">Cc: #{list items:recipients,as:'recip'}
+                        <span class="mailAddress" title="${recip.address}">${recip.mail}</span>
+                        #{if !recip_isLast},&nbsp;#{/if}
+                    #{/list}</p>
+                #{/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#{if emailData.contentData!=null}
+<div class="message-body">${controllers.ReportClass.ReportFunctionLocal.getBreakLine(emailData.contentData.body).raw()}
+    #{if emailData.contentData.attach.length()>0}
+        <div class="message-attache">${emailData.contentData.attach.raw()}</div>#{/if}
+</div>
+#{/if}
+<script>
+    var emailGetAttachmentNow = false;
+    $("div#mainContent .message-attache a").click(function () {
+        var loadTag = $(this);
+        if (!emailGetAttachmentNow) {
+            emailGetAttachmentNow = true;
+            loadTag.find('img').show();
+            $.ajax({
+                type: "POST",
+                data: {
+                    folderNames: $(this).attr('folder'),
+                    mid: $(this).attr('mid'),
+                    fileName: $(this).attr('filename'),
+                    extension: $(this).attr('extension'),
+                    filenameOrg: $(this).attr('filenameOrg')
+                },
+                url: "/emailGetAttachment"
+            }).success(function (data) {
+                emailGetAttachmentNow = false;
+                loadTag.find('img').hide();
+                var ext = checkFileExtension(loadTag.attr('extension'));
+                if (ext == imageFile) {
+                    $.fancybox.open("/FileCenter/Email/${user.id}/" + loadTag.attr('filename') + "." + loadTag.attr('extension'));
+                } else if (ext == wordFile || ext == excelFile || ext == powerPointFile) {
+                    var pathArray = location.href.split('/');
+                    window.open("http://view.officeapps.live.com/op/view.aspx?src=" + pathArray[2] + data);
+                } else if (ext == pdfFile) {
+                    window.open(data);
+                } else {
+                    $('body').append("<iframe height='0' width='0' style='display:none' src='" + downloadAction({
+                                fileDir: "/FileCenter/Email/${user.id}/" + loadTag.attr('filename'),
+                                fileName: loadTag.attr("fileName"),
+                                extension: loadTag.attr("extension")
+                            }) + "'/>");
+                }
+            });
+        }
+    });
+    #{if name.toLowerCase().startsWith("draft")}
+    $('div#main-content .message-action-btn .draft').each(function () {
+        $(this).attr('mid',${mid}).show();
+    });
+    #{/if}
+    #{else}
+    $('div#main-content .message-action-btn .draft').each(function () {
+        $(this).hide();
+    });
+    #{/else}
+</script>

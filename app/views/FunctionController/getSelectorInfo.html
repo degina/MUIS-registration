@@ -1,0 +1,17 @@
+#{if organizationChart!=null}
+<table id="selector-info-table">
+    <tr>
+        <td rowspan="3"><img src="${organizationChart.user.profilePicture}" width="70" height="80"></td>
+        <td>Нэр:</td>
+        <td>${organizationChart.user.toString()}</td>
+    </tr>
+    <tr>
+        <td>Баг:</td>
+        <td>${organizationChart.team.name}</td>
+    </tr>
+    <tr>
+        <td style="font-size: 10px">Албан</br>тушаал:</td>
+        <td>${organizationChart.userPosition.name}</td>
+    </tr>
+</table>
+#{/if}

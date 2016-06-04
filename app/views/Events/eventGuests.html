@@ -1,0 +1,17 @@
+#{list items:eventPeoples ,as:'people'}
+    <span title="${people.getUser()}">
+        <img src="${people.user.profilePicture}"
+             alt="eventPeople"
+             data-rel="tooltip"
+             data-original-title="${people.user.toString()}"
+             style="width:33px"/>
+    </span>
+#{/list}
+#{if status==0}
+<script>
+    var sobj=$("div#sendUserTag1 ul");
+    #{list items:eventInvite ,as:'people'}
+    sobj.append("<li id='u-${people.user.id}'></li>");
+    #{/list}
+</script>
+#{/if}

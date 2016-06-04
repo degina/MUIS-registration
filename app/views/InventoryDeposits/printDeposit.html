@@ -1,0 +1,59 @@
+<div class="row" style="background-color: #dfe5e9;">
+    <div class="a4">
+        <div>
+            <table class="table">
+                <thead>
+                <td class="bBlack" colspan="4"><strong>ХҮЛЭЭН АВАЛТ</strong></td>
+                <td class="f-18 text-center">Огноо: <strong>${today?.format("yyyy/MM/dd")}</strong></td>
+                </thead>
+                <tbody>
+                <tr>
+                    <td rowspan="4" class="text-center"><img src="/public/images/logo/logo.png"  alt="design"
+                                                             height="60px;"/></td>
+                </tr>
+                </tbody>
+            </table>
+        #{if Deposits!=null && !Deposits.isEmpty()}
+            <table class="table border" style="margin-top: 10px;">
+                <thead>
+                <tr>
+                    <th style="min-width:70px">
+                    </th>
+                    <th><strong>&{'item'}</strong>
+                    </th>
+                    <th><strong>&{'supplier'}</strong>
+                    </th>
+                    <th><strong>&{'worker'}</strong>
+                    </th>
+                    <th><strong>&{'location'}</strong>
+                    </th>
+                    <th><strong>&{'quantity'}</strong>
+                    </th>
+                    <th><strong>&{'price'}</strong>
+                    </th>
+                    <th><strong>&{'all_price'}</strong>
+                    </th>
+                    <th style="width: 100px">
+                        <strong>&{'date'}</strong>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>#{list items:Deposits, as: 'deposit'}
+                <tr>
+                    <td><strong>${deposit.id}</strong></td>
+                    <td>${deposit.inventory.item}</td>
+                    <td>${deposit.supplier.name}</td>
+                    <td>${deposit.receiver}</td>
+                    <td>${deposit.location.name}</td>
+                    <td>${deposit.quantity}</td>
+                    <td><strong>${deposit.price}</strong></td>
+                    <td><strong></strong></td>
+                    <td>${deposit.date.format("yy/MM/dd")}</td>
+                </tr>
+                #{/list}
+                </tbody>
+            </table>
+        #{/if}
+        </div>
+    </div>
+</div>

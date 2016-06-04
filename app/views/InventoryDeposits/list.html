@@ -1,0 +1,1759 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Inventory'/}
+#{set activeMenuSub:'InventoryDeposit'/}
+#{jqueryui-config /}
+#{fileupload-config /}
+#{ckeditor-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+#{flashCrud /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script src="/public/javascripts/jquery.resizableColumns.min.js"></script>
+
+%{inventoryPermission = user.getUserPermissionType(controllers.Consts.permissionInventoryOther);}%
+<div id="main-content" class="dhidden" ${inventoryPermission==4 || inventoryPermission==5 ? "" : "hidden=\"true\""}>
+    <div>
+        <div class="m-b-0 clearfix">
+            <div class="page-title pull-left">
+                <h3 class="pull-left"><strong>&{'Deposit'}</strong></h3>
+            </div>
+            <div class="pull-right">
+            #{if inventoryPermission==4 || inventoryPermission==5}
+                <button class="btn btn-success m-t-10" id="adddeposit_btn" data-toggle="modal"
+                        data-target="#modal-adddeposit"><i
+                        class="fa fa-plus p-r-10"></i> &{'add_new_deposit'}</button>
+            #{/if}
+            </div>
+        </div>
+        <form id="filterForm" action="@{InventoryDeposits.list()}" method="get">
+            <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                <div id="reportrange" class="form-control m-b-10" style="padding-left: 10px;padding-right: 10px;">
+                    <i class="fa fa-calendar fa-lg p-r-0"></i><span>#{if (filterStartDate=="" || filterStartDate==null || filterStartDate=="0") && (filterEndDate=="" || filterEndDate==null || filterEndDate=="0")}
+                    Өдрөөр хайх...#{/if}#{else}${filterStartDate}
+                    -${filterEndDate}#{/else}</span>
+                    <input type="text" hidden="true" name="filterStartDate" id="filter_start"
+                           value="${filterStartDate}"/>
+                    <input type="text" hidden="true" name="filterEndDate" id="filter_end"
+                           value="${filterEndDate}"/>
+                </div>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="receiver_filter"
+                        class="form-control" name="receiver_filter">
+                    <option value="0">&{'AllReceiver'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Receiver,as: 'receiver'}
+                    <option value="${receiver.id}" ${receiver.id.toString() == receiver_filter ? 'selected' : ''}>${receiver.lastnameFirstCharacter}
+                        . ${receiver.firstName}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="supplier_filter"
+                        class="form-control" name="supplier_filter">
+                    <option value="0">&{'AllSupplier'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Suppliers,as: 'supplier'}
+                    <option value="${supplier.id}" ${supplier.id.toString() == supplier_filter ? 'selected' : ''}>${supplier.name}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="location_filter"
+                        class="form-control" name="location_filter">
+                    <option value="0">&{'AllLocation'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Mains,as: 'main'}
+                    <option value="${main.id}" ${main.id.toString() == location_filter ? 'selected' : ''}>${main.name}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <input type="text" class="form-control" style=";"
+                       placeholder="&{'Search'}!" name="keyword" value="${keyword}"/>
+            </div>
+            <div class="col-md-1" style="padding: 0;">
+                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+            </div>
+            <div class="col-md-2" style="padding: 0;">
+                <input type="hidden" name="CurrentPageNumber" value="1"/>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                <table id="products-table" class="table table-tools table-hover"
+                                       data-resizable-columns-id="inventorydeposit-resizalbe-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="min-width:70px" data-resizable-column-id="#">
+                                        </th>
+                                        <th data-resizable-column-id="item"><strong>&{'item'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="supplier"><strong>&{'supplier'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="reciever"><strong>&{'worker'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="location"><strong>&{'location'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="quantity"><strong>&{'quantity'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="price"><strong>&{'price'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="price"><strong>&{'all_price'}</strong>
+                                        </th>
+                                        <th style="width: 100px" data-resizable-column-id="date">
+                                            <strong>&{'date'}</strong>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:Deposits, as: 'deposit'}
+                                    <tr>
+                                        <td><strong>${deposit.id}</strong></td>
+                                        <td>${deposit.inventory.item}</td>
+                                        <td>${deposit.supplier.name}</td>
+                                        <td>${deposit.receiver}</td>
+                                        <td>${deposit.location.name}</td>
+                                        <td>${deposit.quantity}</td>
+                                        <td><strong>${deposit.price}</strong></td>
+                                        <td><strong></strong></td>
+                                        <td>${deposit.date.format("yy/MM/dd")}</td>
+                                    </tr>
+                                    #{/list}
+                                    </tbody>
+                                    <tfoot>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    #{if MaxPageNumber>1}
+                        <div class="page-navigation" style="width: 100%; text-align: right;">
+                            <a style="text-decoration: none;"
+                               href="@{InventoryDeposits.list(CurrentPageNumber-1,filterStartDate,filterEndDate,receiver_filter,supplier_filter,location_filter,keyword,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber - 1 <= 0 ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="<"/>
+                            </a>
+                        %{
+                            int threeDots = 0;
+                            for(int i = 1; i <= MaxPageNumber; i++){
+                            if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                            (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                            (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                            }%
+                            <a style="text-decoration: none;"
+                               #{if CurrentPageNumber != i}href="@{InventoryDeposits.list(i,filterStartDate,filterEndDate,receiver_filter,supplier_filter,location_filter,keyword,message)}"#{/if}>
+                                <input
+                                        class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="${i}"/>
+                            </a>
+                        %{ }else{
+                            if( i == 2 || i == MaxPageNumber - 1 ){
+                            threeDots = 1;
+                            }
+                            if(threeDots == 1){
+                            }%
+                            <span style="font-size: x-large;"><strong>...</strong></span>
+                        %{
+                            threeDots = 0;
+                            }
+                            }
+                            }
+                            }%
+                            <a style="text-decoration: none;"
+                               href="@{InventoryDeposits.list(CurrentPageNumber+1,filterStartDate,filterEndDate,receiver_filter,supplier_filter,location_filter,keyword,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber >= MaxPageNumber ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value=">"/>
+                            </a>
+                        </div>
+                    #{/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-adddeposit" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 90%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'add_new_deposit'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventoryDeposits.saveDeposit()}" class="form-horizontal" method="get"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12 m-t-0 m-b-10">
+                                <label class="col-md-3 control-label">&{'deposit_location'}<span
+                                        class="asterisk">*</span>:
+                                </label>
+
+                                <div class="col-md-4">
+                                    <select data-live-search="true" id="location_add" title="&{'location'}"
+                                            class="form-control" name="location">
+                                    #{list items:Mains,as: 'main'}
+                                        <option value="${main.id}">${main.name}</option>
+                                    #{/list}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content p-b-0">
+                                        <div class="tab-pane fade active in" id="product_general">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <div class="col-md-12">
+                                                            <div class="panel panel-default">
+                                                                <div class="panel-body">
+                                                                    <div class="row">
+                                                                        <div class="col-md-12 col-sm-12 col-xs-12 table-responsive table-red">
+                                                                            <table class="table table-striped table-hover dataTable"
+                                                                                   id="table-editable-add-deposit">
+                                                                                <thead>
+                                                                                <tr>
+                                                                                    <th style="width: 250px!important;align-content: center">&{'item'}
+                                                                                        <a style="height: 24px!important; padding-top: 1px!important;"
+                                                                                           id="additem"
+                                                                                           data-rel="tooltip"
+                                                                                           title="Шинэ материал нэмэх"
+                                                                                           class="edit btn btn-icon-sm btn-rounded btn-default"
+                                                                                           data-toggle="modal"
+                                                                                           data-target="#modal-additem"
+                                                                                           href=""><i
+                                                                                                class="fa fa-plus"></i></a>
+                                                                                    </th>
+                                                                                    <th style="width: 250px!important;align-content: center">&{'supplier'}
+                                                                                        <a style="height: 24px!important; padding-top: 1px!important;"
+                                                                                           id="addsupplier"
+                                                                                           data-rel="tooltip"
+                                                                                           title="Шинэ нийлүүлэгч нэмэх"
+                                                                                           class="edit btn btn-icon-sm btn-rounded btn-default"
+                                                                                           data-toggle="modal"
+                                                                                           data-target="#modal-addsupplier"
+                                                                                           href=""><i
+                                                                                                class="fa fa-plus"></i></a>
+                                                                                    </th>
+                                                                                    <th style="width:90px!important;align-content: center">&{'quantity'}</th>
+                                                                                    <th style="width:90px!important;align-content: center">&{'measure'}</th>
+                                                                                    <th style="width:90px!important;align-content: center">&{'price'}</th>
+                                                                                    <th style="width:90px!important;align-content: center">&{'all_price'}</th>
+                                                                                    <th style="width:90px!important;align-content: center">&{'partnumber'}</th>
+                                                                                    <th style="width: 80px!important;align-content: center"></th>
+                                                                                </tr>
+                                                                                </thead>
+                                                                                <tfoot>
+                                                                                <tr>
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                    <td></td>
+                                                                                    <td style="text-align: center">
+                                                                                        <a id="table-edit_new"
+                                                                                           style="height: 24px!important; padding-top: 1px!important;"
+                                                                                           class="delete btn btn-icon-sm btn-rounded btn-default"
+                                                                                           href=""><i
+                                                                                                class="fa fa-plus"></i></a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                </tfoot>
+
+                                                                            </table>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-0 m-b-0 align-center">
+                                <button id="add_submit" class="btn btn-success m-t-0" type="button"><i
+                                        class="fa fa-check"></i> &{'save'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-previewdeposit" aria-hidden="true">
+        <div class="modal-dialog " style="width: 500px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'preview_deposit'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" method="get"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <ul id="myTab" class="nav nav-tabs">
+                                        <li class="active"><a href="#deposit_general" data-toggle="tab">&{'general'}</a>
+                                        </li>
+                                        <li><a href="#item_more" data-toggle="tab">&{'item'}</a></li>
+                                        <li><a href="#supplier_more" data-toggle="tab">&{'supplier'}</a></li>
+                                    </ul>
+
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in" id="deposit_general">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'item_name'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'name'}...
+                                                                   required="true"
+                                                                   name="item_name_general"
+                                                                   id="item_name_general_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'supplier_name'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'name'}...
+                                                                   required="true"
+                                                                   name="supplier_name_general"
+                                                                   id="supplier_name_general_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'reciever_name'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   required="true"
+                                                                   name="supplier_name_general"
+                                                                   id="reciever_name_general_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'location'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   required="true"
+                                                                   name="location_general"
+                                                                   id="location_general_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'quantity'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'quantity'}...
+                                                                   required="true"
+                                                                   name="quantity" id="quantity_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'price'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'price'}...
+                                                                   required="true"
+                                                                   name="price" id="price_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'all_price'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'all_price'}...
+                                                                   required="true"
+                                                                   name="all_price" id="all_price_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'partnumber'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   name="partnumber" id="partnumber_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'date'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'date'}...
+                                                                   required="true"
+                                                                   name="date" id="date_preview">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="tab-pane fade" id="item_more">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'item_name'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'name'}...
+                                                                   required="true"
+                                                                   name="item_name" id="item_name_preview">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'category'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'category'}...
+                                                                   required="true" readonly
+                                                                   name="item_category" id="item_category_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'description'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                        <textarea rows="5"
+                                                                  class="form-control valid"
+                                                                  required="true"
+                                                                  style="resize: none"
+                                                                  name="item_description"
+                                                                  id="item_description_preview"
+                                                                  readonly
+                                                                  placeholder=&{'description'}...>
+                                                        </textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'note'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'note'}... readonly
+                                                                   name="item_note" id="item_note_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'website'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'website'}... readonly
+                                                                   name="item_website" id="item_website_preview">
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tab-pane fade" id="supplier_more">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'supplier_name'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control" readonly
+                                                                   placeholder=&{'name'}...
+                                                                   required="true"
+                                                                   name="supplier_name" id="supplier_name_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'supplier_person'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'supplier_person'}...
+                                                                   required="true" readonly
+                                                                   name="supplier_person" id="supplier_person_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'address'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                        <textarea rows="5"
+                                                                  class="form-control valid"
+                                                                  required="true"
+                                                                  style="resize: none"
+                                                                  name="supplier_address"
+                                                                  id="supplier_address_preview"
+                                                                  readonly
+                                                                  placeholder=&{'address'}...>
+                                                        </textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'phone'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'phone'}... readonly
+                                                                   name="supplier_phone" id="supplier_phone_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'phone'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'phone'}... readonly
+                                                                   name="supplier_phone_alternative"
+                                                                   id="supplier_phone_alternative_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'email'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'email'}... readonly
+                                                                   name="supplier_email" id="supplier_email_preview">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'website'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'website'}... readonly
+                                                                   name="supplier_website"
+                                                                   id="supplier_website_preview">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-addsupplier" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 650px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'add_new_supplier'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventorySuppliers.newSupplier()}" class="form-horizontal" method="post"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in" id="product_general">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'name'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'name'}...
+                                                                   required="true"
+                                                                   name="name" id="name_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'person'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'person'}...
+                                                                   required="true"
+                                                                   name="person" id="person_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'address'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                            <textarea rows="5" class="form-control valid" required="true"
+                                                      name="address" id="address_add"
+                                                      style="resize: none"
+                                                      placeholder=&{'address'}...></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'phone'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'phone'}...
+                                                                   required="true"
+                                                                   name="phone" id="phone_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'phone'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'phone'}...
+                                                                   name="phone_alternative" id="phone_alternative_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'email'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'email'}...
+                                                                   name="email" id="email_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'website'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'website'}...
+                                                                   name="website" id="website_add">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                                <table class="table table-striped table-hover dataTable"
+                                                       style="overflow: visible"
+                                                       id="table-editable_add_supplier">
+                                                    <thead>
+                                                    <tr>
+                                                        <th style="width: 250px;" data-resizable-column-id="name">
+                                                            <strong>&{'name'}</strong>
+                                                        </th>
+                                                        <th style="width: 100px;" data-resizable-column-id="price">
+                                                            <strong>&{'price'}</strong>
+                                                        </th>
+                                                        <th style="width: auto;" data-resizable-column-id="price">
+                                                            <strong>&{'partnumber'}</strong>
+                                                        </th>
+                                                        <th style="width: 35px;" data-resizable-column-id="action">
+                                                            <strong></strong>
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tfoot>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td style="width: 35px;">
+                                                            <div class="text-center"><a
+                                                                    id="table-edit_new"
+                                                                    style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;"
+                                                                    class="add btn btn-icon-sm btn-rounded btn-default"
+                                                                    href="#"><i
+                                                                    class="fa fa-plus"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                                <button type="button" id="add_supplier" class="btn btn-success m-t-10"><i
+                                        class="fa fa-check"></i> &{'save'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="section-to-print"></div>
+#{include '/InventoryModals/additem.html'/}
+</div>
+<script>
+    $(window).load(function () {
+    #{if message=="addsuccess"}
+        showSuccessMessage("Хүлээн авалт амжилттай боллоо.");
+    #{/if}
+        $(function () {
+            $("table").resizableColumns({
+                store: window.store
+            });
+        });
+        var sum = 0;
+        $('table#products-table tbody tr').each(function () {
+            var quantity = $(this).find('td:nth-child(6)').html();
+            var price = $(this).find('td:nth-child(7) strong').html();
+            var total = parseFloat(quantity) * parseFloat(price);
+            $(this).find('td:nth-child(8) strong').html(total);
+            if (total != null) {
+                sum = sum + total;
+            }
+        });
+        if (sum != null && sum > 0) {
+            $('table#products-table tfoot tr td:nth-child(8)').html("<strong>&Sigma;=" + sum + "</strong>");
+        }
+        else {
+            $('table#products-table tfoot tr td:nth-child(8)').html("<strong>&Sigma;=0</strong>");
+        }
+        $('div#main-content').removeClass('dhidden');
+        $('#table-edit_new').click();
+    });
+    $(document).ready(function () {
+        var opt = {};
+        $('select').selectpicker();
+
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", 'sEmptyTable': "Үр дүн байхгүй байна."} ,
+                opt.iDisplayLength = 40,
+
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["csv", "xls", "pdf", "print"]
+                };
+        opt.aaSorting = [[0, 'desc']]
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': [0, 1, 2, 3, 4, 5, 6, 7, 8]}
+        ];
+
+
+        var oTable = $('#products-table').dataTable(opt);
+        oTable.fnDraw();
+
+        /* Add a placeholder to searh input */
+        $('.dataTables_filter input').attr("placeholder", "Search a product...");
+
+        /* Delete a product */
+        $('#products-table tbody tr').on('click', function (e) {
+            e.preventDefault();
+            var nRow = $(this);
+
+            var index = $(nRow).find('td:nth-child(1) strong').html();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorydepositspreviewdeposit"
+            }).success(
+                    function (data) {
+                        $('div#modal-previewdeposit form input#item_name_preview').val(data[0]);
+                        $('div#modal-previewdeposit form input#item_category_preview').val(data[1]);
+                        $('div#modal-previewdeposit form textarea#item_description_preview').val(data[2]);
+                        $('div#modal-previewdeposit form input#item_note_preview').val(data[3]);
+                        $('div#modal-previewdeposit form input#item_website_preview').val(data[4]);
+
+
+                        $('div#modal-previewdeposit form input#supplier_name_preview').val(data[5]);
+                        $('div#modal-previewdeposit form textarea#supplier_address_preview').val(data[6]);
+                        $('div#modal-previewdeposit form input#supplier_person_preview').val(data[7]);
+                        $('div#modal-previewdeposit form input#supplier_phone_preview').val(data[8]);
+                        $('div#modal-previewdeposit form input#supplier_phone_alternative_preview').val(data[9]);
+                        $('div#modal-previewdeposit form input#supplier_email_preview').val(data[10]);
+                        $('div#modal-previewdeposit form input#supplier_website_preview').val(data[11]);
+
+                        $('div#modal-previewdeposit form input#item_name_general_preview').val(data[0]);
+                        $('div#modal-previewdeposit form input#supplier_name_general_preview').val(data[5]);
+                        $('div#modal-previewdeposit form input#quantity_preview').val(data[12]);
+                        $('div#modal-previewdeposit form input#price_preview').val(getDecimal(data[13]));
+                        $('div#modal-previewdeposit form input#all_price_preview').val(getDecimal(parseFloat(data[13]) * parseFloat(data[12])));
+                        $('div#modal-previewdeposit form input#date_preview').val(data[14]);
+                        $('div#modal-previewdeposit form input#partnumber_preview').val(data[15]);
+                        $('div#modal-previewdeposit form input#reciever_name_general_preview').val(data[16]);
+                        $('div#modal-previewdeposit form input#location_general_preview').val(data[17]);
+
+
+                        $('div#modal-previewdeposit ul.uploadBox').html('<li><span></span></li>');
+
+                        var obj = $("div#modal-previewdeposit ul.uploadBox li");
+                        if (data.length > 27) {
+                            for (var i = 28; i < data.length; i = i + 3) {
+                                $.ajax({
+                                    type: "POST",
+                                    data: {
+                                        filename: data[i],
+                                        filedir: data[i + 1],
+                                        extension: data[i + 2]
+                                    },
+                                    url: "/inventoryhandleattachment"
+                                }).success(function (d) {
+                                    obj.before(d);
+                                })
+                            }
+                        }
+                        $('div#modal-previewdeposit').modal('show');
+                    })
+        });
+
+        $('#products-table a.delete').on('click', function (e) {
+            e.preventDefault();
+            if (confirm("Are you sure to delete this product ?") == false) {
+                return;
+            }
+            var nRow = $(this).parents('tr')[0];
+
+            var index = $(nRow).find('td:nth-child(1) a span').html();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorydepositsdeletedeposit"
+            }).success(
+                    function () {
+                    });
+
+            oTable.fnDeleteRow(nRow);
+        });
+
+
+        var oTable_add_deposit = $('#table-editable-add-deposit').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [5]
+            }
+            ]
+        });
+
+//        var newsupplier = "";
+        var newitem = "";
+
+        function editableTable() {
+            function editRow(oTable_add_deposit, nRow) {
+                var jqTds = $('>td', nRow);
+                var jqInputs = $('input', nRow);
+                jqTds[0].innerHTML = '<select data-live-search="true"  data-width="220px" name="item" class="form-control input-sm" title="&{'item'}" required="true"><option value=""></option>#{list items:Inventorys,as:"inventory"}<option value="${inventory.item}" >${inventory.item}</option>#{/list}' + newitem + '</select>';
+                $('select', jqTds[0]).on('change', function () {
+                    var measure = $(this).parents('tr').find("td:nth-child(4) input");
+                    var supplier = $(this).parents('tr').find("td:nth-child(2) select");
+                    var price = $(this).parents('tr').find("td:nth-child(5) input");
+                    var partnumber = $(this).parents('tr').find("td:nth-child(7) input");
+                    $.ajax({
+                        type: "POST",
+                        data: {inv: $('select option:selected', jqTds[0]).val()},
+                        url: "/inventoryordersgetmeasure"
+                    }).success(
+                            function (data) {
+                                measure.val(data);
+                            });
+                    $.ajax({
+                        type: "POST",
+                        data: {inv: $('select option:selected', jqTds[0]).val()},
+                        url: "/inventoryordersgetsupplier"
+                    }).success(
+                            function (data) {
+                                var supp = "";
+                                for (var i = 0; i < data.length; i = i + 2) {
+                                    supp = supp + '<option value="' + data[i] + '">' + data[i + 1] + '</option>';
+                                }
+                                supplier.html(supp);
+                                supplier.selectpicker('refresh');
+                                $.ajax({
+                                    type: "POST",
+                                    data: {
+                                        sup: $('select option:selected', jqTds[1]).val(),
+                                        inv: $('select option:selected', jqTds[0]).val()
+                                    },
+                                    url: "/inventorydepositsgetsupplierprice"
+                                }).success(
+                                        function (data) {
+                                            price.val(data[0]);
+                                            partnumber.val(data[1]);
+                                        });
+                            });
+
+
+                });
+                jqTds[1].innerHTML = '<select data-live-search="true" data-width="220px" name="supplier" class="form-control" title="&{'supplier'}" required="true"></select>';
+                $('select', jqTds[0]).val(jqInputs[0].value);
+                $('select', jqTds[0]).selectpicker('render');
+                $('select', jqTds[1]).val(jqInputs[1].value);
+                $('select', jqTds[1]).selectpicker('render');
+                jqTds[2].innerHTML = '<input type="text" maxlength="7" class="numberic form-control small" name="quantity" value="">';
+                $('select', jqTds[1]).change(function (e) {
+                    e.preventDefault();
+                    var price = $(this).parents('tr').find("td:nth-child(5) input");
+                    var partnumber = $(this).parents('tr').find("td:nth-child(7) input");
+                    $.ajax({
+                        type: "POST",
+                        data: {
+                            sup: $('select option:selected', jqTds[1]).val(),
+                            inv: $('select option:selected', jqTds[0]).val()
+                        },
+                        url: "/inventorydepositsgetsupplierprice"
+                    }).success(
+                            function (data) {
+                                price.val(data[0]);
+                                partnumber.val(data[1]);
+                            });
+
+                });
+                $('input', jqTds[2]).change(function (e) {
+                    e.preventDefault();
+                    var price = $(this).parents('tr').find("td:nth-child(5) input").val();
+                    var quantity = $(this).val();
+                    if (price != null && quantity != null && price.length > 0 && quantity.length > 0) {
+                        var all = parseFloat(quantity) * parseFloat(price);
+                        $(this).parents('tr').find("td:nth-child(6) input").val(all);
+                    }
+
+                });
+                jqTds[3].innerHTML = '<input type="text" class="form-control small" readonly name="measure" value="">';
+                jqTds[4].innerHTML = '<input type="text" maxlength="8" class="numberic form-control small" name="price" value="">';
+                $('input', jqTds[4]).change(function (e) {
+                    e.preventDefault();
+                    var quantity = $(this).parents('tr').find("td:nth-child(3) input").val();
+                    var price = $(this).val();
+                    if (price != null && quantity != null && price.length > 0 && quantity.length > 0) {
+                        var all = parseFloat(quantity) * parseFloat(price);
+                        $(this).parents('tr').find("td:nth-child(6) input").val(all);
+                    }
+                });
+                jqTds[5].innerHTML = '<input type="text" class="numberic form-control small" readonly name="all_price" value="">';
+                jqTds[6].innerHTML = '<input type="text" class="form-control small" name="partnumber" value="">';
+                jqTds[7].innerHTML = '<div class="text-center"><input type="hidden" value="0"><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>';
+
+                $('div#modal-adddeposit tbody tr').each(function () {
+                    $(this).find('td:nth-child(3) input').forceNumericOnly();
+                    $(this).find('td:nth-child(5) input').forceNumericOnly();
+                    $(this).find('td:nth-child(7) input').forceNumericOnly();
+                });
+
+            }
+
+            $('#table-edit_new').click(function (e) {
+                e.preventDefault();
+                var aiNew = oTable_add_deposit.fnAddData(['<input type="text" class="form-control small" name="item">', '<input type="text" class="form-control small" name="supplier" value="">', '<input type="text" class="form-control small" name="quantity" value="">', '<input type="text" readonly class="form-control small" name="measure" value="">',
+                    '<input type="text" class="form-control small" name="price" value="">', '<input type="text" class="form-control small" name="all_price" value="">', '<input type="text" class="form-control small" name="partnumber" value="">',
+                    '<div class="text-center"><input type="hidden" value="0"><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+
+                var nRow = $('#table-editable-add-deposit tbody tr:last-child td').parents('tr')[0];
+                editRow(oTable_add_deposit, nRow);
+                $('select').selectpicker();
+            });
+
+            $('#table-editable-add-deposit tbody a.delete').live('click', function (e) {
+                e.preventDefault();
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+                var nRow = $(this).parents('tr')[0];
+                oTable_add_deposit.fnDeleteRow(nRow);
+
+
+                $('select').selectpicker();
+
+            });
+        };
+
+        editableTable();
+
+        $('button#add_submit').on('click', function (e) {
+            e.preventDefault();
+            var is = 0;
+            var rowCount = 0;
+
+            $('div#modal-adddeposit table tbody tr').each(function () {
+                if ($(this).find("td.dataTables_empty").val() == null) {
+                    rowCount++;
+                    if ($(this).find('td:first-child select').val() == null || $(this).find('td:first-child select').val() == "")
+                        is = 1;
+                    if ($(this).find('td:nth-child(2) select').val() == null || $(this).find('td:nth-child(2) select').val() == "")
+                        is = 1;
+                    if ($(this).find('td:nth-child(3) input').val() == "")
+                        is = 1;
+                    if ($(this).find('td:nth-child(5) input').val() == "")
+                        is = 1;
+                }
+            });
+            if (is == 0 && rowCount != 0) {
+                $('div#modal-adddeposit form').submit();
+            }
+            else {
+                showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+            }
+        });
+
+        $('button#add_button').on('click', function (e) {
+            e.preventDefault();
+            var obj = $('div#add_attach');
+            if ($('input#item_add').val() == "" || $('input#price_add').val() == "") {
+                showErrorMessage("Шардлагатай нүдийг бөглөнө үү?");
+            }
+            else {
+                $("div#modal-additem form ul.uploadBox img.imgIcon").each(function () {
+                    obj.append("<input type=\"hidden\" name=\"filename\" value=" + $(this).attr('filename') + ">" +
+                    "<input type=\"hidden\" name=\"filedir\" value=" + $(this).attr('filedir') + ">" +
+                    "<input type=\"hidden\" name=\"extension\" value=" + $(this).attr('extension') + ">");
+                });
+                $.ajax({
+                    type: "POST",
+                    data: $('div#modal-additem form').serialize(),
+                    url: "/inventorysnewitemmodal"
+                }).success(
+                        function (data) {
+                            if (data == "true") {
+                                newitem += "<option value=" + $('div#modal-additem input#item_add').val() + ">" + $('div#modal-additem input#item_add').val() + "</option>";
+                                $('table#table-editable-add-deposit tbody tr').each(function () {
+                                    $(this).find('select').append("<option value=\"" + $('div#modal-additem input#item_add').val() + "\">" + $('div#modal-additem input#item_add').val() + "</option>").selectpicker('refresh');
+
+                                });
+                                $('div#modal-additem input#item_add').val("");
+                                $('div#modal-additem textarea#description_add').val("");
+                                $('div#modal-additem select#item_category').selectpicker('val', $('div#modal-additem select#item_category').val());
+                                $('div#modal-additem select#item_category').selectpicker('render');
+                                $('div#modal-additem select#measure').selectpicker('val', $('div#modal-additem select#measure').val());
+                                $('div#modal-additem select#measure').selectpicker('render');
+                                $('div#modal-additem input#price_add').val("");
+                                $('div#modal-additem textarea#note_add').val("");
+                                $('div#modal-additem input#website_add').val("");
+                                $('div#modal-additem ul.uploadBox').html("<li class=\"dhidden\"><span><span></span></span></li>");
+
+                                showSuccessMessage("Амжилттай боллоо.");
+                            }
+                            else
+                                showErrorMessage("Амжилтгүй боллоо.");
+
+
+                        });
+                $('div#modal-additem').modal('hide');
+            }
+        });
+
+        var oTable_add_supplier = $('#table-editable_add_supplier').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [0, 1, 2]
+            }
+            ]
+        });
+
+        function editableTable_add_supplier() {
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#modal-addsupplier #table-edit_new').live('click', function (e) {
+                e.preventDefault();
+                oTable_add_supplier.fnAddData(['<input type="text" readonly class="form-control small" name="item" value="">', '<input type="text" readonly class="form-control small" name="price">', '<input type="text" readonly class="form-control small" name="partnumber">',
+                    '<div class="text-center"><a style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+
+                var nRow = $('div#modal-addsupplier table#table-editable_add_supplier tbody tr:last-child td').parents('tr')[0];
+
+                var jqTds = $('>td', nRow);
+
+                var jqInputs = $('input', nRow);
+                jqTds[0].innerHTML = '<select data-live-search="true" name="item" class="form-control input-sm" title="&{'item'}" required="true"><option></option>#{list items:Inventorys,as:"inventory"}<option value="${inventory.item}" >${inventory.item}</option>#{/list}</select>';
+                $('select', jqTds[0]).val(jqInputs[0].value);
+                $('select', jqTds[0]).selectpicker('render');
+
+                jqTds[1].innerHTML = '<input type="text" class="numberic form-control small" name="price" value="' + jqInputs[1].value + '">';
+                $('input', jqTds[1]).forceNumericOnly(true);
+                jqTds[2].innerHTML = '<input type="text" class="numberic form-control small" name="partnumber" value="' + jqInputs[2].value + '">';
+                $('input', jqTds[2]).forceNumericOnly();
+                jqTds[3].innerHTML = '<div class="text-center"><a style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>';
+
+            });
+
+            $('div#modal-addsupplier #table-editable_add_supplier tbody a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parents('tr')[0];
+                oTable_add_supplier.fnDeleteRow(nRow);
+
+            });
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+        };
+        editableTable_add_supplier();
+
+
+        $('button#add_supplier').on('click', function (e) {
+            e.preventDefault();
+            var is = 0;
+            $('table#table-editable_add_supplier tbody tr').each(function () {
+                if ($(this).find('td:first-child select').val() == "" || ($(this).find('td:nth-child(2) input').val() == "" && $(this).find('td:nth-child(3) input').val() == ""))
+                    is = 1;
+            });
+            if ($('div#modal-addsupplier form input#name_add').val() == "" ||
+                    $('div#modal-addsupplier form input#person_add').val() == "" ||
+                    $('div#modal-addsupplier form textarea#address_add').val() == "" ||
+                    $('div#modal-addsupplier form input#phone_add').val() == "" || is == 1) {
+                showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    data: $('div#modal-addsupplier form').serialize(),
+                    url: "/inventorysuppliersnewsuppliermodal"
+                }).success(
+                        function (data) {
+                            if (data != null && data != "false") {
+//                                newsupplier += "<option value=" + $('div#modal-addsupplier form input#name_add').val() + ">" + $('div#modal-addsupplier form input#name_add').val() + "</option>";
+                                $('table#table-editable-add-deposit tbody tr').each(function () {
+                                    $(this).find('td:nth-child(2) select').append("<option value=\"" + $('div#modal-addsupplier form input#name_add').val() + "\">" + $('div#modal-addsupplier form input#name_add').val() + "</option>").selectpicker('refresh');
+
+                                });
+                                $('div#modal-addsupplier form input#name_add').val("");
+                                $('div#modal-addsupplier form input#person_add').val("");
+                                $('div#modal-addsupplier form textarea#address_add').val("");
+                                $('div#modal-addsupplier form input#phone_add').val("");
+                                $('div#modal-addsupplier form input#phone_alternative_add').val("");
+                                $('div#modal-addsupplier form input#email_add').val("");
+                                $('div#modal-addsupplier form input#website_add').val("");
+                                $('div#modal-addsupplier').modal('hide');
+                                showSuccessMessage("Амжилттай боллоо.");
+                            }
+                            else
+                                showErrorMessage("Амжилтгүй боллоо.");
+
+                        });
+            }
+        });
+
+        //
+
+
+        $('input#price_add').forceNumericOnly();
+
+        $('input#quantity_add').forceNumericOnly();
+
+        var dat = [""];
+        var prev_size = 0;
+
+        var oTable_add = $('#table-editable_add').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [0]
+            }
+            ]
+        });
+
+
+        function editableTable_add() {
+
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#table-edit_new_add').click(function (e) {
+                e.preventDefault();
+
+                oTable_add.fnAddData(['<input type="text" hidden="true" required="true" name="ids" value="0"><input type="text" class="form-control" required="true" name="subcategorys">',
+                    '<div class="text-center"><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+
+            });
+
+            $('#table-editable_add a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parent().parent().parent();
+                oTable_add.fnDeleteRow(nRow);
+
+
+                // alert("Deleted! Do not forget to do some ajax to sync with backend :)");
+            });
+
+            $('select#category').change(function () {
+                $.ajax({
+                    type: "POST",
+                    data: {name: $(this).val()},
+                    url: "/inventoryShowSubCategory"
+                }).success(
+                        function (data) {
+                            for (var j = 0; j < prev_size / 2; j++)
+                                oTable_add.fnDeleteRow(0);
+                            dat = data;
+                            prev_size = dat.length;
+                            for (var i = 0; i < dat.length; i = i + 2) {
+                                oTable_add.fnAddData(['<input type="text" hidden="true" name="ids" required="true" value="' + dat[i + 1] + '"><input type="text" class="form-control" required="true" name="subcategorys" value="' + dat[i] + '">',
+                                    '<div class="text-center"><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                                ]);
+                            }
+                            oTable_add.fnDraw();
+
+                        });
+
+
+            });
+
+            $('input#inputcategory_add').change(function () {
+                $.ajax({
+                    type: "POST",
+                    data: {category: $(this).val()},
+                    url: "/inventoryCheckCategory"
+                }).success(
+                        function (data) {
+                            if (data == "false") {
+                                $('input#inputcategory_add').val("");
+                                showErrorMessage("Ангилалын нэр давхцаж байна.");
+                            }
+                        });
+            });
+
+            $('button#add').click(function () {
+                var select = $("div#selectcat");
+                select.addClass("hidden");
+                $('select#category').selectpicker('val', '');
+
+                var input = $("div#inputcat");
+                input.removeClass("hidden");
+                input.attr("required", "true");
+
+                var add = $("div#add");
+                add.addClass("hidden");
+
+                var select = $("div#select");
+                select.removeClass("hidden");
+
+                var is = $("input#is");
+                is.val("1");
+                for (var j = 0; j < prev_size; j++)
+                    oTable_add.fnDeleteRow(1);
+
+
+            });
+            $('button#select').click(function () {
+                var select = $("div#selectcat");
+                select.removeClass("hidden");
+
+                var input = $("div#inputcat");
+                input.addClass("hidden");
+                input.attr("required", "false");
+
+                var add = $("div#add");
+                add.removeClass("hidden");
+
+                var select = $("div#select");
+                select.addClass("hidden");
+
+                var is = $("input#is");
+                is.val("0");
+                $("input#inputcategory_add").val("");
+            });
+
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+        };
+
+
+        editableTable_add();
+
+
+        $('button#category_add').click(function () {
+
+            var is = 0;
+            var rowCount = 0;
+            $('div#modal-addcategory table#table-editable_add tbody tr').each(function () {
+                if ($(this).find("td.dataTables_empty").val() == null) {
+                    if ($(this).find('td:first-child input:nth-child(2)').val() == "")
+                        is = 1;
+                    rowCount++;
+                }
+            });
+
+
+            if ($("input#is").val() == "0" && $("select#category option#empty").val() == $("select#category option:selected").val()) {
+                showErrorMessage("Ангилал сонгон уу?");
+            } else if ($("input#is").val() == "1" && $("input#inputcategory_add").val() == "") {
+                showErrorMessage("Ангилал нэр оруулна уу?");
+            }
+            else if (rowCount == 0) {
+                showErrorMessage("Мөр нэмнэ үү?");
+            }
+            else if (is == 1) {
+                showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+            } else {
+                var subs = [];
+                var dat = [];
+
+                var i = 0;
+                $("table#table-editable_add tbody tr").each(function () {
+                    subs[i] = $(this).find("td input:nth-child(2)").val();
+                    i++;
+                });
+                var ids = [];
+                i = 0;
+                $("table#table-editable_add tbody tr").each(function () {
+                    ids[i] = $(this).find("td input:first-child").val();
+                    i++;
+                });
+
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        selectcat: $('form#category_form_add select#category option:selected').val(),
+                        inputcat: $('form#category_form_add input#inputcategory_add').val(),
+                        subcategorys: subs,
+                        ids: ids,
+                        is: $("input#is").val()
+                    },
+                    url: "/inventorycategoryaddcategory"
+                }).success(
+                        function (data) {
+
+                            if (data[0] != "false") {
+                                dat = data;
+
+                                if ($("input#is").val() == "0") {
+                                    var label = $('form#category_form_add select#category option:selected').val();
+
+                                    $("select#item_category optgroup").each(function () {
+                                        var th = $(this);
+                                        if (th.attr('label') == label) {
+                                            th.html("");
+                                            for (var i = 0; i < subs.length; i++) {
+                                                th.append('<option value="' + dat[i] + '">' + subs[i] + '</option>');
+                                            }
+                                        }
+                                    })
+                                    $('select#item_category').selectpicker('refresh');
+                                }
+                                else {
+                                    var x = document.createElement("optgroup");
+                                    var label = $('form#category_form_add input#inputcategory_add').val();
+                                    x.setAttribute("label", label);
+                                    var z = document.getElementById("item_category");
+                                    z.add(x);
+                                    $('select#item_category').selectpicker('refresh');
+
+                                    for (var i = 0; i < subs.length; i++) {
+                                        var option = document.createElement("option");
+                                        option.text = subs[i];
+                                        option.value = dat[i];
+                                        x.appendChild(option);
+                                    }
+                                }
+
+
+                                showSuccessMessage("Ангилал нэмэлт амжилттай боллоо.");
+                                $('div#modal-addcategory').modal('hide');
+                            }
+                            if (data == "false")
+                                showErrorMessage("Ангилал нэмэлт амжилтгүй боллоо.");
+                            Reload_Category();
+                        });
+            }
+
+        });
+        function Reload_Category() {
+
+            $("table#table-editable tbody tr").each(function () {
+                oTable_add.fnDeleteRow(0);
+            });
+
+            $("input#inputcategory_add").val("");
+            $('select#category').selectpicker('val', '');
+            oTable_add.fnDraw();
+        }
+
+
+        function check() {
+            var add = 0;
+            $('div#modal-addcategory table#table-editable_add tbody tr').each(function () {
+                add++;
+            });
+            if (add < 2)
+                $('div#modal-addcategory table#table-editable_add tbody tr:first-child a.delete').addClass('dhidden');
+            else
+                $('div#modal-addcategory table#table-editable_add tbody tr:first-child a.delete').removeClass('dhidden');
+
+        }
+
+
+        $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+
+        $('button#measure_add').click(function () {
+            $('select#measure').selectpicker();
+            $.ajax({
+                type: "POST",
+                data: {measure: $('form#measure_form input').val()},
+                url: "/inventorymeasuresaddmeasure"
+            }).success(
+                    function (data) {
+                        if (data != "false") {
+
+                            var option = document.createElement("option");
+                            option.text = $("input#input_measure").val();
+                            option.value = parseInt(data);
+                            var z = document.getElementById("measure");
+                            z.add(option);
+
+                            $('select#measure').selectpicker('refresh');
+                            $("div#modal-addmeasure").modal('hide');
+                            showSuccessMessage("Нэгж нэмэлт амжилттай боллоо.");
+                            $("input#input_measure").val("");
+                        }
+                        else {
+                            $("input#input_measure").val("");
+                            showErrorMessage("Нэгж нэмэлт амжилтгүй боллоо.");
+                        }
+
+                    });
+        });
+        $('input#item_add').change(function () {
+            $.ajax({
+                type: "POST",
+                data: {inventory: $(this).val()},
+                url: "/inventoryCheckInventory"
+            }).success(
+                    function (data) {
+                        if (data == "false") {
+                            $('input#item_add').val("");
+                            showErrorMessage("Материал нэр давхцаж байна.");
+                        }
+                    });
+        });
+
+        $('input#item_add').keyup(function () {
+            $.ajax({
+                type: "POST",
+                data: {inventory: $(this).val()},
+                url: "/inventoryLikeInventory"
+            }).success(
+                    function (data) {
+                        if (data != "false") {
+                            $('ul#suggest').html("");
+                            for (var i = 0; i < data.length; i++)
+                                $('ul#suggest').append('<li><a class="result" data-id="">' + data[i] + '</a></li>');
+                        }
+                    });
+        });
+        function getDecimal(val) {
+            var c = 1;
+            var vv = "", value = "";
+            if (val != null) value = val.toString();
+            var i = 0;
+            for (i = (value.length - 1); i >= 0; i--) {
+                if (i != 0 && c == 3) {
+                    vv += value.charAt(i) + "'";
+                    c = 1;
+                } else {
+                    vv += value.charAt(i);
+                    c++;
+                }
+            }
+            value = "";
+            for (i = vv.length - 1; i >= 0; i--) {
+                value += vv.charAt(i);
+            }
+            return value;
+        }
+
+        function StoSplitLong(str) {
+            if (str != null && str != "")
+                return parseInt(str.replace(/'/g, ""));
+            else
+                return null;
+        }
+
+        var startDate = $('input#filter_start');
+        var endDate = $('input#filter_end');
+
+
+        $('#reportrange').daterangepicker({
+                    ranges: {
+                        'Өнөөдөр': [moment(), moment()],
+                        'Өчигдөр': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                        'Сүүлийн 7 хоног': [moment().subtract('days', 6), moment()],
+                        'Сүүлийн 30 хоног': [moment().subtract('days', 29), moment()],
+                        'Энэ сар': [moment().startOf('month'), moment().endOf('month')],
+                        'Өнгөрсөн сар': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                    },
+                    startDate: moment().subtract('days', 29),
+                    endDate: moment(),
+                    format: 'YYYY/MM/DD',
+                    locale: {
+                        applyLabel: 'Болсон',
+                        cancelLabel: 'Болих',
+                        fromLabel: 'Аас',
+                        toLabel: 'Хүртэл',
+                        customRangeLabel: 'Өөрөөр сонгох',
+                        dayNames: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+                        daysOfWeek: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+                        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+                        firstDay: 1
+                    }
+                },
+                function (start, end) {
+                    $('#reportrange span').html(start.format('YYYY/MM/DD') + '-' + end.format('YYYY/MM/DD'));
+                }
+        );
+        $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+            console.log("apply event fired, start/end dates are "
+                    + picker.startDate.format('YYYY/MM/DD')
+                    + "-"
+                    + picker.endDate.format('YYYY/MM/DD')
+            );
+            startDate.val(picker.startDate.format('YYYY/MM/DD'));
+            endDate.val(picker.endDate.format('YYYY/MM/DD'));
+        });
+        $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
+            console.log("cancel event fired");
+            $('#reportrange span').html("Өдрөөр хайх...");
+            startDate.val("");
+            endDate.val("");
+        });
+
+    });
+
+    function printButton() {
+        $(this).removeClass().addClass("fa fa-spinner faa-spin animated m-r-10");
+        $.ajax({
+            type: "POST",
+            data: {
+                CurrentPageNumber: '${CurrentPageNumber}',
+                filterStartDate: '${filterStartDate}',
+                filterEndDate: '${filterEndDate}',
+                receiver_filter: '${receiver_filter}',
+                supplier_filter: '${supplier_filter}',
+                location_filter: '${location_filter}',
+                keyword: '${keyword}'
+            }, url: "/inventorydepositsprint"
+        }).success(
+                function (data) {
+                    $('div#section-to-print').html(data);
+                    $(this).removeClass().addClass("fa fa-print m-r-10");
+                    $('div#section-to-print').print();
+                });
+    }
+
+</script>
+<style>
+
+    div#main-content body, div#main-content ul, div#main-content li {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 21px;
+        text-align: left;
+    }
+
+    .panel-default {
+        border-color: transparent;
+    }
+
+    .panel-body {
+        background-color: #FFF;
+        padding: 0px;
+        padding-left: 0px;
+    }
+
+    table#table-editable-add-deposit .dropdown-toggle {
+        padding-left: 5px;
+    }
+
+    a#additem {
+        padding: 0px 0px !important;
+        height: 24px;
+        width: 24px;
+        margin-left: 5px;
+    }
+
+    a#addsupplier {
+        padding: 0px 0px !important;
+        height: 24px;
+        width: 24px;
+        margin-left: 5px;
+    }
+</style>
+
+#{AttachScriptMulti uploadPath:controllers.Consts.uploadInventoryPath/}
+#{inventory-config /}
+#{ImgThumbnail /}

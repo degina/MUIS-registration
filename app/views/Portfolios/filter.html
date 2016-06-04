@@ -1,0 +1,9 @@
+#{if viewType == 0}
+    #{include 'Portfolios/thumbnail.html'/}
+#{/if}
+#{elseif viewType == 1}
+    #{include 'Portfolios/overview.html'/}
+#{/elseif}
+#{elseif viewType == 2}
+    #{include 'Portfolios/map.html'/}
+#{/elseif}

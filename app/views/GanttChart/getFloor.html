@@ -1,0 +1,8 @@
+<div id=floorSelectionDiv style='margin: 10px;text-align: center' class=noselect>Дэд бүлэг:
+    <select>
+    #{list items:task.projectObject.floors,as:'floor'}
+        <option value='${floor.id}' ${floor.id==task.floor?.id?'selected':''}>${floor.name}</option>
+    #{/list}
+    </select></br>
+    <button onclick="setFloor(${task.id})" class='button' style='margin-top: 15px'>Хадгалах</button>
+</div>

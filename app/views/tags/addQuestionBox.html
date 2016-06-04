@@ -1,0 +1,75 @@
+<div class="modal fade" id="addQuestionBox" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Асуулт асуух</h4>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <input id="Question" class="form-control m-b-10" placeholder="Ямар нэгэн зүйл асуух..."
+                           type="text" style="width: 95%;height:40px;font-size:14pt">
+                    <i class="fa fa-question-circle" style="font-size: 20px;color: darkgrey;" title="Асуулт"></i>
+                </div>
+                <div id="addAnswer" style="margin-top: 10px;cursor: pointer;" onclick="addAnswer()">
+                    <i class="fa fa-plus-circle" style="font-size: 15px;" title="Сонголт нэмэх"></i>
+                    Сонголт нэмэх
+                </div>
+
+            </div>
+            <div class="modal-footer" style="margin-top: 0">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                <button type="button" class="btn btn-success" onclick="addPost('question','${_id}')">Нэмэх</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="showVoteSize" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" style="width: 20%">
+        <div class="modal-content">
+            <div class="modal-body" style="overflow: auto">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function addAnswer() {
+        var answer = document.createElement('div');
+        answer.className = 'choiceContainer';
+        var input = document.createElement('input');
+        input.id = 'choice' + id;
+        input.type = 'text';
+        input.className = 'form-control 1';
+        input.style.margin = '5px 5px 0px 0px';
+        input.placeholder = 'Сонголт ' + id + '...';
+        input.style.height = '30px';
+        input.style.width = '50%';
+        answer.appendChild(input);
+        var icon = document.createElement('i');
+        icon.className = 'fa fa-times f-18';
+        icon.style.fontSize = '13px';
+        icon.style.color = 'darkgrey';
+        icon.style.cursor = 'pointer';
+        icon.title = 'Арилгах';
+        icon.onclick = function () {
+            this.parentElement.remove();
+        };
+        answer.appendChild(icon);
+        $('div#addAnswer').before(answer);
+        id++;
+    }
+
+    function showQuestion() {
+        var questionDic = $('div#addQuestionBox');
+        questionDic.modal('show');
+        questionDic.find('input#Question').val('');
+        questionDic.find('input#questionTextPickerReminder').val('');
+        $('div.choiceContainer').remove();
+        id = 1;
+    }
+
+</script>

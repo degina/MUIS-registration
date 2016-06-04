@@ -1,0 +1,16 @@
+<script>
+    $('td#tdTotalSaleAc').html("${controllers.Functions.getDecimal(budget.netSales.totalActual)}");
+    $('td#tdTotalSaleBu').html("${controllers.Functions.getDecimal(budget.netSales.totalBudget)}");
+    $('td#tdTotalCogsAc').html("${controllers.Functions.getDecimal(budget.cogs.totalActual)}");
+    $('td#tdTotalCogsBu').html("${controllers.Functions.getDecimal(budget.cogs.totalBudget)}");
+
+    currentTd= $('td#tdTotalProfitAc');
+    %{ value = budget.grossMargin.totalActual;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    currentTd= $('td#tdTotalProfitBu');
+    %{ value = budget.grossMargin.totalBudget;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+</script>
+#{include "Budgets/calculateTotalScript.html"/}

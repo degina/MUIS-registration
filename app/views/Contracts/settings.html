@@ -1,0 +1,205 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    button.delete:hover {
+        background-color: #c75757;
+        color: #fff !important
+    }
+    .pricing-2 .plan .btn {
+        min-width: 5px!important;
+    }
+    .pricing-2 {
+        padding: 10px 40px 40px;
+    }
+
+    .bootstrap-select>.btn {
+        padding: 7px 10px;
+    }
+
+</style>
+<div id="main-content">
+    <div class="page-title"><i class="icon-custom-left"></i>
+        <h2>Тохиргоо
+            <small>/ангилал нэмэх, хасах/</small>
+        </h2>
+    </div>
+    <form id=addContract action="@{saveStatus()}" method="post" accept-charset="utf-8"
+          enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                            <!-- BEGIN PRICING TABLE 2 -->
+                            <div class="row plans pricing-2">
+                                <h3 class="align-center m-b-40">Төлөв, ангилал болон төлбөрийн нөхцлийг засах</h3>
+                                <div class="col-sm-4">
+                                    <div class="plan">
+                                        <div class="title">Төлөв:</div>
+                                        <div class="description">
+                                        #{list statuses,as:'status'}
+                                            <div id="status1${status.id}" class="col-md-12" style="display: inline-flex;">
+                                                <select name="statusColor" data-width="50px" class="form-control">
+                                                    <option value="red" data-icon="fa fa-circle c-red"  #{if status.colorClass == 'red'} selected #{/if}></option>
+                                                    <option value="blue" data-icon="fa fa-circle c-blue" #{if status.colorClass == 'blue'} selected #{/if}></option>
+                                                    <option value="purple" data-icon="fa fa-circle c-purple" #{if status.colorClass == 'purple'} selected #{/if}></option>
+                                                    <option value="brown" data-icon="fa fa-circle c-brown" #{if status.colorClass == 'brown'} selected #{/if}></option>
+                                                    <option value="orange" data-icon="fa fa-circle c-orange" #{if status.colorClass == 'orange'} selected #{/if}></option>
+                                                    <option value="green" data-icon="fa fa-circle c-green" #{if status.colorClass == 'green'} selected#{/if}></option>
+                                                    <option value="dark" data-icon="fa fa-circle c-dark" #{if status.colorClass == 'dark'} selected #{/if}></option>
+                                                </select>
+                                                <input class="col-md-8" style="margin-bottom:10px" type="text" name="status" value="${status.status}"/>
+                                                <button type="button" onclick="deleteStatus('${status.id}',1)" data-rel="tooltip" title="Устгах" style="margin-top: 3px;"
+                                                        class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+                                                <input type="hidden" name="statusId" value="${status.id}"/>
+
+                                            </div>
+                                        #{/list}
+                                            <div class="add" id="statusadd">  </div>
+                                        </div>
+                                            <button class="btn btn-success" type="button" onclick="add(1)" id="addbutton1"><i class="fa fa-plus"></i> Төлөв нэмэх</button>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="plan">
+                                        <div class="title">Ангилал:</div>
+                                        <div class="description">
+                                            #{list categories,as:'category'}
+                                            <div id="status2${category.id}" class="col-md-12">
+                                                <input class="col-md-10" type="text" name="category" style="margin-bottom:10px " value="${category.category}"/>
+                                                <input type="hidden" name="categoryId" value="${category.id}"/>
+                                                <button type="button"
+                                                        onclick="deleteStatus('${category.id}' ,2)" data-rel="tooltip" title="Устгах"
+                                                        class="delete btn btn-icon-sm btn-rounded btn-default">
+                                                    <i class="fa fa-times"></i></button>
+                                            </div>
+                                        #{/list}
+                                                <div class="add" id="categoryadd"></div>
+                                        </div>
+                                            <button class="btn btn-success" type="button" onclick="add(2)" id="addbutton2"><i class="fa fa-plus"></i> Ангилал нэмэх</button>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="plan">
+                                        <div class="title">Төлбөрийн нөхцөл:</div>
+                                        <div class="description">
+                                        #{list payments,as:'payment'}
+                                            <div id="status3${payment.id}" class="col-md-12">
+                                                <input class="col-md-10" type="text" name="payment" style="margin-bottom:10px" value="${payment.payment}"/>
+                                                <input type="hidden" name="paymentId" value="${payment.id}"/>
+                                                <button type="button" onclick="deleteStatus('${payment.id}' ,3)" data-rel="tooltip" title="Устгах"
+                                                        class="delete btn btn-icon-sm btn-rounded btn-default"> <i class="fa fa-times"></i></button>
+                                            </div>
+                                        #{/list}
+                                            <div class="add" id="paymentadd"> </div>
+                                        </div>
+                                            <button class="btn btn-success" type="button" onclick="add(3)" id="addbutton3"><i class="fa fa-plus"></i> Төлбөрийн нөхцөл нэмэх</button>
+                                    </div>
+                                </div>
+                            </div>
+                        <!-- END PRICING TABLE 2 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 m-t-20 m-b-40 align-center">
+        <a href="@{controllers.Contracts.list()}" class="btn btn-default m-r-10 m-t-10"><i class="fa fa-reply"></i> Болих</a>
+        <button type="submit" class="btn btn-danger m-t-10"><i class="fa fa-check"></i> Хадгалах</button>
+    </div>
+    </form>
+</div>
+#{contract-settings-config /}
+#{set title:'Гэрээний тохиргоо'/}
+#{set activeMenu: 'Contract'/}
+#{set activeMenuSub: 'ContractSetting'/}
+<script>
+    var statusid = 40;
+    function deleteStatus(id, type) {
+        var r = confirm("Та устгахдаа итгэлтэй байна уу!!!");
+        if (r == true) {
+            $.ajax({
+                type: "POST",
+                data: {
+                    id:id,
+                    type:type
+                }, url: "/contract/deleteStatus"
+            }).success(
+                    function () {
+                        $("div#status" + type + id).remove();
+                    });
+        }
+    }
+    function add(type) {
+        $("button#addbutton"+type+" i").removeClass().addClass("fa fa-spinner faa-spin animated");
+        $.ajax({
+            type: "POST",
+            data: {
+                type:type
+            }, url: "/contract/CreateStatus"
+        }).success(
+                function (data) {
+                    console.log("id: "+data.id);
+                    if (type == 1) {
+                        $("#statusadd").before("<div id=status"+type+ data.id + " class=col-md-12 style='display: inline-flex;' >"+
+                                "<select name=statusColor data-width=50px class=form-control >"+
+                                "<option value=red data-icon='fa fa-circle c-red'></option>"+
+                                "<option value=blue data-icon='fa fa-circle c-blue'></option>"+
+                                "<option value=purple data-icon='fa fa-circle c-purple'></option>"+
+                                "<option value=brown data-icon='fa fa-circle c-brown'></option>"+
+                                "<option value=orange data-icon='fa fa-circle c-orange'></option>"+
+                                "<option value=green data-icon='fa fa-circle c-green'></option>"+
+                                "<option value=dark data-icon='fa fa-circle c-dark'></option> </select>"+
+                                "<input class=col-md-8 name=status style=margin-bottom:10px type=text/> "+
+                        "<button type=button onclick=deleteStatus(" + data.id + ","+type+") data-rel=tooltip title=Устгах " +
+                                "class='delete btn btn-icon-sm btn-rounded btn-default' style='margin-top: 3px;' >"+
+                        "<i class='fa fa-times'></i></button><input type=hidden name=statusId value="+data.id+" /></div>");
+
+                        $('select[name=statusColor]').each(function(){
+                            $(this).selectpicker('render');
+                        });
+                    }
+                    if (type == 2) {
+                        $("#categoryadd").before("<div id=status"+type+ data.id + " class=col-md-12 ><input class=col-md-10 name=category style=margin-bottom:10px type=text /> "+
+                        "<button type=button onclick=deleteStatus(" + data.id + ","+type+") data-rel=tooltip title=Устгах class='delete btn btn-icon-sm btn-rounded btn-default' >"+
+                        "<i class='fa fa-times'></i></button><input type=hidden name=categoryId value="+data.id+" /></div>");
+                    }
+                    if (type == 3) {
+                        $("#paymentadd").before("<div id=status"+type+ data.id + " class=col-md-12 ><input class=col-md-10 name=payment style=margin-bottom:10px type=text /> "+
+                        "<button type=button onclick=deleteStatus(" + data.id + ","+type+") data-rel=tooltip title=Устгах class='delete btn btn-icon-sm btn-rounded btn-default' >"+
+                        "<i class='fa fa-times'></i></button><input type=hidden name=paymentId value="+data.id+" /> </div>");
+                    }
+                    $("button#addbutton"+type+" i").removeClass().addClass("fa fa-plus");
+                });
+    }
+    $('div#main-content form#addContract').submit(function (event) {
+        var isValid=true;
+        $("form#addContract input[name='status']").each(function () {
+            if($(this).val() == "") {
+                isValid= false;
+            }
+        });
+        $("form#addContract input[name='category']").each(function () {
+            if($(this).val() == "") {
+                isValid=  false;
+            }
+        });
+        $("form#addContract input[name='payment']").each(function () {
+            if($(this).val() == "") {
+                isValid=  false;
+            }
+        });
+        if(!isValid) showErrorMessage("Хоосон талбарыг бөглөнө үү");
+        return isValid;
+    });
+    function showErrorMessage(message) {
+        jError( message+"<i class='fa fa-exclamation' style='padding-right:6px'></i> ", {
+            HorizontalPosition: "center",
+            VerticalPosition: "center",
+            ShowOverlay: false,
+            TimeShown: 2000,
+            OpacityOverlay: 0.5,
+            MinWidth: 250
+        });
+    }
+</script>
+

@@ -1,0 +1,164 @@
+#{list items:portfolios,as:'portfolio'}
+<div class="col-md-12 m-b-20">
+    <div class="panel panel-default">
+
+        <div class="panel-heading p-0">
+            #{if user.accountSetting==null || user.accountSetting.themeColor==null || user.accountSetting.themeColor.id==1}
+            <div class="text-center bg-dark p-5">
+            #{/if}
+            #{elseif user.accountSetting!=null && user.accountSetting.themeColor!=null}
+                #{if user.accountSetting.themeColor.id==3}
+                <div class="text-center p-5" style="background-color: #31251e;color: #fff">
+                #{/if}
+                #{elseif user.accountSetting.themeColor.id==2}
+                <div class="text-center p-5" style="background-color: darkgrey;color: #fff">
+                #{/elseif}
+                #{elseif user.accountSetting.themeColor.id==4}
+                <div class="text-center p-5" style="background-color: #005d8d;color: #fff">
+                #{/elseif}
+                #{elseif user.accountSetting.themeColor.id==5}
+                <div class="text-center p-5" style="background-color: #C75757;color: #fff">
+                #{/elseif}
+                #{elseif user.accountSetting.themeColor.id==6}
+                <div class="text-center p-5" style="background-color: #159077;color: #fff">
+                #{/elseif}
+            #{/elseif}
+            <h2 class="panel-title">${portfolio.project.name}</h2>
+            #{if admin}
+                <a href="@{Portfolios.blank(portfolio.id)}" style="position: absolute;top: 9px;right: 24px;"
+                   class='btn edit btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Засах'><i
+                        class='fa fa-pencil'></i></a>
+            #{/if}
+
+        </div>
+            <a href="@{Portfolios.selectProject(portfolio.project.id)}">
+                <div class="col-md-4 p-10">
+                    <img src="${portfolio.imageUrl}c.jpg" class="img-responsive" alt="">
+                </div>
+            </a>
+
+            <div class="col-md-8">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <td style="width: 130px;"><strong>Гүйцэтгэл: </strong></td>
+                                <td class="text-left">${portfolio.project.completedPercent}%</td>
+                                <td style="width: 147px;"><strong>Ангилал: </strong></td>
+                                <td class="text-left">${portfolio.category?.name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Эхэлсэн: </strong></td>
+                                <td class="text-left">${portfolio.project?.startDate?.format("yyyy/MM/dd")}</td>
+                                <td><strong>Дуусах: </strong></td>
+                                <td class="text-left">${portfolio.project?.finishDate?.format("yyyy/MM/dd")}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Хоног: </strong></td>
+                                <td class="text-left">${portfolio.project.duration}</td>
+                                <td><strong>Үе шат: </strong></td>
+                                <td class="text-left">#{if portfolio.isActive}Идэвхтэй#{/if}#{else }Идэвхгүй#{/else} > ${portfolio.stage.name}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Байршил: </strong></td>
+                                <td colspan="3">${portfolio.address}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12 p-0">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th style="width: 200px;text-align: center;">Тойм</th>
+                                <th style="text-align: center;">
+                                    <i class="fa fa-square" style="color: #d9534f;"></i> Хугацаа хэтэрсэн &nbsp;
+                                    <i class="fa fa-square" style="color: #f0ad4e;"></i> < Долоо хоног &nbsp;
+                                    <i class="fa fa-square" style="color:#5cb85c;"></i> > Долоо хоног &nbsp;
+                                </th>
+                                <th style="width: 100px;text-align: center;">Нийт</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                #{if portfolio.allRFIs != 0 }
+                                <tr>
+                                    <td style="padding-left: 30px;"> Мэдээлэл хүсэлт</td>
+                                    <td style="padding-left: 20px; padding-right: 20px;">
+                                        <div class="gur-group">
+                                            <div class="gur-ulaan"
+                                                 style="width: ${100*portfolio.overdueRFIs/portfolio.allRFIs}%;">${portfolio.overdueRFIs}</div>
+                                            <div class="gur-ulbar"
+                                                 style="width: ${100*portfolio.nextWeekRFIs/portfolio.allRFIs}%; ">${portfolio.nextWeekRFIs}</div>
+                                            <div class="gur-nogoon"
+                                                 style="width:${100*portfolio.nNextWeekRFIs/portfolio.allRFIs}%;">${portfolio.nNextWeekRFIs}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">${portfolio.allRFIs}</td>
+                                </tr>
+                                </tr>
+                                #{/if}
+                                #{if portfolio.allPunchLists != 0 }
+                                <tr>
+                                    <td style="padding-left: 30px;"> Үүрэг даалгавар</td>
+                                    <td style="padding-left: 20px; padding-right: 20px;">
+                                        <div class="gur-group">
+                                            <div class="gur-ulaan"
+                                                 style="width: ${100*portfolio.overduePunchLists/portfolio.allPunchLists}%;">${portfolio.overduePunchLists}</div>
+                                            <div class="gur-ulbar"
+                                                 style="width: ${100*portfolio.nextWeekPunchLists/portfolio.allPunchLists}%; ">${portfolio.nextWeekPunchLists}</div>
+                                            <div class="gur-nogoon"
+                                                 style="width:${100*portfolio.nNextWeekPunchLists/portfolio.allPunchLists}%;">${portfolio.nNextWeekPunchLists}</div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">${portfolio.allPunchLists}</td>
+                                </tr>
+                                #{/if}
+                                #{if portfolio.allMeetings != 0 }
+                                <tr>
+                                    <td style="padding-left: 30px;"> Хурал уулзалт</td>
+                                    <td style="padding-left: 20px; padding-right: 20px;">
+                                        <div class="gur-group">
+                                            <div class="gur-ulaan"
+                                                 style="width: ${100*portfolio.overdueMeetings/portfolio.allMeetings}%;">${portfolio.overdueMeetings}</div>
+                                            <div class="gur-ulbar"
+                                                 style="width: ${100*portfolio.nextWeekMeetings/portfolio.allMeetings}%; ">${portfolio.nextWeekMeetings}</div>
+                                            <div class="gur-nogoon"
+                                                 style="width:${100*portfolio.nNextWeekMeetings/portfolio.allMeetings}%;">${portfolio.nNextWeekMeetings}</div>
+                                        </div>
+
+                                    </td>
+                                    <td class="text-center">${portfolio.allMeetings}</td>
+                                </tr>
+                                #{/if}
+                                #{if portfolio.allSchedule > 0 }
+                                <tr>
+                                    <td style="padding-left: 30px;"> График төлөвлөгөө</td>
+                                    <td style="padding-left: 20px; padding-right: 20px;">
+                                        <div class="gur-group">
+                                            <div class="gur-ulaan"
+                                                 style="width: ${100*portfolio.overdueSchedule/portfolio.allSchedule}%;">${portfolio.overdueSchedule}</div>
+                                            <div class="gur-ulbar"
+                                                 style="width: ${100*portfolio.nextWeekSchedule/portfolio.allSchedule}%; ">${portfolio.nextWeekSchedule}</div>
+                                            <div class="gur-nogoon"
+                                                 style="width:${100*portfolio.nNextWeekSchedule/portfolio.allSchedule}%;">${portfolio.nNextWeekSchedule}</div>
+                                        </div>
+
+                                    </td>
+                                    <td class="text-center">${portfolio.allSchedule}</td>
+                                </tr>
+                                #{/if}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+#{/list}

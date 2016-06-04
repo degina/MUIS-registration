@@ -1,0 +1,189 @@
+
+<!-- New event modal appear in dashboard -->
+<style type="text/css">
+    table {
+        width: 100% ;
+    }
+
+    th, td {
+        padding: 5px;
+        width: auto;
+    }
+
+    .textInputs {
+        width: 437px;
+        padding-left: inherit;
+    }
+
+    #date_timepicker_start5 {
+        background: url('/public/images/eventCal.png') no-repeat right center;
+        width: 200px;
+        cursor: pointer;
+        padding-left: inherit;
+    }
+
+    #date_timepicker_end5 {
+        background: url('/public/images/eventCal.png') no-repeat right center;
+        width: 200px;
+        cursor: pointer;
+        padding-left: inherit;
+    }
+
+    #duusah {
+        width: 120px;
+        padding-left: inherit;
+        float: right;
+        margin-right: 0
+    }
+
+    #removeButton {
+        width: 10px;
+        height: 10px;
+        position: inherit;
+        float: right;
+        margin-right: 3px;
+    }
+
+    .textarea {
+        margin-top: 5px;
+        width: 437px;
+        padding-left: inherit;
+    }
+
+
+
+
+</style>
+
+<!-- Button trigger modal -->
+
+
+<script>
+    //    $(function() {
+    //        $( "#datepicker" ).datepicker();
+    //    });
+    $(document).ready(function () {
+        $(".nuugdah").hide();
+        $("#removeButton").click(function () {
+            //$("p").hide();
+            $(".nuugdah").hide();
+            $("removeButton").hide();
+        });
+        $("#duusah").click(function () {
+            $("p").show();
+            $(".nuugdah").show();
+//            $("#duusah").show();
+        });
+    });
+    $(document).ready(function () {
+        $('#someInput').on('input', function () {
+            $(this).val();// get the current value of the input field.
+        });
+//        jQuery('#date_timepicker_start').datetimepicker({
+//            format: 'Y-m-d H:i',
+//            timepicker: true,
+
+        jQuery('#date_timepicker_start5').datetimepicker({
+            format: 'd/m/Y H:00',
+            minDate: 0
+        });
+
+        jQuery('#date_timepicker_end5').datetimepicker({
+            format: 'd/m/Y H:00',
+            onShow: function (ct) {
+                this.setOptions({
+                    minDate: jQuery('#date_timepicker_start5').val() ? jQuery('#date_timepicker_start5').val() : false,
+                    minTime: jQuery('#date_timepicker_start5').val() == jQuery('#date_timepicker_end5').val() ? jQuery('#date_timepicker_start_time5').val() : false
+                })
+            },
+        });
+    });
+</script>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Үйл ажиллагаа зарлах </h4>
+
+            </div>
+            <div class="modal-body">
+                <table cellpadding="1" cellspacing="1">
+                    <tr>
+                        <strong><td>Гарчиг</td></strong>
+                        <td colspan="3"><input type="text" class="textInputs" name="name" value="" id="title" placeholder="Гарчиг"/></td>
+                    </tr>
+                    <tr>
+                        <strong><td>Тайлбар</td></strong>
+                        <td colspan="3">
+                            <textarea rows="2" cols="10" id="desc" class="textarea"
+                                      placeholder="Нэмэлт тайлбар"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <strong><td>Хаана</td></strong>
+                        <td colspan="3">
+                            <input type="text" name="name" class="textInputs" value="" id="location"
+                                   placeholder="Хаана зохион байгуулагдах"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <strong><td>Эхлэх</td></strong>
+                        <td><input type="text" name="date_timepicker_start5" class="textInputs" id="date_timepicker_start5" value=""
+                                   placeholder="Эхлэх өдөр"/></td>
+                    *{<td><input type="text" name="name" id="date_timepicker_start_time" value=""}*
+                    *{placeholder="Цаг оруулах уу ?"/></td>}*
+                        <td><a id="duusah" href="#"><p>Дуусах хугацаа?</p></a></td>
+                    </tr>
+
+                    <tr>
+                        <strong><td class="nuugdah" >Дуусах</td></strong>
+                        <td><input type="text" class="nuugdah" class="textInputs" id="date_timepicker_end5" name="startDate"
+                                   placeholder="Дуусах өдөр" value=""/></td>
+                        <td><a href="#" class="nuugdah">
+                            <img src="/public/images/delete.png" alt="removeButton" id="removeButton" style="">
+                        </a></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Цуцлах</button>
+                &nbsp;
+                <button type="button" class="btn btn-primary" onclick="saveNewEvent()">Хадгалах</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function saveNewEvent() {
+        if ($("div#myModal input#title").val() == '') {
+            alert("Гарчиг оруулна уу ?");
+        }
+         else if($("div#myModal input#date_timepicker_start5").val() == ''){
+            alert("Эхлэх хугацааг оруулна уу ?");
+        }
+        else {
+
+            $.ajax({
+                type: "POST",
+                url: "/event/newEvent",
+                data: {
+                    id: "12",
+                    title: $("div#myModal input#title").val(),
+                    desc: $("div#myModal textarea#desc").val(),
+                    location: $("div#myModal input#location").val(),
+                    startDate: $("div#myModal input#date_timepicker_start5").val(),
+                    endDate: $("div#myModal input#date_timepicker_end5").val(),
+                }
+            }).success(function (data) {
+                window.location.replace('/events/'+data);
+            });
+            $('#myModal').modal('toggle').find("input,textarea").val('');
+        }
+    }
+    function newEventModalOpen(){
+        $('#myModal').modal('toggle').find("input,textarea").val('');
+    }
+</script>

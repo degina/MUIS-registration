@@ -1,0 +1,318 @@
+<div class="row" style="background-color: #dfe5e9;">
+    <div class="a4">
+        <div>
+            <table class="table">
+                <thead>
+                <td class="bBlack" colspan="4">ӨДРИЙН ТАЙЛАН</td>
+                <td class="f-18 text-center">Огноо: <strong>${currentDate?.format("yyyy/MM/dd")}</strong></td>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><strong>Нэр: </strong></td>
+                    <td>${user}</td>
+                    <td><strong>Баг:</strong></td>
+                    <td>${user.userTeam.name}</td>
+                    <td rowspan="3" class="text-center"><img src="/public/images/logo/logo.png" alt="design"  height="60px;" /></td>
+                </tr>
+                <tr>
+                    <td><strong>Албан тушаал:</strong></td>
+                    <td colspan="3">${user.userPosition.name}</td>
+                </tr>
+                </tbody>
+            </table>
+        #{if tasks!=null && !tasks.isEmpty()}
+            #{list items:tasks,as:'task'}
+            %{work = task.getScheduledWork(currentDate); }%
+            %{myWorkNote = work?.getMyWorkNote(); }%
+                <table class="table border" style="margin-top: 10px;">
+                    <thead>
+                    <td class="bBlack" colspan="4">Хийгдсэн ажлын тэмдэглэл: ${task_index}</td>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td style="width: 66px;"><strong>Төсөл: </strong></td>
+                        <td>${task?.projectObject.project?.name}</td>
+                        <td style="width: 158px;"><strong>Эхэлсэн:</strong> ${task?.startDate?.format("yyyy-MM-dd")}
+                        </td>
+                        <td><strong>Дуусгах:</strong> ${task?.finishDate?.format("yyyy-MM-dd")}</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 66px;"><strong>Ажил: </strong></td>
+                        <td colspan="2">${task?.name}</td>
+                        <td style="width: 160px;" class="border"><strong>ГҮЙЦЭТГЭЛ:</strong>  <span
+                                style="color: ${task?.completedPercent==100?'green':'red'}">
+                        ${work?work.completedPercent:task?.completedPercent} %</span></td>
+                    </tr>
+                        #{if myWorkNote!=null}
+                        <tr>
+                            <td colspan="4"><strong>Тэмдэглэл:</strong> ${myWorkNote?.notes}</td>
+                        </tr>
+                        #{/if}
+                        #{if myWorkNote?.attaches?.size()>0}
+                        <tr>
+                            <td colspan="4"><strong style="float: left"> Хавсралт:</strong>
+                                <div class="post-images" style="float: left ; margin-left: 10px;">
+                                    #{list items:myWorkNote?.attaches, as:'attach'}
+                                                ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                            #{/list}
+                                </div>
+                            </td>
+                        </tr>
+                        #{/if}
+                    <tr>
+                        <td colspan="4">
+                        %{technicalDelays = task.getTechnicalDelays(currentDate);}%
+                            #{if technicalDelays != null && !technicalDelays.isEmpty()}
+                                <table class="table border" style="margin-top: 0px;float: right;width: 95%;">
+                                    <thead>
+                                    <td class="bBlack" colspan="3">Техникийн саатлын тэмдэглэл:</td>
+                                    </thead>
+                                    <tbody>
+                                        #{list items:technicalDelays,as:'technicalDelay'}
+                                        <tr class="borderTop">
+                                            <td><strong>Шалтгааан:</strong> ${technicalDelay.conditionTechnical}</td>
+                                            <td><strong>Эхэлсэн цаг:</strong> ${technicalDelay.startDate.format('HH:mm')}</td>
+                                            <td><strong>Дууссан цаг:</strong> ${technicalDelay.finishDate.format('HH:mm')}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border" colspan="3"><strong>Тэмдэглэл:</strong> ${technicalDelay.notes}</td>
+                                        </tr>
+                                            #{if technicalDelay.attaches.size()>0}
+                                            <tr>
+                                                <td class="border" colspan="3"><strong style="float: left"> Хавсралт:</strong>
+
+                                                    <div class="post-images" style="float: left ; margin-left: 10px;">
+                                                        #{list items:technicalDelay.attaches, as:'attach'}
+                                                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                            #{/list}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </tbody>
+                                </table>
+                            #{/if}
+                        %{weathers=task.getWeathers(currentDate);}%
+                            #{if weathers != null && !weathers.isEmpty()}
+                                <table class="table border" style="margin-top: 0px;float: right;width: 95%;">
+                                    <thead>
+                                    <td class="bBlack" colspan="3">Цаг агаарын саатлын тэмдэглэл:</td>
+                                    </thead>
+                                    <tbody>
+                                        #{list items:weathers,as:'weather'}
+                                        <tr class="borderTop">
+                                            <td><strong> Нөхцөл:</strong> ${weather.weatherCondition.conditionWeather}</td>
+                                            <td><strong>Эхэлсэн цаг:</strong> ${weather.startDate.format('HH:mm')}</td>
+                                            <td><strong>Дууссан цаг:</strong> ${weather.finishDate.format('HH:mm')}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border" colspan="3"><strong>Тэмдэглэл:</strong> ${weather.notes}</td>
+                                        </tr>
+                                            #{if weather.attaches.size()>0}
+                                            <tr>
+                                                <td class="border" colspan="3"><strong style="float: left"> Хавсралт:</strong>
+
+                                                    <div class="post-images" style="float: left ; margin-left: 10px;">
+                                                        #{list items:weather.attaches, as:'attach'}
+                                                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                            #{/list}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </tbody>
+                                </table>
+                            #{/if}
+                        %{notes=task.getNotesLog(currentDate);}%
+                            #{if notes!=null && !notes.isEmpty()}
+                                <table class="table border " style="margin-top: 0px; float: right;width: 95%;">
+                                    <thead>
+                                    <td class="bBlack" colspan="2">Тэмдэглэл/Асуудал:</td>
+                                    </thead>
+                                    <tbody>
+                                        #{list items:notes,as:'note'}
+                                        <tr class="borderTop">
+                                            <td><strong>Ач холбогдол:</strong> ${note.issue}</td>
+                                            <td><strong>Тэмдэглэл:</strong> ${note.comment}</td>
+                                        </tr>
+                                            #{if note.attaches!=null && !note.attaches.isEmpty()}
+                                            <tr>
+                                                <td class="border" colspan="2"><strong style="float: left"> Хавсралт:</strong>
+
+                                                    <div class="post-images" style="float: left ; margin-left: 10px;">
+                                                        #{list items:note.attaches, as:'attach'}
+            ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </tbody>
+                                </table>
+                            #{/if}
+                        %{sanaachlagas=task.getSanaachlagas(currentDate);}%
+                            #{if sanaachlagas!=null && !sanaachlagas.isEmpty()}
+                                <table class="table border" style="margin-top: 4px;; float: right;width: 95%;">
+                                    <thead>
+                                    <td class="bBlack">Санал санаачлагын тэмдэглэл:</td>
+                                    </thead>
+                                    <tbody>
+                                        #{list items:sanaachlagas,as:'sanaachlaga'}
+                                        <tr class="borderTop">
+                                            <td><strong>Тэмдэглэл:</strong> ${sanaachlaga.sanal}</td>
+                                        </tr>
+                                            #{if sanaachlaga.attaches!=null && !sanaachlaga.attaches.isEmpty()}
+                                            <tr>
+                                                <td class="border"><strong style="float: left"> Хавсралт:</strong>
+
+                                                    <div class="post-images" style="float: left ; margin-left: 10px;">
+                                                        #{list items:sanaachlaga.attaches, as:'attach'}
+            ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </tbody>
+                                </table>
+                            #{/if}
+                        %{deliveries=task.getDeliveries(currentDate);}%
+                            #{if deliveries!=null && !deliveries.isEmpty()}
+                                <table class="table border" style="margin-top: 4px;;float: right;width: 95%;">
+                                    <thead>
+                                    <td class="bBlack" colspan="4">Хүргэлт хүлээн авсан тэмдэглэл:</td>
+                                    </thead>
+                                    <tbody>
+                                        #{list items:deliveries,as:'delivery'}
+                                        <tr class="borderTop">
+                                            <td><strong> Хүлээн авсан цаг:</strong></td>
+                                            <td>${delivery.deliveryHour.format('HH:mm')}</td>
+                                            <td><strong> Хаанаас:</strong></td>
+                                            <td>${delivery.deliveryFrom}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong> Дугаар/Код:</strong></td>
+                                            <td>${delivery.trackingNumber}</td>
+                                            <td><strong> Агуулга:</strong></td>
+                                            <td>${delivery.content}</td>
+                                        </tr>
+                                            #{if delivery.comments!=null && !delivery.comments.isEmpty()}
+                                            <tr>
+                                                <td class="border" colspan="4"><strong>Тэмдэглэл:</strong> ${delivery.comments}</td>
+
+                                            </tr>
+                                            #{/if}
+                                            #{if delivery.attaches!=null && !delivery.attaches.isEmpty()}
+                                            <tr>
+                                                <td class="border" colspan="4"><strong style="float: left"> Хавсралт:</strong>
+
+                                                    <div class="post-images" style="float: left ; margin-left: 10px;">
+                                                        #{list items:delivery.attaches, as:'attach'}
+            ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </tbody>
+                                </table>
+                            #{/if}
+                        %{visitors=task.getVisitors(currentDate);}%
+                            #{if visitors!=null && !visitors.isEmpty()}
+                                <table class="table border" style="margin-top: 4px;;float: right;width: 95%;">
+                                    <thead>
+                                    <td class="bBlack" colspan="4">Зочин хүлээн авсан тэмдэглэл:</td>
+                                    </thead>
+                                    <tbody>
+                                        #{list items:visitors,as:'visitor'}
+                                        <tr class="borderTop">
+                                            <td><strong>Хэн:</strong></td>
+                                            <td>${visitor.visitor}</td>
+                                            <td><strong> Хаанаас:</strong></td>
+                                            <td>${visitor.fromVisitor}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong> Ирсэн цаг:</strong></td>
+                                            <td>${visitor.startHour.format('HH:mm')}</td>
+                                            <td><strong> Явсан цаг:</strong></td>
+                                            <td>${visitor.endHour.format('HH:mm')}</td>
+                                        </tr>
+                                            #{if visitor.description!=null && !visitor.description.isEmpty()}
+                                            <tr>
+                                                <td class="border" colspan="4"><strong>Тайлбар:</strong> ${visitor.description}</td>
+
+                                            </tr>
+                                            #{/if}
+                                            #{if visitor.attaches!=null && !visitor.attaches.isEmpty()}
+                                            <tr>
+                                                <td class="border" colspan="4"><strong style="float: left"> Хавсралт:</strong>
+
+                                                    <div class="post-images" style="float: left ; margin-left: 10px;">
+                                                        #{list items:visitor.attaches, as:'attach'}
+            ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </tbody>
+                                </table>
+                            #{/if}
+                        %{inspections = task?.getInspections(currentDate);}%
+                            #{if inspections!=null && !inspections.isEmpty()}
+                                <table class="table border" style="margin-top:4px;float:right;width: 95%;">
+                                    <thead>
+                                    <td class="bBlack" colspan="4">Үзлэг шалгалтын тэмдэглэл:</td>
+                                    </thead>
+                                    <tbody>
+                                        #{list items:inspections,as:'inspection'}
+                                        <tr class="borderTop">
+                                            <td colspan="2"><strong> Талбар:</strong></td>
+                                            <td colspan="2">${inspection.area}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Шалгагч:</strong></td>
+                                            <td>${inspection.inspectorName}</td>
+                                            <td><strong> Төрөл:</strong></td>
+                                            <td>${inspection.inspectionType}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong> Эхэлсэн цаг:</strong></td>
+                                            <td>${inspection.startHour.format("HH:mm")}</td>
+                                            <td><strong> Дууссан цаг:</strong></td>
+                                            <td>${inspection.finishHour.format("HH:mm")}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border" colspan="4"><strong>Тэмдэглэл:</strong> ${inspection.comments}</td>
+                                        </tr>
+                                            #{if inspection.attaches.size()>0}
+                                            <tr>
+                                                <td class="border" colspan="4"><strong style="float: left"> Хавсралт:</strong>
+
+                                                    <div class="post-images" style="float: left ; margin-left: 10px;">
+                                                        #{list items:inspection.attaches, as:'attach'}
+                                     ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                    #{/list}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            #{/if}
+                                        #{/list}
+                                    </tbody>
+                                </table>
+                            #{/if}
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            #{/list}
+        #{/if}
+        </div>
+    </div>
+</div>

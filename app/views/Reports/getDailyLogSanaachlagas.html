@@ -1,0 +1,35 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Санал санаачлага</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Санал</th>
+            </tr>
+            </thead>
+            <tbody>
+            %{count2=1;}%
+            #{list items:dataListSub,as:'sanaachlaga'}
+            <tr>
+                <td>${count2}</td>
+                <td>
+                    <div class="notes">${controllers.ReportClass.ReportFunctionLocal.getBreakLine(sanaachlaga.sanal).raw()}</div>
+                    #{if sanaachlaga.attaches.size()>0}
+                        <div class="post-images" id="post-images-sanaachlaga-${sanaachlaga.id}">
+                            #{list items:sanaachlaga.attaches, as:'attach'}
+                                ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                            #{/list}
+                        </div>
+                    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-sanaachlaga-"+sanaachlaga.id).raw()}
+                    #{/if}
+                </td>
+            </tr>
+            %{count2++}%
+            #{/list}
+            </tbody>
+        </table>
+    </div>
+</div>

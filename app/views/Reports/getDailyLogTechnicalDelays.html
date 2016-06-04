@@ -1,0 +1,43 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Техникийн саатал</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Ажил</th>
+                <th>Шалтгаан</th>
+                <th>Эхэлсэн</th>
+                <th>Дууссан</th>
+                <th>Тэмдэглэл</th>
+            </tr>
+            </thead>
+            <tbody>
+            %{count2=1;}%
+            #{list items:dataListSub,as:'technical'}
+            <tr>
+                <td>${count2}</td>
+                <td>${technical.task?.name}</td>
+                <td>${technical.conditionTechnical}</td>
+                <td>${technical.startDate.format("HH:mm")}</td>
+                <td>${technical.finishDate.format("HH:mm")}</td>
+                <td>
+                    <div class="notes">${controllers.ReportClass.ReportFunctionLocal.getBreakLine(technical.notes).raw()}</div>
+                    #{if technical.attaches.size()>0}
+                        <div class="post-images" id="post-images-technical-${technical.id}">
+                            #{list items:technical.attaches, as:'attach'}
+                               ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                            #{/list}
+                        </div>
+                    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-technical-"+technical.id).raw()}
+                    #{/if}
+                </td>
+            </tr>
+            %{count2++}%
+            #{/list}
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu: 'MailSet'/}
+#{blankConfig /}
+<div id="main-content">
+    <div style="width:100%; text-align: center;margin-top: 20px">
+        <div><span style="font-weight: bold;font-size: 16px">${email.username}</span></div>
+        <div id="logtxt">нэвтэрч байна</div>
+        <div id=desc style="margin-top:10px"><img src='/public/images/ajax-horizontal.gif' alt='Loading'/></div>
+    </div>
+    <form id='complete' action="@{controllers.Emails.folders()}"></form>
+</div>
+<script>
+    $(function () {
+        $.ajax({
+            type: "POST",
+            url: "/emailFolderAction"
+        }).success(function (data) {
+            if (data == "failed") {
+                $('div#logtxt').html("");
+                $('div#desc').html("Холбогдож чадсангүй. Та И-мэйл хаяг, нууц үгээ шалгана уу!")
+            } else {
+                $('form#complete').attr('action', '/emailFolders?name=' + data).submit();
+            }
+        });
+    });
+</script>

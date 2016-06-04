@@ -1,0 +1,560 @@
+#{extends 'CRUD/layout.html' /}
+#{UserEdit-Config /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script src="/assets/plugins/jquery-validation/jquery.validate.min.js"></script>
+<style>
+    div#general_settings .ui-radio {
+        margin:0;
+    }
+    div#permission_settings table thead span {
+        font-size: 11px;
+    }
+
+    div#permission_settings table th {
+        white-space: normal;
+    }
+
+    div#permission_settings span.description {
+        font-size: 11px;
+    }
+
+    .jcrop-holder div {
+        -webkit-border-radius: 50% !important;
+        -moz-border-radius: 50% !important;
+        border-radius: 50% !important;
+    }
+
+    .profile img {
+        max-height: 200px;
+    }
+</style>
+<div id="main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <form action="@{create()}" class="form-horizontal" role="form" id="settings" method="post"
+                  accept-charset="utf-8" enctype="multipart/form-data">
+                <!-- BEGIN TABS -->
+                <div class="tabbable tabbable-custom form">
+                    <ul class="nav nav-tabs">
+                        <li class="active"><a href="#general_settings" data-toggle="tab">Хэрэглэгчийн мэдээлэл</a></li>
+                        <li><a href="#permission_settings" data-toggle="tab">Хандах эрхүүд</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div class="space20"></div>
+                        <div class="tab-pane active" id="general_settings">
+                            <div class="row profile">
+                                <div class="col-md-12">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div id="profilePicture">
+                                                <ul class="list-unstyled profile-nav col-md-3">
+                                                    <li>
+                                                    %{ramdomPic=controllers.Functions.randomNumber(13)}%
+                                                        <img style="cursor: pointer"
+                                                             src="/assets/img/avatars/avatar${ramdomPic}_big.png"/>
+                                                    </li>
+                                                    <button type="button" class="btn btn-default">Зураг хуулах</button>
+                                                </ul>
+                                                <input type="hidden" id="object_x" name="object.x" value="0">
+                                                <input type="hidden" id="object_y" name="object.y" value="0">
+                                                <input type="hidden" id="object_w" name="object.w" value="100">
+                                                <input type="hidden" id="object_h" name="object.h" value="100">
+
+                                                <h3 id="uploadProgress"></h3>
+
+                                                <div id="file-uploader-demo2"
+                                                     style="visibility:hidden;height:0;width:0;float:left;">
+                                                    <noscript>
+                                                        <p>Please enable JavaScript to use file uploader.</p>
+                                                        <!-- or put a simple form for upload here -->
+                                                    </noscript>
+                                                </div>
+                                            </div>
+                                            <input type="hidden" id="object_profilePicture"
+                                                   value="/assets/img/avatars/avatar${ramdomPic}_big.png"
+                                                   name="object.profilePicture"/>
+                                        </div>
+                                    </div>
+                                    <div class="row profile-classic">
+                                        <div class="col-md-12">
+                                            <div class="panel">
+                                                <div class="panel-title line">
+                                                    <div class="caption"><i class="fa fa-user c-gray m-r-10"></i>
+                                                        ҮНДСЭН МЭДЭЭЛЭЛ
+                                                    </div>
+                                                </div>
+                                                <div class="panel-body" style="padding-top: 0">
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Ургийн овог:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" name="object.surName" id="object_surName"
+                                                                   class="form-control">
+                                                        </div>
+
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Эцэг/Эхийн нэр:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="object_lastName"
+                                                                   name="object.lastName">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Нэр:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   id="object_firstName"
+                                                                   name="object.firstName">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Хүйс:</div>
+                                                        <div class="col-md-2">
+                                                            <label>
+                                                                <input type="radio" name="object.isMen" checked style="display: none" value="1" />
+                                                                <span class="description">Эрэгтэй</span>
+                                                            </label>
+                                                            </div>
+                                                        <div class="col-md-2">
+                                                            <label>
+                                                                <input type="radio" name="object.isMen" style="display: none" value="0"/>
+                                                                <span class="description">Эмэгтэй</span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Регистрийн дугаар:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   id="object_registerNumber"
+                                                                   name="object.registerNumber">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Төрсөн огноо:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control datetimepicker"
+                                                                   id="object_birthday"
+                                                                   name="object.birthday">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Төрсөн газар:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   id="object_birthPlace"
+                                                                   name="object.birthPlace">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row profile-classic">
+                                        <div class="col-md-12">
+                                            <div class="panel">
+                                                <div class="panel-title line">
+                                                    <div class="caption"><i class="fa fa-book c-gray m-r-10"></i>
+                                                        БОЛОВСРОЛ
+                                                    </div>
+                                                </div>
+                                                <div class="panel-body" style="padding-top: 0">
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Төгссөн сургууль
+                                                            /ЕБС, ДС /:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   id="object_education"
+                                                                   name="object.education">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Эзэмшсэн мэргэжил:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   id="object_specialty"
+                                                                   name="object.specialty">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Мэргэжлийн зэрэг:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   id="object_grade"
+                                                                   name="object.grade">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Мэргэжлээрээ болон
+                                                            бусад чиглэлээр хамрагдаж байсан сургалтууд:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <textarea class="form-control" cols="3"
+                                                                      id="object_training"
+                                                                      name="object.training"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Байгууллагаас
+                                                            явуулсан сургалтанд хамрагдсан эсэх:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   id="object_organizationTraining"
+                                                                   name="object.organizationTraining">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row profile-classic">
+                                        <div class="col-md-12">
+                                            <div class="panel">
+                                                <div class="panel-title line">
+                                                    <div class="caption"><i
+                                                            class="glyph-icon flaticon-settings21 c-gray m-r-10"></i>
+                                                        СИСТЕМИЙН БҮРТГЭЛ
+                                                    </div>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">НЭВТРЭХ НЭР:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="object_username"
+                                                                   name="object.username"></div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">НУУЦ ҮГ:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="password" class="form-control"
+                                                                   id="object_password"
+                                                                   name="object.password"></div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Хэрэглэгчийн төрөл:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <select name="object.userRole.id" id="object_userRole">
+                                                                <option value="0">(Сонголтоос сонгоно уу)</option>
+                                                            #{list items:userRoles,as:'role'}
+                                                                <option value="${role.id}">${role.name}</option>
+                                                            #{/list}
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Баг:</div>
+                                                        <div class="col-md-6">
+                                                            <select name="object.userTeam.id" id="object_userTeam">
+                                                                <option value="0">(Сонголтоос сонгоно уу)</option>
+                                                            #{list items:userTeams,as:'team'}
+                                                                <option value="${team.id}">${team.name}</option>
+                                                            #{/list}
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">АЛБАН ТУШААЛ:</div>
+                                                        <div class="col-md-6">
+                                                            <select name="object.userPosition.id"
+                                                                    id="object_userPosition">
+                                                                <option value="0">(Сонголтоос сонгоно уу)</option>
+                                                            #{list items:userPositions,as:'position'}
+                                                                <option value="${position.id}">${position.name}</option>
+                                                            #{/list}
+                                                            </select>
+
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Ажилд орсон огноо:
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control datetimepicker"
+                                                                   id="object_employmentDate"
+                                                                   name="object.employmentDate">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row profile-classic">
+                                        <div class="col-md-12">
+                                            <div class="panel">
+                                                <div class="panel-title line">
+                                                    <div class="caption"><i class="fa fa-phone c-gray m-r-10"></i>
+                                                        ХОЛБОО БАРИХ
+                                                    </div>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">И-Мэйл:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="object_email"
+                                                                   name="object.email">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Утас:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="object_phone1"
+                                                                   name="object.phone1">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Утас:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control" id="object_phone2"
+                                                                   name="object.phone2">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row profile-classic">
+                                        <div class="col-md-12">
+                                            <div class="panel">
+                                                <div class="panel-title line">
+                                                    <div class="caption"><i class="fa fa-home c-gray m-r-10"></i>
+                                                        ГЭРИЙН ХАЯГ
+                                                    </div>
+                                                </div>
+                                                <div class="panel-body">
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Хот, Аймаг:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   name="object.address1">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Дүүрэг, Сум:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   name="object.address2">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Хороо, Баг:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   name="object.address3">
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="control-label c-gray col-md-3">Хаяг:</div>
+                                                        <div class="col-md-6">
+                                                            <input type="text" class="form-control"
+                                                                   name="object.address4">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="permission_settings">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                #{list items:permissions,as:'permission'}
+                                    <td style="width: 20%">${permission.name}</td>
+                                    <td style="width: 20%">
+                                        <label>
+                                            <input type="radio" name="permission-${permission.id}" value="0"
+                                                   style="display: none" checked/>
+                                            <span class="description">Ашиглахгүй</span>
+                                        </label>
+                                    </td>
+                                    #{list items:permission.permissionTypes,as:'permissionType'}
+                                        <td style="width: 20%">
+                                            <label>
+                                                <input type="radio" name="permission-${permission.id}"
+                                                       value="${permissionType.value}"
+                                                       style="display: none"/>
+                                                <span class="description">${permissionType.description}</span>
+                                            </label>
+                                        </td>
+                                    #{/list}
+                                </tr>
+                                #{/list}
+                                </tbody>
+                            </table>
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="align-center m-t-20">
+                                        <button type="submit" name="_save" class="btn btn-primary m-r-20">Хадгалах
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--END TABS-->
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var uploader;
+    var nowDate = new Date();
+    function createUploader() {
+        uploader = new qq.FileUploader({
+
+            element: document.getElementById('file-uploader-demo2'),
+            action: '@{FileUploader.uploadFileCustom}',
+            allowedExtensions: ['jpg', 'jpeg', 'png', 'bmp'],
+            onSubmit: function (id, fileName) {
+                uploader.setParams({
+                    uploadPath: "${controllers.Consts.uploadUserImagePath}", filename: fileName, ratio: "600x600"
+                });
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var profileUrl = responseJSON['filedir'] + responseJSON['filename'] + ".jpg";
+                var d = new Date();
+                $("#profilePicture img").attr('src', profileUrl + "?" + d.getTime());
+                $("#uploadProgress").text('');
+                $("#object_profilePicture").val(profileUrl);
+            }
+        });
+    }
+    function showErrorMessage(message) {
+        jError(message, {
+            HorizontalPosition: "center",
+            VerticalPosition: "center",
+            ShowOverlay: false,
+            TimeShown: 2000,
+            OpacityOverlay: 0.5,
+            MinWidth: 250
+        });
+    }
+    $(document).ready(function () {
+        $("#profilePicture button").click(function () {
+            $(".qq-upload-button input").click();
+        });
+        jQuery.validator.addMethod(
+                "multiemails",
+                function (value, element) {
+                    if (this.optional(element)) // return true on optional element
+                        return true;
+                    var emails = value.split(','),
+                            valid = true;
+                    for (var i in emails) {
+                        value = emails[i];
+                        valid = valid &&
+                                jQuery.validator.methods.email.call(this, $.trim(value), element);
+                    }
+                    return valid;
+                },
+                jQuery.validator.messages.multiemails
+        );
+        $("div#main-content form").validate({
+            rules: {
+                'object.email': {required: false, multiemails: true},
+            },
+            messages: {
+                 'object.email': {
+                    multiemails: "Та хэд хэдэн и-мэйл хаяг бичихдээ , авч хаягаа зөв оруулна уу!"
+                }
+            }
+        });
+        createUploader();
+        cropImage();
+        $('input#object_phone1').forceNumericOnlyLength(8);
+        $('input#object_phone2').forceNumericOnlyLength(8);
+
+        $('div#main-content form').submit(function (event) {
+            if ($('div#profilePicture img').attr('src').length < 1) {
+                showErrorMessage("Заавал зураг оруулах ёстой!");
+                return false;
+            } else if ($('input#object_surName').val().length < 1) {
+                showErrorMessage("Ургийн овог бичнэ үү!");
+                return false;
+            } else if ($('input#object_lastName').val().length < 1) {
+                showErrorMessage("Эцэг, эхийн нэр бичнэ үү!");
+                return false;
+            } else if ($('input#object_firstName').val().length < 1) {
+                showErrorMessage("Нэр бичнэ үү!");
+                return false;
+            } else if ($('input#object_username').val().length < 1) {
+                showErrorMessage("Нэвтрэх нэр бичнэ үү!");
+                return false;
+            } else if ($('input#object_password').val().length < 1) {
+                showErrorMessage("Нууц үг бичнэ үү!");
+                return false;
+            } else if ($('select#object_userTeam').val() < 1) {
+                showErrorMessage("Баг сонгоно уу!");
+                return false;
+            } else if ($('select#object_userPosition').val() < 1) {
+                showErrorMessage("Албан тушаал сонгоно уу!");
+                return false;
+            } else if ($('input#object_email').val().length < 1) {
+                showErrorMessage("И-Мэйл хаяг бичнэ үү!");
+                return false;
+            } else if ($('input#object_phone1').val().length != 8 || isNaN(parseInt($('input#object_phone1').val()))) {
+                showErrorMessage("Утасны дугаар оруулна уу!");
+                return false;
+            }
+            return true;
+        });
+        jQuery(' .datetimepicker').each(function () {
+            $(this).datetimepicker({lang: 'mn', timepicker: false, format: 'Y-m-d', scrollMonth: false});
+        });
+    });
+    var crop_2;
+    function cropImage() {
+        // Grab some information about the preview pane
+        $('div#profilePicture img').Jcrop({
+            // start off with jcrop-light class
+            aspectRatio: 1,
+            minSize: 50,
+            bgColor: 'black',
+            onSelect: updateCoords,
+            onChange: updateCoords
+        }, function () {
+            crop_2 = this;
+            crop_2.setSelect([0, 0, 100, 100]);
+            crop_2.setOptions({
+                bgFade: true,
+                allowSelect: false,
+                allowResize: true
+            });
+            crop_2.ui.selection.addClass('jcrop-selection');
+        });
+    }
+    $(window).resize(function () {
+//        img_width = $('.jcrop-holder img').parent().parent().parent().width() - 40;
+//        $('.jcrop-holder img').width(img_width);
+//        $('.jcrop-holder img').height('auto');
+    });
+    function updateCoords(c) {
+//        $("div#profilePicture input#coords").val("X : " + c.x + ", Y : " + c.y + ", X2 : " + c.x2 + ", Y2 : " + c.y2 + ", W : " + c.w + ", H : " + c.h)
+        var coords = $('div#profilePicture');
+        coords.find('input#object_x').val(c.x);
+        coords.find('input#object_y').val(c.y);
+        coords.find('input#object_w').val(c.w);
+        coords.find('input#object_h').val(c.h);
+    }
+</script>
+

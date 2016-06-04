@@ -1,0 +1,17 @@
+<ul id="loadTemplatesUl">
+#{list items:tmpGantts,as:'tmpGantt'}
+    <li id="${tmpGantt.id}" style="-moz-user-select: none">
+        <div onclick="templateSelect(${tmpGantt.id},${tmpGantt.project})" style="width: 90%;display: inline-block"><span
+                class="loadget" style="margin-right: 2px"></span><span>${tmpGantt.name}</span></div>
+        <i class="fa fa-times" style="float: right;margin: 3px;color: darkgrey" did="${tmpGantt.id}"></i>
+    </li>
+#{/list}
+</ul>
+<script>
+    $('ul#loadTemplatesUl i').on('click', function () {
+        if (confirm("Устгах уу?")) {
+            templateDelete($(this).attr('did'));
+            $(this).parent().remove();
+        }
+    });
+</script>

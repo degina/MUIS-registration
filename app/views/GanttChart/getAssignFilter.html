@@ -1,0 +1,9 @@
+<option value="0">Бүгд</option>
+#{list items:userTeams,as:'team'}
+<optgroup label="${team.name}">
+    #{list items:team.userLocals,as:'userCurrent'}
+        <option data-subtext="${userCurrent.userPosition}"
+                value="${userCurrent.id}">${userCurrent}</option>
+    #{/list}
+</optgroup>
+#{/list}

@@ -1,0 +1,55 @@
+#{if budgetOpexDetailNotEmps != null && !budgetOpexDetailNotEmps.isEmpty()}
+    #{list items:budgetOpexDetailNotEmps,as:'opexDetail'}
+    <tr id="trOpex${opexDetail.id}">
+        <td>${opexDetail.name}</td>
+        <td>${controllers.Functions.getDecimal(opexDetail.budget)}</td>
+        <td>${controllers.Functions.getDecimal(opexDetail.actual)}</td>
+        <td>${opexDetail.description}</td>
+        <td class="text-center">
+            <button onclick="deleteOpex(${opexDetail.id})" data-rel="tooltip" title="Устгах"
+                    class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                    class="fa fa-times"></i></button>
+        </td>
+    </tr>
+    #{/list}
+#{/if}
+#{else }
+    #{list items:tempsNotEmpls,as:'temp'}
+    <tr id="trOpex${temp}">
+        <td><input id="opexEmployeeName${temp}" type="text" placeholder="Зардал" value="${play.i18n.Messages.get(temp)}"/></td>
+        <td><input id="opexEmployeeBudget${temp}" type="text" class="numberic" placeholder="Зардал"/></td>
+        <td><input id="opexEmployeeActual${temp}" type="text" class="numberic" placeholder="Зардал"/></td>
+        <td><input id="opexEmployeeDescription${temp}" type="text" placeholder="Тайлбар"/></td>
+        <td class="text-center">
+            <button onclick="addTempOpexNotEmployee('${temp}')" data-rel="tooltip" title="Хадгалах"
+                    class="update btn btn-icon-sm btn-rounded btn-default"><i
+                    class="fa fa-save"></i></button>
+            <button onclick="deleteTempOpexNotEmployee('${temp}')" data-rel="tooltip" title="Устгах"
+                    class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                    class="fa fa-times"></i></button>
+        </td>
+    </tr>
+    #{/list}
+<script>
+    function addTempOpexNotEmployee(type){
+        loading2("table#tableOpex tr#trOpex"+type+" td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                budgetOpexId: '${budget.opex.id}',
+                name: $('input#opexEmployeeName'+type).val(),
+                actual: $('input#opexEmployeeActual'+type).val(),
+                budgetS: $('input#opexEmployeeBudget'+type).val(),
+                isEmpRelated: false,
+                description: $('input#opexEmployeeDescription'+type).val()
+            }, url: "/budget/CreateOpex"
+        }).success(
+                function (data) {
+                    $("table#tableOpex tr#trOpex"+type).replaceWith(data);
+                });
+    }
+    function deleteTempOpexNotEmployee(type){
+        $('table#tableOpex tr#trOpex'+type).remove();
+    }
+</script>
+#{/else}

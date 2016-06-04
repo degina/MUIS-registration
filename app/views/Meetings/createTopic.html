@@ -1,0 +1,42 @@
+#{list items:meetingTopics,as:'topic'}
+<tr id="trMeTopic${topic.id}">
+    <td>
+        #{if topic.owner.id == user.id}
+        <button data-rel="tooltip" title="Засах" onclick="editTopic(${topic.id})"
+                class="edit btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-pencil"></i></button>
+        #{/if}
+        <button data-rel="tooltip" title="Дэлгэрэнгүй" onclick="showMore(${topic.id})"
+                class="view btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-search"></i></button>
+    </td>
+    <td style="max-width: 10px;"><div>${topic_index}</div></td>
+    <td>${topic.title}</td>
+    <td>${topic.owner.lastnameFirstCharacter}.${topic.owner.firstName}</td>
+    <td >
+        <div data-rel="tooltip" data-placement="bottom" title="${topic.getRelUsers()}">
+            ${topic.getFristRelUser().raw()}
+        </div>
+    </td>
+    <td>${topic?.task?.name}</td>
+    %{ongo="";
+    if (topic.priority.id == 1)ongo='danger';
+    else if (topic.priority.id == 2) ongo='warning';
+    else ongo='primary';
+    }%
+    <td class="text-center"><span class="label label-${ongo} w-300" style="width: 45px;display: inline-block;"> ${topic.priority?.priority}</span></td>
+    %{ if (topic.status.id == 1)ongo='success';
+        else ongo='primary';
+    }%
+    <td class="text-center"><span class="label label-${ongo} w-300" style="display: inline-block; width: 66px;">${topic.status?.status}</span></td>
+    <td class="text-center" >${topic.newOld?.newOld}</td>
+    <td class="text-center">
+    #{if topic?.owner?.id==user?.id || topic.meeting?.owner?.id==user.id}
+        <button onclick="deleteTopic(${topic.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    #{/if}
+    </td>
+</tr>
+#{/list}
+

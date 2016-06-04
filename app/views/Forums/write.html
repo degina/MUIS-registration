@@ -1,0 +1,140 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu: 'Forums'/}
+#{set activeMenuSub: ''/}
+<div id="main-content" class="forum-page">
+    <div class="page-title"> <i class="icon-custom-left"></i>
+        <h3><strong>Forums</strong> <small>Questions &amp; Answers</small></h3>
+    </div>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="panel forum-category">
+                <div class="panel-heading no-bd bg-dark">
+                    <h3 class="panel-title">Categories</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <ul>
+                                <li>General<span class="pull-right badge badge-dark">6</span>
+                                </li>
+                                <li>Sales<span class="pull-right badge badge-dark">12</span>
+                                </li>
+                                <li>Design<span class="pull-right badge badge-dark">7</span>
+                                </li>
+                                <li>Issues<span class="pull-right badge badge-dark">11</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel forum-filter">
+                <div class="panel-heading bd-b-dark bg-light">
+                    <h3 class="panel-title">Filter results</h3>
+                </div>
+                <div class="panel-body p-b-10">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="input-group transparent">
+                                        <span class="input-group-addon bg-white">
+                                            <i class="fa fa-search"></i>
+                                        </span>
+                                <input type="text" class="form-control" placeholder="Search for a topic...">
+                            </div>
+                            <div class="input-group m-t-20">
+                                        <span class="input-group-addon bg-white">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                <input id="calendar" type="text" class="form-control" placeholder="Search a date...">
+                            </div>
+                            <div class="row-fluid">
+                                <label>
+                                    <input type="checkbox" checked>Unanswered
+                                </label>
+                            </div>
+                            <div class="row-fluid">
+                                <label>
+                                    <input type="checkbox">Answered
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer bg-white text-center p-0">
+                    <a href="#">Search</a>
+                </div>
+            </div>
+
+            <div class="panel panel-stat">
+                <div class="panel-heading f-16 text-center p-10 p-b-0 w-600">
+                    Questions Stats
+                </div>
+                <div class="panel-body p-0">
+                    <div id="chart_1" style="height:260px;width:100%"></div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-9">
+            <h3 class="text-center m-b-20"><strong>Шинэ хэлэлцүүлэг нэмэх</strong></h3>
+            <div class="panel forum-answer">
+                <div class="panel-heading text-center">
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <input type="email" class="form-control f-18" id="title" placeholder="Хэлэлцүүлэгийн гарчиг...">
+                    </div>
+                    <div class="form-group">
+                        <h5>Ангилал</h5>
+                            <select class="form-control" multiple title="Choose one or more">
+                                    <option>Shirts</option>
+                                    <option>Shoes</option>
+                                    <option>Underwear</option>
+                                    <option>Adidas</option>
+                                    <option>Nike</option>
+                                    <option>Reebok</option>
+                            </select>
+                    </div>
+                    <div class="form-group">
+                        <h5>Агуулга</h5>
+                        <textarea id="editor1" name="post-edit" class="cke-editor">
+                        </textarea>
+                    </div>
+                    <div class="form-group">
+                        <h5>Comment</h5>
+                        <textarea rows="5" class="form-control valid" placeholder="Optional comment..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END MAIN CONTENT -->
+
+<!-- END MAIN CONTENT -->
+#{set title: 'Хэлэлцүүлэг'/}
+#{set baseClass: 'forum'/}
+#{set 'moreStyles'}
+
+<link href="/assets/plugins/datetimepicker/jquery.datetimepicker.css" rel="stylesheet">
+
+#{/set}
+#{set 'moreScripts'}
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+<script src="/assets/plugins/jquery.cookie.min.js" type="text/javascript"></script>
+
+<script src="/assets/plugins/jquery-mobile/jquery.mobile-1.4.2.js"></script>
+<script src="/assets/plugins/charts-flot/jquery.flot.js"></script>
+<script src="/assets/plugins/datetimepicker/jquery.datetimepicker.js"></script>
+<script src="/assets/js/forum.js"></script>
+#{/set}

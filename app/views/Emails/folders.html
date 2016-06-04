@@ -1,0 +1,304 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: 'И-мэйл'/}
+#{set activeMenu: 'Mail'/}
+#{set activeMenuSub: name/}
+#{set baseClass: 'mailbox'/}
+#{fancybox-config /}
+#{checkFileExtension /}
+#{alertMessages /}
+<!-- BEGIN MAIN CONTENT -->
+<div id="main-content" class="page-mailbox">
+#{if logged && messageCount>0}
+    <div class="row" data-equal-height="true">
+        <div class="col-md-4 list-messages">
+            <div class="panel panel-default">
+                <div class="panel-body messages">
+                    <div class="input-group input-group-lg border-bottom firstHide" style="display: none">
+                                <span class="input-group-btn">
+                                    <a href="" class="btn"><i class="fa fa-search"></i></a>
+                                  </span>
+                        <input type="text" class="form-control bd-0 bd-white" placeholder="Хайх">
+                    </div>
+                    <div id="messages-list" class="panel panel-default text-center noselect"
+                         data-height="window" style="margin-bottom: -40px"
+                         data-padding="90">
+                        <div style='text-align: center' id='mailGetLoader-${messageCount}'><img style="margin-top: 20px"
+                                                                                                src='/public/images/ajaxloader/ajax-loader-pk.gif'>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-8 col-md-8 email-hidden-sm detail-message">
+            <div id="message-detail" class="panel panel-default withScroll firstHide" data-height="window"
+                 data-padding="40"
+                 style="display: none">
+                <div class="panel-heading messages message-result" style="margin-left: 20px">
+                    <div class="message-action-btn clearfix p-t-20">
+                        <div class="pull-left">
+                            <a href="@{Emails.composeNewMail()}">
+                                <div data-rel="tooltip" title="И-мэйл бичих" class="icon-rounded m-r-10"><i
+                                        class="fa fa-edit"></i>
+                                </div>
+                            </a>
+
+                            <div data-rel="tooltip" title="Хариу бичих" class="icon-rounded m-r-10 replyBtn"
+                                 rtype="reply"><i
+                                    class="fa fa-mail-reply"></i>
+                            </div>
+                            <div data-rel="tooltip" title="Бүгдэд хариу бичих" class="icon-rounded m-r-10 replyBtn"
+                                 rtype="replyAll"><i
+                                    class="fa fa-mail-reply-all"></i>
+                            </div>
+                            <div data-rel="tooltip" title="Дамжуулах" class="icon-rounded m-r-10 replyBtn"
+                                 rtype="forward"><i
+                                    class="fa fa-long-arrow-right"></i>
+                            </div>
+                            <div data-rel="tooltip" title="Устгах" class="icon-rounded m-r-10"><i
+                                    class="fa fa-trash-o" onclick="deleteMail()"></i>
+                            </div>
+                            <div data-rel="tooltip" title="Засварлах" class="icon-rounded m-r-10 draft" action="edit"
+                                 style="display: none" mid="0"><i
+                                    class="fa fa-pencil-square"></i></div>
+                            <div data-rel="tooltip" title="Илгээх" class="icon-rounded m-r-10 draft" action="send"
+                                 style="display: none" mid="0" id="directSend"><i
+                                    class="fa fa-check-square-o"></i>
+                            </div>
+                        </div>
+                        <div class="pull-right">
+                            <div data-rel="tooltip" title="" class="icon-rounded gear m-r-10"
+                                 data-original-title="Гарын үсэг"><i class="fa fa-gear"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body messages message-result">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12" id="mainContent"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <form action="@{Emails.composeNewMail()}" id="draftForm" method="get">
+        <input type="hidden" value="" name="mid" id="mid"/>
+        <input type="hidden" value="${name}" name="name" id="name"/>
+        <input type="hidden" value="" name="rtype" id="rtype"/>
+    </form>
+    <script>
+        $(document).ready(function () {
+            loadGetMails(true, ${messageCount}, 1);
+//            loadGetMails(true, 12, 10);
+        });
+        var loadMailContentNow = false, selectedContentMid = 0;
+        function loadGetMails(first, mid, counter) {
+            if (counter > 1)$("div#messages-list").append("<div style='text-align: center' id='mailGetLoader-" + mid + "'>" +
+                    "<img style='margin-top: 4px' src='/public/images/ajaxloader/ajax-loader-pk.gif'></div>");
+            $.ajax({
+                type: "POST",
+                data: {first: first, mid: mid, counter: counter, name: "${name}"},
+                url: "/emailLoadGetMails"
+            }).success(function (data) {
+                if (first) {
+                    $("div#messages-list").html("").removeClass('text-center').removeClass('p-t-20');
+                    $("div.firstHide").each(function () {
+                        $(this).show();
+                    });
+                }
+                $("div#main-content div#mailGetLoader-" + mid).remove();
+                $("div#messages-list").append(data);
+                setScrollListMail();
+            });
+        }
+        function loadGetMailsClick(first, mid, counter) {
+            $("div#main-content div#mailGetLoader-" + mid).show();
+            loadGetMails(first, mid, counter);
+        }
+        var downloadAction = #{jsAction @FunctionController.downloadFile(":fileDir",":fileName",":extension") /};
+
+        function loadMailContent(id, seen) {
+            if (!loadMailContentNow) {
+                selectedContentMid = id;
+                loadMailContentNow = true;
+                $("#main-content #mainContent").html("<div style='text-align: center;width: 100%'><img style='margin-top: 20px' src='/public/images/ajaxloader/ajax-loader-pk.gif'></div>");
+                $.ajax({
+                    type: "POST",
+                    data: {name: "${name}", mid: id},
+                    url: "/emailGetContentData"
+                }).success(function (data) {
+                    loadMailContentNow = false;
+                    $("#main-content #mainContent").html(data);
+                    if (seen = "false") {
+                        var readed = $("#main-content div#m-" + id);
+                        readed.find(".fa-envelope").remove();
+                        readed.find(".mailbold").each(function () {
+                            $(this).removeClass("mailbold");
+                        });
+                    }
+                });
+            }
+        }
+        function setScrollListMail() {
+            $("div#messages-list").mCustomScrollbar("destroy");
+            $("div#messages-list").mCustomScrollbar({
+                scrollButtons: {
+                    enable: false
+                },
+                autoHideScrollbar: true,
+                theme: "dark-2",
+                set_height: $(window).height() - 90,
+                advanced: {
+                    updateOnContentResize: false
+                }
+            });
+            $("div#messages-list").mCustomScrollbar("scrollTo", "bottom");
+        }
+        $('div#main-content .message-action-btn .draft').on('click', function () {
+            var formTag = $('form#draftForm');
+            var mid = $(this).attr('mid');
+            if ($(this).attr('action') == "edit") {
+                var over = "<div id='overlay'><img id=loading src='/public/images/ajaxloader/loadingFire.gif'></div>";
+                $(over).appendTo('body');
+                formTag.find('input#mid').val(mid);
+                formTag.submit();
+            } else {
+                if (!loadMailContentNow && confirm("Илгээх үү?")) {
+                    $('div#main-content div#directSend').html("<i class='fa fa-refresh'></i>");
+                    loadMailContentNow = true;
+                    $.ajax({
+                        type: "POST",
+                        data: {name: '${name}', mid: mid},
+                        url: "/directSendEmail"
+                    }).complete(function () {
+                        $('div#main-content div#directSend').html("<i class='fa fa-check-square-o'></i>");
+                        loadMailContentNow = false;
+                        $('div#main-content .message-action-btn .draft').each(function () {
+                            $(this).hide();
+                        });
+                        showSuccessMessage("Амжилттай илгээгдлээ");
+                        clearNextSelectMail(mid);
+//                        setTimeout(function () {
+//                            location.reload();
+//                        }, 2000);
+                    });
+                }
+            }
+        });
+        function deleteMail() {
+            if (selectedContentMid > 0) {
+                var mid = selectedContentMid;
+                clearNextSelectMail(selectedContentMid);
+                $.ajax({
+                    type: "POST",
+                    data: {name: '${name}', mid: mid},
+                    url: "/deleteEmail"
+                }).complete(function () {
+                    showSuccessMessage("имэйл амжилттай устлаа");
+                });
+            }
+        }
+        function clearNextSelectMail(mid) {
+            $("#main-content div#m-" + mid).remove();
+            $("#main-content #mainContent").html("");
+            setTimeout(function () {
+                location.reload();
+            }, 2000);
+//            if (mid > 1) {
+//                mid--;
+//                $("#main-content div#m-" + mid).addClass("message-active");
+//                loadMailContent(mid, "true")
+//            } else $("#main-content #mainContent").html("");
+        }
+        $('#main-content div.replyBtn').on('click', function () {
+            var folderName = '${name}';
+            if (selectedContentMid > 0) {
+                if (folderName == 'INBOX' || ($(this).attr('rtype') == "forward")) {
+                    var formTag = $('form#draftForm');
+                    var over = "<div id='overlay'><img id=loading src='/public/images/ajaxloader/loadingFire.gif'></div>";
+                    $(over).appendTo('body');
+                    formTag.find('input#mid').val(selectedContentMid);
+                    formTag.find('input#rtype').val($(this).attr('rtype'));
+                    formTag.submit();
+                }
+            }
+        });
+    </script>
+#{/if}
+#{else }
+    <div style="font-size: 20px;padding: 20px;width: 100%;text-align: center">Хоосон байна.</div>
+#{/else}
+</div>
+<!-- END MAIN CONTENT -->
+#{set 'moreStyles'}
+
+#{/set}
+#{set 'moreScripts'}
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+<script src="/assets/plugins/jquery.cookie.min.js" type="text/javascript"></script>
+<script src="/assets/js/mailbox.js"></script>
+
+#{/set}
+<style>
+    h4, h2, h3 {
+        font-family: arial;
+    }
+
+    .mailbold {
+        font-weight: bold !important;
+    }
+
+    #main-content .message-item {
+        cursor: pointer;
+    }
+
+    #main-content #mainContent .mailAddress:hover {
+        text-decoration: underline;
+        cursor: pointer;
+    }
+
+    #mainContent img.localContentType {
+        float: left;
+    }
+
+    #main-content .message-item-right i {
+        font-size: 14px;
+        display: inline-block;
+        float: left;
+        line-height: 20px;
+        margin-right: 7px;
+    }
+
+    div#main-content .message-action-btn .draft {
+        color: #428bca;
+        border-color: #428bca;
+    }
+
+    #overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: #000;
+        opacity: 0.8;
+        filter: alpha(opacity=60);
+        z-index: 100000;
+    }
+
+    #overlay #loading {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+    }
+
+</style>

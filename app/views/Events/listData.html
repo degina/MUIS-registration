@@ -1,0 +1,29 @@
+<table id="events-table" class="table table-tools table-striped">
+    <tbody>
+    #{if events.id.size() == 0}
+        Үр дүн байхгүй байна
+    #{/if}
+    #{list items:events,as:'eventIndicator'}
+    <tr>
+        <td>%{attach=eventIndicator.getFirstAttach()}%
+            <span style="float: left">
+                <img style="margin-left: 10px ;width: 80px;" src="${eventIndicator.imageDir!=null?eventIndicator.imageDir:'/public/images/simple.jpg'}"/>
+            </span>
+        </td>
+       <td><a href="@{controllers.Events.show(eventIndicator.id)}" class="c-red">${eventIndicator.title}</a><br/>
+        ${eventIndicator.startDate.format("yyyy-MM-dd HH:mm")}
+        </td>
+    </tr>
+    #{/list}
+    </tbody>
+</table>
+#{if MaxPageNumber>1}
+    #{include '/SharedView/pageNavigation.html'/}
+<script>
+    $(".page-navigation input.number-button").click(function () {
+        var obj = $(this).attr('pagenumber');
+        if (obj != $(this).attr('CurrentPageNumber'))
+            eventListData(obj);
+    });
+</script>
+#{/if}

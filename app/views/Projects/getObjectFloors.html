@@ -1,0 +1,42 @@
+<label style="width: 80%;">${projectObject.project.name} - ${projectObject.name}
+    : &{'floors'}</label><a class="blueButton" style="float: right" onclick="floorAdd(${projectObject.id})">&{'Floor'} &{'add'}</a>
+<table style="width: 100%" border="0" cellpadding="0" cellspacing="0" id="objectFloorTable">
+    <thead>
+    <tr>
+        <th>&{'name'}</th>
+    </tr>
+    </thead>
+    <tbody>
+    %{count=1;}%
+    #{list items:floors,as:'floor'}
+    <tr class="${count%2==0?'even':'odd'}">
+        <td><input id=f-${floor.id} type="text" class="name" value="${floor.name}" style="width: 75%"/>
+            <a class="blueButton dhidden" onclick="floorOperation(${floor.id},'save',${projectObject.id})">Хадгалах</a>
+                <a style="margin-left: 5px" class="redButton dhidden" onclick="floorOperation(${floor.id},'remove',${projectObject.id})">Устгах</a>
+        </td>
+    </tr>
+    %{count++}%
+    #{/list}
+    </tbody>
+</table>
+#{myTableStyle mytable:'table#objectFloorTable'/}
+<script>
+    function hoverOperation() {
+        $('table#objectFloorTable tbody td').mouseenter(function () {
+            $(this).find('a').removeClass('dhidden');
+        }).mouseleave(function () {
+            $(this).find('a').addClass('dhidden');
+        });
+    }
+    hoverOperation();
+</script>
+<style>
+    table#objectFloorTable input.name {
+        width: 99%;
+        border: none;
+    }
+
+    table#objectFloorTable tr.even input {
+        background: #f9f9f9;
+    }
+</style>

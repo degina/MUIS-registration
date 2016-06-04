@@ -1,0 +1,52 @@
+#{if isList}
+    #{list items:sanaachlagas,as:'sanaachlaga'}
+    %{contractor = sanaachlaga.owner.userTeam.contractor && !contractorUser}%
+    <tr id="trSanaachlaga${sanaachlaga.id}" class=${contractor?'warning':''}>
+        <td></td>
+        <td>${(sanaachlaga.task)?(sanaachlaga.task?.name):(sanaachlaga.myPlan?.name)}</td>
+        <td> #{if sanaachlaga.owner.id!=user.id }
+            <strong>${contractor?(sanaachlaga.owner.toString() +":  "):''}</strong>
+        #{/if}${sanaachlaga.sanal}</td>
+        <td>
+            #{if sanaachlaga.attaches.size()>0}
+                <div class="post-images" id="post-images-sanaachlaga-${sanaachlaga.id}">
+                    #{list items:sanaachlaga.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-sanaachlaga-"+sanaachlaga.id).raw()}
+            #{/if}
+        </td>
+        <td >
+        #{if sanaachlaga.owner.id == user.id }
+            <button onclick="deleteSanaachlaga(${sanaachlaga.id})" data-rel="tooltip" title="Устгах"
+                    class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                    class="fa fa-times"></i></button>
+            #{/if}
+        </td>
+    </tr>
+    #{/list}
+#{/if}
+
+#{else }
+<tr id="trSanaachlaga${sanaachlaga.id}">
+    <td></td>
+    <td>${(sanaachlaga.task)?(sanaachlaga.task?.name):(sanaachlaga.myPlan?.name)}</td>
+    <td>${sanaachlaga.sanal}</td>
+    <td>
+        #{if sanaachlaga.attaches.size()>0}
+            <div class="post-images" id="post-images-sanaachlaga-${sanaachlaga.id}">
+                #{list items:sanaachlaga.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-sanaachlaga-"+sanaachlaga.id).raw()}
+        #{/if}
+    </td>
+    <td >
+        <button onclick="deleteSanaachlaga(${sanaachlaga.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

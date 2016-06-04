@@ -1,0 +1,52 @@
+#{if ftype==1}
+<table id="moreInfo">
+    <tr>
+        <td>Файлын нэр</td>
+        <td>${fileShare}</td>
+    </tr>
+    <tr>
+        <td>Файлын төрөл</td>
+        <td>${fileShare.ftype==0?'Нийтийн':fileShare.ftype==1?'Миний':'Сонголттой'}</td>
+    </tr>
+    <tr>
+        <td>Хуулсан</td>
+        <td>${fileShare.uploader}</td>
+    </tr>
+    <tr>
+        <td>Тайлбар</td>
+        <td>${fileShare.description.raw()}</td>
+    </tr>
+    <tr>
+        <td>Татагдсан тоо</td>
+        <td>${fileShare.downloadCount}</td>
+    </tr>
+    #{if fileShare.ftype==2}
+        <tr>
+            <td>Харах эрхтэй хүмүүс</td>
+            <td>#{list items:users,as:'us'}
+            ${us},&nbsp;
+            #{/list}</td>
+        </tr>
+    #{/if}
+</table>
+#{/if}
+#{else }
+<table id="receivedUser">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>Огноо</th>
+        <th>Хэрэглэгч</th>
+    </tr>
+    </thead>
+%{count=1;}%
+    #{list items:receivedUsers,as:'rec'}
+        <tr>
+            <td>${count}</td>
+            <td>${rec.date.format('yyyy-MM-dd HH:mm')}</td>
+            <td>${rec.user}</td>
+        </tr>
+    %{count++;}%
+    #{/list}
+</table>
+#{/else}

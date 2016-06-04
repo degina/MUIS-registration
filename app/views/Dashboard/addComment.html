@@ -1,0 +1,27 @@
+#{list items:comments,as:'comment'}
+<div class="message-item" id="post-comment${comment.id}">
+    #{if user.getPermissionType("dashboard") == 3 || user.id == comment.owner.id}
+        <div class="deleteCommentIcon">
+            <div class="dropdown">
+                <i data-toggle="dropdown" class="fa fa-edit" style="font-weight: bold;"></i>
+                <ul style="position:static" class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dLabel">
+                    <li>
+                        <a onclick="deleteComment('${post.id}','${comment.id}')">Устгах</a>
+                    </li>
+                    <li>
+                        <a onclick="editComment('${post.id}','${comment.id}')">Засах</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    #{/if}
+    <div class="post-comment">
+        <img src="${comment.owner.profilePicture}" alt="avatar 10" width="35" class="pull-left m-t-5">
+        <div class="media-body">
+            <div ><span class="post-comment-owner">${comment.owner}</span>,
+                <span class="post-comment-created-time" >${comment.createdDate.format("dd, HH:mm")}</span></div>
+            <div id="commentText" style="word-wrap: break-word">${comment.comment.raw()}</div>
+        </div>
+    </div>
+</div>
+#{/list}

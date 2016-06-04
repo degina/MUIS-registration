@@ -1,0 +1,541 @@
+#{extends 'CRUD/layout.html' /}
+#{Gallery-config/}
+#{alertMessages /}
+
+<style>
+    div.thmb-prev {
+        position: relative;
+    }
+    div.media-group{
+        position:absolute;
+        z-index: 5;
+    }
+    div.album_header{
+        width:60px;
+        padding: 10px;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        position:absolute;
+        z-index: 5;
+        display: none;
+    }
+
+    div.album_header ul li img {
+        margin-top: 10px;
+    }
+
+    div.album_header ul li strong {
+        font-size: small;
+    }
+
+</style>
+
+<div id="main-content">
+    <div class="panel-content">
+        <div class="row media-manager">
+            <div class="col-sm-9">
+                <!-- BEGIN GALLERY -->
+                <div id="gallery" style="padding-top:0px;">
+                    #{if gallery_menu=="all" || gallery_menu=="general"}
+                    <div id="workAlbum">
+                        <div style="border-radius: 3px; padding-left: 1%;margin-top:0px; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+                             <span class="pull-left">
+                                Ажлын цомог
+                             </span>
+                        </div>
+                        <div class="row" style="padding: 0px 1% 10px 1%;">
+                            <div class="row media-manager" style="padding: 0px 6% 10px 5%; " >
+                                <div class="gallery row" id="generalAlbums">
+                                    #{if generalAlbums.size()>0}
+                                        #{list items:generalAlbums,as:'dAlbum'}
+                                            <div class="album mix col-xs-6 col-sm-4 col-md-3" id="gAlbum_${dAlbum.id}" albumID="${dAlbum.id}" uploaderID="${dAlbum.uploader.id}" style="display:block;">
+                                                <div class="btn-group media-group" >
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                        <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu media-menu" role="menu">
+                                                        #{if dAlbum.uploader.id == user.id}
+                                                            <li onclick="editAlbum(${dAlbum.id},${dAlbum.type},'${dAlbum.name}')"><a href="#"><i class="fa fa-pencil"></i> Засах</a>
+                                                            </li>
+                                                            <li onclick="deleteAlbum(${dAlbum.id})"><a href="#"><i class="fa fa-trash-o"></i> Устгах</a>
+                                                            </li>
+                                                        #{/if}
+                                                        <li onclick="show_album(${dAlbum.id})"><a href="#"><i class="fa fa-search"></i> Харах</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="panel panel-default" onclick="show_album(${dAlbum.id})">
+                                                    <div class="panel-body">
+                                                        <div class="thmb">
+                                                            <div class="thmb-prev">
+                                                                <a href="#">
+                                                                    <div class="album_header" style="display:none;">
+                                                                        <center>
+                                                                            <ul>
+                                                                                <li style="color:white;"><strong> ${dAlbum.galleryPictures.size()} </strong></li>
+                                                                                <li style="color:white;"><strong> зураг </strong></li>
+                                                                                #{if dAlbum.galleryPictures.size()>1}
+                                                                                    <li><img src="${dAlbum.galleryPictures.get(1).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                                                #{/if}
+                                                                                #{if dAlbum.galleryPictures.size()>2}
+                                                                                    <li><img src="${dAlbum.galleryPictures.get(2).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                                                #{/if}
+                                                                            </ul>
+                                                                        </center>
+                                                                    </div>
+                                                                    #{if dAlbum.galleryPictures.size()>0}
+                                                                        <img onclick="show_album(${dAlbum.id})" src="${dAlbum.galleryPictures.get(0).pathTumb}.jpg" class="img-responsive"/>
+                                                                    #{/if}
+                                                                    #{else}
+                                                                        <img onclick="show_album(${dAlbum.id})" src="/public/images/no-photo-gallery.jpg" class="img-responsive"/>
+                                                                    #{/else}
+                                                                </a>
+                                                            </div>
+                                                            <h5 class="media-title">
+                                                                <a data-rel="tooltip" data-placement="bottom" id="gAlbum_name_${dAlbum.id}"
+                                                                   data-original-title="#{if !dAlbum.name.equals(dAlbum.getNameMax())}${dAlbum.name}#{/if}">
+                                                                    ${dAlbum.getNameMax()}
+                                                                </a>
+                                                            </h5>
+                                                            <small class="text-muted pull-left">${dAlbum.galleryPictures.size()} зураг</small>
+                                                            <small class="text-muted pull-right">${dAlbum.createdDate.format("yyyy-MM-dd")}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        #{/list}
+                                    #{/if}
+                                    #{else }
+                                        <h4 id="empty_gallery">Хоосон</h4>
+                                    #{/else}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    #{/if}
+                    #{if gallery_menu=="all" || gallery_menu=="dailylog"}
+                    <div id="dailyLog">
+                        <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+                            <span class="pull-left">
+                                Өдрийн тайлан цомог
+                            </span>
+                        </div>
+                        <div class="row" style="padding: 0px 1% 10px 1%;">
+                            <div class="row media-manager" style="padding: 0px 6% 10px 5%; " >
+                                <div class="gallery row" id="dailylogAlbums">
+                                    #{if dailyLogAlbums.size()>0}
+                                        #{list items:dailyLogAlbums,as:'dAlbum'}
+                                            <div class="album mix col-xs-6 col-sm-4 col-md-3" id="gAlbum_${dAlbum.id}" albumID="${dAlbum.id}" uploaderID="${dAlbum.uploader.id}" style="display:block;">
+                                                <div class="btn-group media-group" >
+                                                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                                        <span class="caret"></span>
+                                                    </button>
+                                                    <ul class="dropdown-menu media-menu" role="menu">
+                                                        #{if dAlbum.uploader.id == user.id}
+                                                            <li onclick="editAlbum(${dAlbum.id},${dAlbum.type},'${dAlbum.name}')"><a href="#"><i class="fa fa-pencil"></i> Засах</a>
+                                                            </li>
+                                                            <li onclick="deleteAlbum(${dAlbum.id})"><a href="#"><i class="fa fa-trash-o"></i> Устгах</a>
+                                                            </li>
+                                                        #{/if}
+                                                        <li onclick="show_album(${dAlbum.id})"><a href="#"><i class="fa fa-search"></i> Харах</a>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                                <div class="panel panel-default" onclick="show_album(${dAlbum.id})">
+                                                    <div class="panel-body">
+                                                        <div class="thmb">
+                                                            <div class="thmb-prev">
+                                                                <a href="#">
+                                                                    <div class="album_header" style="display:none;">
+                                                                        <center>
+                                                                            <ul>
+                                                                                <li style="color:white;"><strong> ${dAlbum.galleryPictures.size()} </strong></li>
+                                                                                <li style="color:white;"><strong> зураг </strong></li>
+                                                                                #{if dAlbum.galleryPictures.size()>1}
+                                                                                    <li><img src="${dAlbum.galleryPictures.get(1).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                                                #{/if}
+                                                                                #{if dAlbum.galleryPictures.size()>2}
+                                                                                    <li><img src="${dAlbum.galleryPictures.get(2).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                                                #{/if}
+                                                                            </ul>
+                                                                        </center>
+                                                                    </div>
+                                                                    #{if dAlbum.galleryPictures.size()>0}
+                                                                        <img onclick="show_album(${dAlbum.id})" src="${dAlbum.galleryPictures.get(0).pathTumb}.jpg" class="img-responsive"/>
+                                                                    #{/if}
+                                                                    #{else}
+                                                                        <img onclick="show_album(${dAlbum.id})" src="/public/images/no-photo-gallery.jpg" class="img-responsive"/>
+                                                                    #{/else}
+                                                                </a>
+                                                            </div>
+                                                            <h5 class="media-title">
+                                                                <a data-rel="tooltip" data-placement="bottom" id="gAlbum_name_${dAlbum.id}"
+                                                                   data-original-title="#{if !dAlbum.name.equals(dAlbum.getNameMax())}${dAlbum.name}#{/if}">
+                                                                ${dAlbum.getNameMax()}
+                                                                </a>
+                                                            </h5>
+                                                            <small class="text-muted pull-left">${dAlbum.galleryPictures.size()} зураг</small>
+                                                            <small class="text-muted pull-right">${dAlbum.createdDate.format("yyyy-MM-dd")}</small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        #{/list}
+                                    #{/if}
+                                    #{else }
+                                        <h4 id="empty_gallery">Хоосон</h4>
+                                    #{/else}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    #{/if}
+                </div>
+                <!-- END GALLERY -->
+            </div>
+            <div class="col-sm-3 media-menu" style="" >
+                <div class="m-b-10">
+                    <strong>ЦОМОГ</strong>
+                    <a href="#" id="btn_add_album" class="pull-right c-gray w-600">+ НЭМЭХ</a>
+                </div>
+                <div class="panel-group" id="accordion">
+                    <div id="div_sidebar_menu" class="panel panel-default" data-toggle="collapse" data-parent="#accordion">
+                        <div class="panel-heading" >
+                            <h4 class="panel-title" style="width: 100%;">
+                                <span class="glyphicon glyphicon-camera">
+                                </span>ЗУРГИЙН ЦОМОГ
+                            </h4>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr>
+                                        <td class="gallery_menu" menu_string = "all">
+                                            <a href="@{controllers.Gallery.center("all")}">Бүгд</a>
+                                            <span class="label label-success pull-right" id="all_count" val="${all_count}">${all_count}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="gallery_menu" menu_string = "general">
+                                            <a href="@{controllers.Gallery.center("general")}" >Ажлын цомог</a>
+                                            <span class="label label-success pull-right" id="g_count" val="${g_count}">${g_count}</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="gallery_menu" menu_string = "dailylog">
+                                            <a href="@{controllers.Gallery.center("dailylog")}">Өдрийн тайлан</a>
+                                            <span class="label label-success pull-right" id="d_count" val="${d_count}">${d_count}</span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="div_sidebar_album" class="panel panel-default" data-toggle="collapse" data-parent="#accordion">
+                        <div class="panel-heading">
+                            <h4 class="panel-title" style="width: 100%;">
+                                <span class="glyphicon glyphicon-folder-open" >
+                                </span>Цомог
+                            </h4>
+                        </div>
+                        <div id="collapseThree" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr>
+                                        <td id="album_upload_img">
+                                            <a href="#">Зураг хуулах</a>
+                                            <i class="fa fa-cloud-upload m-r-5" style="color:black;float:right;font-size: 18px;"></i>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="div_sidebar_filter" class="panel panel-default" data-toggle="collapse" data-parent="#accordion">
+                        <div class="panel-heading">
+                            <h4 class="panel-title" style="width: 100%;">
+                                <span class="glyphicon glyphicon-search">
+                                </span>Хайлт хийх
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <table class="table">
+                                    <tr>
+                                        <td>
+                                            <div style="padding: 5px 10px;">
+                                                <select class="form-control" data-live-search="true" id="byUser" name="byUser"  style="padding-top:5px; padding-bottom:5px;">
+                                                    <option value="0">Хуулсан хүнээр</option>
+                                                    #{list items:userTeams,as:'team'}
+
+                                                        <optgroup label="${team.name}">
+                                                            #{list items:team.organizationCharts,as:'chart'}
+                                                                <option value="${chart.user.id}" ${chart.user.id==byUser?'selected':''}>${chart.user.toString()}</option>
+                                                            #{/list}
+                                                        </optgroup>
+                                                    #{/list}
+                                                </select>
+                                            </div>
+                                            <div style="padding: 5px 10px;">
+                                                <select name="byTask" id="byTask" class="form-control" data-live-search="true"  style="padding-top:5px; padding-bottom:5px;">
+                                                    <option value="0">Ажилд хамааралгүй</option>
+                                                #{list items:projectObjects, as:'object'}
+                                                    #{if object.tasks.size()>0 }
+                                                        <optgroup label="${object.name}" >
+                                                            #{list items:object.tasks, as:'task'}
+                                                                <option value="${task.id}" ${task.id==byTask?'selected':''}>${task.name}</option>
+                                                            #{/list}
+                                                        </optgroup>
+                                                    #{/if}
+                                                #{/list}
+                                                </select>
+                                            </div>
+                                            <div style="padding: 5px 10px;">
+                                                Эхлэх огноо:&nbsp;
+                                                <input type="text" id="object_startDate"
+                                                       style="width: 90px;float:right"
+                                                       aria-readonly="true"
+                                                       value="${dateS.format('yyyy-MM-dd')}" name="dateS">
+                                            </div>
+                                            <div style="padding: 5px 10px;">
+                                                Дуусах огноо:
+                                                <input type="text" id="object_finishDate"
+                                                       style="width: 90px;float:right"
+                                                       aria-readonly="true"
+                                                       value="${dateF.format('yyyy-MM-dd')}" name="dateF">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td id="td_filter" style="background-color: #3498db;color:white;text-align: center;cursor: pointer;">
+                                            <i class="fa fa-search m-r-5 m-l-0" style="color:white;"></i>Ачаалах
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal_add_album" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Цомог үүсгэх</h4>
+            </div>
+            <div class="modal-body">
+                <input class="form-control m-b-10" id="album_name" name="album_name" placeholder="Цомгийн нэр..."
+                       type="text" style="width: 95%">
+                <input id="album_id" name="album_id" type="hidden" >
+            </div>
+            <div class="modal-footer" style="margin-top: 0">
+                <button type="button" class="btn btn-default"  data-dismiss="modal">Болих</button>
+                <button type="button" class="btn btn-success" id = "modal_btn_add_album">Хадгалах</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var menu_active = '${gallery_menu}';
+    var album = 0
+    var filter=0;
+
+    // BEGIN filter-search-button events
+    $("#td_filter").click(function () {
+        gallery_filter();
+    });
+
+    function gallery_filter(){
+        filter = 1;
+        var div = $('div#div_sidebar_filter');
+        var byUser = div.find('select#byUser').val();
+        //alert(byUser);
+        var byTask = div.find('select#byTask').val();
+        var startDate = div.find('input#object_startDate').val();
+        var finishDate = div.find('input#object_finishDate').val();
+
+        $.ajax({
+            type: "POST",
+            data: {
+                albumId: album,
+                menuActive: menu_active,
+                byUser: byUser,
+                byTask: byTask,
+                startDate:startDate,
+                finishDate: finishDate
+            },
+            url: "/gallery_filter",
+            beforeSend: function () {
+                $("div#gallery").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+            }
+        }).success( function (data) {
+            $('div#gallery').html(data);
+        });
+    }
+    // END filter-search-button events
+
+    $("#btn_add_album").click(function () {
+        //alert(menu_active);
+        if(filter==0){
+            if(menu_active!="dailylog"){
+                if(album==0){
+                    var modalDiv = $("div#modal_add_album");
+                    modalDiv.find('input#album_name').val('');
+                    modalDiv.find('input#album_id').val('');
+                    modalDiv.modal('show');
+                }
+                else{
+                    showErrorMessageCustom("Цомог дотор цомог шинээр үүсгэх боломжгүй", "center", "top", 3000);
+                }
+            }
+            else showErrorMessageCustom("Өдрийн тайлан дээр цомог үүсгэх боломжгүй!", "center", "top", 3000);
+        }
+        else showErrorMessageCustom("Хайлтаас гарна уу!!! Буцах товч дээр дарж хайлтаас гарна.", "center", "top", 3000);
+
+    });
+
+    $("button#modal_btn_add_album").click(function () {
+        if($('div#modal_add_album input#album_name').val()!=''){
+
+            var name = $('div#modal_add_album input#album_name').val();
+            var id = $('div#modal_add_album input#album_id').val();
+            $.ajax({
+                type: "POST",
+                data: {name: name, album_id: id},
+                url: "/gallery_name_equal"
+            }).success(function (data) {
+               // alert("ajax_b:"+data.b);
+                if(data.b == 0){
+                    $.ajax({
+                        type: "POST",
+                        data: {name: name,album_id: id },
+                        url: "/gallery_add_album"
+                    }).success( function (data) {
+                       // alert(album);
+                        var modalDiv = $("div#modal_add_album");
+                        modalDiv.modal('hide');
+
+                        if(id=='') {
+                            $('div#generalAlbums').prepend(data);
+                            $('div#generalAlbums h3#empty_gallery').html("");
+                        }
+                        else{
+                            $('div#generalAlbums div#gAlbum_'+id).html(data);
+                        }
+                    });
+                }
+                else {
+                    showErrorMessageCustom("Цомгийн нэр давхардсан байна. Өөр нэр оруулна уу!", "center", "top", 3000);
+                }
+            });
+
+        } else showErrorMessageCustom("Цомгийн нэрийг оруулна уу!", "center", "top", 2000);
+    });
+
+    function show_album(album_id){
+        album = album_id;
+        $.ajax({
+            type: "POST",
+            data: {albumId: album},
+            url: "/gallery_show_album",
+            beforeSend: function () {
+                $("div#gallery").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+            }
+        }).success( function (data) {
+            $('div#gallery').html(data);
+        });
+    };
+
+    function deleteAlbum(album_id) {
+        if(filter==0) {
+            var x = confirm("Энэ цомгийг устгах уу?");
+            if (x) {
+                $.ajax({
+                type: "POST",
+                data: {album_id: album_id},
+                url: "/gallery_delete_album",
+                }).success(function (data) {
+                    $("div").remove("#gAlbum_"+album_id);
+                });
+            }
+        }
+        else showErrorMessageCustom("Хайлтаас гарна уу!!! Буцах товч дээр дарж хайлтаас гарна.", "center", "top", 3000);
+    }
+
+    function editAlbum(album_id,album_type,album_name){
+        if(filter==0) {
+            if(album_type==2){
+                var modalDiv = $("div#modal_add_album");
+                modalDiv.find('input#album_name').val(album_name);
+                modalDiv.find('input#album_id').val(album_id);
+                modalDiv.modal('show');
+            }
+            else{
+                showErrorMessageCustom("Өдрийн тайлангийн цомгийг засварлах боломжгүй", "center", "top", 3000);
+            }
+        }
+        else showErrorMessageCustom("Хайлтаас гарна уу!!! Буцах товч дээр дарж хайлтаас гарна.", "center", "top", 3000);
+    }
+
+    $(".gallery_menu").click(function(){
+        menu_active = $(this).attr('menu_string');
+        if(menu_active=="dailylog")
+            window.location.href = "@{controllers.Gallery.center("dailylog")}";
+        if(menu_active=="all" || menu_active=="")
+            window.location.href = "@{controllers.Gallery.center("all")}";
+        if(menu_active=="general")
+            window.location.href = "@{controllers.Gallery.center("general")}";
+    });
+
+    $("#album_upload_img").click(function(){
+        if(filter==0) {
+            if (album != 0) {
+                var modalDiv = $("div#add-file");
+                modalDiv.modal('show');
+            }
+            else showErrorMessageCustom("Цомог сонгоно уу!", "center", "top", 3000);
+        }
+        else showErrorMessageCustom("Хайлтаас гарна уу!!! Буцах товч дээр дарж хайлтаас гарна.", "center", "top", 3000);
+    });
+
+    var downloadAction = #{jsAction @FunctionController.downloadFile(":fileDir",":fileName",":extension") /};
+    function handleAttachmentClickFileCenter(image) {
+        $.ajax({
+            type: "POST",
+            data: {id: image.attr('fileId')},
+            url: "/fSharedownloadHistorySave"
+        });
+        $('body').append("<iframe height='0' width='0' style='display:none' src='" + downloadAction({
+                    fileDir: image.attr("fileDir"),
+                    fileName: image.attr("fileName"),
+                    extension: image.attr("extension")
+                }) + "'/>");
+    }
+
+    $(document).ready(function () {
+
+        jQuery('input#object_startDate').datetimepicker({lang: 'mn', timepicker: false, format: 'Y-m-d'});
+        jQuery('input#object_finishDate').datetimepicker({lang: 'mn', timepicker: false, format: 'Y-m-d'});
+
+        $('.album').hover( function() {
+            $(this).find('.album_header').show('slide', { direction: 'left' }, 70);
+        }, function() {
+            $(this).find('.album_header').hide('slide', { direction: 'left' }, 70);
+        });
+
+        $('#td_filter').hover( function() {
+            $(this).css("opacity","0.9");
+        }, function() {
+            $(this).css("opacity","1");
+        });
+    });
+</script>
+

@@ -1,0 +1,207 @@
+<div class="modal fade" id="PunchListModal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="RFIModal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+<script title="sendPunchListScript" type="text/javascript">
+    var draftPunchList = false;
+    var uploadingRFIPunchListFiles = false;
+    function createPunchListDraft() {
+        draftPunchList = true;
+        sendPunchList();
+    }
+    function createPunchList() {
+        draftPunchList = false;
+        sendPunchList();
+    }
+    function sendPunchList() {
+        var sentDist = "";
+        var addItem = "";
+        $("form#punchListForm").find('div#sendUserTag ul li').each(function () {
+            addItem = $(this).attr('id');
+            sentDist += addItem + ",";
+        });
+        $("form#punchListForm").find("input#punchListDistribution").val(sentDist);
+        if (checkFullPunchList() && !uploadingRFIPunchListFiles) {
+            var obj = $('div#punchListAttachs');
+            $("div#punchListRFIAttachContainer ul#uploadBox img.imgIcon").each(function () {
+                obj.append("<input type='hidden' name='filename' value='" + $(this).attr('filename') + "'>" +
+                        "<input type='hidden' name='filedir' value='" + $(this).attr('filedir') + "'>" +
+                        "<input type='hidden' name='extension' value='" + $(this).attr('extension') + "'>" +
+                        "<input type='hidden' name='filesize' value='" + $(this).attr('filesize') + "'>");
+            });
+            if (!draftPunchList)
+                $("#draft").val(0);
+            else
+                $("#draft").val(1);
+            $.ajax({
+                type: "POST",
+                data: $("form#punchListForm").serialize(),
+                url: "/punchList/create",
+                beforeSend: function () {
+                    $("div#PunchListModal").find("div.modal-content").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+                }
+            }).success(function (data) {
+                $("div#PunchListModal").modal('toggle');
+                if (!draftPunchList)
+                    notificationOn("success", "Амжилттай илгээгдлээ!");
+                else
+                    notificationOn("success", "Амжилттай хадгалагдлаа!");
+                sendPunchListAfter(data);
+            });
+        }
+    }
+    function newPunchList(pid, task, assignee, path, revision) {
+        $.ajax({
+            type: "POST",
+            data: {
+                id: pid,
+                taskId: task,
+                assigneeId: assignee,
+                path: path,
+                revision: revision
+            },
+            url: "/punchList/blank",
+            beforeSend: function () {
+                $("div#PunchListModal").find("div.modal-content").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#PunchListModal").find("div.modal-content").html(data);
+        });
+        $("div#PunchListModal").modal('toggle');
+    }
+    function editPunchList(id) {
+        newPunchList(id, 0, 0, "", 0);
+    }
+    function deletePunchListDraft(id) {
+        $.ajax({
+            type: "POST",
+            data: {id: id},
+            url: "/punchList/delete",
+            beforeSend: function () {
+                $("div#PunchListModal").find("div.modal-content").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#PunchListModal").modal('toggle');
+            notificationOn(data.type, data.title);
+            deletePunchListAfter();
+        });
+    }
+    function sendToTaskFunc() {
+        var obj = $('div#divSelTask li.selected:first');
+        var tid = obj.attr('tid');
+        if (tid != undefined) {
+            $("input#taskNo").val(tid);
+            $('button#selectChooseTaskButton').html(obj.find('span.task').html());
+        }
+    }
+    $('div#PunchListModal').on('hide.bs.modal', function (e) {
+        $(this).find("div.modal-content").html("");
+    });
+</script>
+<script title="sendRFIScript" type="text/javascript">
+    var draftRFI = false;
+    function createRFIDraft() {
+        draftRFI = true;
+        sendRFI();
+    }
+    function createRFI() {
+        draftRFI = false;
+        sendRFI();
+    }
+    function sendRFI() {
+        var sentDist = "";
+        var addItem = "";
+        $("form#rfiForm").find('div#sendUserTag ul li').each(function () {
+            addItem = $(this).attr('id');
+            sentDist += addItem + ",";
+        });
+        $("form#rfiForm").find("input#rfiDistribution").val(sentDist);
+        if (checkFullRFI() && !uploadingRFIPunchListFiles) {
+            var obj = $('div#rfiAttachs');
+            $("div#punchListRFIAttachContainer ul#uploadBox img.imgIcon").each(function () {
+                obj.append("<input type='hidden' name='filename' value='" + $(this).attr('filename') + "'>" +
+                        "<input type='hidden' name='filedir' value='" + $(this).attr('filedir') + "'>" +
+                        "<input type='hidden' name='extension' value='" + $(this).attr('extension') + "'>" +
+                        "<input type='hidden' name='filesize' value='" + $(this).attr('filesize') + "'>");
+            });
+            if (!draftRFI)
+                $("#draft").val(0);
+            else
+                $("#draft").val(1);
+            $.ajax({
+                type: "POST",
+                data: $("form#rfiForm").serialize(),
+                url: "/rfi/create",
+                beforeSend: function () {
+                    $("div#RFIModal").find("div.modal-content").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+                }
+            }).success(function (data) {
+                $("div#RFIModal").modal('toggle');
+                if (!draftRFI)
+                    notificationOn("success", "Амжилттай илгээгдлээ!");
+                else
+                    notificationOn("success", "Амжилттай хадгалагдлаа!");
+                sendRFIAfter(data);
+            });
+        }
+    }
+    function newRFI(pid, task, assignee) {
+        $.ajax({
+            type: "POST",
+            data: {
+                id: pid,
+                taskId: task,
+                assigneeId: assignee
+            },
+            url: "/rfi/blank",
+            beforeSend: function () {
+                $("div#RFIModal").find("div.modal-content").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#RFIModal").find("div.modal-content").html(data);
+        });
+        $("div#RFIModal").modal('toggle');
+    }
+
+    function editRFI(id) {
+        newRFI(id, 0, 0);
+    }
+
+    function deleteRFIDraft(id) {
+        $.ajax({
+            type: "POST",
+            data: {id: id},
+            url: "/rfi/delete",
+            beforeSend: function () {
+                $("div#RFIModal").find("div.modal-content").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#RFIModal").modal('toggle');
+            notificationOn(data.type, data.title);
+            deletePunchListAfter();
+        });
+    }
+
+    function sendToTaskFunc() {
+        var obj = $('div#divSelTask li.selected:first');
+        var tid = obj.attr('tid');
+        if (tid != undefined) {
+            $("input#taskNo").val(tid);
+            $('button#selectChooseTaskButton').html(obj.find('span.task').html());
+        }
+    }
+
+    $('div#RFIModal').on('hide.bs.modal', function (e) {
+        $(this).find("div.modal-content").html("");
+    });
+</script>
+#{selectTasks uid:"0", title:'Ажил сонгох', effect:10 /}
+#{selectSentUserOrg containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}

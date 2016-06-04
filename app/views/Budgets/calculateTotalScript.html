@@ -1,0 +1,27 @@
+<script>
+    $('td#tdNetSalesActual').html("${controllers.Functions.getDecimal(budget.netSales.totalActual)}");
+    $('td#tdNetSalesBudget').html("${controllers.Functions.getDecimal(budget.netSales.totalBudget)}");
+    $('td#tdNetSalesVariancePercent').html("${budget.netSales.variancePercent}%");
+    var currentTd= $('td#tdNetSalesVariance');
+    %{ value = budget.netSales.variance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+    $('td#tdNetCogsActual').html("${controllers.Functions.getDecimal(budget.cogs.totalActual)}");
+    $('td#tdNetCogsBudget').html("${controllers.Functions.getDecimal(budget.cogs.totalBudget)}");
+    $('td#tdNetCogsVariancePercent').html("${budget.cogs.variancePercent}%");
+    currentTd= $('td#tdNetCogsVariance');
+    %{ value = budget.cogs.variance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+    $('td#tdNetGrossMarginActual').html("${controllers.Functions.getDecimal(budget.grossMargin.totalActual)}");
+    $('td#tdNetGrossMarginBudget').html("${controllers.Functions.getDecimal(budget.grossMargin.totalBudget)}");
+    $('td#tdNetGrossMarginVariancePercent').html("${budget.grossMargin.variancePercent}%");
+    currentTd= $('td#tdNetGrossMarginVariance');
+    %{ value = budget.grossMargin.variance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+</script>
+#{include "Budgets/calculateResultScript.html"/}

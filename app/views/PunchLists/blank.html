@@ -1,0 +1,598 @@
+<style>
+    table.addPunchListTable tr td {
+        height: 43px !important;
+    }
+
+    table.addPunchListTable tr {
+        height: 43px !important;
+    }
+</style>
+#{if punchList == null}
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title"><strong style="margin-left: 50px">&{'CreatePunchList'}</strong></h4>
+</div>
+<div class="modal-body" style="padding-bottom: 0!important; padding-top: 0!important;">
+    <form id="punchListForm">
+        <div class="row">
+            <div class="col-md-12" style="padding-top: 15px;">
+                <div class="col-md-7">
+                    <table class="addPunchListTable" cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'Subject'}</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input type="text" class="form-control f-18" name="subject"
+                                       id="punchListSubject"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'DueDate'}</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input id="punchListDueDate" name="dueDate" readonly class="form-control" type="text"
+                                       placeholder="Өдрөө сонгоно уу..."
+                                       style="width: 50%;font-size: 14px!important; cursor: pointer"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label style="width: 20%;">&{'Task'}#</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input type="hidden" id="taskNo" name="taskId" value="${task != null ? task.id : ''}"/>
+                                <button type="button" class="btn btn-effect btn-default" style="width: 300px"
+                                        data-toggle="modal" data-target="#divSelTask"
+                                        id="selectChooseTaskButton">${task != null ? task.name : 'Сонгох'}
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'Location'}</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input type="text" class="form-control f-18"
+                                       name="location"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'Reference'}</label>
+                            </td>
+                            <td style="width: 80%; padding-top:5px;">
+                                <input type="text" class="form-control f-18"
+                                       name="reference"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <label style="width: 50%;">
+                                    <input type="checkbox"
+                                           name="private_"/><span style="margin-left: 4px">&{'Private'}</span>
+                                </label>
+                            </td>
+                        </tr>
+                        #{if revision != 0}
+                            <input id="jsonString" name="jsonString" type="hidden" value="${path}"/>
+                            <input id="revisionId" name="revisionId" type="hidden" value="${revision}"/>
+                            <tr>
+                                <td colspan="2">
+                                    <label style="color: red;">&{'haveDrawingPin'}</label>
+                                </td>
+                            </tr>
+                        #{/if}
+                    </table>
+                </div>
+                <div class="col-md-5">
+                    <table class="addPunchListTable" cellspacing="0" cellpadding="0" border="0"
+                           style="width: 100%; overflow: inherit;">
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'AssignedTo'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select class="form-control"
+                                        title="&{'SelectAPerson'}" id="punchListAssignedTo"
+                                        name="assignedTo" onchange="assigneeChanged()">
+                                    <option></option>
+                                    #{list items:teams, as:'team'}
+                                        #{if team.organizationCharts.size() > 0}
+                                            <optgroup label="${team.name}">
+                                                #{list items:team.organizationCharts, as:'usr'}
+                                                    #{if usr.user.id != user.id}
+                                                        <option style="padding-left: 35px;"
+                                                                value="${usr.user.id}" ${usr.user.id == assigneeId ? 'selected' :''}>
+                                                        ${usr.user}
+                                                        </option>
+                                                    #{/if}
+                                                #{/list}
+                                            </optgroup>
+                                        #{/if}
+                                    #{/list}
+                                </select>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'ScheduleImpact'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select id="punchListSchedule" name="schedule"
+                                        class="form-control">
+                                    <option value="Unknown">&{'Unknown'}</option>
+                                    <option value="Yes">&{'Yes'}</option>
+                                    <option value="No" selected="selected">&{'No'}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'CostImpact'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select id="punchListCost" name="cost"
+                                        class="form-control">
+                                    <option value="Unknown">&{'Unknown'}</option>
+                                    <option value="Yes">&{'Yes'}</option>
+                                    <option value="No" selected="selected">&{'No'}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'Priority'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select class="form-control" name="priority"
+                                        id="punchListPriority">
+                                    <option value="Low">&{'Low'}</option>
+                                    <option value="Medium">&{'Medium'}</option>
+                                    <option value="High">&{'High'}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div id="sendUserTag"></div>
+                                <button style="width: 100%;" type="button"
+                                        class="btn btn-effect btn-default" data-toggle="modal"
+                                        data-target="#modal-select"
+                                        id="selectSendUserButton" style="padding-left: 25px">&{'Distribution'}</button>
+                                <input type="hidden" name="distribution" id="punchListDistribution" value=""/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="post-review" class="table table-tools table-hover"
+                       style="padding-bottom: 0px!important;">
+                    <tbody>
+                    <tr>
+                        <th>
+                        &{'Description'}
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                        <textarea class="punchListDesc" style="width: 100%; resize: vertical;" name="description"
+                                  rows="8"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        &{'Attachments'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div style="display:none">
+                                <div id="showPictureZoom">
+                                    <img id="zoomedPicture" src=""/>
+                                </div>
+                                <a id="showPictureZoomA" href="#showPictureZoom"></a>
+                            </div>
+                            <div id="punchListRFIAttachContainer" style="height: 25px;">
+                                <div style="display: none" id="documentImageTemplate">
+                                    <li onclick="uploadPunchListClick(this)">
+                                        <span>
+                                            <span></span>
+                                        </span>
+                                    </li>
+                                </div>
+                                <div style="display: none" id="deleteImageTemplate">
+                                    <img height='12' class='deleteUploadedImage' width='12'
+                                         src="@{'/public/images/delete-image.png'}"
+                                         fileDir='#fileDir' extension='#extension'/>
+                                </div>
+                                <ul id="uploadBox">
+                                    <li onclick="uploadPunchListClick(this)">
+                                        <span>
+                                            <span></span>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="punchListAttachs"></div>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                </table>
+
+                <input type="hidden" id="draft" name="draft" value=""/>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal-footer">
+    <button style="float: left" type="button" class="btn btn-default"
+            data-dismiss="modal">&{'Close'}</button>
+    #{if revision == 0}
+        <button type="button" class="btn btn-default" onclick="createPunchListDraft()"><i
+                class="fa fa-edit m-r-5"></i>&{'createDraft'}</button>
+    #{/if}
+    <button type="button" class="btn btn-success" onclick="createPunchList()"><i
+            class="fa fa-check-square-o m-r-10"></i>&{'Send'}</button>
+</div>
+#{/if}
+#{else}
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <h4 class="modal-title"><strong style="margin-left: 50px">&{'EditPunchList'}</strong></h4>
+</div>
+<div class="modal-body" style="padding-bottom: 0!important; padding-top: 0!important;">
+    <form id="punchListForm">
+        <div class="row">
+            <div class="col-md-12" style="padding-top: 15px;">
+                <div class="col-md-7">
+                    <input type="hidden" name="punchListId" value="${punchList.id}"/>
+                    <table class="addPunchListTable" cellspacing="0" cellpadding="0" border="0" style="width: 100%;">
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'Subject'}</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input type="text" class="form-control f-18" name="subject"
+                                       id="punchListSubject" value="${punchList.name}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'DueDate'}</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input id="punchListDueDate" name="dueDate" readonly class="form-control" type="text"
+                                       placeholder="Өдрөө сонгоно уу..."
+                                       style="width: 50%;font-size: 14px!important; cursor: pointer"
+                                       value="${punchList.dueDate != null ? punchList.dueDate.format("yyyy-MM-dd") : ''}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label style="width: 20%;">&{'Task'}#</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input type="hidden" id="taskNo" name="taskId"
+                                       value="${punchList.task != null ? punchList.task.id : ''}"/>
+                                <button type="button" class="btn btn-effect btn-default" style="width: 300px"
+                                        data-toggle="modal" data-target="#divSelTask"
+                                        id="selectChooseTaskButton">${punchList.task != null ? task.name : 'Сонгох'}
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'Location'}</label>
+                            </td>
+                            <td style="width: 80%;">
+                                <input type="text" class="form-control f-18"
+                                       name="location" value="${punchList.location}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;">
+                                <label>&{'Reference'}</label>
+                            </td>
+                            <td style="width: 80%; padding-top:5px;">
+                                <input type="text" class="form-control f-18"
+                                       name="reference" value="${punchList.reference}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <label style="width: 50%;">
+                                    <input type="checkbox"
+                                           name="private_" ${punchList.private_ ? 'checked' :''}/><span
+                                        style="margin-left: 4px">&{'Private'}</span>
+                                </label>
+                            </td>
+                        </tr>
+                    *{<tr>}*
+                    *{<td colspan="2">}*
+                    *{<label>&{'DrawingPins'}</label>}*
+                    *{</td>}*
+                    *{</tr>}*
+                    *{<tr>}*
+                    *{<td colspan="2">}*
+                    *{<div style="float: left" id="punchListDrawingList">}*
+
+                    *{</div>}*
+                    *{<button style="float: left; width: 100px; height: 100px;" type="button"}*
+                    *{class="btn btn-effect btn-default"}*
+                    *{id="Drawings" onclick="viewGallery()"><i}*
+                    *{class="fa fa-plus f-18"></i>}*
+                    *{</button>}*
+                    *{</td>}*
+                    *{</tr>}*
+                    </table>
+                </div>
+                <div class="col-md-5">
+                    <table class="addPunchListTable" cellspacing="0" cellpadding="0" border="0"
+                           style="width: 100%;  overflow: inherit;">
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'AssignedTo'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select class="form-control"
+                                        title="&{'SelectAPerson'}" id="punchListAssignedTo"
+                                        name="assignedTo" onchange="assigneeChanged()">
+                                    <option></option>
+                                    #{list items:teams, as:'team'}
+                                        #{if team.organizationCharts.size() > 0}
+                                            <optgroup label="${team.name}">
+                                                #{list items:team.organizationCharts, as:'usr'}
+                                                    #{if usr.user.id != user.id}
+                                                        <option style="padding-left: 35px;"
+                                                                value="${usr.user.id}" ${usr.user.id == punchList.assignee.id ? 'selected' :''}>
+                                                        ${usr.user}
+                                                        </option>
+                                                    #{/if}
+                                                #{/list}
+                                            </optgroup>
+                                        #{/if}
+                                    #{/list}
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'ScheduleImpact'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select id="punchListSchedule" name="schedule"
+                                        class="form-control">
+                                    <option value="Yes" ${punchList.scheduleImpact.impact == "Yes" ? 'selected' :''}>&{'Yes'}</option>
+                                    <option value="No" ${punchList.scheduleImpact.impact == "No" ? 'selected' :''}>&{'No'}</option>
+                                    <option value="Unknown" ${punchList.scheduleImpact.impact == "Unknown" ? 'selected' :''}>&{'Unknown'}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'CostImpact'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select id="punchListCost" name="cost"
+                                        class="form-control">
+                                    <option value="Yes" ${punchList.costImpact.impact == "Yes" ? 'selected' :''}>&{'Yes'}</option>
+                                    <option value="No" ${punchList.costImpact.impact == "No" ? 'selected' :''}>&{'No'}</option>
+                                    <option value="Unknown" ${punchList.costImpact.impact == "Unknown" ? 'selected' :''}>&{'Unknown'}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 30%;">
+                                <label>&{'Priority'}</label>
+                            </td>
+                            <td style="width: 70%;">
+                                <select class="form-control" name="priority"
+                                        id="punchListPriority">
+                                    <option value="Low" ${punchList.priority.priority == "Low" ? 'selected' :''}>&{'Low'}</option>
+                                    <option value="Medium" ${punchList.priority.priority == "Medium" ? 'selected' :''}>&{'Medium'}</option>
+                                    <option value="High" ${punchList.priority.priority == "High" ? 'selected' :''}>&{'High'}</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2">
+                                <div id="sendUserTag">
+                                    <ul>
+                                        #{list items:punchList.distributions, as:'distrub'}
+                                            <li id="${distrub.getCode()}-${distrub.getId()}"
+                                                seltype="${distrub.getCode()}"
+                                                uid="${distrub.getId()}">
+                                            <span onclick="sendToUserRemoveSelection('${distrub.getCode()}', ${distrub.getId()})">
+                                                            <i class="fa fa-minus-circle asterisk"></i></span>
+                                            ${distrub.getName()}
+                                            </li>
+                                        #{/list}
+                                    </ul>
+                                </div>
+                                <button style="width: 100%;" type="button"
+                                        class="btn btn-effect btn-default" data-toggle="modal"
+                                        data-target="#modal-select"
+                                        id="selectSendUserButton" style="padding-left: 25px">&{'Distribution'}</button>
+                                <input type="hidden" name="distribution" id="punchListDistribution" value=""/>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <table id="post-review" class="table table-tools table-hover"
+                       style="padding-bottom: 0px!important;">
+                    <tbody>
+                    <tr>
+                        <th>
+                        &{'Description'}
+                        </th>
+                    </tr>
+                    <tr>
+                        <td>
+                        <textarea class="punchListDesc" style="width: 100%; resize: vertical;" name="description"
+                                  rows="8">${punchList.description}</textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                        &{'Attachments'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div style="display:none">
+                                <div id="showPictureZoom">
+                                    <img id="zoomedPicture" src=""/>
+                                </div>
+                                <a id="showPictureZoomA" href="#showPictureZoom"></a>
+                            </div>
+                            <div id="punchListRFIAttachContainer" style="height: 25px;">
+                                <div style="display: none" id="documentImageTemplate">
+                                    <li>
+                                        <span>
+                                            <span></span>
+                                        </span>
+                                    </li>
+                                </div>
+                                <div style="display: none" id="deleteImageTemplate">
+                                    <img height='12' class='deleteUploadedImage' width='12'
+                                         src="@{'/public/images/delete-image.png'}"
+                                         fileDir='#fileDir' extension='#extension'/>
+                                </div>
+                                <ul id="uploadBox">
+                                    #{list items:punchList.attaches, as:'attach'}
+                                        <li>
+                                        <span>
+                                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                        ${controllers.Functions.handleDocumentAttachmentDel(attach.dir,attach.name,attach.extension).raw()}
+                                        </span>
+                                        </li>
+                                    #{/list}
+                                    <li>
+                                        <span>
+                                            <span></span>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div id="punchListAttachs"></div>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                </table>
+
+                <input type="hidden" id="draft" name="draft" value=""/>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="modal-footer">
+    <button style="float: left" type="button" class="btn btn-default"
+            data-dismiss="modal">&{'Close'}</button>
+    <button type="button" onclick="deletePunchListDraft(${punchList.id})" class="btn btn-danger"
+            style="float: left"><i class="fa fa-times m-r-5
+            "></i>&{'DeleteDraft'}
+    </button>
+    <button type="button" class="btn btn-default" onclick="createPunchListDraft()"><i
+            class="fa fa-edit m-r-5"></i>&{'createDraft'}</button>
+    <button type="button" class="btn btn-success" onclick="createPunchList()"><i
+            class="fa fa-check-square-o m-r-10"></i>&{'Send'}</button>
+</div>
+#{/else}
+<script>
+    jQuery('#punchListDueDate').datetimepicker({lang: 'mn', timepicker: false, format: "Y-m-d", minDate: '0'});
+
+    $("select#punchListAssignedTo").selectpicker();
+    $("select#punchListSchedule").selectpicker();
+    $("select#punchListCost").selectpicker();
+    $("select#punchListPriority").selectpicker();
+    //    function uploadPunchListClick(ban) {
+    //        var image = $(ban).find('img');
+    //        if (image.length > 0) {
+    //            handleAttachmentClick(image);
+    //        } else {
+    //            selectedUbox = "punchListFileAttach";
+    //            $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").removeAttr("accept");
+    //            $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").attr("multiple", "multiple");
+    //            $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").click();
+    //        }
+    //    }
+
+    function assigneeChanged() {
+        var selected = $("select#punchListAssignedTo").val();
+        $("input#taskNo").val("");
+        $('button#selectChooseTaskButton').html("Сонгох");
+        selectTasks_uid = selected;
+        $("#modal-select").find("tr").each(function () {
+            $(this).removeClass('dhidden');
+        });
+        $("#modal-select").find("tr td:nth-child(2)").each(function () {
+            var obj = $(this);
+            if (obj.attr('seltype') == 'u' && (obj.attr('uid') == selected || obj.attr('uid') == ${user.id})) {
+                obj.parent().addClass('dhidden');
+            }
+        });
+    }
+    $('button#selectChooseTaskButton').click(function () {
+        if (selectTasks_uid > 0) {
+            $.post(getSelectTasksOpen({uid: selectTasks_uid, percent: 100}), function (data) {
+                $('div#divSelTask ul').html(data);
+            });
+        } else {
+            showErrorMessage('Хэрэглэгчээ сонгоно уу!');
+            return false;
+        }
+    });
+    $('#selectSendUserButton').click(function () {
+        closeButtonClick = false;
+        sendToUserRemoveAll();
+        $("div#sendUserTag li").each(function () {
+            $('div#divSelUser td#' + $(this).attr('id')).parent().click();
+        });
+    });
+    function sendToTaskFunc() {
+        var obj = $('div#divSelTask li.selected:first');
+        var tid = obj.attr('tid');
+        if (tid != undefined) {
+            $("input#taskNo").val(tid);
+            $('button#selectChooseTaskButton').html(obj.find('span.task').html());
+        }
+    }
+    function checkFullPunchList() {
+        var a = "" + $("input#punchListSubject").val();
+        if (a.trim() == "") {
+            alert("Сэдвийн нэрээ оруулна уу!");
+            return 0;
+        }
+        if ($("select#punchListAssignedTo").val() == 0) {
+            alert("Олгох ажилтныг сонгоно уу!");
+            return 0;
+        }
+        if (!draftPunchList && !$("input#punchListDueDate").val()) {
+            alert("&{'InputDueDate'}!");
+            return 0;
+        }
+        a = "" + $("textarea.punchListDesc").val();
+        while (a.search("&nbsp;") != -1) {
+            a = a.replace("&nbsp;", "");
+        }
+        if (!draftPunchList && a.trim() == "") {
+            alert("&{'InputDescription'}!");
+            return 0;
+        }
+        return 1;
+    }
+</script>
+

@@ -1,0 +1,14 @@
+<table cellpadding="2" cellspacing="2" style="width: 25%;">
+#{list items:events,as:'eventIndicator'}
+    <tr>
+        <td>%{attach=eventIndicator.getFirstAttach()}%
+            <span style="float: left">
+                        <img style="margin-left: 10px ;width: 80px;"
+                            #{if attach==NULL} src="${eventIndicator.imageDir}"#{/if}/>
+                #{else }src="${eventIndicator.imageDir}" #{/else}
+                     </span>
+        </td>
+        <td><a href="@{controllers.Events.show(eventIndicator.id)}" class="c-red">${eventIndicator.title}</a></td>
+    </tr>
+#{/list}
+</table>

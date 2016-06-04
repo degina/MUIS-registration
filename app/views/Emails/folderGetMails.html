@@ -1,0 +1,52 @@
+#{if mail!=null}
+<div class="message-item media ${first?'message-active_':''}" mid="${mail.mid}" id="m-${mail.mid}" seen="${mail.isSeen}">
+    <div class="pull-left text-center">
+        <div class="pos-rel message-checkbox">
+            <input type="checkbox" data-style="flat-red">
+        </div>
+        #{if mail.isAttach}
+            <div><i class="fa fa-paperclip"></i></div>#{/if}
+    </div>
+    <div class="message-item-right">
+        <div class="media">
+            <div class="media-body">
+                <small class="pull-right ${!mail.isSeen?'mailbold':''}">${mail.dateReceived.format('yy-MM-dd HH:mm')}</small>
+            %{recipient=mail.getRecipientsFrom();}%
+                <div style="line-height: 1.1;margin-bottom: 10px"
+                     class="c-dark ${!mail.isSeen?'mailbold':''}">${recipient.mail}</div>
+                <h5 class="c-dark" style="margin-bottom: 0">#{if !mail.isSeen}<i
+                        class="fa fa-envelope"></i>#{/if}${mail.subject}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+%{if((mail.mid-1) > 0){
+if(counter<10){}%
+<script>
+    loadGetMails(false, ${mid - 1}, ${counter+1});
+</script>
+%{}else{}%
+<a id="loadMoreGetMails" style="margin-top: 10px;margin-left: 48px;cursor: pointer"
+   onclick="loadGetMailsClick(false, ${mid - 1}, 1)">Цааш үргэлжлүүлэх ...</a>
+<div style='text-align: center;display: none' id='mailGetLoader-${mid - 1}'><img
+        style='margin-top: 4px'
+        src='/public/images/ajaxloader/ajax-loader-pk.gif'>
+</div>
+<script>
+    $('#main-content a#loadMoreGetMails').on('click', function () {
+        $(this).remove();
+    });
+</script>
+%{}}}%
+<script>
+    $('#main-content div.message-item').click(function () {
+        if (!loadMailContentNow) {
+            loadMailContent($(this).attr('mid'),$(this).attr('seen'));
+            $('#main-content div.message-item').each(function () {
+                $(this).removeClass('message-active');
+            });
+            $(this).addClass('message-active');
+        }
+    });
+</script>
+#{/if}

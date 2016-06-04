@@ -1,0 +1,689 @@
+<script>
+    function copyWeather(id) {
+        var trWeather = $("table#tableWeather tr#weather" + id);
+        $('table#tableWeather select#taskWeather').selectpicker('val', trWeather.find("td:nth-child(2)").attr('taskId'));
+        $('table#tableWeather select#conditionWeather').selectpicker('val', trWeather.find("td:nth-child(3)").attr('conditionId'));
+        $('table#tableWeather input#startHourWeather').val(trWeather.find("td:nth-child(4)").text());
+        $('table#tableWeather input#finishHourWeather').val(trWeather.find("td:nth-child(5)").text());
+        $('table#tableWeather textarea#notesWeather').val(trWeather.find("td:nth-child(6)").find('span').text());
+        $("table#tableWeather ul#uWeather").html("");
+        trWeather.find("td:nth-child(7)").find('div.post-images img').each(function () {
+            $("table#tableWeather ul#uWeather").append("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' filedir='/FileCenter/DailyLog/2015/4/14/1428990853362' extension=jpg></span></li>");
+        });
+        $('table#tableWeather ul#uWeather').append("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+        $('button[data-rel="tooltip"]').tooltip();
+    }
+    function copyTechnical(id) {
+        var trTechnical = $("table#tableTechnical tr#technical" + id);
+        $('table#tableTechnical select#taskTechnical').selectpicker('val', trTechnical.find("td:nth-child(2)").attr('taskId'));
+        $('table#tableTechnical input#conditionTechnical').val(trTechnical.find("td:nth-child(3)").text());
+        $('table#tableTechnical input#startHourTechnical').val(trTechnical.find("td:nth-child(4)").text());
+        $('table#tableTechnical input#finishHourTechnical').val(trTechnical.find("td:nth-child(5)").text());
+        $('table#tableTechnical textarea#notesTechnical').val(trTechnical.find("td:nth-child(6)").find('span').text());
+        $("table#tableTechnical ul#uTechnical").html("");
+        trTechnical.find("td:nth-child(7)").find('div.post-images img').each(function () {
+            $("table#tableTechnical ul#uTechnical").append("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' filedir='/FileCenter/DailyLog/2015/4/14/1428990853362' extension=jpg></span></li>");
+        });
+        $('table#tableTechnical ul#uTechnical').append("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+        $('button[data-rel="tooltip"]').tooltip();
+    }
+    function showManPowerModal(taskId) {
+        $('#modal-ManPower').modal('show');
+        currentTaskId = taskId;
+        $.ajax({
+            type: "POST",
+            data: {
+                taskId: currentTaskId,
+                date: '${currentDate.format("yyyy-MM-dd")}'
+            }, url: "/dailyLogShowManPowerModal"
+        }).success(
+                function (data) {
+                    $('table#tableManPower tr.trManPowerClass').each(function () {
+                        $(this).remove();
+                    });
+                    $('table#tableManPower tr#trManPowerInput').before(data);
+                    numberTableContractor("tableManPower");
+                });
+    }
+    function addManPower() {
+        var workers = parseFloat($('table#tableManPower input#manPowerWorkers').val());
+        var hours = parseFloat($('table#tableManPower input#manPowerHours').val());
+        var manHours = $('table#tableManPower input#manPowerManHours').val();
+        var location = $('table#tableManPower input#manPowerLocation').val();
+        var comment = $('table#tableManPower textarea#manPowerNote').val();
+        if (isNaN(workers) || parseInt(workers) <= 0) {
+            showErrorMessage("Ажилласан ажилчдаа бичнэ үү?");
+        } else if (comment.length < 2 || comment == "") {
+            showErrorMessage("Тэмдэглэл бичнэ үү!");
+        } else if (location.length < 2 || location == "") {
+            showErrorMessage("Байршлаа бичнэ үү!");
+        } else if (isNaN(hours) || hours <= 0) {
+            showErrorMessage("Ажилласан цагаа бичнэ үү!");
+        }
+        else {
+            loading2("table#tableManPower tr#trManPowerInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("table#tableManPower ul#uManPower img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: currentTaskId,
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    userTeamId: $('table#tableManPower select#manPowerContact').val(),
+                    mergejilId: $('table#tableManPower select#manPowerMergejil').val(),
+                    workers: workers,
+                    hours: hours,
+                    manHours: manHours,
+                    location: location,
+                    notes: comment,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateManPower"
+            }).success(
+                    function (data) {
+                        $('table#tableManPower tr#trManPowerInput').before(data);
+                        $('table#tableManPower tr#trManPowerInput td:last-child').html("<button onclick='addManPower()' data-rel='tooltip' title='Хадгалах' class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+                        numberTableContractor("tableManPower");
+                        $('table#tableManPower ul#uManPower').html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                        $('table#tableManPower input#manPowerWorkers').val("");
+                        $('table#tableManPower input#manPowerHours').val("");
+                        $('table#tableManPower input#manPowerManHours').val("");
+                        $('table#tableManPower td#tdManPowerManHours').html("");
+                        $('table#tableManPower input#manPowerLocation').val("");
+                        $('table#tableManPower textarea#manPowerNote').val("");
+                    });
+        }
+    }
+    function copyManPower(id) {
+        var trManpower = $("table#tableManPower tr#trManPower" + id);
+        $('table#tableManPower select#manPowerContact').selectpicker('val', trManpower.find("td:nth-child(2)").attr('teamId'));
+        $('table#tableManPower select#manPowerMergejil').selectpicker('val', trManpower.find("td:nth-child(3)").attr('mergejilId'));
+        $('table#tableManPower input#manPowerWorkers').val(trManpower.find("td:nth-child(4)").text());
+        $('table#tableManPower input#manPowerHours').val(trManpower.find("td:nth-child(5)").text());
+        $('table#tableManPower input#manPowerManHours').val(trManpower.find("td:nth-child(6)").text());
+        $('table#tableManPower td#tdManPowerManHours').html(trManpower.find("td:nth-child(6)").text());
+        $('table#tableManPower input#manPowerLocation').val(trManpower.find("td:nth-child(7)").text());
+        $('table#tableManPower textarea#manPowerNote').val(trManpower.find("td:nth-child(8)").find('span').text());
+        $('table#tableManPower ul#uManPower').html("");
+        trManpower.find("td:nth-child(9)").find('div.post-images img').each(function () {
+            $('table#tableManPower ul#uManPower').append("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' filedir='/FileCenter/DailyLog/2015/4/14/1428990853362' extension=jpg></span></li>");
+        });
+        $('table#tableManPower ul#uManPower').append("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+        $('button[data-rel="tooltip"]').tooltip();
+    }
+    function deleteManPower(id) {
+        loading2("table#tableManPower tr#trManPower" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteManPower"
+        }).success(
+                function (data) {
+                    $('table#tableManPower tr#trManPower' + id).remove();
+                    numberTableContractor("tableManPower");
+                    $("button#showManPowerModal" + currentTaskId).html("Ажилчид: " + data.totalWorkers + "  </br> Хүн-цаг: " + data.totalManHours);
+                });
+    }
+    function showContractor(taskId) {
+        $('table#tableScheduledWork tr.trWork' + taskId).each(function () {
+            $(this).toggle();
+        });
+    }
+    function copyWorkNote(taskId, worknoteId) {
+        var trWorkNoteId = $("table#tableScheduledWork tr#trWorkNote" + worknoteId);
+        $('table#tableScheduledWork textarea#scheduledWorkComments' + taskId).val($('table#tableScheduledWork textarea#scheduledWorkComments' + taskId).val() + " " + trWorkNoteId.find("td:nth-child(3)").text());
+        var ulScheduledWork = $("table#tableScheduledWork ul#uScheduledWork" + taskId);
+        trWorkNoteId.find("td:nth-child(4)").find('div.post-images img').each(function () {
+            ulScheduledWork.find("li:last-child").before("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' filedir='/FileCenter/DailyLog/2015/4/14/1428990853362' extension=jpg></span></li>");
+        });
+    }
+    function addEquipment() {
+        var operator = $('table#tableEquipment input#equipmentOperator').val();
+        var location = $('table#tableEquipment input#equipmentLocation').val();
+        var startHour = $('table#tableEquipment input#equipmentStartHour').val();
+        var finishHour = $('table#tableEquipment input#equipmentFinishHour').val();
+        var comments = $('table#tableEquipment textarea#equipmentComments').val();
+        if (startHour == "" || startHour == "__:__") {
+            showErrorMessage("Эхэлсэн цагаа бичнэ үү?");
+        }
+        else if (finishHour == "" || finishHour == "__:__") {
+            showErrorMessage("Дууссан цагаа бичнэ үү?");
+        }
+        else if (operator.length < 1 || operator == "") {
+            showErrorMessage("Оператроо бичнэ үү!");
+        }
+        else if (location.length < 1 || location == "") {
+            showErrorMessage("Байршлаа бичнэ үү!");
+        }
+        else if (comments.length < 2 || comments == "") {
+            showErrorMessage("Тайлбар бичнэ үү!");
+        }
+        else {
+            loading2("table#tableEquipment tr#trEquipmentInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("ul#uEquipment img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: currentTaskId,
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    type: $('table#tableEquipment select#equipmentType').val(),
+                    operator: operator,
+                    location: location,
+                    startHour: startHour,
+                    finishHour: finishHour,
+                    comments: comments,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateEquipment"
+            }).success(
+                    function (data) {
+                        $('table#tableEquipment tr#trEquipmentInput').before(data);
+                        $('table#tableEquipment tr#trEquipmentInput td:last-child').html("<button onclick=addEquipment() data-rel='tooltip' title='Хадгалах' class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+                        numberTableContractor("tableEquipment");
+                        $('table#tableEquipment ul#uEquipment').html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                        $('table#tableEquipment input#equipmentOperator').val("");
+                        $('table#tableEquipment input#equipmentLocation').val("");
+                        $('table#tableEquipment input#equipmentStartHour').val("");
+                        $('table#tableEquipment input#equipmentFinishHour').val("");
+                        $('table#tableEquipment textarea#equipmentComments').val("");
+                        $('[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function copyEquipment(id) {
+        var trEquipment = $("table#tableEquipment tr#trEquipment" + id);
+        $('table#tableEquipment select#equipmentType').selectpicker('val', trEquipment.find("td:nth-child(2)").attr('equipmentType'));
+        $('table#tableEquipment input#equipmentOperator').val(trEquipment.find("td:nth-child(3)").text());
+        $('table#tableEquipment input#equipmentLocation').val(trEquipment.find("td:nth-child(4)").text());
+        $('table#tableEquipment input#equipmentStartHour').val(trEquipment.find("td:nth-child(5)").text());
+        $('table#tableEquipment input#equipmentFinishHour').val(trEquipment.find("td:nth-child(6)").text());
+        $('table#tableEquipment textarea#equipmentComments').val(trEquipment.find("td:nth-child(7)").find('span').text());
+        $('table#tableEquipment ul#uEquipment').html("");
+        trEquipment.find("td:nth-child(8)").find('div.post-images img').each(function () {
+            $('table#tableEquipment ul#uEquipment').append("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' filedir='/FileCenter/DailyLog/2015/4/14/1428990853362' extension=jpg></span></li>");
+        });
+        $('table#tableEquipment ul#uEquipment').append("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+        $('button[data-rel="tooltip"]').tooltip();
+    }
+    function deleteEquipment(id) {
+        loading2("table#tableEquipment tr#trEquipment" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteEquipment"
+        }).success(
+                function (data) {
+                    $('table#tableEquipment tr#trEquipment' + id).remove();
+                    numberTableContractor('tableEquipment');
+                    $("button#showEquipmentModal" + currentTaskId).html("Техник: " + data.size + " </br> Мот-цаг:" + data.motHours);
+                });
+    }
+    function addSafety() {
+        var hour = $('table#tableSafety input#safetyHour').val();
+        var notice = $('table#tableSafety input#safetyNotice').val();
+        var issuedTo = $('table#tableSafety input#safetyIssuedTo').val();
+        var complianceDue = $('table#tableSafety input#safetyComplianceDue').val();
+        var comments = $('table#tableSafety textarea#safetyComments').val();
+        if (reqTime(hour) && req(notice) && req(issuedTo) && req(comments) && req(complianceDue)) {
+            loading2("table#tableSafety tr#trSafetyInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("table#tableSafety ul#uSafety img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableSafety select#safetyTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    hour: hour,
+                    notice: notice,
+                    issuedTo: issuedTo,
+                    complianceDue: complianceDue,
+                    comments: comments,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateSafety"
+            }).success(
+                    function (data) {
+                        $('table#tableSafety tr#trSafetyInput').before(data);
+                        $('table#tableSafety tr#trSafetyInput td:last-child').html("<button onclick=addSafety() data-rel=tooltip title=Хадгалах class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+                        numberTable("tableSafety");
+                        $('table#tableSafety ul#uSafety').html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                        $('table#tableSafety input#safetySubject').val("");
+                        $('table#tableSafety input#safetyNotice').val("");
+                        $('table#tableSafety input#safetyIssuedTo').val("");
+                        $('table#tableSafety input#safetyHour').val("");
+                        $('table#tableSafety input#safetyComplianceDue').val("");
+                        $('table#tableSafety textarea#safetyComments').val("");
+                        $('[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function copySafety(id) {
+        var trSafety = $("table#tableSafety tr#trSafety" + id);
+        $('table#tableSafety select#safetyTask').selectpicker('val', trSafety.find("td:nth-child(2)").attr('taskId'));
+        $('table#tableSafety input#safetyHour').val(trSafety.find("td:nth-child(3)").text());
+        $('table#tableSafety input#safetyNotice').val(trSafety.find("td:nth-child(4)").text());
+        $('table#tableSafety input#safetyIssuedTo').val(trSafety.find("td:nth-child(5)").text());
+        $('table#tableSafety input#safetyComplianceDue').val(trSafety.find("td:nth-child(6)").text());
+        $('table#tableSafety textarea#safetyComments').val(trSafety.find("td:nth-child(7)").find('span').text());
+        $('table#tableSafety ul#uSafety').html("");
+        trSafety.find("td:nth-child(8)").find('div.post-images img').each(function () {
+            $('table#tableSafety ul#uSafety').append("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' ></span></li>");
+        });
+        $('table#tableSafety ul#uSafety').append("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+        $('button[data-rel="tooltip"]').tooltip();
+    }
+    function deleteSafety(id) {
+        loading2("table#tableSafety tr#trSafety" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteSafety"
+        }).success(
+                function () {
+                    $('table#tableSafety tr#trSafety' + id).remove();
+                });
+    }
+    function addWaste() {
+        var subject = $('table#tableWaste input#WasteSubject').val();
+        var measure = $('table#tableWaste input#WasteMeasure').val();
+        var quantity = $('table#tableWaste input#WasteQuantity').val();
+        var comments = $('table#tableWaste textarea#WasteComments').val();
+        if (req(subject) && req(measure) && reqNum(quantity) && req(comments)) {
+            loading2("table#tableWaste tr#trWasteInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("ul#uWaste img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableWaste select#wasteTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    subject: subject,
+                    measure: measure,
+                    quantity: quantity,
+                    comments: comments,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateWaste"
+            }).success(
+                    function (data) {
+                        $('table#tableWaste tr#trWasteInput').before(data);
+                        $('table#tableWaste tr#trWasteInput td:last-child').html("<button onclick=addWaste() data-rel=tooltip title=Хадгалах class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+                        numberTable("tableDelivery");
+                        $('table#tableWaste ul#uWaste').html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                        $('table#tableWaste input#WasteSubject').val("");
+                        $('table#tableWaste input#WasteMeasure').val("");
+                        $('table#tableWaste input#WasteQuantity').val("");
+                        $('table#tableWaste textarea#WasteComments').val("");
+                        $('button[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function deleteWaste(id) {
+        loading2("table#tableWaste tr#trWaste" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteWaste"
+        }).success(
+                function () {
+                    $('table#tableWaste tr#trWaste' + id).remove();
+                });
+    }
+    function addDumpster() {
+        var dumpsterMaterial = $('table#tableDumpster select#dumpsterMaterial').val();
+        var quantity = $('table#tableDumpster input#dumpsterQuantity').val();
+        var location = $('table#tableDumpster input#dumpsterLocation').val();
+        var comments = $('table#tableDumpster textarea#dumpsterNotes').val();
+        if (reqNum(quantity) && req(location) && req(comments)) {
+            loading2("table#tableDumpster tr#trDumpsterInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("table#tableDumpster ul#uDumpster img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    dumpsterTask: $('table#tableDumpster select#dumpsterTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    dumpsterMaterial: dumpsterMaterial,
+                    quantity: quantity,
+                    location: location,
+                    comments: comments,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateDumpster"
+            }).success(
+                    function (data) {
+                        $('table#tableDumpster tr#trDumpsterInput').before(data);
+                        $('table#tableDumpster tr#trDumpsterInput td:last-child').html("<button onclick=addDumpster() data-rel=tooltip title='Хадгалах' class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+                        numberTableContractor("tableDumpster");
+                        $('table#tableDumpster ul#uDumpster').html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                        $('table#tableDumpster input#dumpsterQuantity').val("");
+                        $('table#tableDumpster input#dumpsterLocation').val("");
+                        $('table#tableDumpster textarea#dumpsterNotes').val("");
+                        $('[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function copyDumpster(id) {
+        var trDumpster = $("table#tableDumpster tr#trDumpster" + id);
+        $('table#tableDumpster select#dumpsterTask').selectpicker('val', trDumpster.find("td:nth-child(2)").attr('taskId'));
+        $('table#tableDumpster select#dumpsterMaterial').selectpicker('val', trDumpster.find("td:nth-child(3)").attr('materialId'));
+        $('table#tableDumpster input#dumpsterQuantity').val(parseFloat(trDumpster.find("td:nth-child(4)").text()));
+        $('table#tableDumpster input#dumpsterLocation').val(trDumpster.find("td:nth-child(5)").text());
+        $('table#tableDumpster textarea#dumpsterNotes').val(trDumpster.find("td:nth-child(6)").find('span').text());
+        $("table#tableDumpster ul#uDumpster").html("");
+        trDumpster.find("td:nth-child(7)").find('div.post-images img').each(function () {
+            $("table#tableDumpster ul#uDumpster").append("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' filedir='/FileCenter/DailyLog/2015/4/14/1428990853362' extension=jpg></span></li>");
+        });
+        $('table#tableDumpster ul#uDumpster').append("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+        $('button[data-rel="tooltip"]').tooltip();
+    }
+    function deleteDumpster(id) {
+        loading2("table#tableDumpster tr#trDumpster" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteDumpster"
+        }).success(
+                function () {
+                    $('table#tableDumpster tr#trDumpster' + id).remove();
+                });
+    }
+    function showEquipmentModal(taskId) {
+        currentTaskId = taskId;
+        $('#modal-Equipment').modal('show');
+        $.ajax({
+            type: "POST",
+            data: {
+                taskId: currentTaskId,
+                date: '${currentDate.format("yyyy-MM-dd")}'
+            }, url: "/dailyLogShowEquipmentModal"
+        }).success(
+                function (data) {
+                    $('table#tableEquipment tr.trEquipmentClass').each(function () {
+                        $(this).remove();
+                    });
+                    $('table#tableEquipment tr#trEquipmentInput').before(data);
+                    numberTable("tableEquipment");
+                });
+    }
+    function showMaterialModal(taskId) {
+        currentTaskId = taskId;
+        $('#modal-Material').modal('show');
+        $.ajax({
+            type: "POST",
+            data: {
+                taskId: currentTaskId,
+                date: '${currentDate.format("yyyy-MM-dd")}'
+            }, url: "/dailyLogShowMaterialModal"
+        }).success(
+                function (data) {
+                    $('table#tableMaterial tr.trMaterialClass').each(function () {
+                        $(this).remove();
+                    });
+                    $('table#tableMaterial tr#trMaterialInput').before(data);
+                    numberTableContractor("tableMaterial");
+                    $('[data-rel="tooltip"]').tooltip();
+                });
+    }
+    function deleteMaterial(materialId, inventoryId) {
+        loading2("table#tableMaterial tr#trMaterial" + materialId + inventoryId + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: materialId
+            }, url: "/dailyLogDeleteMaterial"
+        }).success(
+                function () {
+                    $("table#tableMaterial tr#trMaterial" + materialId + inventoryId).remove();
+                    $('table#tableMaterial tr.trMaterialContractor' + inventoryId).each(function () {
+                        $(this).remove();
+                    });
+                    numberTableContractor("tableMaterial");
+                });
+    }
+    function addMaterial() {
+        var baigaa = false;
+        var inventoryId = $('table#tableMaterial tr#trMaterialInput select#selectMaterial').val();
+        $('div#modal-Material table#tableMaterial tr.trMaterialClassInput').each(function () {
+            if ($(this).attr("inventoryId") == inventoryId)
+                baigaa = true;
+        });
+        if (baigaa)
+            showErrorMessage("Энэ материал аль хэдийн нэмэгдсэн байна");
+        else {
+            loading2("table#tableMaterial tr#trMaterialInput td:last-child");
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: currentTaskId,
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    inventoryId: inventoryId
+                }, url: "/dailyLogCreateMaterial"
+            }).success(
+                    function (data) {
+                        $('table#tableMaterial tr#trMaterialInput').before(data);
+                        $('table#tableMaterial tr#trMaterialInput td:last-child').html("<button onclick='addMaterial()' data-rel='tooltip' title='Нэмэх' style='margin: auto;' class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-plus' ></i></button>");
+                        numberTableContractor("tableMaterial");
+                    });
+            $('[data-rel="tooltip"]').tooltip();
+        }
+    }
+    function saveMaterial() {
+        var materials = new Array();
+        var i = 0;
+        var notValid = true;
+        $('div#modal-Material button#buttonSaveMaterial i').removeClass().addClass("fa fa-spinner faa-spin animated");
+        $('div#modal-Material button#buttonSaveMaterial').prop('disabled', true);
+        $('div#modal-Material table#tableMaterial tr.trMaterialClassInput').each(function () {
+            var attaches = new Array();
+            var quantity = $(this).find("input[name=materialQuantity]").val();
+            if (quantity == "" || quantity <= 0) {
+                notValid = false;
+            }
+            $(this).find("ul.uploadBox img.imgIcon").each(function () {
+                attaches.push({
+                    "filename": $(this).attr('filename'),
+                    "filedir": $(this).attr('filedir'),
+                    "extension": $(this).attr('extension'),
+                    "filesize": $(this).attr('filesize')
+                });
+            });
+            materials.push({
+                "materialId": $(this).attr("materialId"),
+                "inventoryId": $(this).attr("inventoryId"),
+                "quantity": quantity,
+                "note": $(this).find("textarea[name=materialNote]").val(),
+                "attaches": attaches
+            });
+        });
+        if (notValid)
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: currentTaskId,
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    materials: JSON.stringify(materials)
+                }, url: "/dailyLogSaveMaterial"
+            }).success(
+                    function (data) {
+                        $('div#modal-Material button#buttonSaveMaterial i').removeClass().addClass("fa fa-check");
+                        $('div#modal-Material button#buttonSaveMaterial').prop('disabled', false);
+                        showSuccessMessage(data);
+                        $('#modal-Material').modal('hide');
+                    });
+        else{
+            showErrorMessage("Тоо хэмжээг бичнэ үү!");
+            $('div#modal-Material button#buttonSaveMaterial i').removeClass().addClass("fa fa-check");
+            $('div#modal-Material button#buttonSaveMaterial').prop('disabled', false);
+        }
+    }
+    function copyMaterial(materialId, inventoryId) {
+        var trMaterial = $('table#tableMaterial tr[inventoryId=' + inventoryId + ']');
+        var trCopyMaterial = $('table#tableMaterial tr#trMaterial' + materialId + inventoryId);
+        var quantity = parseInt(trMaterial.find("input[name=materialQuantity]").val());
+        if (isNaN(quantity))
+            quantity = parseInt(trCopyMaterial.find("td:nth-child(2)").text());
+        else
+            quantity += parseInt(trCopyMaterial.find("td:nth-child(2)").text());
+        trMaterial.find("input[name=materialQuantity]").val(quantity);
+        trMaterial.find("textarea[name=materialNote]").val(trMaterial.find("textarea[name=materialNote]").val() + trCopyMaterial.find("td:nth-child(4)").text());
+        var ulMaterial = trMaterial.find("ul");
+        trCopyMaterial.find("td:nth-child(5)").find('div.post-images img').each(function () {
+            ulMaterial.find("li:last-child").before("<li><span>" + $(this).prop('outerHTML') +
+                    "<img height=12 class=deleteImage width=12 src='/public/images/delete-image.png' filedir='/FileCenter/DailyLog/2015/4/14/1428990853362' extension=jpg></span></li>");
+        });
+    }
+    function showMaterialContractor(inventoryId) {
+        $('table#tableMaterial tr.trMaterialContractor' + inventoryId).each(function () {
+            $(this).toggle();
+        });
+    }
+    function updateScheduledWork(taskId) {
+        var comment = $('table#tableScheduledWork textarea#scheduledWorkComments' + taskId).val();
+        var percent = $('table#tableScheduledWork input#scheduledWorkPercent' + taskId).val();
+        if (comment.length < 2 || comment == "") {
+            showErrorMessage("Тэмдэглэл бичнэ үү!");
+        }
+        #{if !user.userTeam.contractor}
+        else if (parseFloat(percent) > 100) {
+            showErrorMessage("Гүйцэтгэл хувь 100-с их байж болохгүй!");
+        }
+        else if (isNaN(parseFloat(percent))) {
+            showErrorMessage("Гүйцэтгэл хувь 0-100 хооронд тоо байх ёстой");
+        }
+        #{/if}
+        else {
+            loading2("table#tableScheduledWork tr#trScheduledWork" + taskId + " td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("table#tableScheduledWork ul#uScheduledWork" + taskId + " img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: taskId,
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    percent: percent,
+                    comments: comment,
+                    hours: "",
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogUpdateScheduledWork"
+            }).success(function (data) {
+                $("table#tableScheduledWork tr#trScheduledWork" + taskId + " td:last-child").html("" +
+                        "<button onclick=deleteScheduledWork(" + data + ")  data-rel=tooltip title='Устгах' " +
+                        "class='delete btn btn-icon-sm btn-rounded btn-default'><i class='fa fa-times' ></i></button>" +
+                        "<button onclick=updateScheduledWork('" + taskId + "') data-rel=tooltip title='Шинэчлэх' " +
+                        "class='update btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save'></i></button>");
+                $('[data-rel="tooltip"]').tooltip();
+                showSuccessMessage('Хадгалагдлаа');
+            });
+        }
+    }
+    $(document).ready(function () {
+        $('input#manPowerHours').blur(function () {
+            $('td#tdManPowerManHours').html($('input#manPowerHours').val() * $('input#manPowerWorkers').val());
+            $('input#manPowerManHours').val($('input#manPowerHours').val() * $('input#manPowerWorkers').val());
+        });
+        $('input#manPowerWorkers').blur(function () {
+            $('input#manPowerManHours').val($('input#manPowerHours').val() * $('input#manPowerWorkers').val());
+            $('td#tdManPowerManHours').html($('input#manPowerHours').val() * $('input#manPowerWorkers').val());
+        });
+        numberTableContractor("tableDumpster");
+        numberTable("tableWaste");
+        numberTableContractor("tableSafety");
+
+        $('#modal-Material').on('hidden.bs.modal', function (e) {
+            var totalMaterial = 0;
+            $('div#modal-Material table#tableMaterial tr.trMaterialClassInput').each(function () {
+                if (!$(this).hasClass("warning")) {
+                    totalMaterial += 1;
+                }
+            });
+            $("button#showMaterialModal" + currentTaskId).html("Материал: </br>" + totalMaterial);
+        });
+    });
+</script>

@@ -1,0 +1,121 @@
+<div class="modal fade" id="modal-addsupplier" aria-hidden="true">
+    <div class="modal-dialog modal-lg" style="width: 650px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title"><strong>&{'add_new_supplier'}</strong></h4>
+            </div>
+            <div class="modal-body">
+                <form action="@{InventorySuppliers.newSupplier()}" class="form-horizontal" method="get"
+                      accept-charset="utf-8"
+                      enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="tabcordion">
+                                <div id="myTabContent" class="tab-content">
+                                    <div class="tab-pane fade active in" id="product_general">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'name'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control" placeholder=&{'name'}...
+                                                               required="true"
+                                                               name="name" id="name_add">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'person'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'person'}...
+                                                               required="true"
+                                                               name="person" id="person_add">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'address'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                            <textarea rows="5" class="form-control valid" required="true"
+                                                      name="address" id="address_add"
+                                                      placeholder=&{'address'}...></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'phone'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'phone'}...
+                                                               required="true"
+                                                               name="phone" id="phone_add">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'phone'}
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'phone'}...
+                                                               name="phone_alternative" id="phone_alternative_add">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'email'}
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'email'}...
+                                                               name="email" id="email_add">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'website'}
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'website'}...
+                                                               name="website" id="website_add">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 m-t-20 m-b-40 align-center">
+                            <button type="button" id="add_submit" class="btn btn-success m-t-10"><i
+                                    class="fa fa-check"></i> &{'save'}
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+#{extends 'CRUD/layout.html' /}
+#{set title:'Chat room' /}
+
+<h1>WebSocket — You are now chatting as ${user} Leave the chat room</h1>
+
+<div id="thread">
+    <script type="text/html" id="message_tmpl">
+        <% if(event.type == 'message') { %>
+        <div class="message <%= event.user == '${user}' ? 'you' : '' %>">
+            <h2><%= event.user %></h2>
+
+            <p>
+                <%= event.text %>
+            </p>
+        </div>
+        <% } %>
+        <% if(event.type == 'join') { %>
+        <div class="message notice">
+            <h2></h2>
+
+            <p>
+                <%= event.user %> joined the room
+            </p>
+        </div>
+        <% } %>
+        <% if(event.type == 'leave') { %>
+        <div class="message notice">
+            <h2></h2>
+
+            <p>
+                <%= event.user %> left the room
+            </p>
+        </div>
+        <% } %>
+        <% if(event.type == 'quit') { %>
+        <div class="message important">
+            <h2></h2>
+
+            <p>
+                You are now disconnected!
+            </p>
+        </div>
+        <% } %>
+    </script>
+</div>
+
+<div id="newMessage">
+    <input type="text" id="message" autocomplete="off">
+    <input type="submit" value="send" id="send" onclick="sentt()">
+</div>
+
+<script language="javascript" type="text/javascript">
+    function sentt() {
+        $.ajax({
+            url: '/websocketTestPort',
+            dataType: 'text',
+            type: 'POST',
+            complete: function () {
+            }
+        });
+    }
+
+
+</script>

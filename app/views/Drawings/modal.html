@@ -1,0 +1,65 @@
+<div class="modal fade modal-fullscreen" id="DrawingFieldModal" data-backdrop="static" tabindex="-1" role="dialog"
+     aria-hidden="true" style="top: 0; right: 0; left: 0; overflow: hidden;">
+    <div class="modal-dialog" style="width: 100%;">
+        <div class="modal-content" style="width: 100%;">
+            <div class="modal-header"
+                 style="padding: 0; height: 54px; position: absolute; left: 0; top: 0; z-index: 9000; width: 100%;">
+            </div>
+
+            <div class="modal-body" style="padding: 0; top: 54px; overflow: hidden;">
+                <div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var drawingFieldHeight = 0;
+    var dinamicRevisonId = 0;
+    function prepareToDraw(id, pathing) {
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id,
+                action: action
+            },
+            url: "/drawing/extendModal",
+            beforeSend: function () {
+                drawingFieldHeight = parseInt(window.innerHeight);
+                $("div#DrawingFieldModal").css("height", drawingFieldHeight + "px");
+                drawingFieldHeight -= 30;
+                $("div#DrawingFieldModal").find("div.modal-dialog").css("height", drawingFieldHeight + "px");
+                $("div#DrawingFieldModal").find("div.modal-content").css("height", drawingFieldHeight + "px");
+                $("div#DrawingFieldModal").find("div.modal-body").css("height", drawingFieldHeight + "px");
+                $("div#DrawingFieldModal").find("div.modal-header").html('');
+                $("div#DrawingFieldModal").find("div.modal-body").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#DrawingFieldModal").find("div.modal-header").html(data);
+            if (pathing == null){
+                pathing = "";
+                dinamicRevisonId = 0;
+            }
+            else dinamicRevisonId = id;
+            changeRevisionToDraw(id, pathing);
+            $("div#DrawingFieldModal").modal("show");
+        });
+    }
+    function changeRevisionToDraw(id, pathing) {
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id,
+                isClean: isClean,
+                path: pathing,
+                height: drawingFieldHeight,
+                action: action
+            },
+            url: "/drawing/extendField",
+            beforeSend: function () {
+                $("div#DrawingFieldModal").find("div.modal-body").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+            }
+        }).success(function (data) {
+            $("div#DrawingFieldModal").find("div.modal-body").html(data);
+        });
+    }
+</script>

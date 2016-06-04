@@ -1,0 +1,57 @@
+<table id="contentListTable" cellpadding="0px" cellspacing="0px">
+    <thead>
+    <tr>
+        <th>&{'Contract#'}</th>
+        <th>&{'ContractorName'}</th>
+        <th>&{'Title'}</th>
+        <th>&{'Status'}</th>
+        <th>&{'PaymentMode'}</th>
+        <th>&{'TotalAmount'}</th>
+        <th>&{'ApprovedDate'}</th>
+        <th>&{'StartDate'}</th>
+        <th>&{'EndDate'}</th>
+        <th>&{'File'}</th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list  items:Contracts, as:'contract'}#{/list}
+    <tr class="content">
+        <td><a href="@{Contracts.show(contract.id)}">${contract.name}</a></td>
+        <td><a href="@{Contracts.show(contract.id)}">${contract.companyName}</a></td>
+        <td>${contract.title}</td>
+        <td>${contract.status?.status}</td>
+        <td>${contract.payment?.payment}</td>
+        <td>${controllers.Functions.getDecimal(contract.totalAmount?.amount)}</td>
+        <td>${contract.reviewDate?.format('yyyy-MM-dd')}</td>
+        <td>${contract.startDate?.format('yyyy-MM-dd')}</td>
+        <td>${contract.endDate?.format('yyyy-MM-dd')}</td>
+    #{if ontract.contractAttachments.size() > 0 }
+        <td>
+            <img src="public\images\fileIcon\pdf-icon.png" width="25px" height="25px"/>
+        </td>
+    #{/if}
+    #{else }
+        <td></td>
+    #{/else}
+    </tr>
+    </tbody>
+</table>
+<style type="text/css">
+    table#contentListTable thead tr th {
+        text-align: center !important;
+        padding: 0 !important;
+        border: 1px solid #ddd;
+        border-left: none !important;
+        border-bottom: none !important;
+        border-right: 1px solid #ddd !important;
+        line-height: 16px;
+        text-shadow: none !important;
+        font-size: 12px;
+    }
+
+    table#contentListTable tbody td {
+        text-align: center !important;
+        border: 1px solid #ddd !important;
+        background-color: #f5f5f5;
+    }
+</style>

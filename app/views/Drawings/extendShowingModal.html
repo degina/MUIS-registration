@@ -1,0 +1,616 @@
+<div class="modal-header"
+     style="padding: 0; height: 54px; position: absolute; left: 0; top: 0; z-index: 9000; width: 100%;">
+    <table class="table table-tools" cellpadding="0" cellspacing="0"
+           style="border-color: lightgray; margin: 0; padding: 0; ">
+        <tr>
+            <td style="left: 0; right: 0; margin: 0; padding-bottom: 0;min-height: 56px; padding-top: 8px;">
+                <div class="col-md-12" style="margin-top: 0;">
+                    <div style="float: left;vertical-align: middle;">
+                        <i class="fa fa-times"
+                           style="font-size: 35px; vertical-align: middle; margin-right: 20px; cursor: pointer; border-right: solid lightgray 1px; padding-right: 20px;"
+                           data-dismiss="modal"></i>
+                        <span style="font-size: 18px; vertical-align: middle;">
+                            ${layer.revision.drawing.Number + " - " + layer.revision.drawing.title}
+                        </span>
+
+                    </div>
+
+                </div>
+            </td>
+        </tr>
+    </table>
+    <script>
+    </script>
+</div>
+<div class="modal-body" style="padding: 0; top: 54px; overflow: hidden; height: ${height};">
+    <table class="table table-tools" border="1" cellpadding="0" cellspacing="0"
+           style="border-color: lightgrey; margin: 0; padding: 0; height: ${height}px; ">
+        <tr style="">
+            <td style="padding: 0;">
+                <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                     style="width: 100%; height: ${height}px;overflow: hidden;">
+                    <foreignObject ${controllers.Drawings.getSize(layer.revision.dir + "." +layer.revision.extension)}
+                            class="imgPanel"
+                            id="outer_group"
+                            style="border: solid lightgrey 1px; stroke-width: 1.5px; background: url('${layer.revision.dir + "." +layer.revision.extension}') no-repeat center;"
+                            transform="translate(0,0)scale(1)"
+                            scaler="1">
+                        <svg id="stage" xmlns="http://www.w3.org/2000/svg"
+                             xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+                    </foreignObject>
+                </svg>
+            </td>
+            <td style="width: 300px; vertical-align: top; padding: 8px;">
+            %{drawing = layer.revision.drawing;}%
+                <div>
+                    <div class="clearfix" data-no-turbolink="">
+                        <p class="group-label pull-left">Зургийн мэдээлэл:</p>
+
+                        <div class="dropdown-light dropdown pull-right">
+                            <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                <i class="fa fa-caret-down"></i>
+                            </a>
+
+                            <div class="dropdown-menu">
+                                <ul>
+                                    <li onclick="downloadPDF()" style="cursor: pointer;"> PDF татах</li>
+                                    <li onclick="downloadPDFwithMarkUp()" style="cursor: pointer;"> Тэмдэглэгээтэй PDF
+                                        татах
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <table class="revision-info">
+                        <tbody>
+                        <tr>
+                            <td>Дугаар:</td>
+                            <td>${drawing.Number}</td>
+                        </tr>
+                        <tr>
+                            <td>Гарчиг:</td>
+                            <td>${drawing.title}</td>
+                        </tr>
+                        <tr>
+                            <td>Шифр:</td>
+                            <td>${drawing.cipher}</td>
+                        </tr>
+                        <tr>
+                            <td>Хувилбар:</td>
+                            <td>${layer.revision.number}</td>
+                        </tr>
+                        <tr>
+                            <td>Төрөл:</td>
+                            <td>${drawing.discipline.name}</td>
+                        </tr>
+                        <tr>
+                            <td>Зурагдсан огноо:</td>
+                            <td>${layer.revision.createdDate.format("yyyy-MM-dd")}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<input id="jsonString" type="hidden" value="${layer.path}"/>
+<svg id="cleanSVG" class="dhidden" ${controllers.Drawings.getSize(layer.revision.dir + "." +layer.revision.extension)}>
+    <image id="background" xlink:href="${layer.revision.dir + "." +layer.revision.extension}" x="0"
+           y="0" ${controllers.Drawings.getSize(layer.revision.dir + "." +layer.revision.extension)}/>
+</svg>
+<script>
+    var _type = "Path";
+    var _color = "red";
+    var _opacity = 0.0;
+    var _width = 4;
+    var _text = "";
+    var _fontSize = 12;
+    var _offset = $("#outer_group").offset();
+    var _drawing = false;
+    var _clicking = false;
+    var newElement = null;
+    var _points = [];
+    var startPoint = [];
+    var endPoint = [];
+    var activityHistory = [];
+    var activityJson = [];
+    var svg = d3.select("#svg");
+    var svg_group = d3.select('#outer_group');
+    var group = document.getElementById('stage');
+    var _mouseEnter = false;
+    var _keyDown = false;
+    var displayCounter = 0;
+    var zoom = d3.behavior.zoom()
+            .translate([0, 0])
+            .scale(1)
+            .scaleExtent([.5, 4])
+            .on("zoom", zoomed);
+    zooming();
+    function zoomed() {
+        svg_group.style("stroke-width", 1.5 / d3.event.scale + "px");
+        svg_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg_group.attr("scaler", d3.event.scale);
+    }
+    readPersonalLayer();
+    function addHistory(element) {
+        var factorHistory = activityHistory;
+        activityHistory = [];
+        var factorJson = activityJson;
+        activityJson = [];
+        for (var i = 0; i < displayCounter; i++) {
+            activityHistory.push(factorHistory[i]);
+            activityJson.push(factorJson[i]);
+        }
+        var jsonElement = {
+            type: _type,
+            color: _color
+        };
+        var dan = svg_group.attr("scaler");
+        if (_type == "Line" || _type == "ArrowLine" || _type == "DoubleArrowLine" || _type == "Rectangle" || _type == "Circle") {
+            jsonElement.startX = startPoint[0] / dan;
+            jsonElement.startY = startPoint[1] / dan;
+            jsonElement.endX = endPoint[0] / dan;
+            jsonElement.endY = endPoint[1] / dan;
+            jsonElement.strokeWidth = _width;
+
+        } else if (_type == "Path") {
+            jsonElement.path = points_to_string(dan);
+            jsonElement.strokeWidth = _width;
+        }
+        if (_type == "Rectangle" || _type == "Circle") {
+            jsonElement.fillAlpha = _opacity;
+        }
+        if (_type == "Text") {
+            jsonElement.startX = startPoint[0] / dan;
+            jsonElement.startY = startPoint[1] / dan;
+            jsonElement.endX = endPoint[0] / dan;
+            jsonElement.endY = endPoint[1] / dan;
+            jsonElement.text = _text;
+            jsonElement.fontSize = _fontSize;
+        }
+        if (_type == "Punch") {
+            jsonElement.startX = startPoint[0] / dan;
+            jsonElement.startY = startPoint[1] / dan;
+        }
+        activityHistory.push(element);
+        if (element.type == "CLEAN" || element.type == "erase") {
+            activityJson.push("");
+        }
+        else {
+            activityJson.push(jsonElement);
+        }
+        displayCounter++;
+        factorJson = toDisplay();
+    }
+    function readPersonalLayer() {
+        readerJsonArray($("input#jsonString").val());
+        _type = "Path";
+        _color = "red";
+        _opacity = 0.0;
+        _width = 4;
+        _text = "";
+        _fontSize = 12;
+        newElement = null;
+        _points = [];
+        startPoint = [];
+        endPoint = [];
+    }
+    function readerJsonArray(stringer) {
+        if (stringer == "") return;
+        var factorJson = jQuery.parseJSON(stringer);
+        var dan = 1;
+        for (var i = 0; i < factorJson.length; i++) {
+            newElement = null;
+            readerJson(factorJson[i]);
+            var jsonElement = {type: "element", element: newElement};
+            addHistory(jsonElement);
+        }
+    }
+    function readerJson(json) {
+        var dan = svg_group.attr("scaler");
+        if (json.type != null) {
+            _type = json.type;
+            _color = json.color;
+            if (_type == "Line" || _type == "ArrowLine" || _type == "DoubleArrowLine" || _type == "Rectangle" || _type == "Circle") {
+                startPoint = [json.startX, json.startY];
+                endPoint = [json.endX, json.endY];
+                _width = json.strokeWidth;
+                _opacity = json.fillAlpha;
+            } else if (_type == "Path") {
+                _width = json.strokeWidth;
+            }
+            if (_type == "Rectangle" || _type == "Circle") {
+                _opacity = json.fillAlpha;
+            }
+            if (_type == "Text") {
+                startPoint = [json.startX, json.startY];
+                endPoint = [json.endX, json.endY];
+                _text = json.text;
+                _fontSize = json.fontSize;
+            }
+            if (_type == "Punch") {
+                startPoint = [json.startX, json.startY];
+            }
+            _points = [];
+            if (_type == "Path") {
+                var path = "";
+                var p = json.path;
+                path = "M" + p[0].x / dan + "," + p[0].y / dan;
+                path += "L" + (p[0].x + 1.0) / dan + "," + (p[0].y + 1) / dan;
+                _points.push([p[0].x, p[0].y]);
+                for (var j = 1; j < p.length; j++) {
+                    path += "L" + p[j].x / dan + "," + p[j].y / dan;
+                    _points.push([p[j].x, p[j].y]);
+                }
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Path");
+                var pather = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+                pather.setAttribute("fill", "none");
+                pather.setAttribute("d", path);
+                pather.style.strokeLinecap = "round";
+                pather.style.strokeLinejoin = "round";
+                pather.style.stroke = _color;
+                pather.style.strokeWidth = _width;
+                newElement.appendChild(pather);
+            }
+            if (_type == "Rectangle") {
+                var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Rectangle");
+                var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                recter.setAttribute("fill", _color);
+                recter.setAttribute("fill-opacity", _opacity);
+                recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+                recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+                recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+                recter.style.stroke = _color;
+                recter.style.strokeWidth = _width;
+                newElement.appendChild(recter);
+            }
+            if (_type == "Circle") {
+                var a = (startPoint[0] - endPoint[0]) / 2, b = (startPoint[1] - endPoint[1]) / 2;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Circle");
+                var circler = document.createElementNS("http://www.w3.org/2000/svg", 'ellipse');
+                circler.setAttribute("fill", _color);
+                circler.setAttribute("fill-opacity", _opacity);
+                circler.setAttribute("cx", (startPoint[0] + endPoint[0]) / (2 * dan));
+                circler.setAttribute("cy", (startPoint[1] + endPoint[1]) / (2 * dan));
+                circler.setAttribute("rx", a < 0 ? -a / dan : a / dan);
+                circler.setAttribute("ry", b < 0 ? -b / dan : b / dan);
+                circler.style.strokeLinecap = "round";
+                circler.style.strokeLinejoin = "round";
+                circler.style.stroke = _color;
+                circler.style.strokeWidth = _width;
+                newElement.appendChild(circler);
+            }
+            if (_type == "Line") {
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Line");
+                var liner = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                liner.setAttribute("fill", "none");
+                liner.setAttribute("x1", startPoint[0] / dan);
+                liner.setAttribute("y1", startPoint[1] / dan);
+                liner.setAttribute("x2", endPoint[0] / dan);
+                liner.setAttribute("y2", endPoint[1] / dan);
+                liner.style.strokeLinecap = "round";
+                liner.style.strokeLinejoin = "round";
+                liner.style.stroke = _color;
+                liner.style.strokeWidth = _width;
+                newElement.appendChild(liner);
+            }
+            if (_type == "ArrowLine") {
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "ArrowLine");
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 3) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "DoubleArrowLine") {
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "DoubleArrowLine");
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 5) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                    lineangle = Math.atan2(startPoint[1] - endPoint[1], startPoint[0] - endPoint[0]);
+                    angle1 = lineangle + Math.PI + angle;
+                    topx = startPoint[0] + Math.cos(angle1) * h;
+                    topy = startPoint[1] + Math.sin(angle1) * h;
+                    angle2 = lineangle + Math.PI - angle;
+                    botx = startPoint[0] + Math.cos(angle2) * h;
+                    boty = startPoint[1] + Math.sin(angle2) * h;
+                    trangle = null;
+                    trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + startPoint[0] / dan + "," + startPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "Text") {
+                var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Text");
+                var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                recter.setAttribute("fill", "none");
+                recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+                recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+                recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+                recter.style.stroke = _color;
+                recter.style.strokeWidth = 0;
+                newElement.appendChild(recter);
+                var texter = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+                texter.setAttributeNS(null, "fill", _color);
+                texter.setAttribute("id", "rectWrap" + i);
+                texter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan + 3);
+                texter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                texter.setAttribute("font-size", _fontSize);
+                var textNode = document.createTextNode(_text);
+                texter.appendChild(textNode);
+                newElement.appendChild(texter);
+            }
+            if (_type == "Punch") {
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'image');
+                newElement.setAttribute("type", "Punch");
+                newElement.setAttributeNS(null, 'height', 50);
+                newElement.setAttributeNS(null, 'width', 50);
+            #{if punchList != null}
+                #{if punchList.status.status == "NotResolved"}
+                    newElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/redPunch.png');
+                #{/if}
+                #{else}
+                    newElement.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/greyPunch.png');
+                #{/else}
+            #{/if}
+                newElement.setAttributeNS(null, 'x', (startPoint[0] - 30) / dan);
+                newElement.setAttributeNS(null, 'y', (startPoint[1] - 25) / dan);
+                newElement.setAttributeNS(null, 'class', 'pinned');
+            }
+            var jsonElement = {type: "element", element: newElement};
+            addHistory(jsonElement);
+        }
+    }
+    function toDisplay() {
+        var factorHistory = [];
+        var factorJson = [];
+        for (var i = 0; i < displayCounter; i++) {
+            if (activityHistory[i].type == "CLEAN") {
+                factorHistory = [];
+                factorJson = [];
+            }
+            else {
+                if (activityHistory[i].type == "erase") {
+                    var element = activityHistory[i].element;
+                    for (var j = 0; j < factorHistory.length; j++) {
+                        if (factorHistory[j].element == element) {
+                            factorHistory.splice(j, 1);
+                            factorJson.splice(j, 1);
+                        }
+                    }
+                } else {
+                    factorHistory.push(activityHistory[i]);
+                    factorJson.push(activityJson[i]);
+                }
+            }
+        }
+        $("svg#stage").empty();
+        for (var i = 0; i < factorHistory.length; i++) {
+            group.appendChild(factorHistory[i].element);
+            if (factorHistory[i].element.getAttribute("type") == "Text")
+                textPublish(i);
+        }
+        return factorJson;
+    }
+
+    function textPublish(count) {
+        d3plus.textwrap().container(d3.select("#rectWrap" + count)).draw();
+        $("text#rectWrap").removeAttr("id");
+    }
+    function points_to_string(dan) {
+        var _path = [];
+        if (_points.length > 1) {
+            for (var i = 0; i < _points.length; i++) {
+                var jsonPoint = {x: _points[i][0] / dan, y: _points[i][1] / dan};
+                _path.push(jsonPoint);
+            }
+        }
+        return _path;
+    }
+
+    function zooming() {
+        svg.call(zoom);
+    }
+
+    function downloadPDFwithMarkUp(name) {
+        var cleanSVG = $("svg#cleanSVG");
+        var imageBack = cleanSVG.find("image#background");
+        cleanSVG.html("");
+        cleanSVG.append(imageBack);
+        cleanSVG.append($("svg#stage").html());
+        svg_to_pdf(document.getElementById("cleanSVG"), function (pdf) {
+            download_pdf('${drawing.Number + " - " + drawing.title + " (Хувилбар " + layer.revision.id + ") [Тэмдэглэгээтэй].pdf"}', pdf.output('dataurlstring'));
+        });
+    }
+
+    function downloadPDF(name) {
+        var cleanSVG = $("svg#cleanSVG");
+        var imageBack = cleanSVG.find("image#background");
+        cleanSVG.html("");
+        cleanSVG.append(imageBack);
+        svg_to_pdf(document.getElementById("cleanSVG"), function (pdf) {
+            download_pdf('${drawing.Number + " - " + drawing.title + " (Хувилбар " + layer.revision.id + ").pdf"}', pdf.output('dataurlstring'));
+        });
+    }
+</script>
+<style type="text/css">
+    img.imgIcon {
+        width: 50px;
+        height: 50px;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    div#pros {
+        vertical-align: middle;
+        padding: auto;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    table#uses tr {
+        cursor: pointer;
+    }
+
+    div.thmb:hover {
+        cursor: pointer;
+    }
+
+    tr.selected {
+        background-color: #808080 !important;
+    }
+
+    tr.selected td {
+        background-color: #808080 !important;
+    }
+
+    svg#svgView {
+        cursor: move;
+    }
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .pinned:hover {
+        cursor: pointer;
+    }
+
+    #draw-tools {
+        top: 80px;
+        left: 20px;
+        width: 44px;
+        height: 360px;
+        margin: 0;
+        z-index: 6000;
+        position: fixed;
+        border-radius: 3px !important;
+    }
+
+    #draw-tools .navbar {
+        height: 44px;
+        padding: 0;
+        padding-bottom: 10px;
+        margin: 0;
+        position: fixed;
+        border-radius: 3px !important;
+    }
+
+    #draw-tools .navbar li {
+        height: 44px;
+        width: 44px;
+        /*float: left;  */
+        object-position: top;
+        text-align: center;
+        list-style: none;
+        font: normal bold 12px/1.2em Arial, Verdana, Helvetica;
+        padding: 0;
+        margin: 0;
+        background-color: #313335;
+    }
+
+    #draw-tools .navbar i {
+        padding: 10px 0;
+        text-decoration: none;
+        color: #000;
+        display: block;
+    }
+
+    #pen-tools li {
+        float: left;
+    }
+
+    #draw-tools .navbar li:hover {
+        background-color: #515151;
+    }
+
+    #draw-tools .navbar li ul {
+        display: none;
+        margin-left: 44px;
+        margin-top: -44px;
+        float: left;
+        height: 44px;
+    }
+
+    #draw-tools .navbar li:hover ul {
+        float: left;
+        display: block;
+        z-index: 6000;
+        padding-left: 0;
+
+    }
+
+    #draw-tools .navbar li ul li {
+        float: left;
+        background-color: #313335;
+    }
+
+    #draw-tools .navbar li ul li:hover {
+        background-color: #515151;
+        border-color: #515151;
+    }
+
+    #draw-tools .navbar li ul li i {
+        z-index: 7001;
+    }
+
+    i.fa-plus:hover {
+        background-color: transparent;
+    }
+</style>

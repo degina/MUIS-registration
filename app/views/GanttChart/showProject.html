@@ -1,0 +1,628 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: 'Ажлын график'/}
+#{set activeMenu: 'GanttChart'/}
+#{set activeMenuSub:'GanttEditor'/}
+<style>
+    td.subGroup, td.taskAssigs {
+        cursor: pointer;
+    }
+
+    td.mcenter {
+        cursor: pointer;
+        text-align: center;
+    }
+
+    svg:not(:root) {
+        overflow: visible !important;
+    }
+
+    .resEdit {
+        padding: 15px;
+    }
+
+    .resLine {
+        width: 95%;
+        padding: 3px;
+        margin: 5px;
+        border: 1px solid #d0d0d0;
+    }
+
+    .ganttButtonBar h1 {
+        color: #000000;
+        font-weight: bold;
+        font-size: 28px;
+        margin-left: 10px;
+    }
+
+    table#mainGanttTable td.scope,
+    table#mainGanttTable input.scope {
+        background-color: orange;
+    }
+
+    table#mainGanttTable input.scopeError,
+    span.scopeError {
+        color: red;
+    }
+
+    table#mainGanttTable .timeType {
+        margin-right: 4px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    ul#loadTemplatesUl li:hover {
+        background-color: lightgrey;
+        cursor: pointer;
+    }
+
+    ul#loadTemplatesUl li {
+        padding: 2px 8px;
+        border-bottom: 1px solid #e5e5e5;
+    }
+
+    ul#loadTemplatesUl li:last-child {
+        border-bottom: none;
+    }
+</style>
+<script>
+    var project_holidays = "${project.holidays}";
+    project_holidays = "#" + project_holidays;
+    var project_weekend = "${project.weekend}";
+    var setPeriodTimeType=2;
+    var assignDialogWidth = 320;
+    #{if controllers.CompanyConf.type==1}
+    assignDialogWidth = 420;
+    #{/if}
+
+</script>
+#{set 'moreStyles'}
+<link rel=stylesheet href="/public/ganttChart/gantt.css" type="text/css">
+<link rel=stylesheet href="/public/ganttChart/ganttPrint.css" type="text/css" media="print">
+<link rel="stylesheet" type="text/css" href="/public/ganttChart/libs/jquery.svg.css">
+<link rel=stylesheet href="/public/ganttChart/platform.css" type="text/css">
+<link rel=stylesheet href="/public/ganttChart/libs/dateField/jquery.dateField.css" type="text/css">
+#{/set}
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+
+<script src="/public/ganttChart/libs/jquery.livequery.min.js"></script>
+<script src="/public/ganttChart/libs/jquery.timers.js"></script>
+<script src="/public/ganttChart/libs/platform.js"></script>
+<script src="/public/ganttChart/libs/date.js"></script>
+<script src="/public/ganttChart/libs/i18nJs.js"></script>
+<script src="/public/ganttChart/libs/dateField/jquery.dateField.js"></script>
+<script src="/public/ganttChart/libs/JST/jquery.JST.js"></script>
+
+<script type="text/javascript" src="/public/ganttChart/libs/jquery.svg.min.js"></script>
+<!--In case of jquery 1.8-->
+<script type="text/javascript" src="/public/ganttChart/libs/jquery.svgdom.1.8.js"></script>
+
+<script src="/public/ganttChart/ganttCopyEditor.js"></script>
+<script src="/public/ganttChart/ganttUtilities.js"></script>
+<script src="/public/ganttChart/ganttTask.js"></script>
+<script src="/public/ganttChart/ganttDrawerSVG.js"></script>
+<script src="/public/ganttChart/ganttGridEditor.js"></script>
+<script src="/public/ganttChart/ganttMaster.js"></script>
+<script src="/public/ganttChart/ganttSetFunction.js"></script>
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+#{set 'moreScripts'}
+#{/set}
+#{alertMessages /}
+<div id="main-content" style="background-color: #fff;margin-top: 40px;padding: 0;overflow: visible;">
+    <div id="workSpace"
+         style="padding:0px; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px;z-index: 0"></div>
+
+    <div id="taZone" style="display:none;" class="noprint">
+        <textarea rows="8" cols="150" id="ta">${prjData}</textarea>
+    </div>
+    <script type="text/javascript">
+        menuWidthAction = true;
+        var workSpace = $("#workSpace");
+        var menuWidthActionValue = 250;
+        var ge;  //this is the hugly but very friendly global var for the gantt editor
+        $(function () {
+
+            //load templates
+            $("#ganttemplates").loadTemplates();
+
+            // here starts gantt initialization
+            ge = new GanttMaster();
+            workSpace.css({width: $(window).width() - 20, height: $(window).height() - 100});
+            ge.init(workSpace);
+
+            //overwrite with localized ones
+            loadI18n();
+
+            //simulate a data load from a server.
+            loadFromLocalStorage();
+
+            $(window).resize(function () {
+                workSpace.css({
+                    width: $(window).width() - 1 - menuWidthActionValue,
+                    height: $(window).height() - workSpace.position().top
+                });
+                workSpace.trigger("resize.gantt");
+            }).oneTime(150, "resize", function () {
+                $(this).trigger("resize")
+            });
+//            clearGantt(); //empty the undo stack
+        });
+        function menuWidthActionFn(w) {
+            menuWidthActionValue = w;
+            workSpace.css({
+                width: $(window).width() - 1 - w,
+                height: $(window).height() - workSpace.position().top
+            });
+            workSpace.trigger("resize.gantt");
+        }
+        function saveGanttOnServer() {
+            if (!ge.canWrite)
+                return;
+            var invalidCheck = false;
+            if (!checkScope()) {
+//                jError("Жингээ зөв тааруулана уу!", {
+//                    HorizontalPosition: "center",
+//                    VerticalPosition: "top",
+//                    ShowOverlay: false,
+//                    TimeShown: 2000,
+//                    OpacityOverlay: 0.5,
+//                    MinWidth: 250
+//                });
+                if (confirm("Жингээ зөв тааруулаагүй байна!\nХадгалах уу?"))invalidCheck = true;
+            } else invalidCheck = true;
+            //this is a simulation: save data to the local storage or to the textarea
+            if (invalidCheck) {
+                var saveBtn = $('div#main-content button#btnSaveGanttOnServer');
+                saveBtn.attr('disabled', 'disabled');
+                var prj = ge.saveProject();
+
+                var prof = new Profiler("saveServerSide");
+                prof.reset();
+
+                /*
+                if (ge.deletedTaskIds.length > 0) {
+                    if (!confirm(ge.deletedTaskIds.length + " устгасан ажилбар байна хадгалах уу?")) {
+                        return;
+                    }
+                }*/
+                var deletedId = "";
+                if (ge.deletedTaskIds.length > 0) {
+                    for (var d = 0; d < ge.deletedTaskIds.length; d++) {
+                        deletedId += ge.deletedTaskIds[d] + "#";
+                    }
+                }
+
+                $.ajax({
+                    dataType: "json",
+                    data: {prj: JSON.stringify(prj), deletedTasks: deletedId},
+                    type: "POST",
+                    url: "/ganttChartSaveProject"
+                }).success(function (project) {
+                    prof.stop();
+                    if (project.response == "success") {
+                        ge.loadProject(project); //must reload as "tmp_" ids are now the good ones
+                        showSuccessMessage("Хадгалагдсан");
+                    }
+                    else {
+                        ge.loadProject(JSON.parse($("#ta").val()));
+                        showErrorMessage(project.response);
+                    }
+                    saveBtn.removeAttr('disabled');
+//                if (response.ok) {
+//                    prof.stop();
+//                    if (response.project) {
+//                        ge.loadProject(project); //must reload as "tmp_" ids are now the good ones
+//                    } else {
+//                        ge.reset();
+//                    }
+//                } else {
+//                    var errMsg = "Errors saving project\n";
+//                    if (response.message) {
+//                        errMsg = errMsg + response.message + "\n";
+//                    }
+//
+//                    if (response.errorMessages.length) {
+//                        errMsg += response.errorMessages.join("\n");
+//                    }
+//                    alert(errMsg);
+//                }
+                });
+            }
+        }
+        //-------------------------------------------  Create some demo data ------------------------------------------------------
+
+        function clearGantt() {
+            ge.reset();
+        }
+
+        function loadI18n() {
+            GanttMaster.messages = {
+                "CANNOT_WRITE": "Бичих эрхгүй",
+                "CHANGE_OUT_OF_SCOPE": "NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
+                "START_IS_MILESTONE": "START_IS_MILESTONE",
+                "END_IS_MILESTONE": "END_IS_MILESTONE",
+                "TASK_HAS_CONSTRAINTS": "TASK_HAS_CONSTRAINTS",
+                "GANTT_ERROR_DEPENDS_ON_OPEN_TASK": "Шалтгаалах ажилбар",
+                "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK": "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK",
+                "TASK_HAS_EXTERNAL_DEPS": "TASK_HAS_EXTERNAL_DEPS",
+                "GANTT_ERROR_LOADING_DATA_TASK_REMOVED": "GANTT_ERROR_LOADING_DATA_TASK_REMOVED",
+                "ERROR_SETTING_DATES": "ERROR_SETTING_DATES",
+                "CIRCULAR_REFERENCE": "CIRCULAR_REFERENCE",
+                "CANNOT_DEPENDS_ON_ANCESTORS": "CANNOT_DEPENDS_ON_ANCESTORS",
+                "CANNOT_DEPENDS_ON_DESCENDANTS": "CANNOT_DEPENDS_ON_DESCENDANTS",
+                "INVALID_DATE_FORMAT": "Буруу формат байна!",
+                "TASK_MOVE_INCONSISTENT_LEVEL": "Ажилбарын шилжилт таарахгүй байна",
+
+                "GANTT_QUARTER_SHORT": "Улирал",
+                "GANTT_SEMESTER_SHORT": "Хагас жил"
+            };
+        }
+
+        function loadFromLocalStorage() {
+            ge.loadProject(JSON.parse($("#ta").val()));
+            ge.checkpoint(); //empty the undo stack
+        }
+
+        function funcIndentCurrentTask() {
+            if (funcSelectionCurrentTaskId.indexOf("tmp_") > -1)$('#workSpace').trigger('indentCurrentTask.gantt');
+            else showErrorMessage("Энэ мөр системд хадгалагдсан учир\nустгаад шинээр мөр нэмэх замаар гүйцэтгэнэ!");
+        }
+        function funcOutdentCurrentTask() {
+            if (funcSelectionCurrentTaskId.indexOf("tmp_") > -1)$('#workSpace').trigger('outdentCurrentTask.gantt');
+            else showErrorMessage("Энэ мөр системд хадгалагдсан учир\nустгаад шинээр мөр нэмэх замаар гүйцэтгэнэ!");
+        }
+    </script>
+
+    <div id="gantEditorTemplates" style="display:none;">
+        <div class="__template__" type="GANTBUTTONS">
+            <div class="ganttButtonBar noprint">
+                <div class="buttons">
+                    <button onclick="$('#workSpace').trigger('undo.gantt');" class="button textual" title="буцах"><span
+                            class="teamworkIcon">&#39;</span></button>
+                    <button onclick="$('#workSpace').trigger('redo.gantt');" class="button textual" title="эргэж буцах"><span
+                            class="teamworkIcon">&middot;</span></button>
+                    <span class="ganttButtonSeparator"></span>
+                    <button onclick="$('#workSpace').trigger('addNewCurrentTask.gantt');" class="button textual"
+                            title="шинэ мөр нэмэх"><span class="teamworkIcon">P</span></button>
+                    <button onclick="$('#workSpace').trigger('addAboveCurrentTask.gantt');" class="button textual"
+                            title="дээд талд нэмэх"><span class="teamworkIcon">l</span></button>
+                    <button onclick="$('#workSpace').trigger('addBelowCurrentTask.gantt');" class="button textual"
+                            title="дотор талд нэмэх"><span class="teamworkIcon">X</span></button>
+                    <span class="ganttButtonSeparator"></span>
+                    <button onclick="funcIndentCurrentTask()" class="button textual"
+                            title="догол мөр болгох"><span class="teamworkIcon">.</span></button>
+                    <button onclick="funcOutdentCurrentTask()" class="button textual"
+                            title="догол мөр болиулах"><span class="teamworkIcon">:</span></button>
+                    <span class="ganttButtonSeparator"></span>
+                    <button onclick="$('#workSpace').trigger('moveUpCurrentTask.gantt');" class="button textual"
+                            title="дээш шилжүүлэх"><span class="teamworkIcon">k</span></button>
+                    <button onclick="$('#workSpace').trigger('moveDownCurrentTask.gantt');" class="button textual"
+                            title="доош шилжүүлэх"><span class="teamworkIcon">j</span></button>
+                    <span class="ganttButtonSeparator"></span>
+                    <button onclick="$('#workSpace').trigger('zoomMinus.gantt');" class="button textual"
+                            title="багасгаж харах"><span class="teamworkIcon">)</span></button>
+                    <button onclick="$('#workSpace').trigger('zoomPlus.gantt');" class="button textual"
+                            title="томруулж харах">
+                        <span class="teamworkIcon">(</span></button>
+                    <span class="ganttButtonSeparator"></span>
+                    <button onclick="$('#workSpace').trigger('deleteCurrentTask.gantt');" class="button textual"
+                            title="мөр устгах"><span class="teamworkIcon">&cent;</span></button>
+                *{<span class="ganttButtonSeparator"></span>}*
+                *{<img onclick="$('#workSpace').trigger('setmilestone.gantt');"}*
+                *{src="/public/ganttChart/res/milestone.png" title="Milestone"}*
+                *{style="vertical-align: top;margin-top: 5px;cursor: pointer"/>}*
+                *{<span class="ganttButtonSeparator"></span>}*
+                *{<button onclick="print();" class="button textual" title="хэвлэх"><span class="teamworkIcon">p</span>}*
+                *{</button>}*
+                    <span class="ganttButtonSeparator"></span>
+                    <button onclick="ge.gantt.showCriticalPath=!ge.gantt.showCriticalPath; ge.redraw();"
+                            class="button textual" title="шидвэрлэх зам"><span class="teamworkIcon">&pound;</span>
+                    </button>
+                    &nbsp; &nbsp; &nbsp; &nbsp;
+                    <button id="btnSaveGanttOnServer" onclick="saveGanttOnServer();" class="button first"
+                            title="Хадгалах"
+                            style="font-size: 12px">Хадгалах
+                    </button>
+                </div>
+            </div>
+            <div class="noprint">
+                <select name="" id="columnHide" onchange="columnHideChange()" style="margin-left: 4px;font-size: 11px">
+                #{if controllers.CompanyConf.type==0}
+                    <option value="12" w="0" hide="0">Дэд</option>
+                    <option value="11" w="0" hide="0">Хүн хүч</option>
+                    <option value="10" w="0" hide="0">Техник</option>
+                    <option value="9" w="0" hide="0">Материал</option>
+                    <option value="8" w="0" hide="0">Хариуцагч</option>
+                    <option value="7" w="0" hide="0">Ажлын тоо хэмжээ</option>
+                #{/if}
+                #{else}
+                    <option value="7" w="0" hide="0">Хариуцагч</option>
+                #{/else}
+                    <option value="6" w="0" hide="0">Холбоос</option>
+                    <option value="5" w="0" hide="0">Жин</option>
+                    <option value="4" w="0" hide="0">Хоног</option>
+                    <option value="3" w="0" hide="0">Дуусах</option>
+                    <option value="2" w="0" hide="0">Эхлэх</option>
+                    <option value="1" w="0" hide="0">Нэр</option>
+                </select>
+                <input type="button" id='hideButton' onclick="columnHideButton()" value="Нуух"
+                       style="height: 17px;font-size: 11px;padding: 0 4px">
+                <span style="margin-left: 10px">Жин:<span id="scopeSumma"></span>%</span>
+            </div>
+        </div>
+        <div class="__template__" type="TASKSEDITHEAD">
+            <table class="gdfTable" cellspacing="0" cellpadding="0" id="mainGanttTable">
+                <thead>
+                <tr style="height:40px">
+                    <th class="gdfColHeader" style="width:25px;"></th>
+                    <th class="gdfColHeader" style="width:25px;"></th>
+                    <th class="gdfColHeader gdfResizable" style="display: none">code</th>
+                    <th class="gdfColHeader gdfResizable" style="width:200px;">Нэр</th>
+                    <th class="gdfColHeader gdfResizable" style="width:68px;"><i class="fa fa-unlock timeType" value="0"
+                                                                                 title="Царцаах"></i>Эхлэх
+                    </th>
+                    <th class="gdfColHeader gdfResizable" style="width:68px;"><i class="fa fa-unlock timeType" value="1"
+                                                                                 title="Царцаах"></i>Дуусах
+                    </th>
+                    <th class="gdfColHeader gdfResizable" style="width:48px;" title="Хоног"><i
+                            class="fa fa-lock timeType" value="2" title="Царцаах"></i>Хон
+                    </th>
+                    <th class="gdfColHeader gdfResizable" style="width:40px;" title="Эзлэх хувийн жин">Жин</th>
+                    <th class="gdfColHeader gdfResizable" style="width:34px;" title="Холбоос">Хол</th>
+                #{if controllers.CompanyConf.type==0}
+                    <th class="gdfColHeader gdfResizable" style="width:70px;" title="Ажлын тоо хэмжээ">Ажлын тоо.х</th>
+                #{/if}
+                    <th class="gdfColHeader gdfResizable" style="width:150px;">
+                        <div style="font-size: 10px;text-align: center">Хариуцагчаар шүүх</div>
+                        <select id="selectUserId" data-live-search="true">
+                        #{include '/GanttChart/getAssignFilter.html'/}
+                        </select>
+                    </th>
+                #{if controllers.CompanyConf.type==0}
+                    <th class="gdfColHeader gdfResizable" style="width:26px;" title="Материал">Мат</th>
+                    <th class="gdfColHeader gdfResizable" style="width:26px;" title="Техник">Тех</th>
+                    <th class="gdfColHeader gdfResizable" style="width:26px;" title="Хүн хүч">Хүн</th>
+                    <th class="gdfColHeader gdfResizable" style="width:100px;">Дэд</th>
+                #{/if}
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="__template__" type="TASKROW"><!--
+  <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)" id=t(#=obj.id#)>
+    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+    <td class="gdfCell noClip" align="center"><div class="taskStatus cvcColorSquare" status="(#=obj.status#)"></div></td>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;">
+      <div class="(#=obj.isParent()?'exp-controller expcoll exp':'exp-controller'#)" align="center"></div>
+      <input type="text" name="name" value="(#=obj.name#)" class="(#=obj.isParent()?'groupTask':''#)">
+    </td>
+
+    <td class="gdfCell"><input type="text" name="start" value="" class="date"></td>
+    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+    <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
+    <td class="gdfCell"><input type="text" name="scopePercent" saveChecked=false value="(#=obj.scopePercent#)"></td>
+    <td class="gdfCell"><input type="text" name="depends" value="(#=obj.depends#)" (#=obj.hasExternalDep?"readonly":""#)></td>
+    #{if controllers.CompanyConf.type==0}
+    <td class="gdfCell"><input type="text" name="workCount" value="(#=obj.workCount#)"></td>
+    #{/if}
+    <td class="gdfCell taskAssigs" id="assign(#=obj.id#)" title="(#=obj.assign#)">(#=obj.assign#)</td>
+    #{if controllers.CompanyConf.type==0}
+    <td class="gdfCell material mcenter" id="material(#=obj.id#)" rtype=1 title="Материал">(#=obj.material#)</td>
+    <td class="gdfCell technical mcenter" id="technical(#=obj.id#)" rtype=2 title="Техник">(#=obj.technical#)</td>
+    <td class="gdfCell person mcenter" id="person(#=obj.id#)" rtype=3 title="Хүн хүч">(#=obj.person#)</td>
+    <td class="gdfCell subGroup" id="floor(#=obj.id#)"></td>
+    #{/if}
+  </tr>
+  --></div>
+
+        <div class="__template__" type="TASKEMPTYROW"><!--
+  <tr class="taskEditRow emptyRow" >
+    <th class="gdfCell" align="right"></th>
+    <td class="gdfCell noClip" align="center"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    #{if controllers.CompanyConf.type==0}
+    <td class="gdfCell"></td>
+    <td class="gdfCell" title="Материал"></td>
+    <td class="gdfCell" title="Хүн хүч"></td>
+    <td class="gdfCell" title="Техник"></td>
+    <td class="gdfCell"></td>
+    #{/if}
+  </tr>
+  --></div>
+
+        <div class="__template__" type="TASKBAR"><!--
+  <div class="taskBox taskBoxDiv" taskId="(#=obj.id#)" >
+    <div class="layout (#=obj.hasExternalDep?'extDep':''#)">
+      <div class="taskStatus" status="(#=obj.status#)"></div>
+      <div class="taskProgress" style="width:(#=obj.progress>100?100:obj.progress#)%; background-color:(#=obj.progress>100?'red':'rgb(153,255,51);'#);"></div>
+      <div class="milestone (#=obj.startIsMilestone?'active':''#)" ></div>
+
+      <div class="taskLabel"></div>
+      <div class="milestone end (#=obj.endIsMilestone?'active':''#)" ></div>
+    </div>
+  </div>
+  --></div>
+
+        <div class="__template__" type="CHANGE_STATUS"><!--
+    <div class="taskStatusBox">
+      <div class="taskStatus cvcColorSquare" status="STATUS_ACTIVE" title="active"></div>
+      <div class="taskStatus cvcColorSquare" status="STATUS_DONE" title="completed"></div>
+      <div class="taskStatus cvcColorSquare" status="STATUS_FAILED" title="failed"></div>
+      <div class="taskStatus cvcColorSquare" status="STATUS_SUSPENDED" title="suspended"></div>
+      <div class="taskStatus cvcColorSquare" status="STATUS_UNDEFINED" title="undefined"></div>
+    </div>
+  --></div>
+    </div>
+    <div class="modal fade" id="templateLoad" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Загварууд</h4>
+                </div>
+                <div class="modal-body" style="padding: 0;"></div>
+                <div class="modal-footer" style="margin-top: 0">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <ul id="menuPanel" style="margin: 0;padding: 2px;position: absolute;background: #f5f5f5;
+    border: 1px solid #979797;box-shadow: 2px 2px 2px #999999;display: none;">
+        <li class="nonProject" onclick="copyGanttItem()"><i class="fa fa-copy"></i><span>Хуулах</span></li>
+        <li class="nonProject paste" onclick="pasteGanttItem()"><i class="fa fa-paste"></i><span>Буулгах</span></li>
+        <li class="nonProject" onclick="saveGanttOnTemplate()"><i class="fa fa-upload"></i><span>Загвар болгох</span>
+        </li>
+        <li class="nonProject paste" onclick="loadTemplate(false)"><i class="fa fa-download"></i><span>Загвар оруулах</span>
+        </li>
+        <li class="project hasChild" onclick="saveProjectTemplate()"><i class="fa fa-upload"></i><span>Төслийг загвар болгох</span>
+        </li>
+        <li class="project noChild" onclick="loadTemplate(true)"><i class="fa fa-download"></i><span>Төслийн загвар оруулах</span>
+        </li>
+        <li class="project noChild" style="background-color: lightgrey;color: darkgrey"><i
+                class="fa fa-upload"></i><span>Төслийг загвар болгох</span></li>
+        <li class="project hasChild" style="background-color: lightgrey;color: darkgrey"><i
+                class="fa fa-download"></i><span>Төслийн загвар оруулах</span></li>
+    </ul>
+</div>
+<div id="sendUserTag" style="display: none"></div>
+#{selectSentUserOrg containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:fasle /}
+<script>
+    $('ul#menuPanel').mouseleave(function () {
+        $(this).hide();
+    });
+    $(function () {
+        $('select#selectUserId').on('change', function () {
+            assignFilterChange($(this).val());
+        });
+        document.oncontextmenu = document.body.oncontextmenu = function () {
+            return false;
+        };
+        window.onbeforeunload = function () {
+            return "Өөр хуудасруу шилжих үү?\nТийм бол Leave\nҮгүй бол Stay";
+        };
+    });
+    function sendToUserTeamFunc() {
+        if (!closeButtonClick) {
+            $('#modal-select').modal('hide');
+            var objTd, objVal = "", bsan;
+            $('div#divSelUser tr.selUserTr').each(function () {
+                if ($(this).attr('enable') == 1) {
+                    objTd = $(this).find('td.checked');
+                    if (objTd.attr('type') == 'checked' && objTd.attr('bsan') == 0) {
+                        objVal += "<div id='fi-s" + objTd.attr('assign') + "' uid='u-" + objTd.attr('uid') + "' class='assinedUsers' style='border-bottom: 1px solid lightgrey'>" +
+                                "<div id=0 style='width: 250px;display: inline-block' uid=" + objTd.attr('uid') + ">" + objTd.attr('name') + "</div>";
+                        if (assignDialogWidth == 420) {
+                            objVal += "<input id=0 type='text' style='width: 70px;height: 23px' value='0'/><span class='measure' style='margin-right: 2px'>цаг</span>";
+                        } else objVal += "<input type='hidden' style='width: 70px;height: 23px' value='0'/>";
+                        objVal += "<span class='teamworkIcon delAssig' style='cursor: pointer' onclick=removeUser('" + objTd.attr('assign') + "',1)>d</span></div>";
+                    }
+                }
+            });
+            $('div#assignValues').append(objVal);
+        }
+    }
+</script>
+<style>
+    select#selectUserId {
+        width: 100%;
+        border: 1px solid lightgrey;
+        padding: 0;
+        background: #91B4B7;
+        font-size: 11px;
+    }
+
+    ul#menuPanel li {
+        list-style: none;
+        border-bottom: 1px solid lightgrey;
+        /*padding: 8px 20px;*/
+        display: block;
+        padding: 0 2em 0 2em;
+        text-decoration: none;
+        width: auto;
+        color: black;
+        white-space: nowrap;
+        line-height: 2.4em;
+        text-shadow: 1px 1px 0 white;
+        border-radius: 1px;
+        cursor: pointer;
+    }
+
+    ul#menuPanel li:last-child {
+        border-bottom: none;
+    }
+
+    ul#menuPanel li:hover {
+        position: relative;
+        background-color: #e8eff7;
+        box-shadow: 0 0 2px #0a6aa1;
+    }
+
+    ul#menuPanel li > i {
+        text-decoration: none;
+        display: inline-block;
+        width: 2.4em;
+        height: 2.4em;
+        background: transparent;
+        margin: 0 0 0 -2em;
+        vertical-align: top;
+        text-align: center;
+        line-height: 2.4em;
+    }
+</style>
+<script>
+    function columnHideChange() {
+        var opt = $("div#main-content select#columnHide option:selected");
+        if (opt.attr('hide') == 1) {
+            $("div#main-content input#hideButton").val("Ил гаргах");
+        } else {
+            $("div#main-content input#hideButton").val("Нуух");
+        }
+    }
+    function columnHideButton() {
+        var opt = $("div#main-content select#columnHide option:selected");
+        $.gridify.columInResize = $("th.gdfColHeader.gdfResizable:not(.gdfied)").eq(opt.val());
+        var colm = $("table.fixHead th.gdfColHeader.gdfResizable.gdfied").eq(opt.val());
+        if (opt.attr('hide') == 0) {
+            opt.attr('hide', 1);
+            opt.attr('w', $.gridify.columInResize.width());
+            $("div#main-content input#hideButton").val("Ил гаргах");
+            $.gridify.columInResize.width(-10);
+            colm.css("width", -10);
+        } else {
+            opt.attr('hide', 0);
+            $("div#main-content input#hideButton").val("Нуух");
+            $.gridify.columInResize.width(opt.attr('w'));
+            colm.css("width", parseInt(opt.attr('w')) + 5);
+        }
+        delete $.gridify.columInResize;
+    }
+    selectStyle = 1;
+    $(function () {
+        $('table#mainGanttTable .timeType').on("click", function () {
+            setPeriodTimeType = $(this).attr('value');
+            $('table#mainGanttTable .timeType').each(function () {
+                $(this).removeClass('fa-lock').addClass('fa-unlock');
+            });
+            $(this).removeClass('fa-unlock').addClass('fa-lock');
+        });
+
+    });
+</script>
+

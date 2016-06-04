@@ -1,0 +1,187 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    button.delete:hover {
+        background-color: #c75757;
+        color: #fff !important
+    }
+    .pricing-2 .plan .btn {
+        min-width: 5px!important;
+    }
+    .bootstrap-select>.btn {
+        padding: 7px 10px;
+    }
+</style>
+<div id="main-content">
+    <div class="page-title"><i class="icon-custom-left"></i>
+        <h2>Тохиргоо</h2>
+    </div>
+    <form action="@{controllers.Portfolios.saveSettings()}" method="post" accept-charset="utf-8" id="saveSetting"
+          enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <!-- BEGIN PRICING TABLE 2 -->
+                            <div class="row plans pricing-2">
+                                <div class="col-md-6">
+                                    <div class="plan">
+                                        <div class="title">Ангилал:</div>
+                                        <div class="description" id="descCategory">
+                                        #{list items:categories,as:'category'}
+                                            <div id="category${category.id}" class="col-md-12">
+                                                <input type="text" class="col-md-10" name="categoryName" style="margin-bottom:10px;" value="${category.name}"/>
+                                                <input type="hidden" name="categoryId" value="${category.id}"/>
+                                                <button type="button" settingId="${category.id}" settingType="category" data-rel="tooltip" title="Устгах"
+                                                        class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+                                            </div>
+                                        #{/list}
+                                            <div class="add" id="categoryAdd"></div>
+                                        </div>
+                                        <button class="btn btn-success btn-transparent" type="button" onclick="addCategory()" id="addbutton2"><i class="fa fa-plus"></i> Ангилал нэмэх</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="plan">
+                                        <div class="title">Үе шат:</div>
+                                        <div class="description" id="descStage">
+                                        #{list items:stages,as:'stage'}
+                                            <div id="stage${stage.id}" class="col-md-12" style="display: inline-flex;">
+                                                <select name="stageColor" data-width="50px" class="form-control" >
+                                                    <option value="red" data-icon="fa fa-map-marker c-red"  #{if stage.mapIcon.equals('/public/images/map/m-red.png')} selected #{/if}></option>
+                                                    <option value="blue" data-icon="fa fa-map-marker c-blue" #{if stage.mapIcon.equals('/public/images/map/m-blue.png')} selected #{/if}></option>
+                                                    <option value="purple" data-icon="fa fa-map-marker c-purple" #{if stage.mapIcon.equals('/public/images/map/m-purple.png')} selected #{/if}></option>
+                                                    <option value="brown" data-icon="fa fa-map-marker c-brown" #{if stage.mapIcon.equals('/public/images/map/m-brown.png')} selected #{/if}></option>
+                                                    <option value="orange" data-icon="fa fa-map-marker c-orange" #{if stage.mapIcon.equals('/public/images/map/m-orange.png')} selected #{/if}></option>
+                                                    <option value="green" data-icon="fa fa-map-marker c-green" #{if stage.mapIcon.equals('/public/images/map/m-green.png')} selected#{/if}></option>
+                                                    <option value="dark" data-icon="fa fa-map-marker c-dark" #{if stage.mapIcon.equals('/public/images/map/m-dark.png')} selected #{/if}></option>
+                                                </select>
+                                                <input class="col-md-8" type="text" name="stageName" style="margin-bottom:10px;" value="${stage.name}"/>
+                                                <input type="hidden" name="stageId" value="${stage.id}"/>
+                                                <button type="button"settingId="${stage.id}" settingType="stage" data-rel="tooltip" title="Устгах" style="margin-top: 3px;"
+                                                        class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+                                            </div>
+                                        #{/list}
+                                            <div class="add" id="stageAdd"></div>
+                                        </div>
+                                        <button class="btn btn-success btn-transparent" type="button" onclick="addStage()" ><i class="fa fa-plus"></i> Үе шат нэмэх</button>
+                                    </div>
+                                </div>
+                            *{<div class="col-sm-4">}*
+                            *{<div class="plan">}*
+                            *{<div class="title">Үйлдвэр:</div>}*
+                            *{<div class="description" id="descFactory">}*
+                            *{#{list items:factories,as:'factory'}}*
+                            *{<div id="factory${factory.id}">}*
+                            *{<input type="text" name="factoryName" style="margin-bottom:10px;" value="${factory.name}"/>}*
+                            *{<input type="hidden" name="factoryId" value="${factory.id}"/>}*
+                            *{<button type="button" locationId="${factory.id}" settingType="factory" data-rel="tooltip" title="Устгах"}*
+                            *{class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>}*
+                            *{</div>}*
+                            *{#{/list}}*
+                            *{<div class="add" id="factoryAdd"></div>}*
+                            *{</div>}*
+                            *{<button class="btn btn-success" type="button" onclick="addFactory()" id="addbutton2"><i class="fa fa-plus"></i> Үйлдвэр нэмэх</button>}*
+                            *{</div>}*
+                            *{</div>}*
+                            </div>
+                            <!-- END PRICING TABLE 2 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 m-t-20 m-b-40 align-center">
+            <a href="@{controllers.Portfolios.list()}" class="btn btn-default m-r-10 m-t-10"><i class="fa fa-reply"></i> Болих</a>
+            <button type="submit" class="btn btn-success m-t-10"><i class="fa fa-check"></i> Хадгалах</button>
+        </div>
+    </form>
+</div>
+#{set title:'Төслийн тохиргоо'/}
+#{contract-settings-config /}
+#{alertMessages /}
+#{set activeMenu: ''/}
+#{set activeMenuSub: ''/}
+<script>
+    $('div#main-content div.description button.delete').each(function(){
+        $(this).click(function(){
+            var id = $(this).attr('settingId');
+            var type =$(this).attr('settingType');
+            if(id=='0') {
+                $(this).parent('div').remove();
+            }else{
+                var r = confirm("Та устгахдаа итгэлтэй байна уу!!!");
+                if (r == true) {
+                    $.ajax({
+                        type: "POST",
+                        data: {
+                            type:type,
+                            id:id
+                        }, url: "/portfolio/deleteSettings"
+                    }).success(
+                            function (data) {
+                                if(data.type){
+                                    showErrorMessage(data.message);
+                                }else {
+                                    showSuccessMessage(data.message);
+                                    $("div#" + type + id).remove();
+                                }
+                            });
+                }
+            }
+        });
+    });
+    $('div#main-content form#saveSetting').submit(function (event) {
+        var isValid=true;
+        $("form#saveSetting input[name='stageName']").each(function () {
+            if($(this).val() == "") {
+                isValid= false;
+            }
+        });
+        $("form#saveSetting input[name='categoryName']").each(function () {
+            if($(this).val() == "") {
+                isValid=  false;
+            }
+        });
+        if(!isValid) showErrorMessage("Хоосон талбарыг бөглөнө үү");
+        return isValid;
+    });
+    function addFactory(){
+        $("div#factoryAdd").before("<div> <input type=text name=factoryName style='margin-bottom:10px;' value='' />"+
+                "<input type=hidden name=factoryId value='0' /> <button type=button data-rel='tooltip' title='Устгах' "+
+                "class='delete btn btn-icon-sm btn-rounded btn-default' > <i class='fa fa-times'></i></button> </div>");
+        $('div#main-content div#descFactory button:last-child').click(function(){
+            $(this).parent('div').remove();
+        });
+    }
+    function addCategory(){
+        $("div#categoryAdd").before("<div> <input type=text name=categoryName style='margin-bottom:10px;' value='' />"+
+                "<input type=hidden name=categoryId value='0' /> <button type=button data-rel='tooltip' title='Устгах' "+
+                "class='delete btn btn-icon-sm btn-rounded btn-default' > <i class='fa fa-times'></i></button> </div>");
+        $('div#main-content div#descCategory button:last-child').click(function(){
+            $(this).parent('div').remove();
+        });
+    }
+    function addStage(){
+        $("div#stageAdd").before("<div class=col-md-12 style='display: inline-flex;'>" +
+                "<select name=stageColor data-width=50px class=form-control>"+
+                "<option value=red data-icon='fa fa-map-marker c-red'></option>"+
+                "<option value=blue data-icon='fa fa-map-marker c-blue'></option>"+
+                "<option value=purple data-icon='fa fa-map-marker c-purple'></option>"+
+                "<option value=brown data-icon='fa fa-map-marker c-brown'></option>"+
+                "<option value=orange data-icon='fa fa-map-marker c-orange'></option>"+
+                "<option value=green data-icon='fa fa-map-marker c-green'></option>"+
+                "<option value=dark data-icon='fa fa-map-marker c-dark'></option> </select>"+
+                "<input type=text class='col-md-8' name=stageName style='margin-bottom:10px;' value='' />"+
+                "<input type=hidden name=stageId value='0' /> <button type=button data-rel='tooltip' title='Устгах' "+
+                "class='delete btn btn-icon-sm btn-rounded btn-default' style='margin-top: 3px'> " +
+                "<i class='fa fa-times'></i></button> </div>");
+        $('select[name=stageColor]').each(function(){
+            $(this).selectpicker('render');
+        });
+        $('div#main-content div#descStage button:last-child').click(function(){
+            $(this).parent('div').remove();
+        });
+    }
+</script>
+

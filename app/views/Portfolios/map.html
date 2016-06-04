@@ -1,0 +1,52 @@
+<div class="col-md-12">
+    <div id=map-canvas style="height: 620px"></div>
+</div>
+<form action="" id="formPortfolioMap" method="get" accept-charset="utf-8"></form>
+<script>
+    var map;
+    var lat = 47.919045645075;
+    var lon = 106.91750764847;
+    function initialize() {
+        var mapOptions = {
+            zoom: 12,
+            center: new google.maps.LatLng(lat, lon),
+            mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+        var infowindow = new google.maps.InfoWindow({maxWidth: 300});
+    #{list items:portfolios,as:'portfolio'}
+        var icon = new google.maps.MarkerImage(
+                '${portfolio.stage.mapIcon}',
+                null, null, null, new google.maps.Size(32, 50));
+        var marker = new google.maps.Marker({
+            map: map,
+            position: new google.maps.LatLng('${portfolio.mapLat}', '${portfolio.mapLon}'),
+            title: '${portfolio.project.name}',
+            portfolioId: '${portfolio.id}',
+            icon: icon
+        });
+        google.maps.event.addListener(marker, 'click', (function (marker) {
+            //  $("form#formPortfolioMap").attr("action", "/portfolios/" + this.portfolioId).submit();
+            return function () {
+                var contentString = '<div id="content">' +
+                        '<div id="siteNotice">' +
+                        '</div>' +
+                        '<h4 id="firstHeading" class="firstHeading">${portfolio.project.name}</h4   >' +
+                        '<div id="bodyContent">' +
+                        '<p><b>Ангилал : </b> ${portfolio.category.name} </br>'+
+                        '<b> Үе шат : </b> ${portfolio.stage.name} </br>'+
+                        '<b> Хариуцагч : </b> ${portfolio.owner} </br>'+
+                        '<b> Тайлбар : </b> ${portfolio.description} </br>'+
+                        '<b> Хаяг : </b> ${portfolio.address} </br>'+
+                        '</p>' +
+                        '</div>' +
+                        '</div>';
+
+                infowindow.setContent(contentString);
+                infowindow.open(map, marker);
+            }
+        })(marker));
+    #{/list}
+    }
+    initialize();
+</script>

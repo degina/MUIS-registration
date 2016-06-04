@@ -1,0 +1,204 @@
+#{if isList}
+    #{if materials.size()==0}
+        #{list items:hasInventories,as:'inventory'}
+        <tr id="trMaterial0${inventory.id}" class="trMaterialClass trMaterialClassInput" materialId="0"
+            inventoryId="${inventory.id}">
+            <td></td>
+            <td>${inventory.item}
+            </td>
+            <td class="tdClassMaterialToo"><input type="number" class="form-control" name="materialQuantity" min="0"/>
+            </td>
+            <td>${inventory.inventoryMeasure.measure}</td>
+            <td><textarea class="form-control" name="materialNote"
+                          rows="1"></textarea></td>
+            </td>
+            <td>
+                <ul class="uploadBox" id="uMaterial${inventory.id}">
+                    <li>
+                <span> <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                               data-rel="tooltip" title="Хавсаргах"><i class="fa fa-cloud-upload"></i></button></span>
+                    </li>
+                </ul>
+            </td>
+            <td class="materialButton">
+                <button onclick="deleteMaterial('0','${inventory.id}')" data-rel="tooltip" title="Устгах"
+                        class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                        class="fa fa-times"></i></button>
+            </td>
+        </tr>
+        #{/list}
+    #{/if}
+    #{else }
+    %{materialId = 0}%
+        #{list items:materials,as:'material'}
+        %{contractor = material.owner.userTeam.contractor && !contractorUser}%
+            #{if contractor}
+                #{if material.checkHaruitsagch()&& materialId != material.material.id}
+                <tr id="trMaterial0${material.material.id}" class="trMaterialClass trMaterialClassInput" materialId="0"
+                    inventoryId="${material.material.id}">
+                    <td></td>
+                %{count=material.countContractors();}%
+                    <td>${material.material.item}
+                        #{if !contractorUser && count > 0}
+                            <span data-rel="tooltip" title="Туслан гүйцэтгэгчидийн мэдээлэл"
+                                  class="badge badge-default" style="cursor: pointer;float: right"
+                                  onclick="showMaterialContractor(${material.material.id})">${count}
+                            </span>
+                        #{/if}
+                    </td>
+                    <td class="tdClassMaterialToo"><input type="number" class="form-control" name="materialQuantity" min="0"
+                                                          value=""/></td>
+                    <td>${material.material.inventoryMeasure.measure}</td>
+                    <td><textarea class="form-control" name="materialNote" rows="1"></textarea></td>
+                    </td>
+                    <td>
+                        <ul class="uploadBox" id="uMaterial${material.material.id}">
+                            <li>
+                                <span>
+                                    <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                                            data-rel="tooltip" title="Хавсаргах"><i class="fa fa-cloud-upload"></i>
+                                    </button>
+                                </span>
+                            </li>
+                        </ul>
+                    </td>
+                    <td class="materialButton">
+                        <button onclick="deleteMaterial('0','${material.material.id}')" data-rel="tooltip"
+                                title="Устгах"
+                                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                                class="fa fa-times"></i></button>
+                    </td>
+                </tr>
+                #{/if}
+            %{materialId = material.material.id}%
+            <tr id="trMaterial${material.id}${material.material.id}"
+                class="trMaterialClass warning trMaterialContractor${material.material.id}" style="display: none;">
+                <td colspan="2"
+                    style="border: 0;text-align: right; background-color: #fff;">${material?.owner?.toString()}:
+                </td>
+                <td class="tdClassMaterialToo" style="background-color: #f9f9f9!important;">${material.amount}</td>
+                <td style="background-color: #f9f9f9!important;">${material.material.inventoryMeasure.measure}</td>
+                <td style="background-color: #f9f9f9!important;">${material.note}</td>
+                </td>
+                <td style="background-color: #f9f9f9!important;">
+                    #{if material.attaches?.size()>0}
+                        <div class="post-images" id="post-images-material-${material.id}">
+                            #{list items:material.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                            #{/list}
+                        </div>
+                    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-material-"+material.id).raw()}
+                    #{/if}
+                </td>
+                <td class="materialButton" style="background-color: #f9f9f9!important;">
+                    <button onclick="copyMaterial('${material.id}','${material.material.id}')" data-rel="tooltip"
+                            title="Хуулах"
+                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                            class="fa fa-check"></i></button>
+                </td>
+            </tr>
+            #{/if}
+            #{else }
+            <tr id="trMaterial${material.id}${material.material.id}" class="trMaterialClass trMaterialClassInput"
+                materialId="${material.id}" inventoryId="${material.material.id}">
+                <td></td>
+            %{count=material.countContractors();}%
+                <td>${material.material.item} #{if !contractorUser && count > 0}
+                    <span data-rel="tooltip" title="Туслан гүйцэтгэгчидийн мэдээлэл"
+                          class="badge badge-default" style="cursor: pointer; float: right;"
+                          onclick="showMaterialContractor(${material.material.id})">${count}</span>
+                #{/if}
+                </td>
+                <td class="tdClassMaterialToo"><input type="number" class="form-control" name="materialQuantity" min="0"
+                                                      value="${material.amount}"/></td>
+                <td>${material.material.inventoryMeasure.measure}</td>
+                <td><textarea class="form-control" name="materialNote" rows="1">${material.note}</textarea></td>
+                </td>
+                <td>
+                    <ul class="uploadBox" id="uMaterial${material.id}">
+                        #{list items:material.attaches, as:'attach'}
+                            <li>
+                                <span>${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                      ${controllers.Functions.handleDocumentAttachmentNonDel(attach.dir,attach.name,attach.extension).raw()}</span>
+                            </li>
+                        #{/list}
+                    ${controllers.Functions.handleDocumentAttachmentImgGallery("uMaterial"+material.id).raw()}
+                        <li>
+                            <span> <button class="btn upload btn-default btn-icon-sm btn-rounded" data-rel="tooltip"
+                                           title="Хавсаргах"><i class="fa fa-cloud-upload"></i></button></span>
+                        </li>
+                    </ul>
+                </td>
+                <td class="materialButton">
+                    <button onclick="deleteMaterial('${material.id}','${material.material.id}')" data-rel="tooltip"
+                            title="Устгах"
+                            class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                            class="fa fa-times"></i></button>
+                </td>
+            </tr>
+            #{/else}
+        #{/list}
+    #{/else}
+#{/if}
+#{else }
+<tr id="trMaterial0${inventory.id}" class="trMaterialClass trMaterialClassInput" materialId="0"
+    inventoryId="${inventory.id}">
+    <td></td>
+    <td>${inventory.item}
+        #{if !contractorUser && materials?.size() > 0}
+            <span data-rel="tooltip" title="Туслан гүйцэтгэгчидийн мэдээлэл"
+                  class="badge badge-default" style="cursor: pointer;float: right"
+                  onclick="showMaterialContractor(${inventory.id})">${materials.size()}
+                            </span>
+        #{/if}
+    </td>
+    <td class="tdClassMaterialToo"><input type="number" class="form-control" name="materialQuantity" value="" min="0"/></td>
+    <td>${inventory.inventoryMeasure.measure}</td>
+    <td><textarea class="form-control" name="materialNote" rows="1"></textarea></td></td>
+    <td>
+        <ul class="uploadBox" id="uMaterial${inventory.id}">
+            <li>
+                                <span>
+                                    <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                                            data-rel="tooltip" title="Хавсаргах"><i class="fa fa-cloud-upload"></i>
+                                    </button>
+                                </span>
+            </li>
+        </ul>
+    </td>
+    <td class="materialButton">
+        <button onclick="deleteMaterial('0','${inventory.id}')" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+    #{if !contractorUser}
+        #{list items:materials,as:'material'}
+        <tr id="trMaterial${material.id}${material.material.id}"
+            class="trMaterialClass warning trMaterialContractor${material.material.id}" style="display: none;">
+            <td colspan="2"
+                style="border: 0;text-align: right; background-color: #fff;">${material?.owner?.toString()}:
+            </td>
+            <td class="tdClassMaterialToo" style="background-color: #f9f9f9!important;">${material.amount}</td>
+            <td style="background-color: #f9f9f9!important;">${material.material.inventoryMeasure.measure}</td>
+            <td style="background-color: #f9f9f9!important;">${material.note}</td>
+            <td style="background-color: #f9f9f9!important;">
+                #{if material.attaches?.size()>0}
+                    <div class="post-images" id="post-images-material-${material.id}">
+                        #{list items:material.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                    #{/list}
+                    </div>
+                ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-material-"+material.id).raw()}
+                #{/if}
+            </td>
+            <td class="materialButton" style="background-color: #f9f9f9!important;">
+                <button onclick="copyMaterial('${material.id}','${material.material.id}')" data-rel="tooltip"
+                        title="Хуулах"
+                        class="add btn btn-icon-sm btn-rounded btn-default"><i
+                        class="fa fa-check"></i></button>
+            </td>
+        </tr>
+        #{/list}
+    #{/if}
+#{/else}

@@ -1,0 +1,43 @@
+<div style="text-align: left">
+    <table class="table table-bordered">
+        <tr>
+            <td>Хэрэглэгч</td>
+            <td>
+                <select id="selectUserId" data-live-search="true"
+                        style="width: 200px" ${!changePermission?'disabled':''}>
+                #{list items:userTeams,as:'team'}
+                    <optgroup label="${team.name}">
+                        #{list items:team.userLocals,as:'userCurrent'}
+                            <option data-subtext="${userCurrent.userPosition}" pos="${userCurrent.userPosition.id}"
+                                    value="${userCurrent.id}" source="${userCurrent.profilePicture}"
+                            ${selectedId==userCurrent.id?'selected':''}>${userCurrent}</option>
+                        #{/list}
+                    </optgroup>
+                #{/list}
+                </select></td>
+        </tr>
+        <tr>
+            <td>Баг</td>
+            <td><select id="selectTeamId" style="width: 200px">
+            #{list items:organizationTeams,as:'team'}
+                <option value="${team.id}"
+                ${selectedTeam==team.id?'selected':''}>${team.name}</option>
+            #{/list}
+            </select></td>
+        </tr>
+        <tr>
+            <td>Албан тушаал</td>
+            <td><select id="selectPositionId" style="width: 200px">
+            #{list items:userPositions,as:'position'}
+                <option value="${position.id}"
+                ${selectedPos==position.id?'selected':''}>${position.name}</option>
+            #{/list}
+            </select></td>
+        </tr>
+    </table>
+</div>
+<script>
+    $('select#selectUserId').change(function () {
+        $('select#selectPositionId').val($(this).find("option:selected").attr('pos'));
+    });
+</script>

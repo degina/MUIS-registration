@@ -1,0 +1,69 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: type==0?'Бүх сонордуулгаууд':'Бүх илгээмжүүд'/}
+
+#{set 'moreScripts'}
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+#{/set}
+<div id="main-content" style="padding:5px;background: transparent">
+    <div style="background: #fff;width: 600px;margin-left: auto;margin-right: auto;border: 1px solid #d8d8d8;
+  -webkit-border-radius: 3px;
+  border-radius: 4px;box-shadow: 0 2px 40px 0 rgba(0, 0, 0, .4);
+  -webkit-transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+  transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;"
+         id="loadNotificationData"></div>
+</div>
+<script>
+    function loadNotificationData(page) {
+        loading2('div#loadNotificationData');
+        $.ajax({
+            type: "POST",
+            data: {type: ${type}, CurrentPageNumber: page},
+            url: "/getAllNotifications"
+        }).success(function (data) {
+            $('div#loadNotificationData').html(data);
+        });
+    }
+    $(function () {
+        loadNotificationData(1);
+    })
+</script>
+<style>
+    div#loadNotificationData li.unseen:hover,
+    div#loadNotificationData li:hover {
+        background-color: #E0E0E0
+    }
+
+    div#loadNotificationData li {
+        border-bottom: 1px solid #ddd;
+        height: 80px;
+        padding: 5px;
+    }
+
+    div#loadNotificationData li.unseen {
+        background-color: #EEEEEE
+    }
+
+    div#loadNotificationData li img {
+        height: 60px !important;
+        width: 60px !important;
+        margin-top: 5px!important;
+    }
+
+    div#loadNotificationData li p {
+        text-align: left;
+    }
+
+    div#loadNotificationData li a {
+        text-decoration: none;
+        color: black;
+    }
+</style>

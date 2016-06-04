@@ -1,0 +1,34 @@
+<script>
+    var user = "<ul>";
+    #{list items:editTopic?.topicUserRels,as:'userR'}
+    user += "<li id=u-";
+    user += "${userR.user.id}";
+    user += " seltype=u uid=";
+    user += "${userR.user.id}";
+    user += " ><span onclick=sendToUserRemoveSelection('u',";
+    user += "'" + "${userR.user.id}" + "')><i class='fa fa-minus-circle asterisk'></i>";
+    user += "${userR.user.lastnameFirstCharacter}" + "." + "${userR.user.firstName}" + "</span></li>";
+    #{/list}
+    user += "</ul>";
+    $('input#topic-title').val("${editTopic?.title}");
+    $('div#sendUserTag').html(user);
+    #{if editTopic?.task != null}
+    $('button#selectChooseTaskButton').html("${editTopic.task.name}");
+    $('input#selectTaskInputHidden').val('${editTopic?.task?.id}');
+    #{/if}
+    #{else}
+         $('input#selectTaskInputHidden').val('');
+    #{/else}
+    $('select#topic-priority').selectpicker('val', '${editTopic?.priority?.id}');
+    $('select#topic-status').selectpicker('val', '${editTopic?.status?.id}');
+    $('textarea#topic-description').val("${editTopic?.description?.raw()}");
+    $('button#addTopicId').attr("onclick", "addTopic(" + ${editTopic?.id} +")");
+
+    var obj = $("div#attachContainer ul#uploadBox li");
+
+    #{list items:editTopic?.topicAttachments, as:'attach'}
+    obj.before("<li><span>${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension).raw()}" +
+            "${controllers.Functions.handleDocumentAttachmentDel(attach.dir,attach.name,attach.extension).raw()}" +
+            "</span></li>");
+    #{/list}
+</script>

@@ -1,0 +1,37 @@
+<script>
+    $(function () {
+        checkLockedPermission();
+        fileSaveId =${fileShare.id};
+        var rem = $('div#description');
+        var ftypeDiv = $('div#fileShareControl');
+        if (rem.hasClass('dhidden')) {
+            rem.removeClass('dhidden');
+            ftypeDiv.removeClass('dhidden');
+        }
+        $('div#file-uploader-demo1 ul.qq-upload-list').append("<li id=li1 class=qq-upload-success" +
+        " uploadedpath='${fileShare.dir}'" +
+        " filename='${fileShare.name}'" +
+        " extension='${fileShare.extension}'>" +
+        "<span class=qq-progress-bar style='width: 100%;'></span><span class='qq-upload-file'>${fileShare}</span>" +
+        "<span class=qq-upload-size style='display: inline;'>${fileShare.fileSize}</span><span class='qq-upload-failed-text'></span>" +
+        "<span style='float:left' onclick='deleteFileSelection(1)'><i class='fa fa-minus-circle asterisk'></i></span></li>");
+        rem.find('textarea').val("${fileShare.description.raw()}");
+        ftypeDiv.find('input.fileType').eq(${fileShare.ftype}).prop('checked', true);
+    #{if users.size()>0}
+        ftypeDiv.find('div#sendUserTag').html('<ul></ul>');
+        ftypeDiv = ftypeDiv.find('div#sendUserTag ul');
+        #{list items:users,as:'us'}
+            ftypeDiv.append("<li id='u-${us.id}' seltype=u uid=${us.id}>" +
+            "<span onclick=sendToUserRemoveSelection('u',${us.id})><i class='fa fa-minus-circle asterisk'></i></span>&nbsp;${us}" +
+            "</li>");
+        #{/list}
+    #{/if}
+    #{if fileShare.ftype==2}
+        $('div#personSelect').removeClass("dhidden");
+    #{/if}
+    #{else}
+        $('div#personSelect').addClass("dhidden");
+    #{/else}
+
+    });
+</script>

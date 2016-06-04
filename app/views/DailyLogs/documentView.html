@@ -1,0 +1,114 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    .btn {
+        padding: 1px 6px;
+        font-size: 13px;
+    }
+
+    .a4 {
+        /*height: 29.7cm;*/
+        padding: 25px;
+        background: white;
+        width: 21cm;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 100px;
+    }
+
+    .bBlack {
+        color: white;
+        background: #000000;
+    }
+
+    .border {
+        border: 1px solid #000000 !important;
+    }
+
+    .borderTop {
+        border-left: 1px solid #000000 !important;
+        border-right: 1px solid #000000 !important;
+        border-bottom: 1px solid #000000 !important;
+        border-top: 4px solid #000000 !important;
+    }
+
+    @page
+
+    [size="A4"] {
+        background: white;
+        width: 21cm;
+        height: 29.7cm;
+        display: block;
+        margin: 0 auto;
+        margin-bottom: 0.5cm;
+        box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.5);
+    }
+
+    @media print {
+        body, div[size="A4"] {
+            margin: 0;
+            box-shadow: 0;
+        }
+    }
+</style>
+<div id="main-content">
+    <div class="row m-b-20 m-t-20 no-print">
+        <div class="col-md-12">
+            <div style="width:21cm;margin-left: auto;margin-right: auto;">
+                <div class="btn-group">
+                    <button class="btn btn-primary" type="button" style="padding: 2px 13px;" onclick="previousDate()"><i
+                            class="fa fa-angle-left" style="font-size: 37px;"></i>
+                    </button>
+                    <button class="btn btn-primary" id="btnDailLogDate"><i class="fa fa-calendar p-r-10"
+                                                                           style="font-size: 25px;"></i>
+                        <input class="form-control" id="dailylogDate"
+                               style="cursor:pointer; padding: 1px 6px; font-size: 25px; text-align: center; border-radius: 11px;width: 200px;"
+                               type="text" value="${currentDate?.format("yyyy-MM-dd")}">
+                    </button>
+                    <button class="btn btn-primary" type="button" style="padding: 2px 13px;" onclick="nextDate()"><i
+                            class="fa fa-angle-right" style="font-size: 37px;"></i>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-white" style="font-size: 17px; padding: 7px 24px; float: right"
+                        onclick="window.print();">
+                    <i class="fa fa-print m-r-10"></i> Print Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+#{if controllers.CompanyConf.type==0}
+    #{include "DailyLogs/printOperation.html"/}
+#{/if}
+#{else }
+    #{include "DailyLogs/printDesign.html"/}
+#{/else}
+</div>
+<form action="" id="formDate">
+</form>
+#{set activeMenu: 'DailyLog'/}
+#{set activeMenuSub: ''/}
+#{dailyLog-document-config /}
+#{ImgThumbnail div:'div.post-images'/}
+<script>
+    var date = '${currentDate.format("yyyy-MM-dd")}';
+    function previousDate() {
+        $('form#formDate').attr('action', '/dailyLogDocumentView/' + date + "/1").submit();
+    }
+    function nextDate() {
+        $('form#formDate').attr('action', '/dailyLogDocumentView/' + date + "/2").submit();
+    }
+    $(document).ready(function () {
+        $('input#dailylogDate').datetimepicker({
+            timepicker: false,
+            lang: 'mn',
+            format: 'Y-m-d',
+            maxDate: '${currentDate.format("yyyy-MM-dd")}',
+            onSelectDate: function (ct, $i) {
+                $('form#formDate').attr('action', '/dailyLogBlankView/' + ct.dateFormat('Y-m-d') + "/0").submit();
+            }
+        });
+        $('button#btnDailLogDate').click(function () {
+            $('input#dailylogDate').datetimepicker('show');
+        });
+    });
+</script>
+

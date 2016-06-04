@@ -1,0 +1,61 @@
+<style type="text/css">
+    table {
+        width: 100% ;
+    }
+
+    th, td {
+        padding: 5px;
+        width: auto;
+    }
+    #searchName {
+        height: 30px;
+        padding-left: inherit;
+        width: 100%;
+    }
+
+
+</style>
+
+<!-- Button trigger modal -->
+
+<script>
+    $(document).ready(function () {
+        $('#someInput').on('input', function () {
+            $(this).val();// get the current value of the input field.
+        });
+        jQuery('#date_timepicker_start5').datetimepicker({
+            format: 'd/m/Y H:00'
+        });
+
+        jQuery('#date_timepicker_end6').datetimepicker({
+            format: 'd/m/Y H:00',
+            onShow: function (ct) {
+                this.setOptions({
+                    minDate: jQuery('#date_timepicker_start6').val() ? jQuery('#date_timepicker_start6').val() : false,
+                    minTime: jQuery('#date_timepicker_start6').val() == jQuery('#date_timepicker_end6').val() ? jQuery('#date_timepicker_start_time6').val() : false
+                })
+            },
+        });
+    });
+    function editEvent(id){
+        $.ajax({
+            type: "POST",
+            data: {id: id},
+            url: "/event/edit"
+        }).success(function(data){
+            $("div#myEditModal").find("div.modal-content").html(data);
+            $("div#myEditModal").modal('show');
+        });
+//        $('myEditModal').modal('toggle');
+    }
+</script>
+<!-- Modal -->
+<div class="modal fade" id="myEditModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,373 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: 'И-Мэйл бичих'/}
+#{set activeMenu: 'Mail'/}
+#{set activeMenuSub: 'MailWrite'/}
+<script src="/assets/plugins/jquery-validation/jquery.validate.min.js"></script>
+#{fileupload-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+#{flashCrud /}
+<div id="main-content" class="send-message">
+    <div class="row" style="margin-top: 10px">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="border-bottom">
+                                <div class="pull-left">
+                                    <a href="@{controllers.Emails.folders('INBOX')}"
+                                       class="btn btn-default btn-transparent"><i
+                                            class="fa fa-arrow-left fa-fw"></i> буцах</a>
+                                </div>
+                                <div class="pull-left p-l-20">
+                                    <a href="#" onclick="sendMail('draft')" class="btn btn-success btn-transparent"><i
+                                            class="fa fa-floppy-o fa-fw"></i> Ноороглох</a>
+                                </div>
+                                <div class="clearfix m-b-20"></div>
+                            </div>
+                            <datalist id="myaddress">
+                            #{list items:user.emailAddresses,as:'addr'}
+                            <option value="${addr.address}">
+                            #{/list}
+                            </datalist>
+                            <form class="form-horizontal p-t-20" role="form" id="send" method="get"
+                                  action="@{controllers.Emails.sendEmail()}">
+                                <div class="form-group">
+                                    <label for="to" class="col-sm-1 control-label">To:</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control emails" name="addressTo" id="to"
+                                               value="${emailDraft?.to}" autocomplete="off" list="myaddress"/>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="Cc" class="col-sm-1 control-label secondColor">Cc:</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control emails" name="addressCc" id="Cc"
+                                               value="${emailDraft?.cc}" autocomplete="off" list="myaddress"/>
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <label for="Bcc" class="col-sm-1 control-label secondColor">Bcc:</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control emails" name="addressBcc" id="Bcc"
+                                               value="${emailDraft?.bcc}" autocomplete="off" list="myaddress">
+                                    </div>
+                                </div>
+                                <div class=" form-group">
+                                    <label for="subject" class="col-sm-1 control-label">Гарчиг:</label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control" name="subject" id="Subject"
+                                               value="${emailDraft?.subject}" autocomplete="off" style="height: 40px">
+                                    </div>
+                                </div>
+                                <div class="clearfix"></div>
+                                <textarea name="mailcontent" id="mailcontent" style="display: none"></textarea>
+                                <input type="hidden" name="name" value="${name}"/>
+                                <input type="hidden" name="mid" value="${mid}"/>
+                            </form>
+                            <div class="summernote">${emailDraft!=null?controllers.ReportClass.ReportFunctionLocal.getBreakLine(emailDraft.body).raw():""}</div>
+                            <div id="file-uploader-demo1" style="visibility:hidden;height:0;width:0">
+                                <noscript>
+                                    <p>Please enable JavaScript to use file uploader.</p>
+                                </noscript>
+                            </div>
+                            <div id="attachContainer" style="height: 25px;">
+                                <div style="display: none" id="documentImageTemplate">
+                                    <li class="newAttach"><span><span></span></span></li>
+                                </div>
+                                <div style="display: none" id="deleteImageTemplate">
+                                    <img height='12' class='deleteUploadedImage' width='12'
+                                         src="@{'/public/images/delete-image.png'}"
+                                         fileDir='#fileDir' extension='#extension'/>
+                                </div>
+                                <ul id="uploadBox">
+                                ${emailDraft?.attach?.raw()}
+                                    <li class="newAttach"><span><span></span></span></li>
+                                </ul>
+                            </div>
+                            <div class="text-center footer-message">
+                                <a href="@{controllers.Emails.folders('INBOX')}"
+                                   class="btn btn-default btn-transparent"><i class="fa fa-times-circle"></i>
+                                    Болих</a>
+                                <a href="#" class="btn btn-primary btn-transparent" onclick="sendMail('send')"><i
+                                        class="fa fa-share fa-fw"></i> Илгээх</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var sendBtnValid = true;
+    $(function () {
+        $('div#main-content .note-editable').focus();
+        jQuery.validator.addMethod(
+                "multiemails",
+                function (value, element) {
+                    if (this.optional(element)) // return true on optional element
+                        return true;
+                    var emails = value.split(','),
+                            valid = true;
+                    for (var i in emails) {
+                        value = emails[i];
+                        valid = valid &&
+                                jQuery.validator.methods.email.call(this, $.trim(value), element);
+                    }
+                    sendBtnValid = valid;
+                    return valid;
+                },
+                jQuery.validator.messages.multiemails
+        );
+        $("div#main-content form#send").validate({
+            rules: {
+                addressTo: {required: true, multiemails: true},
+                addressCc: {required: false, multiemails: true},
+                addressBcc: {required: false, multiemails: true}
+//                subject: {
+//                    required: true,
+//                    minlength: 2
+//                }
+            },
+            messages: {
+                addressTo: {
+                    required: "Та и-мэйл хаягаа зөв оруулна уу!",
+                    multiemails: "Та хэд хэдэн и-мэйл хаяг бичихдээ , авч хаягаа зөв оруулна уу!"
+                }, addressCc: {
+                    required: "Та и-мэйл хаягаа зөв оруулна уу!",
+                    multiemails: "Та хэд хэдэн и-мэйл хаяг бичихдээ , авч хаягаа зөв оруулна уу!"
+                }, addressBcc: {
+                    required: "Та и-мэйл хаягаа зөв оруулна уу!",
+                    multiemails: "Та хэд хэдэн и-мэйл хаяг бичихдээ , авч хаягаа зөв оруулна уу!"
+                },
+                subject: "Гарчигаа оруулна уу!"
+            }
+        });
+        $('form#send input.emails').keydown(function (e) {
+            var key = e.charCode || e.keyCode || 0;
+            if (key == 188) {
+
+            }
+        });
+    });
+    var attachmentMaxCount = 20;
+    function createUploader() {
+        var uploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo1'),
+            action: '@{Emails.uploadFile}',
+            sizeLimit: 1048576 * 20,
+            onSubmit: function (id, fileName) {
+                uploader.setParams({uploadPath: '${controllers.Consts.uploadEMailPath+user.id}/', filename: fileName});
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var li = $('div#attachContainer #uploadBox li:last span span');
+                li.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                if (responseJSON['success'] == true) {
+                    var attachWhichUpload = $('div#attachContainer #uploadBox li:last');
+                    attachWhichUpload.removeClass('newAttach');
+                    var li = attachWhichUpload.find('span'),
+                            fileDir = responseJSON['filedir'],
+                            fileName = responseJSON['filename'],
+                            extension = responseJSON['extension'];
+                    if (li.length > 0) {
+                        var ext = checkFileExtension(extension),
+                                imgHtml = "<img src='#src' class='imgIcon' fileDir='#fileDir' fileName='#fileName' extension='#extension' filesize='#filesize' nowUpload=1 />";
+                        if (ext == imageFile)imgHtml = imgHtml.replace("#src", imageFileIcon);
+                        else if (ext == pdfFile) imgHtml = imgHtml.replace("#src", pdfFileIcon);
+                        else if (ext == wordFile) imgHtml = imgHtml.replace("#src", wordFileIcon);
+                        else if (ext == excelFile) imgHtml = imgHtml.replace("#src", excelFileIcon);
+                        else if (ext == videoFile) imgHtml = imgHtml.replace("#src", videoFileIcon);
+                        else if (ext == powerPointFile) imgHtml = imgHtml.replace("#src", powerPointFileIcon);
+                        else if (ext == cadFile) imgHtml = imgHtml.replace("#src", autoCadFileIcon);
+                        else if (ext == viewableVideoFile) imgHtml = imgHtml.replace("#src", viewableVideoIcon);
+                        else if (ext == otherFile) imgHtml = imgHtml.replace("#src", otherFileIcon);
+                        imgHtml = imgHtml.replace("#fileDir", fileDir).replace("#fileName", fileName).replace("#extension", extension).replace("#filesize", responseJSON['filesize']);
+                        li.html(imgHtml + $("#deleteImageTemplate").html().replace('#fileDir', fileDir).replace("#extension", extension));
+                        if ($("div#attachContainer #uploadBox li").length < attachmentMaxCount)
+                            $('div#attachContainer #uploadBox').append($("div#documentImageTemplate").html());
+                    }
+                }
+            }
+        });
+    }
+    var deleteFileCall =
+    #{jsAction @FileUploader.deleteUploadFile(':fileDir',':extension') /}
+    var deleteUploadedFile = function (fileDir, extension) {
+        $.post(deleteFileCall({fileDir: fileDir, extension: extension}), function (data) {
+        });
+    };
+
+    $(document).ready(function () {
+        createUploader();
+    });
+    $(document).on('click', 'div#attachContainer img.deleteUploadedImage', function (event) {
+        deleteUploadedFile($(this).attr('fileDir'), $(this).attr('extension'));
+        $(this).parent().parent().remove();
+        event.stopPropagation();
+        if ($('div#attachContainer ul#uploadBox li').length == 0)
+            $('div#attachContainer ul#uploadBox').append($("div#documentImageTemplate").html());
+    });
+    $(document).on('click', "div#attachContainer li", function () {
+        var image = $(this).find('img');
+        if (image.length > 0) {
+            var ext = checkFileExtension(image.attr('extension'));
+            if (ext == imageFile && image.attr('nowUpload') != undefined)$.fancybox.open(image.attr('fileDir') + "." + image.attr('extension'));
+        } else {
+            if (getAttachSize() < 20480) {
+                $("#file-uploader-demo1 .qq-upload-button input").click();
+            } else alert("Файлын хэмжээ хэтэрсэн байна!");
+        }
+    });
+    function getAttachSize() {
+        var attachSize = 0;
+        $("div#attachContainer img.imgIcon").each(function () {
+            attachSize += parseInt($(this).attr('filesize'));
+        });
+        return attachSize;
+    }
+    function sendMail(stype) {
+        var maindiv = $('div#main-content');
+        var contentHtml = maindiv.find('.note-editable').html();
+        if (sendBtnValid) {
+            if (maindiv.find('input#to').val().length < 4) {
+                sendBtnValid = false;
+                alert("Явуулах хаягаа оруулна уу!");
+            }
+            if (contentHtml.length > 8)maindiv.find('textarea#mailcontent').val(contentHtml);
+            else {
+                sendBtnValid = false;
+                alert("Агуулагаа оруулна уу!");
+            }
+            if (getAttachSize() > 20480) {
+                sendBtnValid = false;
+                alert("Файлын хэмжээ хэтэрсэн байна!");
+            }
+            if (sendBtnValid) {
+                var form = maindiv.find('form#send');
+                form.append("<input type='hidden' name='stype' value='" + stype + "'>");
+                $("div#attachContainer img.imgIcon").each(function () {
+                    form.append("<input type='hidden' name='attachments' value='" + $(this).attr('fileDir') + "." + $(this).attr('extension') + "'>");
+                });
+                var over = "<div id='overlay'><img id=loading src='/public/images/ajaxloader/loadingFire.gif'><div>Илгээж байна...</div></div>";
+                $(over).appendTo('body');
+                maindiv.find('form#send').submit();
+            }
+        }
+    }
+</script>
+<style>
+    div#main-content form#send .secondColor,
+    div#main-content form#send .error {
+        color: darkgrey;
+    }
+
+    .send-message .form-control {
+        /*height: 30px;*/
+    }
+
+    div #attachContainer ul {
+        padding: 0;
+        margin-top: 2px;
+        height: 50px;
+    }
+
+    div #attachContainer li {
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+        float: left;
+        height: 50px;
+        width: 50px;
+        list-style: none;
+        margin-left: 1px;
+        cursor: pointer;
+        position: relative;
+        border: 1px solid #808080;
+    }
+
+    div #attachContainer li.newAttach {
+        background-image: url("/public/images/attach50.png");
+        background-size: 100%;
+    }
+
+    div #attachContainer li span img.imgIcon {
+        height: 50px;
+        width: 50px;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px
+    }
+
+    div #attachContainer li span img.deleteUploadedImage {
+        height: 18px;
+        left: 34px;
+        position: absolute;
+        top: 34px;
+        width: 18px;
+    }
+
+    div #attachContainer li span span {
+        margin-top: 4px;
+        float: left;
+        text-align: center;
+    }
+
+    #overlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: 0;
+        background: #000;
+        opacity: 0.8;
+        filter: alpha(opacity=60);
+        z-index: 100000;
+    }
+
+    #overlay #loading {
+        position: absolute;
+        top: 45%;
+        left: 50%;
+    }
+
+    #overlay div {
+        position: absolute;
+        font-size: 20px;
+        color: white;
+        top: 55%;
+        left: 47%;
+    }
+
+    blockquote {
+        border-left: 1px solid #08C;
+        padding: 7px 0 7px 19px;
+        margin: 1em 0;
+        opacity: .5;
+        font-size: 14px;
+    }
+</style>
+#{set 'moreStyles'}
+<link rel="stylesheet" href="/assets/plugins/summernote/summernote.css">
+#{/set}
+#{set 'moreScripts'}
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+<script src="/assets/plugins/jquery.cookie.min.js" type="text/javascript"></script>
+<script src="/assets/plugins/summernote/summernote.min.js"></script>
+<script src="/assets/js/summernote.js"></script>
+#{/set}

@@ -1,0 +1,159 @@
+%{if(reportMainDate==null)reportMainDate=controllers.ReportClass.ReportFunction.getReportDateObject(objecttype,wtask,dateBetween);}%
+<table class="table table-bordered rangeTable percentTable" style="margin-bottom: 0">
+    <tbody>
+    <tr>
+        <td style="border-left: none"></td>
+        <td style="width: 9%;padding: 10px 0;font-size: 11px;">Өмнөх 7 хоногт</td>
+    #{list items:reportMainDate.reportDates,as:'rdate'}
+        <td class="${rdate.isHoliday?'weekendDay':''}" style="width: 9%">(${rdate.dateS.format('dd')}) ${rdate.text}</td>
+    #{/list}
+        <td style="width: 9%">Нийт</td>
+    </tr>
+    <tr>
+        <td style="text-align: left;">Ахиц</td>
+    %{
+        percent=0;
+        max_completedPercent=0;
+        if(reportMainDate.beforeScheduledWork!=null){percent=reportMainDate.beforeScheduledWork.progressPercent;
+        max_completedPercent=reportMainDate.beforeScheduledWork.completedPercent;
+        }}%
+        <td class="myhoveredTD" onclick="changeReportData(-1)">
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateS,wtask.actualFinish,percent,true,"%").raw()}
+        </td>
+    %{ tot1=0;
+        for(controllers.ReportClass.ReportDate rdate:reportMainDate.reportDates){
+        if(rdate.scheduledWork!=null){percent=rdate.scheduledWork.progressPercent;
+        tot1+=percent;
+        }else percent=0;
+        if(percent>0 || !rdate.isHoliday){}%
+        <td class="myhoveredTD ${rdate.isHoliday?'weekendDay':''}"
+            onclick="changeDateReport('${changeRepType}',2,'${rdate.dateS.format('yyyy-MM-dd')}',${changeRepId})">
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,rdate.dateS,wtask.actualFinish,percent,true,"%").raw()}</td>
+    %{}else{}%
+        <td class="myhoveredTD weekendDay">-</td>
+    %{}}}%
+        <td>${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateF,wtask.actualFinish,(float)tot1,true,"%").raw()}</td>
+    </tr>
+    <tr>
+        <td style="text-align: left;">Гүйцэтгэл</td>
+        <td class="myhoveredTD" onclick="changeReportData(-1)">
+        %{
+            if(swork0!=null)percent=reportMainDate.beforeScheduledWork.completedPercent;
+            else percent=0;}%
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateS,wtask.actualFinish,percent,false,"%").raw()}
+        </td>
+    %{
+        for(controllers.ReportClass.ReportDate rdate:reportMainDate.reportDates){
+        if(rdate.scheduledWork!=null)percent=rdate.scheduledWork.completedPercent;
+        else percent=0;
+        if(max_completedPercent < percent)max_completedPercent=percent;
+        if(percent>0 || !rdate.isHoliday){}%
+        <td class="myhoveredTD ${rdate.isHoliday?'weekendDay':''}"
+            onclick="changeDateReport('${changeRepType}',2,'${rdate.dateS.format('yyyy-MM-dd')}',${changeRepId})">
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,rdate.dateS,wtask.actualFinish,percent,false,"%").raw()}</td>
+    %{}else{}%
+        <td class="myhoveredTD weekendDay">-</td>
+    %{}}}%
+        <td>
+        %{if(reportMainDate.afterScheduledWork!=null)percent=reportMainDate.afterScheduledWork.completedPercent;
+            else percent=0;
+            }%
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateF,wtask.actualFinish,percent,false,"%").raw()}</td>
+    </tr>
+    %{
+    if(objecttype==2){
+    beforeReportDateBetween=controllers.ReportClass.ReportFunctionLocal.beforeReportDateBetween(dateBetween);
+    beforeReportDate=controllers.ReportClass.ReportFunctionLocal.beforeReportDate(beforeReportDateBetween.dateS);
+    reportMaterials=controllers.Reports.getReportMaterials(objecttype,null,null,wtask,wtask.id,dateBetween,reportMainDate.reportDates,null);
+    beforeReportMaterials=controllers.Reports.getReportMaterials(objecttype,null,null,wtask,wtask.id,beforeReportDateBetween,beforeReportDate,null);
+    if(reportMaterials.size()>0){}%
+    <tr>
+        <td colspan="9" style="padding-left: 20px;text-align: left;font-weight: bold">Материал хүч</td>
+    </tr>
+    %{for (controllers.ReportClass.ReportMaterial reportMaterial:reportMaterials){}%
+    <tr>
+        <td style="text-align: left">${reportMaterial.inventory.item} (зарцуулсан/хэвийн)
+            (${reportMaterial.inventory.inventoryMeasure.measure})
+        </td>
+        <td>%{beforeReportChartValue=controllers.ReportClass.ReportFunctionLocal.getBeforeReportMaterialTotal(beforeReportMaterials,reportMaterial.inventory);}%
+        ${controllers.Functions.getFloatFormat(beforeReportChartValue.value,2)}
+            / ${controllers.Functions.getFloatFormat(beforeReportChartValue.normal,2)}</td>
+    %{ totalValue=0;totalNormal=0;
+        for(controllers.ReportClass.ReportChartValue
+        chartValue:controllers.ReportClass.ReportFunction.getChartValues(reportMaterial.charts)){
+        totalValue+=chartValue.value;
+        totalNormal+=chartValue.normal;}%
+        <td>${controllers.Functions.getFloatFormat(chartValue.value,2)}
+            / ${controllers.Functions.getFloatFormat(chartValue.normal,2)}</td>
+    %{}}%
+        <td>${controllers.Functions.getFloatFormat((float)totalValue,2)}
+            / ${controllers.Functions.getFloatFormat((float)totalNormal,2)}</td>
+    </tr>
+    %{}}
+    reportManPowers=controllers.Reports.getReportManPowers(objecttype,null,null,wtask,wtask.id,dateBetween,reportMainDate.reportDates,null);
+    beforeReportManPowers=controllers.Reports.getReportManPowers(objecttype,null,null,wtask,wtask.id,beforeReportDateBetween,beforeReportDate,null);
+    if(reportManPowers.size()>0){}%
+    <tr>
+        <td colspan="9" style="padding-left: 20px;text-align: left;font-weight: bold">Ажиллах хүч</td>
+    </tr>
+    %{for (controllers.ReportClass.ReportManPower manPower:reportManPowers){}%
+    <tr>
+        <td style="text-align: left">${manPower.manPower.name} (ажилчид/хүн цаг)</td>
+        <td>
+        %{beforeReportChartValue=controllers.ReportClass.ReportFunctionLocal.getBeforeReportManPowerTotal(beforeReportManPowers,manPower.manPower);}%
+        ${beforeReportChartValue.count}
+            / ${controllers.Functions.getFloatFormat(beforeReportChartValue.value,2)} </td>
+    %{ totalValue=0;totalCount=0;
+        for(controllers.ReportClass.ReportChartValue
+        chartValue:controllers.ReportClass.ReportFunction.getChartValues(manPower.charts)){
+        totalValue+=chartValue.value;
+        totalCount+=chartValue.count;}%
+        <td>${chartValue.count}
+            / ${controllers.Functions.getFloatFormat(chartValue.value,2)}</td>
+    %{}}%
+        <td>${totalCount}
+            / ${controllers.Functions.getFloatFormat((float)totalValue,2)}</td>
+    </tr>
+    %{}}
+    reportEquipments=controllers.Reports.getReportEquipments(objecttype,null,null,wtask,wtask.id,dateBetween,reportMainDate.reportDates,null);
+    beforeReportEquipments=controllers.Reports.getReportEquipments(objecttype,null,null,wtask,wtask.id,beforeReportDateBetween,beforeReportDate,null);
+    if(reportEquipments.size()>0){}%
+    <tr>
+        <td colspan="9" style="padding-left: 20px;text-align: left;font-weight: bold">Техник</td>
+    </tr>
+    %{for (controllers.ReportClass.ReportEquipment equipment:reportEquipments){}%
+    <tr>
+        <td style="text-align: left">${equipment.equipment.name} (ажилласан/хэвийн) (мот цаг)</td>
+        <td>
+        %{beforeReportChartValue=controllers.ReportClass.ReportFunctionLocal.getBeforeReportEquipmentTotal(beforeReportEquipments,equipment.equipment);}%
+        ${controllers.Functions.getFloatFormat(beforeReportChartValue.value,2)}
+            / ${controllers.Functions.getFloatFormat(beforeReportChartValue.normal,2)}</td>
+    %{ totalValue=0;totalNormal=0;
+        for(controllers.ReportClass.ReportChartValue
+        chartValue:controllers.ReportClass.ReportFunction.getChartValues(equipment.charts)){
+        totalValue+=chartValue.value;
+        totalNormal+=chartValue.normal;}%
+        <td>${controllers.Functions.getFloatFormat(chartValue.value,2)}
+            / ${controllers.Functions.getFloatFormat(chartValue.normal,2)}</td>
+    %{}}%
+        <td>${controllers.Functions.getFloatFormat((float)totalValue,2)}
+            / ${controllers.Functions.getFloatFormat((float)totalNormal,2)}</td>
+    </tr>
+    %{}}
+
+    }}%
+    </tbody>
+</table>
+%{if((objecttype==2 || objecttype==3) && timeType==1){
+reportSummary=controllers.Reports.getReportSummary(objecttype,wtask.id,timeType,dateBetween.dateS);
+if(user.isProjectOwner()){}%
+<div style="margin-top: 2px">
+    Тэмдэглэл:
+        <textarea style="width: 100%;height: 200px"
+                  id="reportSummary-${objecttype}-${wtask.id}">${reportSummary}</textarea>
+        <button type="button" class="btn btn-success" onclick="changeReportNote(${objecttype},${wtask.id})">Хадгалах
+        </button>
+</div>
+%{}else if(reportSummary.length()>0){}%
+<div style="width: 100%;border: 1px solid lightgrey;border-radius: 4px;padding: 4px;text-align: justify;">${controllers.ReportClass.ReportFunctionLocal.getBreakLine(reportSummary).raw()}</div>
+%{}}}%

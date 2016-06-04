@@ -1,0 +1,24 @@
+<tr id="trActivity${activity.id}">
+    <td>${activity.name}</td>
+    <td class="text-right">${controllers.Functions.getDecimal(activity.salesActual)}</td>
+    <td class="text-right">${controllers.Functions.getDecimal(activity.salesBudget)}</td>
+    <td class="text-right">${controllers.Functions.getDecimal(activity.cogsActual)}</td>
+    <td class="text-right">${controllers.Functions.getDecimal(activity.cogsBudget)}</td>
+    <td class="text-right">
+        %{ value = activity.profitActual;
+            if (value < 0){ value*=-1; }%(${controllers.Functions.getDecimal(value)})%{ }
+            else { }%${controllers.Functions.getDecimal(value)} %{ }}%
+    </td>
+    <td class="text-right">
+    %{ value = activity.profitBudget;
+        if (value < 0){ value*=-1; }%(${controllers.Functions.getDecimal(value)}) %{ }
+        else{ }%${controllers.Functions.getDecimal(value)} %{ }}%
+    </td>
+    <td>${activity.description}</td>
+    <td>
+        <button onclick="deleteActivity(${activity.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+            class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{include "Budgets/deleteActivity.html"/}

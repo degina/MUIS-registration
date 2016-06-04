@@ -1,0 +1,172 @@
+#{if status == "All" || status == "NotResolved"}
+<div class="col-md-12">
+    <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px!important;
+            line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+        #{if firstload}Надад хамааралтай:#{/if}
+        <i class="fa fa-square" style="color: #d9534f;"></i> Хугацаа хэтэрсэн (${overdue})
+        <i class="fa fa-square" style="color: #f0ad4e;margin-left: 10px"></i> < Долоо хоног (${weeker})
+        <i class="fa fa-square" style="color:#5cb85c;margin-left: 10px"></i> > Долоо хоног (${nextWeeker})
+    </div>
+</div>
+<div class="row" style="padding-bottom: 10px!important"></div>
+#{/if}
+
+<div class="col-md-12 col-sm-12 col-xs-12 table-responsive" style=" text-align: left;">
+    <table id="posts-table" class="table table-tools table-striped"
+           style="font-size: 13px!important; margin-top: 0!important;">
+        <thead>
+        <tr>
+            <th id="id" class="text-center">
+                #
+            </th>
+            <th>
+            &{'Subject'}
+            </th>
+            <th style="padding: 0;">
+
+            </th>
+        #{if status != "Draft"}
+            <th style="font-size: 12px!important;">
+            &{'PunchSender'}
+            </th>
+        #{/if}
+            <th style="width: 200px">
+            &{'Assignee'}
+            </th>
+        #{if status == "All"}
+            <th class="text-center">
+            &{'CreatedDate'}
+            </th>
+        #{/if}
+        #{if status == "NotResolved" || status == "Me" || status == "Replied"}
+            <th class="text-center">&{'CreatedDate'}</th>
+            <th class="text-center">&{'DueDate'}</th>
+        #{/if}
+        #{if status == "Resolved"}
+            <th class="text-center">
+            &{'CreatedDate'}
+            </th>
+            <th class="text-center">
+            &{'ClosedDate'}
+            </th>
+        #{/if}
+        #{if status == "Draft"}
+            <th class="text-center">
+            &{'CreatedDate'}
+            </th>
+        #{/if}
+            <th class="text-center">&{'Priority'}</th>
+        </tr>
+        </thead>
+        <tbody style="font-weight: 500">
+        #{list items:punchLists, as:'punchList'}
+        <tr
+                onclick="${punchList.status.status == "Draft" ? 'editPunchList(' + punchList.id + ')' : 'showPunchList(' + punchList.id + ')'}"
+                class="${(punchList.status.status == "NotResolved" || status == "Me" )? (!now.after(punchList.dueDate) ? (!week.after(punchList.dueDate) ? "success" : "warning") : "danger") : "black"}"
+                title="${punchList.name}">
+            #{if status != "Draft"}
+                <td class="text-center">${punchList.No}</td>
+            #{/if}
+            #{else}
+                <td class="text-center">${punchList_index}</td>
+            #{/else}
+            #{if status == "All"}
+                <td>${(punchList.name.size() > 70 ? punchList.name.substring(0,70) + "...": punchList.name)} </td>
+            #{/if}
+            #{if status == "NotResolved"|| status == "Me" || status == "Replied"}
+                <td>${(punchList.name.size() > 40 ? punchList.name.substring(0,40) + "...": punchList.name)} </td>
+            #{/if}
+            #{if status == "Resolved"}
+                <td>${(punchList.name.size() > 40 ? punchList.name.substring(0,40) + "...": punchList.name)} </td>
+            #{/if}
+            #{if status == "Draft"}
+                <td>${(punchList.name.size() > 110 ? punchList.name.substring(0,110) + "...": punchList.name)} </td>
+            #{/if}
+            <td class="text-center" style="padding: 0;">
+                <label class="label label-danger">${controllers.PunchLists.checkNewPunchListandReply(punchList.id)}</label>
+            </td>
+            #{if status != "Draft"}
+                <td>${punchList.questionReceivedFrom}</td>
+            #{/if}
+            <td>${punchList.assignee}</td>
+            #{if status == "All"}
+                <td class="text-center" style="width: 130px;">
+                ${punchList.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+            #{/if}
+            #{if status == "NotResolved" || status == "Me" || status == "Replied"}
+                <td class="text-center" style="width: 130px;">
+                ${punchList.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+                <td class="text-center" style="width: 130px;">
+                ${punchList.dueDate.format("yyyy-MM-dd")}
+                </td>
+            #{/if}
+            #{if status == "Resolved"}
+                <td class="text-center" style="width: 130px;">
+                ${punchList.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+                <td class="text-center" style="width: 130px;">
+                ${punchList.closedDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+            #{/if}
+            #{if status == "Draft"}
+                <td class="text-center" style="width: 130px;">
+                ${punchList.createDate.format("yyyy-MM-dd HH:mm")}
+                </td>
+            #{/if}
+            <td class="text-center" style="width: 120px;">&{punchList.priority.priority}</td>
+        </tr>
+        #{/list}
+        </tbody>
+    </table>
+
+    <div id="listForm" class="dhidden">
+        <input type="hidden" id="listStatus" value="${status}"/>
+        <input type="hidden" id="listSender" value="${sender}"/>
+        <input type="hidden" id="listAssignee" value="${assignee}"/>
+        <input type="hidden" id="listKeyword" value="${keyword}"/>
+        <input type="hidden" id="listPageNumber" value="${CurrentPageNumber}"/>
+        <input type="hidden" id="listTasky" value="${tasky}"/>
+    </div>
+
+#{if MaxPageNumber>1}
+    #{include '/SharedView/pageNavigation.html'/}
+#{/if}
+    <script>
+        #{if MaxPageNumber>1}
+        $(".page-navigation input.number-button").click(function () {
+            var obj = $(this).attr('pagenumber');
+            if (obj != ${CurrentPageNumber})
+                list($("div#listForm").find("input#listStatus").val(),
+                        $("div#listForm").find("input#listSender").val(),
+                        $("div#listForm").find("input#listAssignee").val(),
+                        $("div#listForm").find("input#listKeyword").val(),
+                        obj,
+                        $("div#listForm").find("input#listTasky").val());
+        });
+        #{/if}
+        $(document).ready(function () {
+            var opt = {};
+            // Tools: export to Excel, CSV, PDF & Print
+            opt.sDom = "",
+                    opt.oLanguage = {"sSearch": "", "sZeroRecords": "Үр дүн байхгүй байна."} ,
+                    opt.oTableTools = {
+
+                        "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                        "aButtons": ["pdf"]
+                    };
+            opt.iDisplayLength = 100;
+            opt.aaSorting = [[${status != "Draft" ? 5: 4}, 'desc']];
+            opt.aoColumnDefs = [
+                {'bSortable': false, 'aTargets': []}
+            ];
+            var oTable = $('#posts-table').dataTable(opt);
+            oTable.fnDraw();
+        });
+        $("table#posts-table tbody tr").click(function () {
+            $(this).find("label.label").remove();
+        });
+    </script>
+</div>
+

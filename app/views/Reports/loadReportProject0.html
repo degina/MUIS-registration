@@ -1,0 +1,801 @@
+<script src="/assets/plugins/charts-flot/jquery.flot.js"></script>
+<script src="/assets/plugins/charts-flot/jquery.flot.animator.min.js"></script>
+<script src="/assets/plugins/charts-flot/jquery.flot.resize.js"></script>
+<link href="/assets/plugins/c3-master/c3.css" rel="stylesheet" type="text/css">
+<script src="/assets/plugins/d3/d3.min.js" charset="utf-8"></script>
+<script src="/assets/plugins/c3-master/c3.min.js"></script>
+<script>
+    var chart_data=[];
+</script>
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title"><strong>Ерөнхий мэдээлэл</strong></h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <table class="table table-bordered" style="margin-bottom: 0">
+                        <tbody>
+                        <tr>
+                            <td style="width:20%;"><strong>Төслийн нэр</strong></td>
+                            <td style="width:30%">${project.name}</td>
+                            <td style="width:30%;"><strong>Xүн цаг</strong></td>
+                            <td style="width:20%">${reportValues.totalManpower}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Нийт гүйцэтгэл &nbsp;</strong></td>
+                            <td style="font-weight: bold">
+                            ${project.completedPercent}%
+                            </td>
+                            <td><strong>Нийт хүн цаг (хуримтлагдсан)</strong></td>
+                            <td>${project.manHours}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Эхлэх хугацаа</strong></td>
+                            <td>${project.startDate.format('yyyy-MM-dd')}</td>
+                            <td><strong>Байршил</strong></td>
+                            <td>${project.portfolio?.address}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Дуусах хугацаа</strong></td>
+                            <td>${project.finishDate.format('yyyy-MM-dd')}</td>
+                            <td><strong>Хариуцагч</strong></td>
+                            <td>
+                            #{list items:project.portfolio.contacts,as:'contact'}
+                            ${contact.name}(${contact.position},${contact.phoneNumber})
+                                </br>
+                            #{/list}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Үргэлжилсэн хоног</strong></td>
+                            <td>${project.continuedDuration(date).raw()}</td>
+                            <td><strong>Гэрээний огноо</strong></td>
+                            <td>${project.portfolio.contractDate?.format("yyyy-MM-dd")}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <table class="table table-bordered" style="margin-bottom: 0">
+                        <tr>
+                            <td class="name2 center">#</td>
+                            <td class="name2 center"><strong>Ажлын бүлгүүд</strong></td>
+                            <td class="name2 center"><strong>Жин</strong></td>
+                            <td class="name2 center">
+                                <strong>${timeType==0?'Өмнөх сард':timeType==1?'Өмнөх 7 хоногт':'Өчигдөр'}</strong></td>
+                            <td class="name2 center">
+                                <strong>${timeType==0?'Энэ сард':timeType==1?'Энэ 7 хоногт':'Өнөөдөр'}</strong></td>
+                            <td class="name2 center"><strong>Зөрүү</strong></td>
+                        </tr>
+                    %{count=1}%
+                    #{list items:project.getProjectObjects(),as:'object'}
+                        <tr>
+                            <td class="cell center">${count}</td>
+                            <td class="cell center"><strong>${object.name}</strong></td>
+                            <td class="cell center">${controllers.Functions.getFloatFormat(object.scopePercent,2)}%</td>
+                            <td class="cell center">%{percent=object.getProjectObjectPercent(dateBetween.dateS);}%
+                            ${percent>=0?controllers.Functions.getFloatFormat(percent,2)+'%':''}</td>
+                            <td class="cell center">${controllers.ReportClass.ReportFunction.getPercentHtmlFormatted(object.completedPercent,2,false,"%").raw()}</td>
+                            <td class="cell center">
+                            ${percent>=0?controllers.ReportClass.ReportFunction.getPercentHtmlFormatted((float)(object.completedPercent-percent),2,true,"%").raw():''}</td>
+                        </tr>
+                    %{count++}%
+                    #{/list}
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12" style="min-height: 300px">
+                    <div id="graph-wrapper">
+                        <div class="graph-info p-r-10">
+                            <a href="javascript:void(0)"
+                               class="btn bg-green">Гүйцэтгэл</a>
+                            <a href="javascript:void(0)"
+                               class="btn bg-blue">Төлөвлөгөөгөөр</a>
+                            <button id="bars" class="btn" disabled><span></span>
+                            </button>
+                            <button id="lines" class="btn active" disabled><span></span>
+                            </button>
+                        </div>
+                        <div class="h-300">
+                            <div class="h-300" id="graph-lines" style="width:100%"></div>
+                            <div class="h-300" id="graph-bars" style="width:100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <table class="percentTable table table-bordered rangeTable" style="margin-bottom: 0">
+                        <tbody>
+                        <tr>
+                            <td style="border-left: none"></td>
+                            <td style="vertical-align: middle">Өмнөх сар</td>
+                        #{list items:reportDates,as:'reportDate'}
+                            <td class="${reportDate.isHoliday?'weekendDay':''}">${reportDate.dateS.format('dd')}</td>
+                        #{/list}
+                            <td style="vertical-align: middle">Нийт</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Ахиц (%)</td>
+                            <td class="myhoveredTD"></td>
+                        %{ totalProgressed=0;beforePercent=(beforeDayHistoryProject!=null?beforeDayHistoryProject.completedPercent:0);
+                            if(afterhistoryProject!=null)totalProgressed=afterhistoryProject.completedPercent;
+                            if(beforehistoryProject!=null)totalProgressed-=beforehistoryProject.completedPercent;
+                            percentProgressed=0;
+                            for(controllers.ReportClass.ReportDate rdate:reportDates){
+                            percentProgressed=rdate.completedPercent-beforePercent;
+                            if(percentProgressed<0)percentProgressed=0;
+                            if(percentProgressed>0 || !rdate.isHoliday){}%
+                            <td class="myhoveredTD ${rdate.isHoliday?'weekendDay':''}"
+                                onclick="changeDateReport('Project',2,'${rdate.dateS.format('yyyy-MM-dd')}',${project.id})">
+                            ${controllers.ReportClass.ReportFunction.getPercentHtml(project.startDate,rdate.dateS,project.actualFinish,(float)percentProgressed,true,"").raw()}</td>
+                            %{}else{}%
+                            <td class="myhoveredTD weekendDay">-</td>
+                            %{}
+                            beforePercent=rdate.completedPercent;}}%
+                            <td>${controllers.ReportClass.ReportFunction.getPercentHtml(project.startDate,dateBetween.dateF,project.actualFinish,(float)totalProgressed,true,"").raw()}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;white-space: nowrap">Гүйцэтгэл(%)</td>
+                            <td class="myhoveredTD" onclick="changeReportData(-1)">
+                            %{ percent=0;
+                                if(beforehistoryProject!=null)percent=beforehistoryProject.completedPercent;}%
+                            ${controllers.ReportClass.ReportFunction.getPercentHtml(project.startDate,dateBetween.dateS,project.actualFinish,percent,false,"").raw()}
+                            </td>
+                        %{for(controllers.ReportClass.ReportDate rdate:reportDates){
+                            if(rdate.completedPercent>0 || !rdate.isHoliday){}%
+                            <td class="myhoveredTD ${rdate.isHoliday?'weekendDay':''}"
+                                onclick="changeDateReport('Project',2,'${rdate.dateS.format('yyyy-MM-dd')}',${project.id})">${controllers.ReportClass.ReportFunction.getPercentHtml(project.startDate,rdate.dateS,project.actualFinish,rdate.completedPercent,false,"").raw()}</td>
+                        %{}else{}%
+                            <td class="myhoveredTD weekendDay">-</td>
+                        %{}}}%
+                            <td>
+                            %{if(afterhistoryProject!=null)percent=afterhistoryProject.completedPercent;
+                                else percent=0;}%
+                            ${controllers.ReportClass.ReportFunction.getPercentHtml(project.startDate,dateBetween.dateS,project.actualFinish,percent,false,"").raw()}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12" id="d3_chart1">
+                    <svg style="height:327px"></svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#{if controllers.CompanyConf.type==0}
+<div class="col-md-12">
+    #{if reportMaterials.size()>0}
+        <div class="panel panel-default" id="chartDiv1">
+            <div class="panel-heading">
+                Материалын зарцуулалт:
+                <div class="btn-group">
+                    #{list items:reportMaterials,as:'material'}
+                        <button type="button" class="btn btn-default ${material_isFirst?'active':''}"
+                                onclick="chartData1OnLoad(${material_index})">${material.inventory.item}
+                            <span style="font-size: 10px">(${material.inventory.inventoryMeasure.measure})</span>
+                        </button>
+                    #{/list}
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div id="chartData1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #{/if}
+    #{if reportManPowers.size()>0}
+        <div class="panel panel-default" id="chartDiv2">
+            <div class="panel-heading">
+                Хүн цаг зарцуулалт:
+                <div class="btn-group">
+                    #{list items:reportManPowers,as:'manpower'}
+                        <button type="button" class="btn btn-default ${manpower_isFirst?'active':''}"
+                                onclick="chartData2OnLoad(${manpower_index})">${manpower.manPower.name}
+                            <span style="font-size: 10px">(хүн/цаг)</span></button>
+                    #{/list}
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div id="chartData2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #{/if}
+    #{if reportEquipments.size()>0}
+        <div class="panel panel-default" id="chartDiv3">
+            <div class="panel-heading">
+                Техник зарцуулалт:
+                <div class="btn-group">
+                    #{list items:reportEquipments,as:'equipment'}
+                        <button type="button" class="btn btn-default ${equipment_isFirst?'active':''}"
+                                onclick="chartData3OnLoad(${equipment_index})">${equipment.equipment.name}
+                            <span style="font-size: 10px">(мот/цаг)</span></button>
+                    #{/list}
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div id="chartData3"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #{/if}
+</div>
+#{/if}
+<div class="col-md-12">
+%{ counterVals = [];
+    counterVals[0]=controllers.ReportClass.ReportFunction.getProjectWeathers(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterVals[1]=controllers.ReportClass.ReportFunction.getProjectTechnicalDelays(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    if(controllers.CompanyConf.type==0){
+    counterVals[2]=controllers.ReportClass.ReportFunction.getProjectDumpsters(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterVals[3]=controllers.ReportClass.ReportFunction.getProjectSafetys(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterVals[9]=controllers.ReportClass.ReportFunction.getProjectWastes(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    }else{
+    counterVals[2]=0;
+    counterVals[3]=0;
+    counterVals[9]=0;
+    }
+    counterVals[4]=controllers.ReportClass.ReportFunction.getProjectInspections(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterVals[5]=controllers.ReportClass.ReportFunction.getProjectDeliverys(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterVals[6]=controllers.ReportClass.ReportFunction.getProjectNotes(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterVals[7]=controllers.ReportClass.ReportFunction.getProjectSanaachlagas(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterVals[8]=controllers.ReportClass.ReportFunction.getProjectVisitors(0,project.id,dateBetween.dateS,dateBetween.dateF).size();
+    counterNames = [];
+    counterNames[0]="Цаг агаарын саатал";
+    counterNames[1]="Техникийн саатал";
+    counterNames[2]="Материалын алдагдал";
+    counterNames[3]="БОХАБЭА-н зөрчил";
+    counterNames[4]="Үзлэг шалгалт";
+    counterNames[5]="Хүргэлт хүлээн авсан";
+    counterNames[6]="Тэмдэглэл/Асуудал";
+    counterNames[7]="Санал санаачлага";
+    counterNames[8]="Зочин хүлээн авсан";
+    counterNames[9]="Хог хаягдал";
+    if(counterVals[0]>0 || counterVals[1]>0 || counterVals[2]>0 || counterVals[3]>0 || counterVals[4]>0 ||
+    counterVals[5]>0 || counterVals[6]>0 || counterVals[7]>0 || counterVals[8]>0 || counterVals[9]>0){}%
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <table cellpadding="0" cellspacing="0" border="0"
+                           style="width: 100%">
+                        <tr>
+                            <td style="width: 50%">
+                                <div id="chartRfiPunch" class="otherChart"></div>
+                            </td>
+                            <td style="width: 50%">
+                                <div id="chartOther" class="otherChart"></div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>chart_data[1]= ${controllers.ReportClass.ReportFunction.getRelationWorkCharts(counterVals,counterNames).raw()};</script>
+%{}}%
+    <script>chart_data[2]= ${controllers.ReportClass.ReportFunction.getTaskRfiPunchCharts(0,project.id,dateBetween.dateS,dateBetween.dateF).raw()};</script>
+</div>
+#{include '/Reports/reportFooter.html'/}
+<script>
+    $(function () {
+        /* ==============================================
+         CHART 2: D3 LINE AND BAR CHARTS
+       =============================================== */
+        var manpower = ${manPowerData.raw()}.
+        map(function (series) {
+            series.values = series.values.map(function (d) {
+                return {x: d[0], y: d[1]}
+            });
+            return series;
+        });
+
+        var chart;
+
+        if (typeof nv !== 'undefined') {
+
+            nv.addGraph(function () {
+                chart = nv.models.linePlusBarChart()
+                        .margin({
+                            top: 30,
+                            right: 60,
+                            bottom: 50,
+                            left: 70
+                        })
+                        .x(function (d, i) {
+                            return i
+                        })
+                        .color(d3.scale.category10().range())
+                        .noData('Хүн хүчний өгөгдөл байхгүй байна!');
+
+                chart.xAxis.tickFormat(function (d) {
+                    var dx = manpower[0].values[d] && manpower[0].values[d].x || 0;
+                    return dx ? d3.time.format('%m/%d')(new Date(dx)) : '';
+                })
+                        .showMaxMin(false);
+
+                chart.y1Axis
+                        .tickFormat(function (d) {
+                            return (d) + ' хүн';
+                        });
+                chart.y2Axis
+                        .tickFormat(function (d) {
+                            return d3.format(',.1f')(d) + ' х/ц'
+                        });
+                chart.bars.forceY([0]).padData(false);
+                //chart.lines.forceY([0]);
+
+                d3.select('#d3_chart1 svg')
+                        .datum(manpower)
+                        .transition().duration(500).call(chart);
+                nv.utils.windowResize(chart.update);
+                chart.dispatch.on('stateChange', function (e) {
+                    nv.log('New State:', JSON.stringify(e));
+                });
+
+                return chart;
+            });
+        }
+    });
+    //****************** LINE & BAR SWITCH CHART ******************//
+    var d1 = ${reportValues.projPerMust.raw()};
+    var d2 = ${reportValues.projPerDay.raw()};
+
+    /****  Line Chart  ****/
+    var graph_lines = [{
+        label: "Төлөвлөгөөгөөр",
+        data: d1,
+        lines: {
+            lineWidth: 2
+        },
+        shadowSize: 0,
+        color: '#0090D9'
+    }, {
+        label: "Төлөвлөгөөгөөр",
+        data: d1,
+        points: {
+            show: true,
+            fill: true,
+            radius: 6,
+            fillColor: "#0090D9",
+            lineWidth: 3
+        },
+        color: '#fff'
+    }, {
+        label: "Гүйцэтгэл",
+        data: d2,
+        animator: {
+            steps: 300,
+            duration: 1000,
+            start: 0
+        },
+        lines: {
+            fill: 0.7,
+            lineWidth: 0
+        },
+        color: '#18A689'
+    }, {
+        label: "Гүйцэтгэл",
+        data: d2,
+        points: {
+            show: true,
+            fill: true,
+            radius: 6,
+            fillColor: "#18A689",
+            lineWidth: 3
+        },
+        color: '#fff'
+    },];
+
+    function lineCharts() {
+        var line_chart = $.plotAnimator($('#graph-lines'), graph_lines, {
+            xaxis: {
+                tickLength: 0,
+                tickDecimals: 0,
+                min: 0,
+                ticks: ${reportValues.projPerName.raw()},
+                font: {
+                    lineHeight: 12,
+//                    size:8,
+                    weight: "bold",
+                    family: "Open sans",
+                    color: "#8D8D8D"
+                }
+            },
+            yaxis: {
+                ticks: 10,
+                tickDecimals: 0,
+                tickColor: "#f3f3f3",
+                font: {
+                    lineHeight: 13,
+                    weight: "bold",
+                    family: "Open sans",
+                    color: "#8D8D8D"
+                }
+            },
+            grid: {
+                backgroundColor: {
+                    colors: ["#fff", "#fff"]
+                },
+                borderColor: "transparent",
+                margin: 0,
+                minBorderMargin: 0,
+                labelMargin: 15,
+                hoverable: true,
+                clickable: true,
+                mouseActiveRadius: 4
+            },
+            legend: {
+                show: false
+            }
+        });
+    }
+
+    lineCharts();
+
+    /****  Bars Chart  ****/
+    var graph_bars = [{
+        label: "Төлөвлөгөөгөөр",
+        data: d1,
+        color: '#0090D9'
+    }, {
+        // Returning Visitors
+        label: "Гүйцэтгэл",
+        data: d2,
+        color: '#18A689',
+        points: {
+            radius: 4,
+            fillColor: '#18A689'
+        }
+    }];
+
+    function barCharts() {
+        bar_chart = $.plotAnimator($('#graph-bars'), graph_bars, {
+            series: {
+                bars: {
+                    fill: 1,
+                    show: true,
+                    barWidth: .6,
+                    align: 'center'
+                },
+                shadowSize: 0
+            },
+            xaxis: {
+                tickColor: 'transparent',
+                ticks: ${reportValues.projPerName.raw()},
+                font: {
+                    lineHeight: 12,
+                    weight: "bold",
+                    family: "Open sans",
+                    color: "#9a9a9a"
+                }
+            },
+            yaxis: {
+                ticks: 10,
+                tickDecimals: 0,
+                tickColor: "#f3f3f3",
+                font: {
+                    lineHeight: 13,
+                    weight: "bold",
+                    family: "Open sans",
+                    color: "#9a9a9a"
+                }
+            },
+            grid: {
+                backgroundColor: {
+                    colors: ["#fff", "#fff"]
+                },
+                borderColor: "transparent",
+                margin: 0,
+                minBorderMargin: 0,
+                labelMargin: 15,
+                hoverable: true,
+                clickable: true,
+                mouseActiveRadius: 4
+            },
+            legend: {
+                show: false
+            }
+        });
+    }
+
+    $("#graph-lines").on("animatorComplete", function () {
+        $("#lines, #bars").removeAttr("disabled");
+    }).css('padding-right', '5px');
+    ;
+
+    $("#lines").on("click", function () {
+        $('#bars').removeClass('active');
+        $('#graph-bars').fadeOut();
+        $(this).addClass('active');
+        $("#lines, #bars").attr("disabled", "disabled");
+        $('#graph-lines').fadeIn();
+        lineCharts();
+    });
+
+    $("#graph-bars").on("animatorComplete", function () {
+        $("#bars, #lines").removeAttr("disabled")
+    });
+
+    $("#bars").on("click", function () {
+        $("#bars, #lines").attr("disabled", "disabled");
+        $('#lines').removeClass('active');
+        $('#graph-lines').fadeOut();
+        $(this).addClass('active');
+        $('#graph-bars').fadeIn().removeClass('hidden');
+        barCharts();
+    });
+
+    $('#graph-bars').hide();
+
+    function showTooltip(x, y, contents) {
+        $('<div id="flot-tooltip">' + contents + '</div>').css({
+            position: 'absolute',
+            display: 'none',
+            top: y + 5,
+            left: x + 5,
+            color: '#fff',
+            padding: '2px 5px',
+            'background-color': '#717171',
+            opacity: 0.80
+        }).appendTo("body").fadeIn(200);
+    }
+
+    var previousPoint = null;
+    $("#graph-lines, #graph-bars").bind("plothover", function (event, pos, item) {
+        $("#x").text(pos.x.toFixed(0));
+        $("#y").text(pos.y.toFixed(0));
+        if (item) {
+            if (previousPoint != item.dataIndex) {
+                previousPoint = item.dataIndex;
+                $("#flot-tooltip").remove();
+                var x = item.datapoint[0].toFixed(0),
+                        y = item.datapoint[1].toFixed(2);
+                showTooltip(item.pageX, item.pageY, item.series.label + ": " + y + " %");
+            }
+        } else {
+            $("#flot-tooltip").remove();
+            previousPoint = null;
+        }
+    });
+    #{if controllers.CompanyConf.type==0}
+    var charData1Array = [];
+        #{list items:reportMaterials,as:'material'}
+        charData1Array[${material_index}] = ${material.charts.raw()};
+        #{/list}
+    var charData2Array = [];
+        #{list items:reportManPowers,as:'manPower'}
+        charData2Array[${manPower_index}] = ${manPower.charts.raw()};
+        #{/list}
+    var charData3Array = [];
+        #{list items:reportEquipments,as:'equipment'}
+        charData3Array[${equipment_index}] = ${equipment.charts.raw()};
+        #{/list}
+        #{if reportMaterials.size()>0}
+        var chartData1 = c3.generate({
+            bindto: '#chartData1',
+            data: {
+                x: 'x',
+                columns: ${reportMaterials.get(0).charts.raw()},
+                type: 'bar',
+                types: {
+                    Хэвийн: 'line'
+                },
+                colors: {
+                    Хэвийн: '#008000'
+                }
+//            onclick: function (d, element) {
+//                alert(d + "==" + element);
+//            }
+            }, grid: {
+                y: {
+                    show: true
+                }
+            },
+            axis: {
+                x: {
+                    type: 'category'
+                }
+            }
+        });
+        #{/if}
+        #{if reportManPowers.size()>0}
+        var chartData2 = c3.generate({
+            bindto: '#chartData2',
+            data: {
+                x: 'x',
+                columns: ${reportManPowers.get(0).charts.raw()},
+                type: 'bar',
+                types: {
+                    Хэвийн: 'line'
+                },
+                colors: {
+                    Хэвийн: '#008000'
+                }
+            }, grid: {
+                y: {
+                    show: true
+                }
+            },
+            axis: {
+                x: {
+                    type: 'category'
+                }
+            }
+        });
+        #{/if}
+        #{if reportEquipments.size()>0}
+        var chartData3 = c3.generate({
+            bindto: '#chartData3',
+            data: {
+                x: 'x',
+                columns: ${reportEquipments.get(0).charts.raw()},
+                type: 'bar',
+                types: {
+                    Хэвийн: 'line'
+                },
+                colors: {
+                    Хэвийн: '#008000',
+                    Ажилласан: '#ff585d'
+                }
+            }, grid: {
+                y: {
+                    show: true
+                }
+            },
+            axis: {
+                x: {
+                    type: 'category'
+                }
+            }
+        });
+        #{/if}
+    function chartData1OnLoad(index) {
+        var counter = 1;
+        $('div#chartDiv1 button.btn').each(function () {
+            if (counter == index)$(this).addClass('active');
+            else $(this).removeClass('active');
+            counter++;
+        });
+        chartData1.load({
+            columns: charData1Array[index]
+        });
+    }
+    function chartData2OnLoad(index) {
+        var counter = 1;
+        $('div#chartDiv2 button.btn').each(function () {
+            if (counter == index)$(this).addClass('active');
+            else $(this).removeClass('active');
+            counter++;
+        });
+        chartData2.load({
+            columns: charData2Array[index]
+        });
+    }
+    function chartData3OnLoad(index) {
+        var counter = 1;
+        $('div#chartDiv3 button.btn').each(function () {
+            if (counter == index)$(this).addClass('active');
+            else $(this).removeClass('active');
+            counter++;
+        });
+        chartData3.load({
+            columns: charData3Array[index]
+        });
+    }
+    #{/if}
+    if(chart_data[1]!=undefined && chart_data[1].length>0) {
+        var chartOther = c3.generate({
+            bindto: '#chartOther',
+            data: {
+                columns: chart_data[1],
+                type: 'donut'
+            },
+            size: {height: 240},
+            legend: {
+                position: 'right'
+            }, donut: {
+                title: "Холбоотой мэдээлэл",
+                label: {
+                    format: function (value, ratio, id) {
+                        return value;
+                    }
+                }
+            },
+            tooltip: {
+                format: {
+                    title: function (d) {
+                        return 'Тоо ширхэг';
+                    },
+                    value: function (value, ratio, id) {
+                        return value;
+                    }
+                }
+            }
+        });
+        $("#reportLoadData #chartOther svg").css('height', 240);
+        setTimeout(function () {chartOther.resize();}, 100);
+    }
+    if(chart_data[2]!=undefined && chart_data[2].length>0) {
+        var chartRfiPunch = c3.generate({
+            bindto: '#chartRfiPunch',
+            data: {
+                columns: chart_data[2],
+                type: 'donut'
+            },
+            size: {height: 240},
+            legend: {
+                position: 'right'
+            }, donut: {
+                title: "Хүсэлтүүд",
+                label: {
+                    format: function (value, ratio, id) {
+                        return value;
+                    }
+                }
+            },
+            tooltip: {
+                format: {
+                    title: function (d) {
+                        return 'Тоо ширхэг';
+                    },
+                    value: function (value, ratio, id) {
+                        return value;
+                    }
+                }
+            }
+        });
+        $("#reportLoadData #chartRfiPunch svg").css('height', 240);
+        setTimeout(function () {
+            chartRfiPunch.resize();
+        }, 100);
+    }
+</script>
+<style>
+    table.percentTable td {
+        padding: 8px 2px !important;
+        font-size: 12px;
+    }
+</style>

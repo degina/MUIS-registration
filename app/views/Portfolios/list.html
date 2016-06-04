@@ -1,0 +1,233 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    .top-menu {
+        border-bottom: 1px solid #fff;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+
+    .events-filter {
+        background-color: #fff;
+        padding: 20px 10px 10px;
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+    }
+
+    #reportrange {
+        color: #838383;
+    }
+
+    div#portfolioArea h3, .h3 {
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+
+    .overviewArea h3, .thumbnailsArea h3 {
+        font-family: arial;
+        margin-top: 5px;
+        margin-bottom: 10px;
+        font-size: 18px;
+        overflow: hidden;
+        white-space: pre;
+        text-overflow: ellipsis;
+    }
+
+    a.edit:hover {
+        background-color: #18a689;
+        color: #fff !important
+    }
+
+    div.selectedPortfolio {
+        border: 2px solid #a9a9a9;
+        border-radius: 4px;
+    }
+
+    .overviewArea .panel-body {
+        padding: 0;
+    }
+
+    .overviewArea .table th {
+        text-transform: none;
+        text-align: center;
+    }
+
+    .twoLine {
+        line-height: 1.5em;
+        height: 1.5em;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        width: 100%;
+    }
+
+    .oneLine {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
+    }
+    .firstHeading{
+        font-size: 18px;
+        color: #0078a8;
+        cursor: pointer;
+    }
+    div#main-content div.portfolioList p{
+        font-family: "Tahoma";
+    }
+</style>
+<div id="main-content">
+    <div class="m-b-20 m-t-10">
+        <div class="btn-group">
+            <button type="button" id="thumbnailsButton" class="btn btn-default"><i class="fa fa-th-large"></i> Тойм
+            </button>
+            <button type="button" id="overviewButton" class="btn btn-default"><i class="fa fa-list"></i> Дэлгэрэнгүй
+            </button>
+            <button type="button" id="locationButton" class="btn btn-default"><i class="fa fa-map-marker"></i> Байршил
+            </button>
+        </div>
+    #{if admin}
+        <div class="pull-right">
+            <a href="@{Portfolios.blank()}" class="btn btn-default"><i class="fa fa-plus-circle p-r-10"></i> Шинэ төсөл
+                нэмэх</a>
+            <a href="@{controllers.Portfolios.settings()}" class="btn btn-primary btn-transparent"><i
+                    class="fa fa-cog p-r-10"></i>Тохиргоо</a>
+        </div>
+    #{/if}
+    </div>
+    <div class="top-menu">
+        <button class="btn btn-dark" onclick="statusClick(0)" id="status0"><strong>Бүгд</strong> <span
+                class="label label-danger m-l-10">${portfolios.size()}</span></button>
+    #{list items:stages,as:'stage'}
+        <button type="button" class="btn btn-default" onclick="statusClick('${stage.id}')"
+                id='status${stage.id}' bg-color="${stage.colorClass}">${stage.name}<span
+                class="label label-default m-l-10">${stage.portfolios.size()}</span></button>
+    #{/list}
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="events-filter clearfix">
+                <div class="col-md-3">
+                    <div id="reportrange" class="form-control m-b-10">
+                        <i class="fa fa-calendar fa-lg p-r-10"></i> <span>Эхэлсэн огноо...</span>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select data-width="100%" id="portfolioCategory" class="form-control">
+                        <option value="0">Бүх ангилал</option>
+                    #{list items:categories,as:'category'}
+                        <option value="${category.id}"
+                                data-subtext="(${category.portfolios.size()})">${category.name}</option>
+                    #{/list}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" id="searchName" class="form-control m-b-10" placeholder="Хайх түлхүүр үг...">
+                </div>
+                <div class="col-md-3">
+                    <button onclick="searchFilter()" class="btn btn-primary btn-transparent" style="width: 100%"><i
+                            class="fa fa-filter"></i><span>  </span> Шүүх
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row m-t-20" id="portfolioArea">
+    #{include 'Portfolios/thumbnail.html'/}
+    </div>
+</div>
+<!-- END MAIN CONTENT -->
+#{portfolios-list-config /}
+<script>
+    var startDate = "";
+    var endDate = "";
+    var anhniiStatus = 0;
+    var viewType = 0;
+    $(document).ready(function () {
+        $('button#thumbnailsButton').click(function () {
+            viewType = 0;
+            searchFilter();
+        });
+        $('button#overviewButton').click(function () {
+            viewType = 1;
+            searchFilter();
+        });
+        $('button#locationButton').click(function () {
+            viewType = 2;
+            searchFilter();
+        });
+        $('#reportrange').daterangepicker({
+                    ranges: {
+                        'Өнөөдөр': [moment(), moment()],
+                        'Өчигдөр': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                        'Сүүлийн 7 хоног': [moment().subtract('days', 6), moment()],
+                        'Сүүлийн 30 хоног': [moment().subtract('days', 29), moment()],
+                        'Энэ сар': [moment().startOf('month'), moment().endOf('month')],
+                        'Өнгөрсөн сар': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                    },
+                    startDate: moment().subtract('days', 29),
+                    endDate: moment(),
+                    format: 'YYYY/MM/DD',
+                    locale: {
+                        applyLabel: 'Болсон',
+                        cancelLabel: 'Болих',
+                        fromLabel: 'Аас',
+                        toLabel: 'Хүртэл',
+                        customRangeLabel: 'Өөрөөр сонгох',
+                        dayNames: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+                        daysOfWeek: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+                        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+                        firstDay: 1
+                    }
+                },
+                function (start, end) {
+                    $('#reportrange span').html(start.format('YYYY-MM-DD') + ' -c ' + end.format('YYYY-MM-DD'));
+                }
+        );
+        $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+            console.log("apply event fired, start/end dates are "
+                    + picker.startDate.format('YYYY-MM-DD')
+                    + " to "
+                    + picker.endDate.format('YYYY-MM-DD')
+            );
+            startDate = picker.startDate.format('YYYY-MM-DD');
+            endDate = picker.endDate.format('YYYY-MM-DD');
+        });
+        $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
+            console.log("cancel event fired");
+            $('#reportrange span').html("Өдрөөр хайх...");
+            startDate = "";
+            endDate = "";
+        });
+
+    });
+    function searchFilter() {
+        loading2("div#main-content div#portfolioArea");
+        $.ajax({
+            type: "POST",
+            data: {
+                viewType: viewType,
+                stageId: anhniiStatus,
+                categoryId: $('select#portfolioCategory').val(),
+                searchName: $('input#searchName').val(),
+                startDate: startDate,
+                endDate: endDate
+            }, url: "/portfolio/filter"
+        }).success(
+                function (data) {
+                    $("div#main-content div#portfolioArea").html(data);
+                });
+    }
+    function statusClick(id) {
+        $('button#status' + anhniiStatus).removeClass('btn-dark').addClass("btn-default");
+        $('button#status' + anhniiStatus + '>span').removeClass('label-danger').addClass("label-default");
+        anhniiStatus = id;
+        $('button#status' + id).removeClass('btn-default').addClass("btn-dark");
+        $('button#status' + anhniiStatus + '>span').removeClass('label-default').addClass("label-danger");
+        $('input#searchName').val("");
+        $('#reportrange span').html('Гэрээ хийсэн огноо...');
+        $('select#portfolioCategory').selectpicker('val', '0');
+        searchFilter();
+    }
+</script>

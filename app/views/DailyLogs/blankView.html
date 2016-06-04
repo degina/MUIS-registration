@@ -1,0 +1,1518 @@
+#{extends 'CRUD/layout.html' /}
+#{fancybox-config /}
+<!-- BEGIN MAIN CONTENT -->
+<div id="main-content">
+    <div class="row m-b-20 m-t-20">
+        <div class="col-md-12 text-left">
+            <div class="btn-group">
+                <button class="btn btn-primary" type="button" style="padding: 2px 13px;" onclick="previousDate()"><i
+                        class="fa fa-angle-left" style="font-size: 37px;"></i>
+                </button>
+                <button class="btn btn-primary" id="btnDailLogDate"><i class="fa fa-calendar p-r-10"
+                                                                       style="font-size: 25px;"></i>
+                    <input class="form-control" id="dailylogDate"
+                           style="cursor:pointer; padding: 1px 6px; font-size: 25px; text-align: center; border-radius: 11px;width: 200px;"
+                           type="text" value="${currentDate.format("yyyy-MM-dd")}">
+                </button>
+                <button #{if isToday} disabled #{/if}class="btn btn-primary" type="button" style="padding: 2px 13px;"
+                                      onclick="nextDate()"><i
+                        class="fa fa-angle-right" style="font-size: 37px;"></i>
+                </button>
+            </div>
+            <button type="button" class="btn btn-white" style="font-size: 17px; padding: 7px 24px; float: right"
+                    onclick="printButton()">
+                <i class="fa fa-print m-r-10"></i> Хэвлэх
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel-group panel-accordion " id="accordion">
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="" data-toggle="collapse" href="#collapseThree">
+                                    Хийгдсэн ажил <span class="badge badge-default" data-rel="tooltip"
+                                                        title="Нийт хийгдсэн ажил">${workNumber}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseThree" class="panel-collapse collapse in">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableScheduledWork"
+                                               style="border: none;">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 140px;">Сурвалж</th>
+                                            <th>Ажил</th>
+                                            #{if controllers.CompanyConf.type==0}
+                                            <th style="width: 100px">Хүн</th>
+                                            <th style="width: 100px">Техник</th>
+                                            <th style="width: 100px">Материал</th>
+                                                #{if !contractorUser}
+                                                <th style="width: 106px;">Гүйцэтгэл %</th>
+                                                #{/if}
+                                            #{/if}
+                                            #{else }
+                                            <th style="width: 106px;">Гүйцэтгэл %</th>
+                                            <th style="width: 100px">Зарцуулсан</th>
+                                            #{/else}
+                                            <th>Тэмдэглэл</th>
+                                            <th style="width: 67px;"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                            #{include "DailyLogs/createScheduledWork.html"/}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseWeather">
+                                    Цаг агаарын саатал <span class="badge badge-default" data-rel="tooltip"
+                                                             title="Нийт цаг агаарын саатал">${weathers.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseWeather" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableWeather">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th style="width: 100px;">Нөхцөл</th>
+                                            <th>Эхэлсэн</th>
+                                            <th>Дууссан</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th style="text-align: center;width: 67px;"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                            #{include "DailyLogs/createWeather.html"/}
+                                            <tr id="weatherInput">
+                                                <td id="weatherNumber">1</td>
+                                                <td><select id="taskWeather" data-width="120px"
+                                                            class="weather" data-container="body">
+                                                #{list items:tasks,as:'task'}
+                                                    <option data-subtext="${task.projectObject.project.name}"
+                                                            value="t${task.id}">${task.name}</option>
+                                                #{/list}
+                                                #{list items:myPlans,as:'myPlan'}
+                                                    <option data-subtext="Хувийн төлөвлөгөөт"
+                                                            value="m${myPlan.id}">${myPlan.name}</option>
+                                                #{/list}
+                                                </select>
+                                                </td>
+                                                <td><select name="conditionWeather" id="conditionWeather"
+                                                            class="weather" data-container="body">
+                                                #{list items:weatherConditions,as:'condition'}
+                                                    <option value="${condition.id}">${condition.conditionWeather}</option>
+                                                #{/list}
+                                                </select>
+                                                </td>
+                                                <td style="width: 60px;">
+                                                    <input id="startHourWeather" class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/>
+                                                </td>
+                                                <td style="width: 60px;">
+                                                    <input id="finishHourWeather"
+                                                           class="form-control dateTimePickerHour"
+                                                           name="finishHour" type="text"/>
+                                                </td>
+                                                <td><textarea class="form-control" name="notes" id="notesWeather"
+                                                              cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td>
+                                                    <ul class="uploadBox" id="uWeather">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td id="button" style="width: 25px; text-align: center;">
+                                                    <button onclick="addWeather()" data-rel="tooltip" title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseTechnical">
+                                    Техникийн саатал <span class="badge badge-default">${technicalDelays.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseTechnical" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableTechnical">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th style="width: 100px;">Шалтгаан</th>
+                                            <th>Эхэлсэн</th>
+                                            <th>Дууссан</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th style="text-align: center;width: 67px;"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                            #{include "DailyLogs/createTechnical.html"/}
+                                            <tr id="technicalInput">
+                                                <td id="technicalNumber">1</td>
+                                                <td><select id="taskTechnical" data-width="120px"
+                                                            class="weather" data-container="body">
+                                                #{list items:tasks,as:'task'}
+                                                    <option data-subtext="${task.projectObject.project.name}"
+                                                            value="t${task.id}">${task.name}</option>
+                                                #{/list}
+                                                #{list items:myPlans,as:'myPlan'}
+                                                    <option data-subtext="Хувийн төлөвлөгөөт"
+                                                            value="m${myPlan.id}">${myPlan.name}</option>
+                                                #{/list}
+                                                </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" class="form-control" id="conditionTechnical"/>
+                                                </td>
+                                                <td style="width: 60px;">
+                                                    <input id="startHourTechnical"
+                                                           class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/>
+                                                </td>
+                                                <td style="width: 60px;">
+                                                    <input id="finishHourTechnical"
+                                                           class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/>
+                                                </td>
+                                                <td><textarea class="form-control" name="notes" id="notesTechnical"
+                                                              cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td>
+                                                    <ul class="uploadBox" id="uTechnical">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td id="button" style="width: 25px; text-align: center;">
+                                                    <button onclick="addTechnical()" data-rel="tooltip" title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{if controllers.CompanyConf.type==0}
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseDumpster">
+                                    Материалын алдагдал <span class="badge badge-default">${dumpsters.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseDumpster" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableDumpster">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 110px;">Ажил</th>
+                                            <th>Материал</th>
+                                            <th style="width: 100px;">Тоо хэмжээ</th>
+                                            <th>Байршил</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th style="width: 67px;"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                                #{include "DailyLogs/createDumpster.html"/}
+                                            <tr id="trDumpsterInput">
+                                                <td>1</td>
+                                                <td>
+                                                    <select id="dumpsterTask" data-width="120px"
+                                                            class="weather" data-container="body">
+                                                        #{list items:tasks,as:'task'}
+                                                            <option data-subtext="${task.projectObject.project.name}"
+                                                                    value="t${task.id}">${task.name}</option>
+                                                        #{/list}
+                                                        #{list items:myPlans,as:'myPlan'}
+                                                            <option data-subtext="Хувийн төлөвлөгөөт"
+                                                                    value="m${myPlan.id}">${myPlan.name}</option>
+                                                        #{/list}
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <select id="dumpsterMaterial" data-container="body"
+                                                            data-live-search="true" data-width="150px">
+                                                        #{list items:inventoryCategories,as:'inventoryCategory'}
+                                                            <optgroup label="${inventoryCategory.name}">
+                                                                #{list items:inventoryCategory.subCategories,as:'subCategory'}
+                                                                    #{list items:subCategory.inventories,as:'inventory'}
+                                                                        <option data-subtext="${inventory.inventoryMeasure.measure}"
+                                                                                value="${inventory.id}">${inventory.item}</option>
+                                                                    #{/list}
+                                                                #{/list}
+                                                            </optgroup>
+                                                        #{/list}
+                                                    </select>
+                                                <td><input id="dumpsterQuantity" class="form-control" type="number"
+                                                           min="0"/>
+                                                </td>
+
+                                                <td><input id="dumpsterLocation" class="form-control" type="text"/></td>
+
+                                                <td><textarea class="form-control" id="dumpsterNotes" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td>
+                                                    <ul class="uploadBox" id="uDumpster">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addDumpster()" data-rel="tooltip" title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{/if}
+            #{if !contractorUser}
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseZurgaa">
+                                    Үзлэг шалгалт <span class="badge badge-default">${inspections.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseZurgaa" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableInspection">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 110px;">Ажил</th>
+                                            <th>Эхэлсэн</th>
+                                            <th>Дууссан</th>
+                                            <th>Төрөл</th>
+                                            <th>Шалгагч</th>
+                                            <th>Талбар</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th colspan="2" class="text-center">
+                                            </th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                                #{include "DailyLogs/createInspection.html"/}
+                                            <tr id="trInspectionInput">
+                                                <td>1</td>
+                                                <td><select id="inspectionTask" data-width="120px"
+                                                            data-container="body">
+                                                    #{list items:tasks,as:'task'}
+                                                        <option data-subtext="${task.projectObject.project.name}"
+                                                                value="t${task.id}">${task.name}</option>
+                                                    #{/list}
+                                                    #{list items:myPlans,as:'myPlan'}
+                                                        <option data-subtext="Хувийн төлөвлөгөөт"
+                                                                value="m${myPlan.id}">${myPlan.name}</option>
+                                                    #{/list}
+                                                </select>
+                                                </td>
+                                                <td style="width:60px;">
+                                                    <input id="inspectionStartHour"
+                                                           class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/>
+                                                </td>
+
+                                                <td style="width: 60px;"><input id="inspectionFinishHour"
+                                                                                class="form-control dateTimePickerHour"
+                                                                                name="startHour" type="text"/>
+                                                </td>
+
+                                                <td><input id="inspectionType" class="form-control" type="text"/></td>
+                                                <td><input id="InspectorName" class="form-control" type="text"/></td>
+
+                                                <td><input id="inspectionArea" class="form-control" type="text"/></td>
+                                                <td><textarea class="form-control" id="inspectionComments" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td style="width: 67px;">
+                                                    <ul class="uploadBox" id="uInspection">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+
+                                                </td>
+                                                <td style="width: 67px;">
+                                                    <button class="btn btn-default rfi btn-icon-sm btn-rounded btn-effect"
+                                                            data-rel="tooltip" title="Мэдээлэл хүсэх"
+                                                            data-modal="modal-RFI"><i class="fa fa-exchange"></i>
+                                                    </button>
+                                                    <button class="btn btn-default plist btn-icon-sm btn-rounded"
+                                                            data-rel="tooltip" title="Даалгавар"><i
+                                                            class="fa fa-list-ol"></i></button>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addInspection()" data-rel="tooltip"
+                                                            title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseNaim">
+                                    Хүргэлт хүлээн авсан <span class="badge badge-default">${deliveries.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseNaim" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableDelivery">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th style="width: 70px;">Цаг</th>
+                                            <th>Хаанаас</th>
+                                            <th>Дугаар/Код</th>
+                                            <th>Агуулга</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th colspan="2" class="text-center">
+                                            </th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                                #{include "DailyLogs/createDelivery.html"/}
+                                            <tr id="trDeliveryInput">
+                                                <td>1</td>
+                                                <td><select id="deliveryTask" data-width="120px"
+                                                            data-container="body">
+                                                    #{list items:tasks,as:'task'}
+                                                        <option data-subtext="${task.projectObject.project.name}"
+                                                                value="t${task.id}">${task.name}</option>
+                                                    #{/list}
+                                                    #{list items:myPlans,as:'myPlan'}
+                                                        <option data-subtext="Хувийн төлөвлөгөөт"
+                                                                value="m${myPlan.id}">${myPlan.name}</option>
+                                                    #{/list}
+                                                </select>
+                                                </td>
+                                                <td><input id="deliveryHour" class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/></td>
+                                                <td><input id="deliveryFrom" class="form-control" type="text"/></td>
+                                                <td><input id="deliveryTrackingNumber" class="form-control"
+                                                           type="text"/></td>
+
+                                                <td><input id="deliveryContents" class="form-control" type="text"/></td>
+                                                <td><textarea class="form-control" id="deliveryComments" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td style="width: 67px;">
+                                                    <ul class="uploadBox" id="uDelivery">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <button class="btn btn-default rfi btn-icon-sm btn-rounded btn-effect"
+                                                            data-rel="tooltip" title="Мэдээлэл хүсэх"
+                                                            data-modal="modal-RFI"><i
+                                                            class="fa fa-exchange"></i></button>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addDelivery()" data-rel="tooltip" title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{/if}
+            #{if controllers.CompanyConf.type==0}
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseDoloo">
+                                    БОХАБЭА-н зөрчил <span class="badge badge-default">${safeties.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseDoloo" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableSafety">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th style="width: 100px;">Гарсан цаг</th>
+                                            <th>Авсан арга хэмжээ</th>
+                                            <th>Хэнд</th>
+                                            <th>Гүйцэтгэх хугцаа</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th colspan="2" class="text-center">
+                                            </th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                                #{include "DailyLogs/createSafety.html"/}
+                                            <tr id="trSafetyInput">
+                                                <td>1</td>
+                                                <td><select id="safetyTask" data-width="120px"
+                                                            data-container="body">
+                                                    #{list items:tasks,as:'task'}
+                                                        <option data-subtext="${task.projectObject.project.name}"
+                                                                value="t${task.id}">${task.name}</option>
+                                                    #{/list}
+                                                    #{list items:myPlans,as:'myPlan'}
+                                                        <option data-subtext="Хувийн төлөвлөгөөт"
+                                                                value="m${myPlan.id}">${myPlan.name}</option>
+                                                    #{/list}
+                                                </select>
+                                                </td>
+                                                <td>
+                                                    <input id="safetyHour" class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/>
+                                                </td>
+                                                <td><input id="safetyNotice" class="form-control" type="text"/></td>
+                                                <td><input id="safetyIssuedTo" class="form-control" type="text"/>
+                                                </td>
+                                                <td><input id="safetyComplianceDue" class="form-control"
+                                                           type="text"/>
+                                                </td>
+                                                <td><textarea class="form-control" id="safetyComments" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td class="text-center" style="width: 67px;">
+                                                    <ul class="uploadBox" id="uSafety">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td style="width: 67px;">
+                                                    <button class="btn btn-default rfi btn-icon-sm btn-rounded btn-effect"
+                                                            data-rel="tooltip" title="Мэдээлэл хүсэх"
+                                                            data-modal="modal-RFI"><i
+                                                            class="fa fa-exchange"></i></button>
+                                                    <button class="btn btn-default plist btn-icon-sm btn-rounded"
+                                                            data-rel="tooltip" title="Даалгавар"><i
+                                                            class="fa fa-list-ol"></i></button>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addSafety()" data-rel="tooltip"
+                                                            title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{/if}
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseEs">
+                                    Тэмдэглэл/Асуудал <span class="badge badge-default">${dailyLogNotes.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseEs" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableNotes">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th>Ач холбогдол</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th class="text-center"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                            #{include "DailyLogs/createNotes.html"/}
+                                            <tr id="trNotesInput">
+                                                <td>1</td>
+                                                <td><select id="notesTask" data-width="120px"
+                                                            data-container="body">
+                                                #{list items:tasks,as:'task'}
+                                                    <option data-subtext="${task.projectObject.project.name}"
+                                                            value="t${task.id}">${task.name}</option>
+                                                #{/list}
+                                                #{list items:myPlans,as:'myPlan'}
+                                                    <option data-subtext="Хувийн төлөвлөгөөт"
+                                                            value="m${myPlan.id}">${myPlan.name}</option>
+                                                #{/list}
+                                                </select>
+                                                </td>
+                                                <td style="width: 120px;">
+                                                    <select class="form-control" id="notesIssue" data-container="body">
+                                                        <option data-content="<span class='label label-danger' style='display: inline-block; width: 54px;' >Өндөр</span>"
+                                                                value="1">Өндөр
+                                                        </option>
+                                                        <option data-content="<span class='label label-warning' style='display: inline-block; width: 54px;' >Дунд</span>"
+                                                                value="2">Дунд
+                                                        </option>
+                                                        <option data-content="<span class='label label-primary' style='display: inline-block; width: 54px;' >Бага</span>"
+                                                                value="3">Бага
+                                                        </option>
+                                                    </select>
+                                                </td>
+                                                <td><textarea class="form-control" id="notesComment" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td>
+                                                    <ul class="uploadBox" id="uNotes">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addNotes()" data-rel="tooltip" title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseSanaachlaga">
+                                    Санал санаачлага <span class="badge badge-default">${sanaachlagas.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseSanaachlaga" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableSanaachlaga">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th>Санал</th>
+                                            <th style="width: 67px;"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                            #{include "DailyLogs/createSanaachlaga.html"/}
+                                            <tr id="trSanaachlagaInput">
+                                                <td>1</td>
+                                                <td><select id="sanaachlagaTask" data-width="120px"
+                                                            data-container="body">
+                                                #{list items:tasks,as:'task'}
+                                                    <option data-subtext="${task.projectObject.project.name}"
+                                                            value="t${task.id}">${task.name}</option>
+                                                #{/list}
+                                                #{list items:myPlans,as:'myPlan'}
+                                                    <option data-subtext="Хувийн төлөвлөгөөт"
+                                                            value="m${myPlan.id}">${myPlan.name}</option>
+                                                #{/list}
+                                                </select>
+                                                </td>
+                                                <td><textarea class="form-control" id="sanaachlagaSanal" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td>
+                                                    <ul class="uploadBox" id="uSanaachlaga">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addSanaachlaga()" data-rel="tooltip"
+                                                            title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{if !contractorUser}
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseVisitor">
+                                    Зочин хүлээн авсан <span class="badge badge-default">${visitors.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseVisitor" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableVisitor">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th>Хэн</th>
+                                            <th>Хаанаас</th>
+                                            <th>Ирсэн цаг</th>
+                                            <th>Явсан цаг</th>
+                                            <th>Тэмдэглэл</th>
+                                            <th style="width: 67px;"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                                #{include "DailyLogs/createVisitor.html"/}
+                                            <tr id="trVisitorInput">
+                                                <td>1</td>
+                                                <td><select id="visitorTask" data-width="120px"
+                                                            data-container="body">
+                                                    #{list items:tasks,as:'task'}
+                                                        <option data-subtext="${task.projectObject.project.name}"
+                                                                value="t${task.id}">${task.name}</option>
+                                                    #{/list}
+                                                    #{list items:myPlans,as:'myPlan'}
+                                                        <option data-subtext="Хувийн төлөвлөгөөт"
+                                                                value="m${myPlan.id}">${myPlan.name}</option>
+                                                    #{/list}
+                                                </select>
+                                                </td>
+                                                <td><input id="visitorTitle" class="form-control" type="text"/></td>
+                                                <td><input id="visitorFrom" class="form-control" type="text"/></td>
+                                                <td style="width: 80px;">
+                                                    <input id="visitorStartHour" class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/>
+                                                </td>
+                                                <td style="width: 80px;">
+                                                    <input id="visitorFinishHour"
+                                                           class="form-control dateTimePickerHour"
+                                                           name="startHour" type="text"/>
+                                                </td>
+                                                <td><textarea class="form-control" id="visitorDescription" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td>
+                                                    <ul class="uploadBox" id="uVisitor">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addVisitor()" data-rel="tooltip" title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{/if}
+            #{if controllers.CompanyConf.type==0}
+                <div class="sortable ui-sortable">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse"
+                                   href="#collapseWaste">
+                                    Хог хаягдал <span class="badge badge-default">${wastes.size()}</span>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseWaste" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="table table-bordered" id="tableWaste">
+                                            <thead>
+                                            <th style="width: 25px;">#</th>
+                                            <th style="width: 100px;">Ажил</th>
+                                            <th>Үүсгэгч</th>
+                                            <th>Хэмжих нэгж</th>
+                                            <th>Тоо хэмжээ</th>
+                                            <th>Тайлбар</th>
+                                            <th style="width: 67px;"></th>
+                                            <th style="width: 35px;"></th>
+                                            </thead>
+                                            <tbody>
+                                                #{include "DailyLogs/createWaste.html"/}
+                                            <tr id="trWasteInput">
+                                                <td>1</td>
+                                                <td><select id="wasteTask" data-width="120px"
+                                                            data-container="body">
+                                                    #{list items:tasks,as:'task'}
+                                                        <option data-subtext="${task.projectObject.project.name}"
+                                                                value="t${task.id}">${task.name}</option>
+                                                    #{/list}
+                                                    #{list items:myPlans,as:'myPlan'}
+                                                        <option data-subtext="Хувийн төлөвлөгөөт"
+                                                                value="m${myPlan.id}">${myPlan.name}</option>
+                                                    #{/list}
+                                                </select>
+                                                </td>
+                                                <td><input id="WasteSubject" class="form-control" type="text"/></td>
+
+                                                <td><input id="WasteMeasure" class="form-control" type="text"/></td>
+                                                <td><input id="WasteQuantity" class="form-control" type="number"
+                                                           min="0"/></td>
+
+                                                <td><textarea class="form-control" id="WasteComments" cols="40"
+                                                              rows="1"></textarea></td>
+                                                <td>
+                                                    <ul class="uploadBox" id="uWaste">
+                                                        <li>
+                                                            <span> <button
+                                                                    class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                    data-rel="tooltip" title="Хавсаргах"><i
+                                                                    class="fa fa-cloud-upload"></i></button></span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <button onclick="addWaste()" data-rel="tooltip" title="Хадгалах"
+                                                            class="add btn btn-icon-sm btn-rounded btn-default"><i
+                                                            class="fa fa-save"></i></button>
+                                                </td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{/if}
+            </div>
+        </div>
+    </div>
+#{if controllers.CompanyConf.type==0}
+    #{include "DailyLogs/Modal.html"/}
+#{/if}
+    <div id="section-to-print"></div>
+</div>
+<form action="" id="formDate">
+</form>
+#{include "SharedView/AttachsMulti.html"/}
+#{checkFileExtension /}
+#{AttachScriptMulti uploadPath:controllers.Consts.uploadDailyLogPath /}
+#{ImgThumbnail div:'div.post-images',divid:'dailylog'/}
+#{set activeMenu: 'DailyLog'/}
+#{set activeMenuSub: ''/}
+#{dailyLog-list-config /}
+#{alertMessages /}
+<script>
+    var filename = [];
+    var filedir = [];
+    var extension = [];
+    var filesize = [];
+    var i = 0;
+    var currentTaskId = 0;
+    var date = '${currentDate.format("yyyy-MM-dd")}';
+    function previousDate() {
+        $('form#formDate').attr('action', '/dailyLogBlankView/' + date + "/1").submit();
+    }
+    function nextDate() {
+        $('form#formDate').attr('action', '/dailyLogBlankView/' + date + "/2").submit();
+    }
+    $(document).ready(function () {
+        $('input.dateTimePickerHour').each(function () {
+            var $input = $(this);
+            $(this).datetimepicker({
+                datepicker: false,
+                lang: 'mn',
+                defaultSelect: true,
+                step: 10,
+                format: 'H:i',
+                mask: true,
+                onShow: function (ct) {
+                    var finishTimeInput = $input.parent('td').next("td").find('input.dateTimePickerHour');
+                    var startTimeInput = $input.parent('td').prev("td").find('input.dateTimePickerHour');
+                    if ((typeof startTimeInput != 'undefined') && startTimeInput.val() != '__:__' && startTimeInput.val() != "") {
+                        this.setOptions({
+                            minTime: startTimeInput.val(),
+                            value: startTimeInput.val(),
+                        });
+                    }
+                    if ((typeof finishTimeInput != 'undefined') && finishTimeInput.val() != '__:__' && finishTimeInput.val() != "") {
+                        this.setOptions({
+                            maxTime: finishTimeInput.val(),
+                            value: finishTimeInput.val(),
+                        });
+                    }
+                }
+            });
+        });
+
+        $('input#dailylogDate').datetimepicker({
+            timepicker: false,
+            lang: 'mn',
+            format: 'Y-m-d',
+            maxDate: '${currentDate.format("yyyy-MM-dd")}',
+            onSelectDate: function (ct, $i) {
+                $('form#formDate').attr('action', '/dailyLogBlankView/' + ct.dateFormat('Y-m-d') + "/0").submit();
+            }
+        });
+        $('button#btnDailLogDate').click(function () {
+            $('input#dailylogDate').datetimepicker('show');
+        });
+        $('[data-rel="tooltip"]').tooltip();
+        $('input.numberic').forceNumericOnly(false);
+        numberTableContractor("tableWeather");
+        numberTableContractor("tableTechnical");
+        numberTable("tableVisitor");
+        numberTable("tableSanaachlaga");
+        numberTable("tableNotes");
+        numberTable("tableDelivery");
+        numberTable("tableInspection");
+        $('.progress-bar').progressbar();
+        $('a[data-toggle=collapse]').each(function () {
+            $(this).click(function () {
+                if ($(this).hasClass("collapsed"))
+                    console.log();
+            });
+        });
+    });
+    function addWeather() {
+        var startHour = $('table#tableWeather input#startHourWeather').val();
+        var finishHour = $('table#tableWeather input#finishHourWeather').val();
+        var note = $('table#tableWeather textarea#notesWeather').val();
+        if (startHour == "" || startHour == "__:__") {
+            showErrorMessage("Эхэлсэн цагаа бичнэ үү?");
+        }
+        else if (finishHour == "" || finishHour == "__:__") {
+            showErrorMessage("Дууссан цагаа бичнэ үү?");
+        }
+        else if (note.length < 2 || note == "") {
+            showErrorMessage("Тайлбар бичнэ үү!");
+        }
+        else {
+            loading2("table#tableWeather tr#weatherInput td#button");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("table#tableWeather ul#uWeather img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableWeather select#taskWeather').val(),
+                    conditionId: $('table#tableWeather select#conditionWeather').val(),
+                    startHour: startHour,
+                    finishHour: finishHour,
+                    notes: note,
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateWeather"
+            }).success(
+                    function (data) {
+                        $('table#tableWeather tr#weatherInput').before(data);
+                        $('table#tableWeather tr#weatherInput td#button').html("<button onclick='addWeather()' data-rel='tooltip' title='Хадгалах'  class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+                        numberTableContractor("tableWeather");
+                        $('table#tableWeather textarea#notesWeather').val("");
+                        $('table#tableWeather ul#uWeather').html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                        $('table#tableWeather textarea#notesWeather').val("");
+                    });
+        }
+    }
+    function deleteWeather(id) {
+        loading2("table#tableWeather tr#weather" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteWeather"
+        }).success(
+                function () {
+                    $('table#tableWeather tr#weather' + id).remove();
+                    numberTableContractor("tableWeather");
+                });
+    }
+    function addTechnical() {
+        var condition = $('table#tableTechnical input#conditionTechnical').val();
+        var startHour = $('table#tableTechnical input#startHourTechnical').val();
+        var finishHour = $('table#tableTechnical input#finishHourTechnical').val();
+        var note = $('table#tableTechnical textarea#notesTechnical').val();
+        if (startHour == "" || startHour == "__:__") {
+            showErrorMessage("Эхэлсэн цагаа бичнэ үү?");
+        }
+        else if (finishHour == "" || finishHour == "__:__") {
+            showErrorMessage("Дууссан цагаа бичнэ үү?");
+        }
+        else if (note.length < 2 || note == "") {
+            showErrorMessage("Тайлбар бичнэ үү!");
+        }
+        else if (condition.length < 2 || condition == "") {
+            showErrorMessage("Шалтгаан аа бичнэ үү!");
+        }
+        else {
+            loading2("table#tableTechnical tr#technicalInput td#button");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("ul#uTechnical img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableTechnical select#taskTechnical').val(),
+                    date: '${currentDate.format("yyy-MM-dd")}',
+                    condition: condition,
+                    startHour: startHour,
+                    finishHour: finishHour,
+                    notes: note,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateTechnical"
+            }).success(
+                    function (data) {
+                        $('table#tableTechnical tr#technicalInput').before(data);
+                        $('table#tableTechnical tr#technicalInput td#button').html("<button onclick='addTechnical()' data-rel='tooltip' title='Хадгалах'   class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+                        numberTableContractor("tableTechnical");
+                        $('textarea#notesTechnical').val("");
+                        $('table#tableTechnical ul#uTechnical').html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                        $('table#tableTechnical input#conditionTechnical').val("");
+                        $('table#tableTechnical textarea#notesTechnical').val("");
+                        $('table#tableTechnical input#startHourTechnical').val("");
+                        $('table#tableTechnical input#finishHourTechnical').val("");
+                    });
+        }
+    }
+    function deleteTechnical(id) {
+        loading2("table#tableTechnical tr#technical" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteTechnical"
+        }).success(
+                function () {
+                    $('table#tableTechnical tr#technical' + id).remove();
+                    numberTableContractor("tableTechnical");
+                });
+    }
+    function deleteScheduledWork(taskId, workNoteId) {
+        if (workNoteId > 0) {
+            loading2("table#tableScheduledWork tr#trScheduledWork" + taskId + " td:last-child");
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: workNoteId
+                }, url: "/dailyLogDeleteScheduledWork"
+            }).complete(function () {
+                $('table#tableScheduledWork textarea#scheduledWorkComments' + taskId).val("");
+                $("table#tableScheduledWork ul#uScheduledWork" + taskId).html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+                $("table#tableScheduledWork tr#trScheduledWork" + taskId + " td:last-child").html("" +
+                        "<button onclick=deleteScheduledWork('" + taskId + "',0)  data-rel=tooltip title='Устгах' " +
+                        "class='delete btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-times' ></i></button>" +
+                        "<button onclick=updateScheduledWork('" + taskId + "') data-rel=tooltip title='Шинэчлэх' " +
+                        "class='update btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save'></i></button>");
+                $('[data-rel="tooltip"]').tooltip();
+            });
+        }
+    }
+    function addInspection() {
+        var startHour = $('table#tableInspection input#inspectionStartHour').val();
+        var finishHour = $('table#tableInspection input#inspectionFinishHour').val();
+        var note = $('table#tableInspection textarea#inspectionComments').val();
+        var type = $('table#tableInspection input#inspectionType').val();
+        var name = $('table#tableInspection input#InspectorName').val();
+        var area = $('table#tableInspection input#inspectionArea').val();
+        if (startHour == "" || startHour == "__:__") {
+            showErrorMessage("Эхэлсэн цагаа бичнэ үү?");
+        }
+        else if (finishHour == "" || finishHour == "__:__") {
+            showErrorMessage("Дууссан цагаа бичнэ үү?");
+        }
+        else if (note.length < 2 || note == "") {
+            showErrorMessage("Тайлбар бичнэ үү!");
+        }
+        else if (req(type) && req(name) && req(area)) {
+            loading2("table#tableInspection tr#trInspectionInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("ul#uInspection img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableInspection select#inspectionTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    startHour: startHour,
+                    finishHour: finishHour,
+                    type: type,
+                    name: name,
+                    area: area,
+                    comments: note,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateInspection"
+            }).success(
+                    function (data) {
+                        $('table#tableInspection tr#trInspectionInput').before(data);
+                        appendSaveBtn('table#tableInspection tr#trInspectionInput td:last-child', 'addInspection');
+                        appendUploadBtn('table#tableInspection ul#uInspection');
+                        numberTable("tableInspection");
+                        $('table#tableInspection input#inspectionType').val("");
+                        $('table#tableInspection input#InspectorName').val("");
+                        $('table#tableInspection input#inspectionArea').val("");
+                        $('table#tableInspection textarea#inspectionComments').val("");
+                        $('[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function deleteInspection(id) {
+        loading2("table#tableInspection tr#trInspection" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteInspection"
+        }).success(
+                function () {
+                    $('table#tableInspection tr#trInspection' + id).remove();
+                });
+    }
+    function addDelivery() {
+        var startHour = $('table#tableDelivery input#deliveryHour').val();
+        var from = $('table#tableDelivery input#deliveryFrom').val();
+        var trackingNumber = $('table#tableDelivery input#deliveryTrackingNumber').val();
+        var contents = $('table#tableDelivery input#deliveryContents').val();
+        var comments = $('table#tableDelivery textarea#deliveryComments').val();
+        if (reqTime(startHour) && req(from) && req(trackingNumber) && req(contents) && req(comments)) {
+            loading2("table#tableDelivery tr#trDeliveryInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("ul#uDelivery img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableDelivery select#deliveryTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    hour: startHour,
+                    from: from,
+                    trackingNumber: trackingNumber,
+                    contents: contents,
+                    comments: comments,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateDelivery"
+            }).success(
+                    function (data) {
+                        $('table#tableDelivery tr#trDeliveryInput').before(data);
+                        appendSaveBtn('table#tableDelivery tr#trDeliveryInput td:last-child', 'addDelivery');
+                        appendUploadBtn('table#tableDelivery ul#uDelivery');
+                        numberTable("tableDelivery");
+                        $('table#tableDelivery input#deliveryFrom').val("");
+                        $('table#tableDelivery input#deliveryTrackingNumber').val("");
+                        $('table#tableDelivery input#deliveryHour');
+                        $('table#tableDelivery input#deliveryContents').val("");
+                        $('table#tableDelivery textarea#deliveryComments').val("");
+                        $('[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function deleteDelivery(id) {
+        loading2("table#tableDelivery tr#trDelivery" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteDelivery"
+        }).success(
+                function () {
+                    $('table#tableDelivery tr#trDelivery' + id).remove();
+                });
+    }
+    function addNotes() {
+        var comments = $('table#tableNotes textarea#notesComment').val();
+        if (req(comments)) {
+            loading2("table#tableNotes tr#trNotesInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("ul#uNotes img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableNotes select#notesTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    issue: $('table#tableNotes select#notesIssue option:checked').val(),
+                    comments: comments,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateNotes"
+            }).success(
+                    function (data) {
+                        $('table#tableNotes tr#trNotesInput').before(data);
+                        appendSaveBtn('table#tableNotes tr#trNotesInput td:last-child', 'addNotes');
+                        appendUploadBtn('table#tableNotes  ul#uNotes');
+                        numberTable("tableDelivery");
+                        $('table#tableNotes  textarea#notesComment').val("");
+                        $('[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function deleteNotes(id) {
+        loading2("table#tableNotes tr#trNotes" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteNotes"
+        }).success(
+                function () {
+                    $('table#tableNotes tr#trNotes' + id).remove();
+                });
+    }
+    function addSanaachlaga() {
+        var sanal = $('table#tableSanaachlaga textarea#sanaachlagaSanal').val();
+        loading2("table#tableSanaachlaga tr#trSanaachlagaInput td:last-child");
+        if (req(sanal)) {
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("ul#uSanaachlaga img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableSanaachlaga select#sanaachlagaTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    sanal: sanal,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateSanaachlaga"
+            }).success(
+                    function (data) {
+                        $('table#tableSanaachlaga tr#trSanaachlagaInput').before(data);
+                        appendSaveBtn('table#tableSanaachlaga tr#trSanaachlagaInput td:last-child', 'addSanaachlaga');
+                        appendUploadBtn('table#tableSanaachlaga ul#uSanaachlaga');
+                        numberTable("tableSanaachlaga");
+                        $('table#tableSanaachlaga textarea#sanaachlagaSanal').val("");
+                        $('[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function deleteSanaachlaga(id) {
+        loading2("table#tableSanaachlaga tr#trSanaachlaga" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteSanaachlaga"
+        }).success(
+                function () {
+                    $('table#tableSanaachlaga tr#trSanaachlaga' + id).remove();
+                });
+    }
+    function addVisitor() {
+        var from = $('table#tableVisitor input#visitorFrom').val();
+        var startHour = $('table#tableVisitor input#visitorStartHour').val();
+        var finishHour = $('table#tableVisitor input#visitorFinishHour').val();
+        var description = $('table#tableVisitor textarea#visitorDescription').val();
+        var title = $('table#tableVisitor input#visitorTitle').val();
+        if (req(from) && reqTime(startHour) && reqTime(finishHour) && req(description)) {
+            loading2("table#tableVisitor tr#trVisitorInput td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("table#tableVisitor ul#uVisitor img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: $('table#tableVisitor select#visitorTask').val(),
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    title: title,
+                    from: from,
+                    startHour: startHour,
+                    finishHour: finishHour,
+                    description: description,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogCreateVisitor"
+            }).success(
+                    function (data) {
+                        $('table#tableVisitor tr#trVisitorInput').before(data);
+                        appendSaveBtn('table#tableVisitor tr#trVisitorInput td:last-child', 'addVisitor');
+                        appendUploadBtn('table#tableVisitor ul#uVisitor');
+                        numberTable("tableDelivery");
+                        $('table#tableVisitor input#visitorTitle').val("");
+                        $('table#tableVisitor input#visitorFrom').val("");
+                        $('table#tableVisitor input#visitorStartHour').val("");
+                        $('table#tableVisitor input#visitorFinishHour').val("");
+                        $('button[data-rel="tooltip"]').tooltip();
+                    });
+        }
+    }
+    function deleteVisitor(id) {
+        loading2("table#tableVisitor tr#trVisitor" + id + " td:last-child");
+        $.ajax({
+            type: "POST",
+            data: {
+                id: id
+            }, url: "/dailyLogDeleteVisitor"
+        }).success(
+                function () {
+                    $('table#tableVisitor tr#trVisitor' + id).remove();
+                });
+    }
+    function numberTable(id) {
+        var i = 1;
+        var $row = $("table#" + id + " tbody").find("tr"),        // Finds the closest row <tr>
+                $tds = $row.find("td:first-child"); // Finds the 2nd <td> element
+        $.each($tds, function () {                // Visits every single <td> element
+            $(this).text(i + "");         // Prints out the text within the <td>
+            i++;
+        });
+    }
+    function numberTableContractor(id) {
+        var i = 1;
+        var $row = $("table#" + id + " tbody").find("tr"),        // Finds the closest row <tr>
+                $tds = $row.find("td:first-child"); // Finds the 2nd <td> element
+        $.each($tds, function () {                // Visits every single <td> element
+            if (!$(this).parent().hasClass("warning")) {
+                $(this).text(i + "");
+                i++;
+            }
+        });
+    }
+    $(document).on('click', 'ul.uploadBox img.deleteImage', function (event) {
+        $(this).parent().parent().remove();
+        event.stopPropagation();
+    });
+    function printButton() {
+        $(this).removeClass().addClass("fa fa-spinner faa-spin animated m-r-10");
+        $.ajax({
+            type: "POST",
+            data: {
+                currentDate: '${currentDate.format("yyyy-MM-dd")}'
+            }, url: "/dailyLog/print"
+        }).success(
+                function (data) {
+                    $('div#section-to-print').html(data);
+                    $(this).removeClass().addClass("fa fa-print m-r-10");
+                    window.print();
+                });
+    }
+    function req(text) {
+        if (text.length < 2 || text == "") {
+            showErrorMessage("Хоосон талбарыг бөглөнө үү!");
+            return false;
+        }
+        else return true;
+    }
+    function reqTime(time) {
+        if (time == "" || time == "__:__") {
+            showErrorMessage("Хоосон талбарыг бөглөнө үү!");
+            return false;
+        }
+        else return true;
+    }
+    function reqNum(number) {
+        if (!$.isNumeric(number)) {
+            showErrorMessage("Хоосон талбарыг бөглөнө үү!");
+            return false;
+        }
+        else return true;
+    }
+    function appendSaveBtn(element, funcName) {
+        $(element).html("<button onclick=" + funcName + "() data-rel=tooltip title=Хадгалах class='add btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save' ></i></button>");
+    }
+    function appendUploadBtn(element) {
+        $(element).html("<li> <span> <button class='btn upload btn-default btn-icon-sm btn-rounded' data-rel='tooltip' title='Хавсаргах' ><i class='fa fa-cloud-upload' ></i></button></span> </li>");
+    }
+</script>
+#{if controllers.CompanyConf.type==0}
+    #{include '/DailyLogs/DailyLogOperation.html'/}
+#{/if}
+#{elseif controllers.CompanyConf.type==1}
+    #{include '/DailyLogs/DailyLogDesign.html'/}
+#{/elseif}

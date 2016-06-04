@@ -1,0 +1,61 @@
+<script>
+    $(document).ready(function () {
+        var allCount = parseInt($('#all_count').attr("val"));
+        var type = parseInt(${album.type});
+        var size = parseInt(${galleryPictures.size()});
+        allCount = allCount +size;
+        $('#all_count').attr("val",allCount).html(allCount);
+
+        if(type==2){
+            var gCount = parseInt( $('#g_count').attr("val"));
+            gCount = gCount + size;
+            $('#g_count').attr("val",gCount).html(gCount);
+        }
+        else{
+            var dCount = parseInt($('#d_count').attr("val"));
+            dCount =dCount+size;
+            $('#d_count').attr("val",dCount).html(dCount);
+        }
+    });
+</script>
+#{list items:galleryPictures,as:'picture'}
+    <div class="mix col-xs-6 col-sm-4 col-md-3" id="gal_pic_${picture.id}" style="display:block;">
+        <div class="btn-group media-group" >
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu media-menu" role="menu">
+                #{if picture.uploader.id == user.id}
+                    <li onclick="edit_picture('${picture.id}')"><a href="#"><i class="fa fa-pencil"></i> Засах</a>
+                    </li>
+                    <li onclick="delete_picture('${picture.id}')"><a href="#"><i class="fa fa-trash-o"></i> Устгах</a>
+                    </li>
+                #{/if}
+                <li id="gal_down_pic_${picture.id}" onclick="download_picture(${picture.id})"
+                    fileId="${picture.id}" fileDir="${picture.path}"
+                    fileName="${picture.name}"
+                    extension="${picture.extension}" openType="1"><a href="#"><i class="fa fa-download"></i> Татах</a>
+                </li>
+            </ul>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <div class="thmb">
+                    <div class="thmb-prev">
+                        <a id="fancyBox_data_${picture.id}" class="fancybox-button" rel="fancybox-button" href="${picture.path}.${picture.extension}" title="${picture.name}" alt="${picture.description}">
+                            <img src="${picture.pathTumb}.jpg"  class="img-responsive" alt="">
+                        </a>
+                    </div>
+                    <h5 class="media-title" style=" word-wrap: break-word;">
+                        <a href="#" style="font-size: small;" data-rel="tooltip" data-placement="bottom" id="gal_pic_title_${picture.id}"
+                           data-original-title="#{if !picture.name.equals(picture.getNameMax())}${picture.name}#{/if}">
+                            ${picture.getNameMax()}
+                        </a>
+                    </h5>
+                    <small class="text-muted pull-left">${picture.uploader.firstName}.${picture.uploader.lastnameFirstCharacter}</small>
+                    <small class="text-muted pull-right">${picture.date.format("yyyy-MM-dd")}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+#{/list}

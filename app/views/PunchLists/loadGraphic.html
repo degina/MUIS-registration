@@ -1,0 +1,51 @@
+<div class="col-md-12 col-sm-12 col-xs-12 table-responsive" style=" text-align: left;">
+    <table id="posts-table" class="table table-tools table-striped"
+           style="font-size: 13px!important; margin-top: 0!important;">
+        <thead>
+        <tr>
+            <th style="text-align: center">Хариуцагч</th>
+            <th></th>
+            <th style="padding: 0;vertical-align: middle;font-size: 14px!importantRRaaaas;">
+                <i class="fa fa-square" style="color: #d9534f;"></i> Хугацаа хэтэрсэн (${overdue})
+                <i class="fa fa-square" style="color: #f0ad4e;margin-left: 10px"></i> < Долоо хоног (${weeker})
+                <i class="fa fa-square" style="color:#5cb85c;margin-left: 10px"></i> > Долоо хоног (${nextWeeker})
+            </th>
+            <th class="text-center">Нийт</th>
+        </tr>
+        </thead>
+        <tbody style="font-weight: 500">
+        #{list items:userGraphics,as:'userg'}
+        <tr>
+            <td style="text-align: center"><img src="${userg.user.profilePicture}" style="height: 80px"/></td>
+            <td class="userInformation">
+                <div>${userg.user}</div>
+            %{organizationChart=userg.user.organizationChart;
+                if(organizationChart!=null){}%
+                <div>${organizationChart.team.name}</div>
+                <div>${organizationChart.userPosition.name}</div>
+            %{}else{}%
+                <div>${userg.user.userPosition.name}</div>
+            %{}}%
+            </td>
+            <td style="padding-left: 20px; padding-right: 20px;">
+                <div class="gur-group" style="height: 30px;" onclick="loadGraphicUser(${userg.user.id})">
+                    <div class="gur-ulaan"
+                         style="width: ${100*userg.overdue/userg.all}%;">${userg.overdue>0?userg.overdue:''}</div>
+                    <div class="gur-ulbar"
+                         style="width: ${100*userg.nextWeek/userg.all}%; ">${userg.nextWeek>0?userg.nextWeek:''}</div>
+                    <div class="gur-nogoon"
+                         style="width:${100*userg.nNextWeek/userg.all}%;">${userg.nNextWeek>0?userg.nNextWeek:''}</div>
+                </div>
+
+            </td>
+            <td style="text-align: center;font-weight: bold">${userg.all}</td>
+        </tr>
+        #{/list}
+        </tbody>
+    </table>
+</div>
+<style>
+    table#posts-table td.userInformation div {
+        line-height: 20px !important;
+    }
+</style>

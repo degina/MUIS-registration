@@ -1,0 +1,261 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    div#meeting_general .ui-radio .ui-btn {
+        background-color: #2b2e33
+    }
+    .bootstrap-select >.btn{
+        width: 60px!important;
+        padding: 1px 20px 1px 12px!important;
+    }
+    .bootstrap-select{
+        width: 60px!important;
+    }
+    .dateTimePickerHour{
+        width: 60px!important;
+    }
+</style>
+<div id="main-content">
+    <div class="page-title">
+        <a href="@{controllers.Meetings.list()}" style="position: absolute;right: 20px;top: 37px;">
+            <i class="fa fa-angle-left"></i><span>Буцах</span>
+        </a>
+        <i class="icon-custom-left"></i>
+        <h3><strong> #{if meeting?.id == null}Шинэ Хурал Товлох#{/if}
+        #{else}Хурал засах#{/else}</strong></h3>
+    </div>
+    <form id=addContract action="@{controllers.Meetings.create()}" method="post" accept-charset="utf-8"
+          enctype="multipart/form-data" data-parsley-validate>
+        <input name="meetingEdit" type="hidden" value="${meeting?.id}"/>
+        <input name="meetingUrgeljlel" type="hidden" value="${urgeljlel}"/>
+        <div id="myTabContent" class="tab-content">
+            <div class="tab-pane fade active in" id="meeting_general">
+                <div class="row">
+                    <div class="col-md-8 post-column-left">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Гарчиг <span
+                                        class="asterisk">*</span></label>
+
+                                <div class="col-sm-10"><input type="text" class="form-control" name="title" value="${meeting?.title}" >
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Хэзээ<span
+                                        class="asterisk">*</span></label>
+
+                                <div class="col-sm-3" style="padding-right: 0">
+                                    <input class="form-control" style="cursor:pointer;" type="text" name="meetingDate"
+                                           placeholder="Хурал болох өдөр" value="${meeting?.meetingDate?.format("yyyy-MM-dd")}" >
+                                </div>
+
+                                <div class="col-sm-7" style="float: right;">
+                                    <label class="control-label">Эхлэх цаг<span
+                                            class="asterisk">*</span></label>
+
+                                    <div class="" style="display: inline-flex;padding-right: 15px;">
+                                        <input id="startHour" class="form-control dateTimePickerHour" value="${meeting?.meetingDate?.format("HH:mm")}"
+                                               name="startHour" type="text"/>
+                                    </div>
+                                    <label class="control-label">Дуусах цаг<span
+                                            class="asterisk">*</span></label>
+                                    <div class="" style="display: inline-flex;">
+                                        <input id="finishHour" class="form-control dateTimePickerHour"  value="${meeting?.finishDate?.format("HH:mm")}"
+                                               name="finishHour" type="text"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label">Хаана<span
+                                        class="asterisk">*</span></label>
+                                <div class="col-sm-10"><input type="text" class="form-control"
+                                                              name="location"  value="${meeting?.location}"></div>
+                            </div>
+                            <div class="form-group">
+                                <h5> Ерөнхий тойм (хуралтай холбоотой тойм мэдээлэл бичнэ үү)</h5>
+                                            <textarea id="editor1" name="overview" class="cke-editor">
+                                                 ${meeting?.overview?.raw()}
+                                            </textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <h5>Энэ хуралтай холбоотой материал хавсаргах</h5>
+                            #{include "SharedView/Attachs.html"/}
+                            #{ImgThumbnail /}
+                            <div id="attachs"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 ">
+                        <div class="post-column-right">
+                            <div class="form-group">
+                                <h5>Сэдэв дэвшүүлэх :</h5>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="privateMeeting"  value="1" checked >Нээлттэй
+                                </label>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="privateMeeting" value="0"
+                                    #{if meeting!=null && !meeting?.privateMeeting} checked #{/if}>Хаалттай
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <h5>Харагдах байдал :</h5>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="viewMeeting" value="1" checked>Бүх хүмүүст
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="radio" name="viewMeeting" value="0"
+                                    #{if meeting!=null && !meeting?.viewMeeting} checked #{/if}>Оролцогчдод
+                                </label>
+                            </div>
+                            <h3>Оролцох хүмүүс</h3>
+                            <div class="form-group">
+                                <div id="sendUserTag">
+                                    %{if( meeting != null) { }%
+                                        <ul>
+                                        #{list items:meeting.meetingUserRels,as:'userR'}
+                                            <li id="u-${userR.user.id}" seltype="u" uid="${userR.user.id}"><span onclick="sendToUserRemoveSelection('u','${userR.user.id}')">
+                                                <i class="fa fa-minus-circle asterisk"></i> ${userR.user.lastnameFirstCharacter}.${userR.user.firstName}</span></li>
+                                        #{/list}
+                                        </ul>
+                                    %{}}%
+                                </div>
+                                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-select" id="selectSendUserButton">Хүн нэмэх</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                <a href="@{controllers.Meetings.list()}" class="btn btn-default m-r-10 m-t-10"><i class="fa fa-reply"></i> &{'Cancel'}</a>
+                <button type="button" class="btn btn-default m-r-10 m-t-10" id="draft"><i class="fa fa-edit"></i> Ноороглох</button>
+                    <input id="draft-input" type="hidden" name="status"  #{if meeting==null}value="1"#{/if}#{else } value="${meeting.status.id}"#{/else} />
+                #{if meeting!=null}
+                    #{if meeting.urgeljlel!=null}
+                    <a href="@{controllers.Meetings.deleteMeeting(meeting.id)}" class="btn btn-danger m-r-10 m-t-10"><i class="fa fa-times"></i> Устгах</a>
+                    #{/if}
+                #{/if}
+                <button id="savebtn" type="submit" class="btn btn-success m-t-10" ><i class="fa fa-check"></i> Хадгалах</button>
+            </div>
+        </div>
+    </form>
+</div>
+#{set activeMenu: 'Meeting'/}
+#{set activeMenuSub: 'MeetingBlank'/}
+#{meeting-blank-config /}
+#{checkFileExtension /}
+#{AttachScript uploadPath:controllers.Consts.uploadMeetingPath /}
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+#{alertMessages /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script>
+    $('input.numberic').forceNumericOnly(true);
+    var picOpt = {
+        monthsFull: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+        monthsShort: ["1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар"],
+        weekdaysFull: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+        weekdaysShort: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+
+        // Today and clear
+        today: 'Өнөөдөр',
+        clear: 'Цэвэрлэх',
+
+        // The format to show on the `input` element
+        format: 'yyyy-mm-dd'
+
+    };
+    $(document).ready(function () {
+        $('input#finishHour').datetimepicker({
+                datepicker: false,
+                lang: 'mn',
+                step: 10,
+                format: 'H:i',
+                mask: true,
+                defaultSelect: true,
+                onShow: function (ct) {
+                    var startTimeInput = $('input#startHour');
+                    if ((typeof startTimeInput != 'undefined') && startTimeInput.val()!='__:__' && startTimeInput.val()!="") {
+                        this.setOptions({
+                            minTime: startTimeInput.val(),
+                            value:startTimeInput.val(),
+                        });
+                    }
+                }
+        });
+        $('input#startHour').datetimepicker({
+            datepicker: false,
+            lang: 'mn',
+            step: 10,
+            format: 'H:i',
+            mask: true,
+            defaultSelect: true,
+            onShow: function (ct) {
+                var finishTimeInput = $('input#finishHour');
+                if ((typeof finishTimeInput != 'undefined') && finishTimeInput.val()!='__:__' && finishTimeInput.val()!="") {
+                    this.setOptions({
+                        maxTime:finishTimeInput.val(),
+                        value:finishTimeInput.val(),
+                    });
+                }
+            }
+        });
+        $('input[name=meetingDate]').datetimepicker({lang: 'mn', step: 15, format: "Y-m-d",timepicker:false});
+        $('.cke-editor').each(function () {
+            $(this).ckeditor();
+        });
+    });
+
+    $('div#main-content form').submit(function () {
+        var obj = $('div#attachs');
+        var hun =$('div#sendUserTag');
+        var title = $(this).find("input[name=title]").val();
+        var meetingDate = $(this).find("input[name=meetingDate]").val();
+        var startHour = $(this).find("input[name=startHour]").val();
+        var finishHour = $(this).find("input[name=finishHour]").val();
+        var location = $(this).find("input[name=location]").val();
+        if(title=="" || meetingDate=="" || startHour=="__:__" || finishHour=="__:__" || location==""){
+            showErrorMessage("Одтой талбаруудыг заавал бөглөнө үү?");
+            return false;
+        }else {
+            if($(this).find('input#draft-input').val()==3)
+                $(this).find('button#draft i').removeClass("fa fa-edit").addClass("fa fa-spinner faa-spin animated");
+            else
+                $(this).find('button#savebtn i').removeClass("fa fa-check").addClass("fa fa-spinner faa-spin animated");
+            $(this).find('button#savebtn').prop("disabled",true);
+            $(this).find('button#draft').prop("disabled",true);
+            $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+                obj.append("<input type=hidden name=filename value=" + $(this).attr('filename') + ">" +
+                        "<input type=hidden name=filedir value=" + $(this).attr('filedir') + ">" +
+                        "<input type=hidden name=filesize value=" + $(this).attr('filesize') + ">" +
+                        "<input type=hidden name=extension value=" + $(this).attr('extension') + ">");
+            });
+            $("div#sendUserTag").find("li").each(function () {
+                hun.append("<input type=hidden name=userId value=" + this.id + ">");
+            });
+            return true;
+        }
+    });
+    $('button#draft').click( function(){
+        $('input#draft-input').val('3');
+        $('div#main-content form').submit();
+    });
+    var obj=$("div#attachContainer ul#uploadBox li");
+
+    #{list items:meeting?.meetingAttachments, as:'attach'}
+    obj.before("<li><span>${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}"+
+    "${controllers.Functions.handleDocumentAttachmentDel(attach.dir,attach.name,attach.extension).raw()}"+
+    "</span></li>");
+
+    #{/list}
+</script>
+

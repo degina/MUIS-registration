@@ -1,0 +1,61 @@
+#{if isList}
+    #{list items:dumpsters,as:'dumpster'}
+    %{contractor=dumpster.owner.userTeam.contractor && !user.userTeam.contractor;}%
+    <tr id="trDumpster${dumpster.id}" class=${contractor?'warning':''} >
+        <td></td>
+        <td taskId="${(dumpster.task)?('t'+dumpster.task?.id):('m'+dumpster.myPlan?.name)}">${(dumpster.task)?(dumpster.task?.name):(dumpster.myPlan?.name)}</td>
+        <td materialId="${dumpster.material.id}">${dumpster.material.item}</td>
+        <td>${dumpster.quantity} ${dumpster.material.inventoryMeasure.measure}</td>
+        <td>${dumpster.location}</td>
+        <td><strong>${contractor?(dumpster.owner.toString() +":  "):''}</strong> <span>${dumpster.notes}</span></td>
+        <td>
+            #{if dumpster.attaches.size()>0}
+                <div class="post-images" id="post-images-dumpster-${dumpster.id}">
+                    #{list items:dumpster.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-dumpster-"+dumpster.id).raw()}
+            #{/if}
+
+        </td>
+        <td>
+            #{if contractor}
+                <button onclick="copyDumpster(${dumpster.id})" data-rel="tooltip" title="Хуулах"
+                        class="add btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-check"></i></button>
+            #{/if}
+            #{else }
+                <button onclick="deleteDumpster(${dumpster.id})" data-rel="tooltip" title="Устгах"
+                        class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                        class="fa fa-times"></i></button>
+            #{/else}
+        </td>
+    </tr>
+    #{/list}
+#{/if}
+
+#{else }
+<tr id="trDumpster${dumpster.id}">
+    <td></td>
+    <td>${(dumpster.task)?(dumpster.task?.name):(dumpster.myPlan?.name)}</td>
+    <td>${dumpster.material.item}</td>
+    <td>${dumpster.quantity} ${dumpster.material.inventoryMeasure.measure}</td>
+    <td>${dumpster.location}</td>
+    <td>${dumpster.notes}</td>
+    <td>
+        #{if dumpster.attaches.size()>0}
+            <div class="post-images" id="post-images-dumpster-${dumpster.id}">
+                #{list items:dumpster.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-dumpster-"+dumpster.id).raw()}
+        #{/if}
+    </td>
+    <td>
+        <button onclick="deleteDumpster(${dumpster.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

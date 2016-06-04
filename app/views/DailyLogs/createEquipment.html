@@ -1,0 +1,71 @@
+#{if isList}
+#{list items:equipments,as:'equipment'}
+%{contractor = equipment.owner.userTeam.contractor && !user.userTeam.contractor;}%
+<tr id="trEquipment${equipment.id}" class="trEquipmentClass ${contractor?'warning':''}">
+    <td></td>
+    <td equipmentType="${equipment.equipmentType.id}">${equipment.equipmentType.name}</td>
+    <td>${equipment.operator}</td>
+    <td>${equipment.location}</td>
+    <td>${equipment.startHour?.format("HH:mm")}</td>
+    <td>${equipment.finishHour?.format("HH:mm")}</td>
+    <td><strong>${contractor?(equipment.owner.toString() +":  "):''}</strong> <span>${equipment.comments}</span></td>
+    <td>
+        <input class="inputClassHiddenEquipmentMotHours" type="hidden" value="${equipment.motHours}"/>
+    #{if equipment.attaches.size()>0}
+        <div class="post-images" id="post-images-equipment-${equipment.id}">
+            #{list items:equipment.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+        </div>
+    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-equipment-"+equipment.id).raw()}
+    #{/if}
+    </td>
+    <td>
+    #{if contractor}
+        <button onclick="copyEquipment(${equipment.id})" data-rel="tooltip" title="Хуулах"
+                class="add btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-check"></i></button>
+    #{/if}
+    #{else }
+        <button onclick="deleteEquipment(${equipment.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+    #{/else}
+    </td>
+</tr>
+#{/list}
+<script >
+    $('div#modal-Equipment select#equipmentType').html('${options.raw()}').selectpicker('refresh');
+</script>
+#{/if}
+#{else }
+<tr id="trEquipment${equipment.id}" class="trEquipmentClass">
+    <td></td>
+    <td>${equipment.equipmentType.name}</td>
+    <td>${equipment.operator}</td>
+    <td>${equipment.location}</td>
+    <td>${equipment.startHour?.format("HH:mm")}</td>
+    <td>${equipment.finishHour?.format("HH:mm")}</td>
+    <td>${equipment.comments}</td>
+    <td>
+        <input class="inputClassHiddenEquipmentMotHours" type="hidden" value="${equipment.motHours}"/>
+        #{if equipment.attaches.size()>0}
+            <div class="post-images" id="post-images-equipment-${equipment.id}">
+                #{list items:equipment.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-equipment-"+equipment.id).raw()}
+        #{/if}
+    </td>
+    <td>
+        <button onclick="deleteEquipment(${equipment.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+<script>
+    ( function() {
+        $("button#showEquipmentModal${taskId}").html("Техник: ${size} </br> Мот-цаг: ${totalMotHour}");
+    })();
+</script>
+#{/else}
+#{ImgThumbnail div:'div.post-images'/}

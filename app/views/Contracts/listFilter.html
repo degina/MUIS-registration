@@ -1,0 +1,58 @@
+<table class="table table-tools table-striped" id="tableContract">
+    <thead>
+    <tr>
+        <th style="width: 100px;">Гэрээ #</th>
+        <th class="sorting">&{'ContractorName'}</th>
+        <th>&{'Title'}</th>
+        <th class="text-center">&{'Category'}</th>
+        <th class="text-center">&{'PaymentMode'}</th>
+        <th class="text-center">&{'TotalAmount'}</th>
+        <th class="text-center">&{'ApprovedDate'}</th>
+        <th class="text-center">&{'StartDate'}</th>
+        <th class="text-center">&{'EndDate'}</th>
+        <th class="text-center">&{'Status'}</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    #{list items:contracts, as:'contract'}
+    <tr class="content clickable-row" data-href="@{Contracts.show(contract.id)}">
+        <td class="text-center">${contract.name}</td>
+        <td>${contract.companyName}</td>
+        <td><a href="@{Contracts.show(contract.id)}">${contract.title}</a></td>
+        <td class="text-center">${contract.category?.category}</td>
+        <td class="text-center">${contract.payment?.payment}</td>
+        <td class="text-center">${controllers.Functions.getDecimal(contract.totalAmount?.amount)}${contract.negj}</td>
+        <td class="text-center">
+        ${contract.approvedDate?.format('yyyy-MM-dd')}
+        </td>
+        <td class="text-center">${contract.startDate?.format('yyyy-MM-dd')}</td>
+        <td class="text-center">${contract.endDate?.format('yyyy-MM-dd')}</td>
+        <td class="text-center">
+            <span class="label bg-${contract.status?.colorClass} w-300"
+                      style="width:62px;display: inline-block;">${contract.status?.status}</span>
+        </td>
+        #{if contract.contractAttachments.size() > 0 }
+            <td class="text-center">
+                <img src="public\images\fileIcon\pdf-icon.png" width="25px" height="25px"/>
+            </td>
+        #{/if}
+        #{else }
+            <td></td>
+        #{/else}
+    </tr>
+    #{/list}
+    #{if contracts.empty}
+    <tr>
+        <td colspan="11">Үр дүн байхгүй байна</td>
+    </tr>#{/if}
+    </tbody>
+</table>
+#{if MaxPageNumber>1}
+    #{include '/SharedView/pageNavigation.html'/}
+<script>
+    $("div#ContentTable input.number-button").click(function () {
+        searchFilter($(this).attr('pagenumber'));
+    });
+</script>
+#{/if}

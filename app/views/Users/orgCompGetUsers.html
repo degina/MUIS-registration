@@ -1,0 +1,18 @@
+<div style="text-align: left">
+    <table class="table table-bordered">
+        <tr>
+            <td>Хэрэглэгч</td>
+            <td>
+                <select id="selectUserId" data-live-search="true" style="width: 200px">
+                #{list items:userTeams,as:'team'}
+                    <optgroup label="${team.name}">
+                        #{list items:team.userLocals,as:'userCurrent'}
+                            <option data-subtext="${userCurrent.userPosition}"
+                                    value="${userCurrent.id}" source="${userCurrent.profilePicture}" position="${userCurrent.userPosition}">${userCurrent}</option>
+                        #{/list}
+                    </optgroup>
+                #{/list}
+                </select></td>
+        </tr>
+    </table>
+</div>

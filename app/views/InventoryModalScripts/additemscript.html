@@ -1,0 +1,402 @@
+<script>
+
+    var dat = [""];
+    var prev_size = 0;
+
+    var nEditing_add = $('div#modal-addcategory table tbody tr td').parents('tr')[0];
+
+    var oTable_add = $('#table-editable_add').dataTable({
+        "aLengthMenu": [
+            [5, 15, 20, -1],
+            [5, 15, 20, "All"] // change per page values here
+        ],
+        "sDom": "",
+        "oTableTools": {
+            "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+        },
+        // set the initial value
+        "iDisplayLength": 10,
+        "bPaginate": false,
+        "sPaginationType": "bootstrap",
+        "oLanguage": {
+            "sLengthMenu": "_MENU_ records per page",
+            "oPaginate": {
+                "sPrevious": "Prev",
+                "sNext": "Next"
+            },
+            "sSearch": ""
+        },
+        "aoColumnDefs": [{
+            'bSortable': false,
+            'aTargets': [0]
+        }
+        ]
+    });
+
+    function editableTable_add() {
+
+
+        function restoreRow(oTable_add, nRow) {
+            var jqInputs = $('input', nRow);
+            if (jqInputs[1].value == "") {
+                showErrorMessage("Бүх нүдийг бөглөнө үү?");
+            }
+            else {
+                oTable_add.fnUpdate('<input type="text" hidden="true" required="true" name="ids" value="' + jqInputs[0].value + '"><input type="text" class="form-control" readonly required="true" name="subcategorys" value="' + jqInputs[1].value + '">', nRow, 0, false);
+                oTable_add.fnUpdate('<div class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-dark" href=""><i class="fa fa-pencil-square-o"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>', nRow, 1, false);
+                check();
+                nEditing_add = null;
+                oTable_add.fnDraw();
+
+            }
+
+        }
+
+        function editRow(oTable_add, nRow) {
+
+            var jqInputs = $('input', nRow);
+            var jqTds = $('>td', nRow);
+            jqTds[0].innerHTML = '<input type="text" hidden="true" required="true" name="ids" value="' + jqInputs[0].value + '"><input type="text" class="form-control" required="true" name="subcategorys" value="' + jqInputs[1].value + '">';
+            jqTds[1].innerHTML = '<div class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-success" href=""><i class="fa fa-check"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>';
+            check();
+            oTable_add.fnDraw();
+        }
+
+        function saveRow(oTable_add, nRow) {
+            var jqInputs = $('input', nRow);
+            var count = 0;
+            $('div#modal-addcategory table tbody tr').each(function () {
+                if ($(this).find('input:nth-child(2)').val() == jqInputs[1].value)
+                    count++;
+            });
+            if (count < 2) {
+
+                oTable_add.fnUpdate('<input type="text" hidden="true" required="true" name="ids" value="' + jqInputs[0].value + '"><input type="text" class="form-control" readonly required="true" name="subcategorys" value="' + jqInputs[1].value + '">', nRow, 0, false);
+                oTable_add.fnUpdate('<div class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-dark" href=""><i class="fa fa-pencil-square-o"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>', nRow, 1, false);
+                check();
+            }
+            else {
+                showErrorMessage("Нэр давхцаж байна");
+            }
+            oTable_add.fnDraw();
+        }
+
+        jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+        jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+        $('#table-editable_add a.delete').live('click', function (e) {
+            e.preventDefault();
+
+            if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                return;
+            }
+
+            var nRow = $(this).parent().parent().parent();
+            oTable_add.fnDeleteRow(nRow);
+            nEditing_add = null;
+
+            check();
+            // alert("Deleted! Do not forget to do some ajax to sync with backend :)");
+        });
+
+        $('#table-editable_add a.cancel').live('click', function (e) {
+            e.preventDefault();
+            if ($(this).attr("data-mode") == "new") {
+                var nRow = $(this).parent().parent().parent();
+                oTable_add.fnDeleteRow(nRow);
+            } else {
+                restoreRow(oTable_add, nEditing_add);
+                nEditing_add = null;
+            }
+            check();
+        });
+
+        $('#table-editable_add a.edit').live('click', function (e) {
+            e.preventDefault();
+
+            /* Get the row as a parent of the link that was clicked on */
+            var nRow = $(this).parents('tr')[0];
+
+            if (nEditing_add != null && nEditing_add != nRow) {
+                var jqInputs = $('input', nRow);
+                if (jqInputs[1].value == "")
+                    showErrorMessage("Бүх нүдийг бөглөнө үү?");
+                else {
+                    editRow(oTable_add, nRow);
+                    nEditing_add = nRow;
+                }
+            } else if (nEditing_add == nRow && this.innerHTML == "<i class=\"fa fa-check\"></i>") {
+                /* This row is being edited and should be saved */
+                var jqInputs = $('input', nRow);
+
+                if (jqInputs[1].value == "")
+                    showErrorMessage("Бүх нүдийг бөглөнө үү?");
+                else {
+                    saveRow(oTable_add, nEditing_add);
+                    nEditing_add = null;
+                }
+                // alert("Updated! Do not forget to do some ajax to sync with backend :)");
+            } else {
+                /* No row currently being edited */
+                editRow(oTable_add, nRow);
+                nEditing_add = nRow;
+            }
+            check();
+        });
+
+        $('#table-edit_new_add').click(function (e) {
+            e.preventDefault();
+
+            if (nEditing_add != null) {
+                restoreRow(oTable_add, nEditing_add);
+            }
+            else {
+                var aiNew = oTable_add.fnAddData(['<input type="text" hidden="true" required="true" name="ids" value="0"><input type="text" class="form-control" required="true" name="subcategorys">',
+                    '<div class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-dark" href=""><i class="fa fa-pencil-square-o"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+                var nRow = oTable_add.fnGetNodes(aiNew[0]);
+                nEditing_add = nRow;
+                editRow(oTable_add, nRow);
+            }
+            check();
+        });
+
+        $('select#category').change(function () {
+            $.ajax({
+                type: "POST",
+                data: {name: $(this).val()},
+                url: "/inventoryShowSubCategory"
+            }).success(
+                    function (data) {
+                        for (var j = 0; j < prev_size / 2; j++)
+                            oTable_add.fnDeleteRow(1);
+                        dat = data;
+                        prev_size = dat.length;
+                        if (dat.length > 0) {
+                            $('div#modal-addcategory table#table-editable_add tbody tr:first-child a.delete').removeClass('dhidden');
+                        }
+                        else {
+                            $('div#modal-addcategory table#table-editable_add tbody tr:first-child a.delete').addClass('dhidden');
+                        }
+                        for (var i = 0; i < dat.length; i = i + 2) {
+                            oTable_add.fnAddData(['<input type="text" hidden="true" name="ids" required="true" value="' + dat[i + 1] + '"><input type="text" class="form-control" required="true" name="subcategorys" value="' + dat[i] + '">',
+                                '<div class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-dark" href=""><i class="fa fa-pencil-square-o"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>'
+                            ]);
+                        }
+                        oTable_add.fnDraw();
+                        check();
+                    });
+
+            check();
+        });
+
+        $('input#inputcategory_add').change(function () {
+            $.ajax({
+                type: "POST",
+                data: {category: $(this).val()},
+                url: "/inventoryCheckCategory"
+            }).success(
+                    function (data) {
+                        if (data == "false") {
+                            $('input#inputcategory_add').val("");
+                            showErrorMessage("Ангилалын нэр давхцаж байна.");
+                        }
+                    });
+        });
+
+        $('button#add').click(function () {
+            var select = $("div#selectcat");
+            select.addClass("hidden");
+            $('select#category').selectpicker('val', '');
+
+            var input = $("div#inputcat");
+            input.removeClass("hidden");
+            input.attr("required", "true");
+
+            var add = $("div#add");
+            add.addClass("hidden");
+
+            var select = $("div#select");
+            select.removeClass("hidden");
+
+            var is = $("input#is");
+            is.val("1");
+            for (var j = 0; j < prev_size; j++)
+                oTable_add.fnDeleteRow(1);
+
+
+        });
+        $('button#select').click(function () {
+            var select = $("div#selectcat");
+            select.removeClass("hidden");
+
+            var input = $("div#inputcat");
+            input.addClass("hidden");
+            input.attr("required", "false");
+
+            var add = $("div#add");
+            add.removeClass("hidden");
+
+            var select = $("div#select");
+            select.addClass("hidden");
+
+            var is = $("input#is");
+            is.val("0");
+            $("input#inputcategory_add").val("");
+        });
+
+        $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+    }
+    ;
+
+
+    editableTable_add();
+
+
+    $('button#category_add').click(function () {
+        if (nEditing_add != null)
+            showErrorMessage("Бүх нүдийг бөглөнө үү?");
+        else {
+            if ($("input#is").val() == "0" && $("select#category option#empty").val() == $("select#category option:selected").val()) {
+                showErrorMessage("Ангилал сонгон уу?");
+            } else if ($("input#is").val() == "1" && $("input#inputcategory_add").val() == "") {
+                showErrorMessage("Ангилал нэр оруулна уу?");
+            }
+            else {
+                var subs = [];
+
+                var i = 0;
+                $("table#table-editable_add tbody tr").each(function () {
+                    subs[i] = $(this).find("td input:nth-child(2)").val();
+                    i++;
+                });
+                var ids = [];
+                i = 0;
+                $("table#table-editable_add tbody tr").each(function () {
+                    ids[i] = $(this).find("td input:first-child").val();
+                    i++;
+                });
+
+
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        selectcat: $('form#category_form_add select#category option:selected').val(),
+                        inputcat: $('form#category_form_add input#inputcategory_add').val(),
+                        subcategorys: subs,
+                        ids: ids,
+                        is: $("input#is").val()
+                    },
+                    url: "/inventorycategoryaddcategory"
+                }).success(
+                        function (data) {
+
+                            if (data[0] != "false") {
+
+                                if ($("input#is").val() == "0") {
+                                    var x = document.createElement("optgroup");
+                                    var label = $('form#category_form_add select#category option:selected').val();
+                                    x.setAttribute("label", label);
+                                }
+                                else {
+                                    var x = document.createElement("optgroup");
+
+                                    var x1 = document.createElement("option");
+
+                                    x1.text = $('form#category_form_add input#inputcategory_add').val();
+                                    x1.value = $('form#category_form_add input#inputcategory_add').val();
+
+                                    var z1 = document.getElementById("category");
+                                    z1.add(x1);
+
+                                    $('select#category').selectpicker('refresh');
+
+                                    var label = $('form#category_form_add input#inputcategory_add').val();
+                                    x.setAttribute("label", label);
+
+                                }
+
+                                for (var i = 0; i < subs.length; i++) {
+                                    var option = document.createElement("option");
+                                    option.text = subs[i];
+                                    alert(data[i]);
+                                    option.value = data[i];
+                                    x.appendChild(option);
+                                }
+
+                                var z = document.getElementById("item_category");
+                                z.add(x);
+                                $('select#item_category').selectpicker('refresh');
+                                showSuccessMessage("Ангилал нэмэлт амжилттай боллоо.");
+                                $('div#modal-addcategory').modal('hide');
+                            }
+                            if (data == "false")
+                                showErrorMessage("Ангилал нэмэлт амжилтгүй боллоо.");
+                            Reload_Category();
+                        });
+            }
+        }
+    });
+    function Reload_Category() {
+
+        $("table#table-editable tbody tr").each(function () {
+            oTable_add.fnDeleteRow(0);
+        });
+        oTable_add.fnAddData(['<input type="text" hidden="true" name="ids" required="true" value="0"><input type="text" class="form-control" required="true" name="subcategorys">',
+            '<div class="text-center"><a style="padding-right: 10px;padding-left: 10px" class="edit btn btn-success" href=""><i class="fa fa-check"></i></a><a style="padding-right: 11px;padding-left: 11px" class="delete btn btn-danger" href=""><i class="fa fa-times-circle"></i></a></div>'
+        ]);
+
+        $("input#inputcategory_add").val("");
+        $('select#category').selectpicker('val', '');
+        oTable_add.fnDraw();
+    }
+
+
+    function check() {
+        var add = 0;
+        $('div#modal-addcategory table#table-editable_add tbody tr').each(function () {
+            add++;
+        });
+        if (add < 2)
+            $('div#modal-addcategory table#table-editable_add tbody tr:first-child a.delete').addClass('dhidden');
+        else
+            $('div#modal-addcategory table#table-editable_add tbody tr:first-child a.delete').removeClass('dhidden');
+
+    }
+
+
+    $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+
+    $('button#measure_add').click(function () {
+        $('select#measure').selectpicker();
+        $.ajax({
+            type: "POST",
+            data: {measure: $('form#measure_form input').val()},
+            url: "/inventorymeasuresaddmeasure"
+        }).success(
+                function (data) {
+                    if (data != "false") {
+                        alert(data);
+                        var option = document.createElement("option");
+                        option.text = $("input#input_measure").val();
+                        option.value = parseInt(data);
+                        var z = document.getElementById("measure");
+                        z.add(option);
+
+                        $('select#measure').selectpicker('refresh');
+                        $("div#modal-addmeasure").modal('hide');
+                        showSuccessMessage("Нэгж нэмэлт амжилттай боллоо.");
+                        $("input#input_measure").val("");
+                    }
+                    else {
+                        $("input#input_measure").val("");
+                        showErrorMessage("Нэгж нэмэлт амжилтгүй боллоо.");
+                    }
+
+                });
+    });
+
+</script>

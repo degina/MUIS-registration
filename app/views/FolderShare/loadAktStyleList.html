@@ -1,0 +1,92 @@
+<script>
+
+    $('tbody#loadData span.delete').on('click', function (e) {
+        var x = confirm("Энэ загварын дагуу хийгдсэн бүх хавсралтууд устахыг анхаарна уу!!! \nХавсралтын загварыг устгах уу? ");
+        if (x) {
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: $(this).attr('fileId')
+                },
+                url: "/aktStyleDelete"
+            }).success(function (data) {
+                loadFiles(selectedFolder,1); //Invoking your data function
+            });
+        }
+        // showMoreInfo($(this), 1);
+    });
+
+    $('tbody#loadData span.edit').on('click', function () {
+        aktStyleBlank($(this), 1); //edit
+    });
+
+    $('tbody#loadData td.showInfo').on('click', function () {
+        aktStyleBlank($(this), 3); //edit
+       // alert('hahaha');
+    });
+
+    #{if MaxPageNumber>1}
+        $("div#loaderDiv input.number-button").click(function () {
+            var pagenumber = $(this).attr('pagenumber');
+            if (pagenumber != ${CurrentPageNumber}) {
+                #{if loadType==1}
+                    loadFiles(selectedFolder, pagenumber);
+                #{/if}
+                #{else}
+                    searchFile('${search}', pagenumber);
+                #{/else}
+            }
+        });
+    #{/if}
+</script>
+
+<div class="col-md-12 text-left" style="float: right;">
+    <button type="submit" onclick="aktStyleBlank(this,2)" fileId="null" id="createaktstyle" class="btn btn-success" style="font-size: 10px; padding: 7px 24px; float: right">
+        <i class="fa fa-plus m-r-10"></i> Хавсралтын загвар үүсгэх
+    </button>
+</div>
+<br />
+<br />
+
+#{if aktStyles.size()==0}
+<h3>Хоосон</h3>
+#{/if}
+#{else }
+    %{count=1;}%
+    <table id="products-table" class="table table-tools table-hover" style="margin-bottom: 8px">
+        <thead>
+        <tr>
+            <th style="width:40px"><strong>#</strong></th>
+            <th><strong>Гарчиг</strong></th>
+            <th class="text-center"><strong>Тоо</strong></th>
+            <th class="text-center"><strong>Төрөл</strong></th>
+            <th class="text-center"><strong>Хуулсан</strong></th>
+            <th style="text-align: center"><strong>Үйлдэл</strong></th>
+        </tr>
+        </thead>
+        <tbody id="loadData">
+            #{list items:aktStyles,as:'aktstyle'}
+            <tr >
+                <td class="showInfo" fileId="${aktstyle.id}">${count}</td>
+                <td class="showInfo" fileId="${aktstyle.id}">${aktstyle.name}</td>
+                <td class="showInfo" fileId="${aktstyle.id}">${aktstyle.akts.size()}</td>
+                <td class="showInfo" fileId="${aktstyle.id}">${aktstyle.aktType.name}</td>
+                <td class="showInfo" fileId="${aktstyle.id}">${aktstyle.uploader}</td>
+
+                <td style="text-align: center">
+                    <span class="edit btn btn-sm btn-default" fileId="${aktstyle.id}" style="font-size: 11px">
+                        <i class="fa fa-pencil"></i> Засах
+                    </span>
+                    <span class="delete btn btn-sm btn-default" fileId="${aktstyle.id}" style="font-size: 11px">
+                        <i class="fa fa-times-circle"></i>Устгах
+                    </span>
+                </td>
+            </tr>
+            %{count++}%
+            #{/list}
+        </tbody>
+    </table>
+    #{if MaxPageNumber>1}
+        #{include '/SharedView/pageNavigation.html'/}
+    #{/if}
+#{/else}

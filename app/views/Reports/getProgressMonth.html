@@ -1,0 +1,67 @@
+%{if(reportMainDate==null)reportMainDate=controllers.ReportClass.ReportFunction.getReportDateObject(objecttype,wtask,dateBetween);}%
+<table class="percentTable table table-bordered rangeTable" style="margin-bottom: 0">
+    <tbody>
+    <tr>
+        <td style="border-left: none"></td>
+        <td style="vertical-align: middle">Өмнөх сар</td>
+    #{list items:reportMainDate.reportDates,as:'reportDate'}
+        <td class="${reportDate.isHoliday?'weekendDay':''}">${reportDate.dateS.format('dd')}</td>
+    #{/list}
+        <td style="vertical-align: middle">Нийт</td>
+    </tr>
+    <tr>
+        <td style="text-align: left;">Ахиц (%)</td>
+    %{
+        percent=0;
+        max_completedPercent=0;
+        if(reportMainDate.beforeScheduledWork!=null){percent=reportMainDate.beforeScheduledWork.progressPercent;
+        max_completedPercent=reportMainDate.beforeScheduledWork.completedPercent;
+        }}%
+        <td class="myhoveredTD" onclick="changeReportData(-1)">
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateS,wtask.actualFinish,percent,true,"").raw()}
+        </td>
+    %{ tot1=0;
+        for(controllers.ReportClass.ReportDate rdate:reportMainDate.reportDates){
+        if(rdate.scheduledWork!=null){percent=rdate.scheduledWork.progressPercent;
+        tot1+=percent;
+        }else percent=0;
+        if(percent>0 || !rdate.isHoliday){}%
+        <td class="myhoveredTD ${reportDate.isHoliday?'weekendDay':''}"
+            onclick="changeDateReport('${changeRepType}',2,'${rdate.dateS.format('yyyy-MM-dd')}',${changeRepId})">
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,rdate.dateS,wtask.actualFinish,percent,true,"").raw()}</td>
+    %{}else{}%
+        <td class="myhoveredTD weekendDay">-</td>
+        %{}}}%
+        <td>${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateF,wtask.actualFinish,(float)tot1,true,"").raw()}</td>
+    </tr>
+    <tr>
+        <td style="text-align: left;white-space: nowrap">Гүйцэтгэл (%)</td>
+        <td class="myhoveredTD" onclick="changeReportData(-1)">
+        %{
+            if(swork0!=null)percent=reportMainDate.beforeScheduledWork.completedPercent;
+            else percent=0;}%
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateS,wtask.actualFinish,percent,false,"").raw()}
+        </td>
+    %{
+        for(controllers.ReportClass.ReportDate rdate:reportMainDate.reportDates){
+        if(rdate.scheduledWork!=null)percent=rdate.scheduledWork.completedPercent;
+        else percent=0;
+        if(max_completedPercent < percent)max_completedPercent=percent;
+        if(percent>0 || !rdate.isHoliday){}%
+        <td class="myhoveredTD ${reportDate.isHoliday?'weekendDay':''}"
+            onclick="changeDateReport('${changeRepType}',2,'${rdate.dateS.format('yyyy-MM-dd')}',${changeRepId})">
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,rdate.dateS,wtask.actualFinish,percent,false,"").raw()}</td>
+    %{}else{}%
+        <td class="myhoveredTD weekendDay">-</td>
+        %{}}}%
+        <td>
+        %{if(reportMainDate.afterScheduledWork!=null)percent=reportMainDate.afterScheduledWork.completedPercent;
+            else percent=0;
+            }%
+        ${controllers.ReportClass.ReportFunction.getPercentHtml(wtask.startDate,dateBetween.dateF,wtask.actualFinish,percent,false,"").raw()}</td>
+    </tr>
+    </tbody>
+</table>
+<script>
+    chart_data[${count}] = ${controllers.ReportClass.ReportFunction.getProgressCharts("month",reportMainDate).raw()};
+</script>

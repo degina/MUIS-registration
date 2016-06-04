@@ -1,0 +1,116 @@
+<div class="row">
+    <form class="form-horizontal">
+        <div class="col-md-12">
+            <div class="tabcordion">
+                <div id="myTabContent" class="tab-content">
+                    <div class="tab-pane fade active in" id="product_general">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+
+                                    <label class="col-sm-2 control-label">&{'item'} <span
+                                            class="asterisk">*</span>
+                                    </label>
+
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control"
+                                               disabled
+                                               placeholder=&{'item'}...
+                                               required="true"
+                                               name="item" id="item_preview" value="${waste.item.item}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+
+                                    <label class="col-sm-2 control-label">&{'waster'} <span
+                                            class="asterisk">*</span>
+                                    </label>
+
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control"
+                                               disabled
+                                               placeholder=&{'waster'}...
+                                               required="true"
+                                               name="waster" id="waster_preview" value="${waste.waster}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+
+                                    <label class="col-sm-2 control-label">&{'location'} <span
+                                            class="asterisk">*</span>
+                                    </label>
+
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control"
+                                               disabled
+                                               placeholder=&{'location'}...
+                                               required="true"
+                                               name="location" id="location_preview" value="${waste.location.name}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+
+                                    <label class="col-sm-2 control-label">&{'quantity'} <span
+                                            class="asterisk">*</span>
+                                    </label>
+
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control"
+                                               disabled
+                                               placeholder=&{'quantity'}...
+                                               required="true"
+                                               name="quantity" id="quantity_preview" value="${waste.quantity}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+
+                                    <label class="col-sm-2 control-label">&{'date'} <span
+                                            class="asterisk">*</span>
+                                    </label>
+
+                                    <div class="col-sm-8">
+                                        <input type="text" class="form-control"
+                                               disabled
+                                               placeholder=&{'date'}...
+                                               required="true"
+                                               name="date" id="date_preview" value="${waste.date.format("YYYY/MM/dd HH:mm")}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+
+                                    <label class="col-sm-2 control-label">&{'note'} <span
+                                            class="asterisk">*</span>
+                                    </label>
+
+                                    <div class="col-sm-8">
+                                                        <textarea rows="5" style="resize: none"
+                                                                  disabled
+                                                                  class="form-control valid" required="true"
+                                                                  name="note" id="note_preview"
+                                                                  placeholder=&{'note'}...>${waste.note}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">&{'attachment'}
+                                    </label>
+                                    <div class="col-sm-10" id="inventorywastes-preview-attach">
+                                        <ul class="uploadBox" id="u2">
+                                        #{list items:waste.attachments, as:'attach'}
+                                            <li>
+                                            <span>
+                                                ${controllers.Functions.handleDocumentAttachment(attach.filedir,attach.filename,attach.extension,attach.filesize).raw()}
+                                            </span>
+                                            </li>
+                                        #{/list}
+                                        ${controllers.Functions.handleDocumentAttachmentImgGallery("inventorywastes-preview-attach").raw()}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

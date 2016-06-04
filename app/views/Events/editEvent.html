@@ -1,0 +1,179 @@
+<style type="text/css">
+    table {
+        width: 100% ;
+    }
+
+    th, td {
+        padding: 5px;
+        width: auto;
+    }
+
+    #date_timepicker_start {
+        background: url('/public/images/eventCal.png') no-repeat right center;
+        width: 120px;
+        cursor: pointer;
+        padding-left: inherit;
+    }
+
+    #date_timepicker_end {
+        background: url('/public/images/eventCal.png') no-repeat right center;
+        width: 120px;
+        cursor: pointer;
+        padding-left: inherit;
+    }
+
+    #date_timepicker_start_time {
+        cursor: pointer;
+        width: 120px;
+        padding-left: inherit;
+    }
+
+    #date_timepicker_end_time {
+        cursor: pointer;
+        width: 120px;
+        padding-left: inherit;
+    }
+
+    #duusah {
+        width: 120px;
+        padding-left: inherit;
+        float: right;
+        margin-right: 0
+    }
+
+    #removeButton {
+        width: 10px;
+        height: 10px;
+        position: inherit;
+        float: right;
+        margin-right: 3px;
+    }
+
+    .textarea {
+        margin-top: 5px;
+        width: 437px;
+        padding-left: inherit;
+        box-shadow: 0 0 3px rgba(81, 203, 238, 1);
+    }
+
+    input[type="text"] {
+        height: 30px;
+        width: 437px;
+        padding-left: inherit;
+        box-shadow: 0 0 3px rgba(81, 203, 238, 1);
+    }
+
+    input:focus {
+        background-color: lightblue;
+    }
+
+</style>
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary btn-lg" onclick="showDialogButton()" style="border: 1px solid #e0e0e0; color: black;
+  background-color: white;  font-size: 17px;
+  padding: 7px 24px;
+  /*margin-top: 5px;*/
+  float: right;
+  text-transform: capitalize;
+  margin-top: -30px;">
+     засах
+</button>
+
+<script>
+    //    $(function() {
+    //        $( "#datepicker" ).datepicker();
+    //    });
+    $(document).ready(function () {
+        $('#someInput').on('input', function () {
+            $(this).val();// get the current value of the input field.
+        });
+        jQuery('#date_timepicker_start').datetimepicker({
+            format: 'Y-m-d',
+            timepicker: false
+        });
+        jQuery('#date_timepicker_start_time').datetimepicker({
+            format: 'H:i',
+            datepicker: false
+        });
+        jQuery('#date_timepicker_end').datetimepicker({
+            format: 'Y-m-d',
+            onShow: function (ct) {
+                this.setOptions({
+                    minDate: jQuery('#date_timepicker_start').val() ? jQuery('#date_timepicker_start').val() : false
+                })
+            },
+            timepicker: false
+        });
+        jQuery('#date_timepicker_end_time').datetimepicker({
+            format: 'H:i',
+            datepicker: false,
+            onShow: function (ct) {
+                this.setOptions({
+                    minTime: jQuery('#date_timepicker_start').val() == jQuery('#date_timepicker_end').val() ? jQuery('#date_timepicker_start_time').val() : false
+                })
+            }
+        });
+    });
+    function showDialogButton(){
+        $('div#myModal').find('textarea').val("");
+        $('#myModal').modal('toggle').find("input,textarea").val('');
+    }
+</script>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                        aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Үйл ажиллагаа засах </h4>
+
+            </div>
+            <div class="modal-body">
+                <table cellpadding="1" cellspacing="1">
+                    <tr>
+                        <td><strong>Гарчиг</strong></td>
+                        <td colspan="3"><input type="text" name="name" value="${event.title}:editEventTitle" id="title" placeholder="Гарчиг"/></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Тайлбар</strong></td>
+                        <td colspan="3">
+                            <textarea rows="2" cols="10" id="desc" class="textarea"  value="${event.description}:editDescription" placeholder="Нэмэлт тайлбар">${event.description.raw()}</textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Хаана</strong></td>
+                        <td colspan="3">
+                            <input type="text" name="name" value="" id="location" placeholder="Хаана зохион байгуулагдах"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Эхлэх</strong></td>
+                        <td><input type="text" name="name" id="date_timepicker_start" value=""
+                                   placeholder="Эхлэх өдөр"/></td>
+                        <td><input type="text" name="name" id="date_timepicker_start_time" value=""
+                                   placeholder="Цаг оруулах уу ?"/></td>
+                        <td><a id="duusah" href="#"><p>Дуусах хугацаа?</p></a></td>
+                    </tr>
+                    <tr>
+                        <td class="nuugdah"><strong>Дуусах</strong></td>
+                        <td><input type="text" class="nuugdah" id="date_timepicker_end" name="startDate"
+                                   placeholder="Дуусах өдөр" value=""/></td>
+                        <td><input type="text" class="nuugdah" name="name" id="date_timepicker_end_time" value=""
+                                   placeholder="Цаг оруулах уу ?"/></td>
+                    *{<td><input type="text" name="name" id="date_timepicker_end_time" value="" placeholder="Устгах"/></td>}*
+                        <td><a href="#" class="nuugdah">
+                            <img src="/public/images/delete.png" alt="removeButton" id="removeButton" style="">
+                        </a></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Цуцлах</button>
+                &nbsp;
+                <button type="button" class="btn btn-primary" onclick="saveEditedEvent()">Хадгалах</button>
+            </div>
+        </div>
+    </div>
+</div>

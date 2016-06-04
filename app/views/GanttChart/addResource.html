@@ -1,0 +1,44 @@
+#{if rtype==1}
+    #{if inventories.size()>0}
+    <select style="min-width: 140px">
+        #{list items:inventories,as:'inventory'}
+            <option value="${inventory.id}" measure="${inventory.inventoryMeasure.measure}">${inventory.item}</option>
+        #{/list}
+    </select>
+    <input id=0 type="text" style="width: 70px;height: 23px"/>
+    <span class="measure">${inventories.get(0).inventoryMeasure.measure}</span>
+    #{/if}
+<script>
+    $('div#resourceValues select').on('change', function () {
+        $(this).parent().find('span.measure').html($(this).find('option:selected').attr('measure'));
+    });
+    $('div#resourceValues input').forceNumericOnly(false);
+</script>
+#{/if}
+#{elseif rtype==2}
+    #{if equipments.size()>0}
+    <select style="min-width: 140px">
+        #{list items:equipments,as:'equipment'}
+            <option value="${equipment.id}">${equipment.name}</option>
+        #{/list}
+    </select>
+    <input id=0 type="text" style="width: 80px;height: 23px"/>
+    <span class="measure">мотцаг</span>
+    #{/if}
+<script>
+    $('div#resourceValues input').forceNumericOnly(false);
+</script>
+#{/elseif}
+#{elseif rtype==3}
+    #{if manPowers.size()>0}
+    <select style="min-width: 140px">
+        #{list items:manPowers,as:'manPower'}
+            <option value="${manPower.id}">${manPower.name}</option>
+        #{/list}
+    </select>
+    <input id=0 type="text" style="width: 80px;height: 23px"/>
+    #{/if}
+<script>
+    $('div#resourceValues input').forceNumericInt();
+</script>
+#{/elseif}

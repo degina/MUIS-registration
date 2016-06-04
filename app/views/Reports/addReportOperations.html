@@ -1,0 +1,17 @@
+#{list items:reportProjectOperations,as:'operation'}
+<tr>
+    <td class="cell">${operation.text} <span class="operation dhidden">
+        <span style="padding: 1px 2px;cursor: pointer" title="Засах" onclick="editOperation(${operation.id},1,'${operation.text}')"><i
+                class="fa fa-edit"></i></span>
+        <span style="padding: 1px 2px;cursor: pointer" title="Устгах" onclick="editOperation(${operation.id},2,'')"><i
+                class="fa fa-minus-square-o asterisk"></i></span>
+    </span></td>
+</tr>
+#{/list}
+<script>
+    $("div#main-content #reportLoadData div#reportOperationData tr").mouseenter(function () {
+        $(this).find('span.operation').removeClass('dhidden');
+    }).mouseleave(function () {
+        $(this).find('span.operation').addClass('dhidden');
+    });
+</script>

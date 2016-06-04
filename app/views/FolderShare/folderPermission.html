@@ -1,0 +1,34 @@
+<input type="hidden" id=mainId value="${folderStructure.id}"/>
+<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered">
+    <thead>
+    <tr>
+        <th style="width: 50%">Хандах эрхтэй хэрэглэгчид</th>
+        <th style="width: 50%">Хандах эрхгүй</th>
+    </tr>
+    </thead>
+    <tr>
+        <td>
+            <ul id="sortable1" class="connectedSortable">
+            #{list items:list,as:'us'}
+                <li id="${us.id}" class="ui-state-highlight">${us.toString()} <span
+                        style="margin-left: 2px;font-size: 11px">(${us.userPosition.name})</span></li>
+            #{/list}
+            </ul>
+        </td>
+        <td>
+            <ul id="sortable2" class="connectedSortable">
+            #{list items:users,as:'us'}
+                <li id="${us.id}" class="ui-state-default">${us.toString()} <span
+                        style="margin-left: 2px;font-size: 11px">(${us.userPosition.name})</span></li>
+            #{/list}
+            </ul>
+        </td>
+    </tr>
+</table>
+<script>
+    $(function () {
+        $("#sortable1, #sortable2").sortable({
+            connectWith: ".connectedSortable"
+        }).disableSelection();
+    });
+</script>

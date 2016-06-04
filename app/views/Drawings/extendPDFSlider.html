@@ -1,0 +1,105 @@
+<svg id="svgView" xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     style="border: solid lightgrey 1px; width: 100%; height: 100%; border-radius: 3px;">
+    <foreignObject width="900" height="701" class="imgPanel"
+                   id="view_outer_group"
+                   style="border: solid lightgray 1px;"
+                   transform="translate(0,0)scale(1)" scaler="1">
+    </foreignObject>
+</svg>
+<canvas id="the-canvas" class="dhidden">
+</canvas>
+<input type="hidden" name="pdfPageCount" id="pdfPageCount"/>
+<input type="hidden" name="pageNumber" id="pageNumber"/>
+<input type="hidden" id="remainingPages"/>
+<input type="hidden" name="imageBase64String" id="imageBase64String"/>
+<script>
+    var svg_view = d3.select("#svgView");
+    var svg_view_group = d3.select('#view_outer_group');
+    var view_group = document.getElementById('view_stage');
+    var zoomView;
+    function view_zoomed() {
+        svg_view_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg_view_group.attr("scaler", d3.event.scale);
+    }
+    var url = '${pdfUrl}';
+    var pdfDoc = null,
+            pageNum = ${pageNum},
+            pageRendering = false,
+            pageNumPending = null,
+            scale = 1,
+            canvas = document.getElementById('the-canvas'),
+            ctx = canvas.getContext('2d');
+    function renderPage(num) {
+        pageRendering = true;
+        // Using promise to fetch the page
+        pdfDoc.getPage(num).then(function (page) {
+            var viewport = page.getViewport(scale);
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+
+            // Render PDF page into canvas context
+            var renderContext = {
+                canvasContext: ctx,
+                viewport: viewport
+            };
+            var renderTask = page.render(renderContext);
+
+            // Wait for rendering to finish
+            renderTask.promise.then(function () {
+                importFromCanvas();
+                pageRendering = false;
+                if (pageNumPending !== null) {
+                    // New page rendering is pending
+                    renderPage(pageNumPending);
+                    pageNumPending = null;
+                }
+            });
+        });
+        $("input#pageNumber").attr("value", num);
+    }
+    function queueRenderPage(num) {
+        if (pageRendering) {
+            pageNumPending = num;
+        } else {
+            renderPage(num);
+        }
+    }
+    function onPrevPage() {
+        if (pageNum <= 1) {
+            return;
+        }
+        pageNum--;
+        queueRenderPage(pageNum);
+    }
+    function onNextPage() {
+        if (pageNum >= pdfDoc.numPages) {
+            return;
+        }
+        pageNum++;
+        queueRenderPage(pageNum);
+    }
+    PDFJS.getDocument(url).then(function (pdfDoc_) {
+        pdfDoc = pdfDoc_;
+        $("input#pdfPageCount").attr("value", pdfDoc.numPages);
+        // Initial/first page rendering
+        remainingPages(pdfDoc.numPages, pageNum);
+        renderPage(pageNum);
+        setSVG();
+    });
+    function setSVG(){
+        zoomView = d3.behavior.zoom()
+                .translate([0,0])
+                .scale(1)
+                .scaleExtent([.5, 2])
+                .on("zoom", view_zoomed);
+    }
+    function importFromCanvas() {
+        var img_dataurl = canvas.toDataURL("image/jpeg");
+        $("input#imageBase64String").attr("value", img_dataurl);
+        svg_view_group.attr("height", canvas.height);
+        svg_view_group.attr("width", canvas.width);
+        svg_view_group.attr("style", svg_view_group.attr("style") + " background: url('" + img_dataurl + "') no-repeat center;");
+        svg_view.call(zoomView);
+    }
+</script>

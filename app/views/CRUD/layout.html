@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js sidebar-large lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js sidebar-large lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js sidebar-large lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js sidebar-${(user.accountSetting!=null && user.accountSetting.menu!=null)?user.accountSetting.menu:'large'}">
+<!--<![endif]-->
+
+<head>
+    <!-- BEGIN META SECTION -->
+    <meta charset="utf-8">
+    <title>Progex</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="Cloud Based Construction Software" name="description">
+    <meta content="Progex Systems LLC" name="author" />
+    <link rel="shortcut icon" href="/assets/img/favicon.png">
+    <!-- END META SECTION -->
+    <!-- BEGIN MANDATORY STYLE -->
+    <link href="/assets/css/icons/icons.min.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/plugins.min.css" rel="stylesheet">
+    <link href="/assets/css/style.min.css" rel="stylesheet">
+    <link href="/public/stylesheets/main.css" rel="stylesheet">
+#{if user.accountSetting!=null && user.accountSetting.themeColor.id!=1L}
+    <link rel="stylesheet" id="theme-color" href="/assets/css/colors/color-${user.accountSetting.themeColor.color}.css">
+#{/if}
+#{else }
+    <link rel="stylesheet" id="theme-color">
+#{/else}
+    <link rel="stylesheet" href="/assets/plugins/jnotify/jNotify.jquery.css">
+    <!-- END  MANDATORY STYLE -->
+#{get 'moreStyles' /}
+    <script src="/assets/plugins/modernizr/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    <script src="@{'/public/javascripts/jquery-2.1.3.js'}" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/public/javascripts/jQuery.print.js"></script>
+</head>
+%{menuActive="active";menuActiveIn="in";}%
+<script>
+    var selectStyle = 0;
+    var selectThemeStyle = 0;
+    #{if user.accountSetting!=null}
+    selectThemeStyle =${user.accountSetting.themeColor.id};
+    #{/if}
+    var userAccountMenu;
+
+    %{
+        if (user.accountSetting != null && user.accountSetting.menu != null) {
+            if (user.accountSetting.menu != "large") {
+                menuActive = "";
+                menuActiveIn = "";
+            }
+        }%
+        userAccountMenu = "${user.accountSetting.menu}";
+        %{
+        }
+    else
+        {
+        }%
+        userAccountMenu = "null";
+        %{
+        }
+    }%
+    var loggedUserProFilePic = "${user.profilePicture}";
+    var menuWidthAction = false;
+</script>
+<body data-page=#{get 'baseClass'/} class=#{get 'baseClass'/}>
+<!-- BEGIN TOP MENU -->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header noselect">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#sidebar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a id="${(user.accountSetting!=null && user.accountSetting.menu!=null)?user.accountSetting.menuNext:'menu-medium'}"
+               class="sidebar-toggle tooltips" style="border-right: none">
+                <i class="fa fa-outdent"></i>
+            </a>
+            <a class="navbar-brand" href="@{controllers.MainRoot.root()}" style="background-size: 80%"></a>
+        </div>
+    %{selectedProject=controllers.Users.pid();}%
+        <div class="navbar-center">
+        #{if selectedProject>0 && activeMenu != 'Dashboard' && activeMenu != 'MyPlans'
+        && activeMenu != 'DailyLog' && activeMenu != 'Budget' && activeMenu != 'Contract'
+        && activeMenu != 'Mail' && activeMenu != 'Users' && activeMenu != 'Admin'}
+        ${session.get('projectName')} <i class="fa fa-angle-double-right"></i>#{/if}
+        #{get 'title'/}</div>
+        <div class="navbar-collapse collapse">
+            <!-- BEGIN TOP NAVIGATION MENU -->
+            <ul class="nav navbar-nav pull-right header-menu">
+                <!-- BEGIN NOTIFICATION DROPDOWN -->
+                <li class="dropdown systemnotifications" id="notifications-header">
+                    <a ntype="0" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+                       data-close-others="true">
+                        <i class="glyph-icon flaticon-notifications"></i>
+                    %{notificationsHeader=controllers.Notifications.getNotifications(user.id);}%
+                        <span class="badge badge-danger badge-header"
+                              ncount="${notificationsHeader}">${notificationsHeader>0?notificationsHeader:''}</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header clearfix">
+                            <p class="pull-left">Сонордуулга</p>
+                        </li>
+                        <li>
+                            <ul class="dropdown-menu-list withScroll" data-height="280"></ul>
+                        </li>
+                        <li class="dropdown-footer clearfix">
+                            <a href="@{controllers.Notifications.showAllNotifications(0)}" class="pull-left">Бүх
+                                сонордуулгыг харах</a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- END NOTIFICATION DROPDOWN -->
+                <!-- BEGIN MESSAGES DROPDOWN -->
+                <li class="dropdown systemnotifications" id="messages-header">
+                    <a ntype="1" class="dropdown-toggle" data-toggle="dropdown" data-hover="dropdown"
+                       data-close-others="true">
+                        <i class="glyph-icon flaticon-email"></i>
+                    %{notificationsHeader=controllers.Notifications.getNotificationMessages(user.id);}%
+                        <span class="badge badge-primary badge-header"
+                              ncount="${notificationsHeader}">${notificationsHeader>0?notificationsHeader:''}</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li class="dropdown-header clearfix">
+                            <p class="pull-left">Илгээмж</p>
+                        </li>
+                        <li class="dropdown-body">
+                            <ul class="dropdown-menu-list withScroll" data-height="280"></ul>
+                        </li>
+                        <li class="dropdown-footer clearfix">
+                            <a href="@{controllers.Notifications.showAllNotifications(1)}" class="pull-left">Бүх илгээмж
+                                харах</a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- END MESSAGES DROPDOWN -->
+                <!-- BEGIN USER DROPDOWN -->
+                <li class="dropdown" id="user-header">
+                    <a href="#" class="dropdown-toggle c-white" data-toggle="dropdown" data-hover="dropdown"
+                       data-close-others="true">
+                        <img src="${user.profilePicture}" alt="user avatar" width="30" class="p-r-5">
+                        <span class="username">${user}</span>
+                        <i class="fa fa-angle-down p-r-10"></i>
+                    </a>
+                    <ul class="dropdown-menu"
+                        style="min-width: 170px !important;max-width: 290px !important;width: auto;">
+                        <li>
+                            <a href="@{controllers.MyPlans.blank()}">
+                                <i class="glyph-icon flaticon-calendar"></i>Миний төлөвлөгөө</a>
+                        </li>
+                        <li>
+                            <a href="@{controllers.Users.show(user.id)}">
+                                <i class="glyph-icon flaticon-account"></i> Миний тохиргоо
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/accountSettings/${user.id}">
+                                <i class="glyph-icon flaticon-settings21"></i> Системийн тохиргоо
+                            </a>
+                        </li>
+                        <li class="dropdown-footer clearfix">
+                            <a href="javascript:;" class="toggle_fullscreen" title="Бүтэн дэлгэцээр харах">
+                                <i class="glyph-icon flaticon-fullscreen3"></i>
+                            </a>
+                            <a href="lockscreen.html" title="Систем цоожлох">
+                                <i class="glyph-icon flaticon-padlock23"></i>
+                            </a>
+                            <a title="Гарах" onclick="logoutMe()">
+                                <i class="fa fa-power-off"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <!-- END USER DROPDOWN -->
+
+                <!-- BEGIN CHAT HEADER -->
+                <li id="chat-header">
+                    <a href="#" class="c-white" id="chat-toggle">
+                        <i class="glyph-icon flaticon-speech76 f-24"></i>
+                        <span id="chat-notification" class="notification notification-danger hide" data-delay="2000"></span>
+                    </a>
+                    <div id="chat-popup" class="chat-popup hide" data-delay="2000">
+                        <div class="arrow-up"></div>
+                        <div class="chat-popup-inner bg-blue">
+                            <div>
+                                <div class="clearfix w-600">
+                                    <img src="assets/img/avatars/avatar3.png" alt="avatar 3" width="30" class="pull-left img-circle p-r-5">Alexa Johnson</div>
+                                <div class="message m-t-5">Hey you there?</div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+
+                <!-- END CHAT HEADER -->
+            </ul>
+            <!-- END TOP NAVIGATION MENU -->
+        </div>
+    </div>
+</nav>
+<!-- END TOP MENU -->
+<!-- BEGIN WRAPPER -->
+<div id="wrapper">
+    <!-- BEGIN MAIN SIDEBAR -->
+    <nav id="sidebar">
+        <div id="main-menu" class="noselect">
+            <ul class="sidebar-nav" style="padding-top: 10px;">
+            %{myPermission=user.getUserPermissionType(controllers.Consts.permissionDashboard);
+                if(myPermission>0){}%
+                <li class="${activeMenu == 'Dashboard'?menuActive+' current':''}">
+                    <a href="@{controllers.Dashboard.index()}"><i class="fa fa-dashboard"></i><span
+                            class="sidebar-text">&{'Dashboard'}</span></a>
+                </li>
+            %{}
+                myPermission=user.getPermissionType(controllers.Consts.permissionGantt);
+                if(selectedProject>0){
+                if(myPermission==3){}%
+                <li class="${activeMenu == 'GanttChart'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="fa fa-tasks"></i><span
+                            class="sidebar-text">Ажлын график</span><span class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'GanttChart'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'GanttEditor'?menuActive+' current':''}">
+                            <a href="@{GanttChart.showProject()}"><span class="sidebar-text">Засварлах</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'GanttViewer'?menuActive+' current':''}">
+                            <a href="@{GanttChart.ganttViewer()}"><span class="sidebar-text">Харах</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{}else if(myPermission>0){}%
+                <li class="${activeMenu == 'GanttChart'?menuActive+' current':''}">
+                    <a href="@{GanttChart.ganttViewer()}"><i class="fa fa-tasks"></i><span
+                            class="sidebar-text">Ажлын график</span></a>
+                </li>
+            %{}}
+                myPermission=user.getUserPermissionType(controllers.Consts.permissionMyPlan);
+                if(myPermission >= 2){}%
+                <li class="${activeMenu == 'MyPlans'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="fa fa-calendar"></i><span
+                            class="sidebar-text">Миний төлөвлөгөө</span><span class="fa arrow"> </span></a>
+                    <ul class="submenu collapse ${activeMenu == 'MyPlans'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'MyPlan'?menuActive+' current':''}">
+                            <a href="@{controllers.MyPlans.blank()}"><span class="sidebar-text">Миний төлөвлөгөө</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'MyPlanWorker'?menuActive+' current':''}">
+                            <a href="@{controllers.MyPlans.workersPlan()}"><span class="sidebar-text">Ажилчдын төлөвлөгөө</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{}else if(myPermission>0){}%
+                <li class="${activeMenu == 'MyPlans'?menuActive+' current':''}">
+                    <a href="@{controllers.MyPlans.blank()}"><i class="fa fa-calendar"></i><span
+                            class="sidebar-text">Миний төлөвлөгөө</span></a>
+                </li>
+            %{}
+                if(user.getUserPermissionType(controllers.Consts.permissionDailyLog)>0){}%
+                <li class="${activeMenu == 'DailyLog'?menuActive+' current':''}">
+                    <a href="@{controllers.DailyLogs.blankView(null,0)}"><i class="fa fa-list-alt"></i><span
+                            class="sidebar-text">Өдрийн тайлан</span></a>
+                </li>
+            %{}
+                if (user.emailAccount!=null){
+                emailFolders=models.EmailFolder.findAll();}%
+                <li class="${activeMenu == 'Mail'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="fa fa-envelope-o"></i><span class="sidebar-text">Э-Шуудан</span><span
+                            class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'Mail'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == "MailWrite"?menuActive+' current':''}">
+                            <a href="@{Emails.composeNewMail()}"><span class="sidebar-text">Бичих</span></a>
+                        </li>
+                    #{list items:emailFolders,as:'folderList'}
+                        <li class="${activeMenuSub == folderList.name?menuActive+' current':''}">
+                            <a href="@{controllers.Emails.folders(folderList.name)}"><span
+                                    class="sidebar-text">${folderList.nameMng}</span></a>
+                        </li>
+                    #{/list}
+                    </ul>
+                </li>
+            %{}
+                if(selectedProject>0){
+                countRFI = controllers.RFIs.checkNewRFI();
+                myPermission=user.getPermissionType(controllers.Consts.permissionRFI);
+                if(myPermission>0){}%
+                <li class="${activeMenu == 'RFI'?menuActive+' current':''}">
+                    <a href="@{controllers.RFIs.list("Me")}"><i class="fa fa-exchange"></i><span
+                            class="sidebar-text">&{'RFI'}</span>#{if countRFI!=0}<span
+                            class="label label-danger pull-right m-r-20 w-300">${countRFI}</span>#{/if}
+                    </a>
+                </li>
+            %{}
+                countPunch = controllers.PunchLists.checkNewPunchList();
+                myPermission=user.getPermissionType(controllers.Consts.permissionGreatePunchList);
+                if(myPermission>0){}%
+                <li class="${activeMenu == 'PunchList'?menuActive+' current':''}">
+                    <a href="@{controllers.PunchLists.list("Me")}"><i class="fa fa-list-ol"></i><span
+                            class="sidebar-text">&{'PunchList'}</span>#{if countPunch!=0}<span
+                            class="label label-danger pull-right m-r-20 w-300">${countPunch}</span>#{/if}
+                    </a>
+                </li>
+            %{}
+                if(user.getPermissionType(controllers.Consts.permissionReport)>0){}%
+                <li class="${activeMenu == 'Reports'?menuActive+' current':''}">
+                    <a href="@{controllers.Reports.reportMain()}"><i class="glyph-icon flaticon-pages"></i><span
+                            class="sidebar-text">Тайлан</span></a>
+                </li>
+            %{}
+                countMeeting = controllers.Meetings.checkNewMeeting();
+                myPermission=user.getPermissionType(controllers.Consts.permissionMeeting);
+                if(myPermission>0){}%
+                <li class="${activeMenu == 'Meeting'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="fa fa-group"></i><span
+                            class="sidebar-text">&{'Meetings'}</span>
+                        <span class="fa arrow"></span> #{if countMeeting!=0}<span
+                            class="label label-danger pull-right m-r-20 w-300">${countMeeting}</span>#{/if}
+                    </a>
+                    <ul class="submenu collapse ${activeMenu == 'Meeting'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'MeetingList'?menuActive+' current':''}">
+                            <a href="@{Meetings.list()}"><span class="sidebar-text">Жагсаалт</span></a>
+                        </li>
+                    #{if myPermission>1}
+                        <li class="${activeMenuSub == 'MeetingBlank'?menuActive+' current':''}">
+                            <a href="@{Meetings.blank()}"><span class="sidebar-text">Шинэ хурал</span></a>
+                        </li>
+                    #{/if}
+                    </ul>
+                </li>
+            %{}
+                if(user.getPermissionType(controllers.Consts.permissionMonitorDrawing)>0){}%
+                <li class="${activeMenu == 'Drawing'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="fa fa-pencil"></i><span
+                            class="sidebar-text">&{'Drawing'}</span>
+                        <span class="fa arrow"></span>
+                    </a>
+                    <ul class="submenu collapse ${activeMenu == 'Drawing'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'DrawingThumb'?menuActive+' current':''}">
+                            <a href="@{controllers.Drawings.thumbnails()}"><span
+                                    class="sidebar-text">Жагсаалт</span></a>
+                        </li>
+                    #{if myPermission > 1}
+                        <li class="${activeMenuSub == 'DrawingUpload'?menuActive+' current':''}">
+                            <a href="@{controllers.Drawings.uploader()}"><span class="sidebar-text">Зураг хуулах</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'DrawingHistory'?menuActive+' current':''}">
+                            <a href="@{controllers.Drawings.history()}"><span class="sidebar-text">Түүх харах</span></a>
+                        </li>
+                    #{/if}
+                    *{#{if myPermission > 2}}*
+                        <li class="${activeMenuSub == 'DrawingSettings'?menuActive+' current':''}">
+                            <a href="@{controllers.Drawings.settings()}"><span class="sidebar-text">Тохиргоо</span></a>
+                        </li>
+                    *{#{/if}}*
+                    </ul>
+                </li>
+            %{}
+                if(user.getPermissionType(controllers.Consts.permissionFileShare)>0){}%
+                <li class="${activeMenu == 'FolderShare'?menuActive+' current':''}">
+                    <a href="@{controllers.FolderShare.center()}"><i class="fa fa-folder-open"></i><span
+                            class="sidebar-text">Төслийн файлууд</span></a>
+                </li>
+            %{}
+                if(user.getPermissionType(controllers.Consts.permissionGallery)>0){}%
+                <li class="${activeMenu == 'Gallery'?menuActive+' current':''}">
+                    <a href="@{controllers.Gallery.center("all")}"><i class="glyph-icon flaticon-gallery"></i><span
+                            class="sidebar-text">Зургийн цомог</span></a>
+                </li>
+            %{}
+                }else{
+                if(user.getUserPermissionType(controllers.Consts.permissionFileShare)>0){}%
+                <li class="${activeMenu == 'FolderShare'?menuActive+' current':''}">
+                    <a href="@{controllers.FolderShare.center()}"><i class="fa fa-folder-open"></i><span
+                            class="sidebar-text">Файлын архив</span></a>
+                </li>
+            %{}
+                }
+                myPermission= user.getUserPermissionType(controllers.Consts.permissionBudget);
+                if(myPermission>0){}%
+                <li class="${activeMenu == 'Budget'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="glyph-icon flaticon-charts2"></i><span
+                            class="sidebar-text">Санхүүгийн мэдээлэл</span>
+                        <span class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'Budget'?menuActiveIn:''}">
+                    #{if myPermission>1}
+                        <li class="${activeMenuSub == 'BudgetAdd'?menuActive+' current':''}">
+                            <a href="@{Budgets.blank(0,0)}"><span class="sidebar-text">Нэмэх</span></a>
+                        </li>
+                    #{/if}
+                        <li class="${activeMenuSub == 'BudgetChart'?menuActive+' current':''}">
+                            <a href="@{Budgets.chartView()}"><span class="sidebar-text">График</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{}
+                myPermission= user.getUserPermissionType(controllers.Consts.permissionContract);
+                if(myPermission>0){}%
+                <li class="${activeMenu == 'Contract'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="fa fa-edit"></i><span
+                            class="sidebar-text">&{'Contract'}</span> <span class="fa arrow"> </span></a>
+                    <ul class="submenu collapse ${activeMenu == 'Contract'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'ContractList'?menuActive+' current':''}">
+                            <a href="@{Contracts.list()}"><span class="sidebar-text">Жагсаалт</span></a>
+                        </li>
+                    #{if myPermission==3}
+                        <li class="${activeMenuSub == 'ContractBlank'?menuActive+' current':''}">
+                            <a href="@{Contracts.blank()}"><span class="sidebar-text">Шинэ гэрээ</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'ContractSetting'?menuActive+' current':''}">
+                            <a href="@{Contracts.settings()}"><span class="sidebar-text">Тохиргоо</span></a>
+                        </li>
+                    #{/if}
+                        <li class="${activeMenuSub == 'ContractChart'?menuActive+' current':''}">
+                            <a href="@{Contracts.chart()}"><span class="sidebar-text">График</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{}}%
+            *{
+            #{if user.getPermissionType(controllers.Consts.permissionMap)>0}
+                <li class="${activeMenu == 'Maps'?menuActive+' current':''}">
+                    <a href="@{controllers.Maps.show}"><i class="fa fa-map-marker"></i><span class="sidebar-text">Байршил</span></a>
+                </li>
+            #{/if}
+            #{if user.getPermissionType(controllers.Consts.permissionForum)>0}
+                <li class="${activeMenu == 'Forums'?menuActive+' current':''}">
+                    <a href="@{controllers.Forums.list}"><i class="fa fa-comments-o"></i><span class="sidebar-text">Хэлэлцүүлэг</span></a>
+                </li>
+            #{/if}
+            }*
+            %{ if(selectedProject>0){
+                myPermission=user.getPermissionType(controllers.Consts.permissionOrganization);
+                if(user.isProjectOwner() || myPermission==2){}%
+                <li class="${activeMenu == 'Organization'?menuActive+' current hasSub':''}">
+                    <a style="cursor: pointer"><i class="fa fa-sitemap"></i><span
+                            class="sidebar-text">Төслийн баг</span><span
+                            class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'OrganizationChart'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'UsersList'?menuActive+' current':''}">
+                            <a href="@{controllers.OrganizationCharts.organization()}"><span class="sidebar-text">Бүтэц бүрэлдэхүүн</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'Permission'?menuActive+' current':''}">
+                            <a href="@{controllers.OrganizationCharts.permission()}"><span class="sidebar-text">Хандах эрх</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{} else if(myPermission>0){}%
+                <li class="${activeMenu == 'Organization'?menuActive+' current hasSub':''}">
+                    <a style="cursor: pointer" href="@{controllers.OrganizationCharts.organization()}"><i
+                            class="fa fa-sitemap"></i><span
+                            class="sidebar-text">Төслийн баг</span></a>
+                </li>
+            %{}}
+                myPermission=user.getUserPermissionType(controllers.Consts.permissionAccount);
+                if(myPermission == 3){}%
+                <li class="${activeMenu == 'Users'?menuActive+' current hasSub':''}">
+                    <a style="cursor: pointer"><i class="fa fa-user"></i><span
+                            class="sidebar-text">Бүртгэлүүд</span><span
+                            class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'Users'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'UsersList'?menuActive+' current':''}">
+                            <a href="@{controllers.Users.list()}"><span class="sidebar-text">&{'Users'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'OrganizationChart'?menuActive+' current':''}">
+                            <a href="@{controllers.Users.companyOrg()}"><span
+                                    class="sidebar-text">Бүтэц бүрэлдэхүүн</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'UserPositions'?menuActive+' current':''}">
+                            <a href="@{controllers.UserPositions.list()}"><span class="sidebar-text">Албан тушаал</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'UserTeams'?menuActive+' current':''}">
+                            <a href="@{controllers.UserTeams.list()}"><span class="sidebar-text">Багууд</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{}else if(myPermission > 0){}%
+                <li class="${activeMenu == 'Users'?menuActive+' current hasSub':''}">
+                    <a style="cursor: pointer"><i class="fa fa-user"></i><span
+                            class="sidebar-text">Бүртгэлүүд</span><span
+                            class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'Users'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'UsersList'?menuActive+' current':''}">
+                            <a href="@{controllers.Users.list()}"><span class="sidebar-text">&{'Users'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'OrganizationChart'?menuActive+' current':''}">
+                            <a href="@{controllers.Users.companyOrg()}"><span
+                                    class="sidebar-text">Бүтэц бүрэлдэхүүн</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{}
+                if(selectedProject > 0 && user.getUserPermissionType(controllers.Consts.permissionAdmin) > 0){}%
+                <li class="${activeMenu == 'Admin'?menuActive+' current hasSub':''}">
+                    <a style="cursor: pointer"><i class="fa fa-gears"></i><span
+                            class="sidebar-text">Админ</span><span
+                            class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'Admin'?menuActiveIn:''}">
+                        <li class="${activeMenuSub == 'Equipmets'?menuActive+' current':''}">
+                            <a href="@{controllers.Equipments.list()}"><span
+                                    class="sidebar-text">&{'Equipments'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'Manpower'?menuActive+' current':''}">
+                            <a href="@{controllers.ManPowers.list()}"><span
+                                    class="sidebar-text">&{'ManPower'}</span></a>
+                        </li>
+                    </ul>
+                </li>
+            %{}
+                inventoryPermission = user.getUserPermissionType(controllers.Consts.permissionInventory);
+                inventoryPermissionOther = user.getUserPermissionType(controllers.Consts.permissionInventoryOther);
+                inventoryProjectPermission = user.getPermissionType(controllers.Consts.permissionInventory);
+                if(inventoryProjectPermission > 0 || inventoryPermission==3){}%
+                <li class="${activeMenu == 'Inventory'?menuActive+' current hasSub':''}">
+                    <a href="#"><i class="glyph-icon flaticon-shopping80"></i><span
+                            class="sidebar-text">&{'Inventory'}</span>
+                        <span class="fa arrow"></span></a>
+                    <ul class="submenu collapse ${activeMenu == 'Inventory'?menuActiveIn:''}">
+                    #{if inventoryProjectPermission>0}
+                        <li class="${activeMenuSub == 'InventoryOrder'?menuActive+' current':''}" }>
+                            <a href="@{InventoryOrders.viewAll()}"><span
+                                    class="sidebar-text">&{'MaterialRequest'}</span></a>
+                        </li>
+                    #{/if}
+                    #{if inventoryProjectPermission >0}
+                        <li class="${activeMenuSub == 'InventoryStockList'?menuActive+' current':''}">
+                            <a href="@{InventoryStocks.viewAll()}"><span class="sidebar-text">&{'ItemStock'}</span></a>
+                        </li>
+                    #{/if}
+
+                    #{if inventoryPermission == 3 || inventoryProjectPermission == 4 || inventoryProjectPermission == 5 || inventoryPermissionOther == 4 || inventoryPermissionOther == 5}
+                        <li class="${activeMenuSub == 'InventoryTransfer'?menuActive+' current':''}">
+                            <a href="@{InventoryTransfers.viewAll()}"><span
+                                    class="sidebar-text">&{'Transfer'}</span></a>
+                        </li>
+                    #{/if}
+                    #{if  inventoryProjectPermission == 4 || inventoryProjectPermission == 5 || inventoryPermissionOther ==4 || inventoryPermissionOther == 5}
+                        <li class="${activeMenuSub == 'InventoryWastes'?menuActive+' current':''}">
+                            <a href="@{InventoryWastes.viewAll()}"><span
+                                    class="sidebar-text">&{'Wastes'}</span></a>
+                        </li>
+                    #{/if}
+                    #{if inventoryPermissionOther == 4 || inventoryPermissionOther == 5 }
+                        <li class="${activeMenuSub == 'InventoryDeposit'?menuActive+' current':''}">
+                            <a href="@{InventoryDeposits.viewAll()}"><span class="sidebar-text">&{'Deposit'}</span></a>
+                        </li>
+                    #{/if}
+                    #{if inventoryPermission == 3}
+                        <li class="${activeMenuSub == 'InventoryList'?menuActive+' current':''}">
+                            <a href="@{Inventorys.viewAll()}"><span class="sidebar-text">&{'ItemManagement'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'InventoryLocation'?menuActive+' current':''}">
+                            <a href="@{InventoryLocations.viewAll()}"><span
+                                    class="sidebar-text">&{'Location'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'InventoryCategory'?menuActive+' current':''}">
+                            <a href="@{InventoryCategorys.viewAll()}"><span
+                                    class="sidebar-text">&{'Category'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'InventorySupplier'?menuActive+' current':''}">
+                            <a href="@{InventorySuppliers.viewAll()}"><span
+                                    class="sidebar-text">&{'Supplier'}</span></a>
+                        </li>
+                        <li class="${activeMenuSub == 'InventoryMeasure'?menuActive+' current':''}">
+                            <a href="@{InventoryMeasures.viewAll()}"><span class="sidebar-text">&{'Measure'}</span></a>
+                        </li>
+                    #{/if}
+                    </ul>
+                </li>
+            %{}}%
+            </ul>
+        </div>
+        <div class="footer-widget">
+            <div class="footer-gradient"></div>
+        *{<div id="sidebar-charts">}*
+        *{<div class="sidebar-charts-inner">}*
+        *{<div class="sidebar-charts-left">}*
+        *{<div class="sidebar-chart-title">Мэдээлэл</div>}*
+        *{<div class="sidebar-chart-number">1,256</div>}*
+        *{</div>}*
+        *{<div class="sidebar-charts-right" data-type="bar" data-color="theme">}*
+        *{<span class="dynamicbar1"></span>}*
+        *{</div>}*
+        *{</div>}*
+        *{<hr class="divider">}*
+        *{<div class="sidebar-charts-inner">}*
+        *{<div class="sidebar-charts-left">}*
+        *{<div class="sidebar-chart-title">Мэдээлэл</div>}*
+        *{<div class="sidebar-chart-number">47,564₮</div>}*
+        *{</div>}*
+        *{<div class="sidebar-charts-right" data-type="bar" data-color="theme">}*
+        *{<span class="dynamicbar2"></span>}*
+        *{</div>}*
+        *{</div>}*
+        *{<hr class="divider">}*
+        *{<div class="sidebar-charts-inner">}*
+        *{<div class="sidebar-charts-left">}*
+        *{<div class="sidebar-chart-title">Мэдээлэл</div>}*
+        *{<div class="sidebar-chart-number" id="number-visits">147,687</div>}*
+        *{</div>}*
+        *{<div class="sidebar-charts-right" data-type="bar" data-color="theme">}*
+        *{<span class="dynamicbar3"></span>}*
+        *{</div>}*
+        *{</div>}*
+        *{</div>}*
+            <div class="sidebar-footer learfix">
+                <a class="pull-left" href="/accountSettings/${user.id}" data-rel="tooltip" data-placement="top"
+                   data-original-title="Системийн тохиргоо"><i class="glyph-icon flaticon-settings21"></i></a>
+                <a class="pull-left toggle_fullscreen" href="#" data-rel="tooltip" data-placement="top"
+                   data-original-title="Бүтэн дэлгэцээр харах"><i class="glyph-icon flaticon-fullscreen3"></i></a>
+                <a class="pull-left" href="lockscreen.html" data-rel="tooltip" data-placement="top"
+                   data-original-title="Систем цоожлох"><i class="glyph-icon flaticon-padlock23"></i></a>
+                <a class="pull-left" style="cursor: pointer" data-rel="tooltip" data-placement="top"
+                   data-original-title="Гарах" onclick="logoutMe()"><i class="fa fa-power-off"></i></a>
+            </div>
+        </div>
+    </nav>
+    <!-- END MAIN SIDEBAR -->
+    <!-- BEGIN MAIN CONTENT -->
+#{doLayout /}
+    <!-- END MAIN CONTENT -->
+</div>
+<!-- END WRAPPER -->
+
+<!-- BEGIN CHAT MENU -->
+#{include '/Notifications/chat.html'/}
+<!-- END CHAT MENU -->
+#{include '/Notifications/reminderDialog.html'/}
+#{include '/Notifications/notificationTag.html'/}
+<!-- BEGIN PAGE LEVEL SCRIPTS -->
+#{get 'moreScripts' /}
+
+<script src="/assets/plugins/jnotify/jNotify.jquery.min.js"></script>
+<!-- END  PAGE LEVEL SCRIPTS -->
+<script src="/assets/js/application.js"></script>
+<script type="text/javascript">
+    $(function () {
+        $('div#main-menu ul.sidebar-nav>li:last-child').addClass("m-b-245");
+    });
+
+    function loading1(vals) {
+        $(vals).html("<div id=loadingImg><img src='/public/images/ajax-horizontal.gif' alt='Loading'/></div>");
+    }
+    function loading2(vals) {
+        $(vals).html("<div id=loadingImg><img src='/public/images/loading.gif' alt='Loading'/></div>");
+    }
+</script>
+
+</body>
+</html>
+
+#{inventory_order_transfer /}

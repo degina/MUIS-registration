@@ -1,0 +1,59 @@
+#{if isList}
+#{list items:wastes,as:'waste'}
+%{contractor = waste.owner.userTeam.contractor && !contractorUser}%
+<tr id="trWaste${waste.id}" class=${contractor?'warning':''}>
+    <td></td>
+    <td>${(waste.task)?(waste.task?.name):(waste.myPlan?.name)}</td>
+    <td>${waste.subject}</td>
+    <td>${waste.measure}</td>
+    <td>${waste.quantity}</td>
+    <td>
+        #{if waste.owner.id!=user.id }
+            <strong>${contractor?(waste.owner.toString() +":  "):''}</strong>
+        #{/if}${waste.comments}
+    </td>
+    <td>
+    #{if waste.attaches.size()>0}
+        <div class="post-images" id="post-images-waste-${waste.id}">
+            #{list items:waste.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+        </div>
+    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-waste-"+waste.id).raw()}
+    #{/if}
+    </td>
+    <td >
+    #{if waste.owner.id == user.id }
+        <button onclick="deleteWaste(${waste.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+        #{/if}
+    </td>
+</tr>
+#{/list}
+#{/if }
+#{else }
+<tr id="trWaste${waste.id}">
+    <td></td>
+    <td>${(waste.task)?waste.task.name:waste.myPlan.name}</td>
+    <td>${waste.subject}</td>
+    <td>${waste.measure}</td>
+    <td>${waste.quantity}</td>
+    <td>${waste.comments}</td>
+    <td>
+        #{if waste.attaches.size()>0}
+            <div class="post-images" id="post-images-waste-${waste.id}">
+                #{list items:waste.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-waste-"+waste.id).raw()}
+        #{/if}
+    </td>
+    <td >
+        <button onclick="deleteWaste(${waste.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

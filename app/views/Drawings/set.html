@@ -1,0 +1,1297 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Drawing'/}
+<script src="/assets/plugins/currentset/d3.js" type="text/javascript"></script>
+<link rel="stylesheet" href="/assets/plugins/font-awesome-animation/font-awesome-animation.min.css">
+<div id="main-content">
+
+    <div class="panel-content">
+        <div class="row media-manager">
+            <ul class="media-header">
+                <li>
+                    <a class="c-dark filter active" data-filter="all"> <strong>&{'All'}</strong>
+                    </a>
+                </li>
+                <li>
+                    <a class="filter" data-filter=".cat-rfi"><i
+                            class="glyph-icon flaticon-ui-elements2 m-r-5"></i> &{'RFI'}</a>
+                </li>
+                <li>
+                    <a class="filter" data-filter=".cat-punch"><i class="fa fa-pencil m-r-5"></i> &{'PunchList'}
+                    </a>
+                </li>
+                <li>
+                    <a class="filter" data-filter=".cat-other"></i> &{'Other'}
+                    </a>
+                </li>
+            #{if user.getPermissionType(controllers.Consts.permissionMonitorDrawing) == 3}
+                <li class="pull-right">
+                    <a href="@{Drawings.uploader()}"><i class="fa fa-cloud-download c-white m-r-5"></i>
+                    &{'Upload'}</a>
+
+                </li>
+            #{/if}
+            </ul>
+            <div class="margin-bottom-30"></div>
+            <div class="col-sm-12">
+                <div class="gallery row">
+                #{list items:drawings, as:'drawing'}
+                %{ rev = drawing.lastRevision();}%
+                %{ cat = rev.isDraw();}%
+                    <div class="${cat == 3 ? "cat-rfi cat-punch":(cat == 2 ? "cat-punch" : (cat == 1 ? "cat-rfi" : "cat-other"))} col-xs-5 col-sm-3 col-md-2">
+                        <div class="btn-group media-group" style="left: 30px;">
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu media-menu" role="menu">
+                                <li onclick="drawDan(this)"><a><i class="fa fa-pencil"></i> &{'Draw'}</a>
+                                </li>
+                                <li onclick="view(this)"><a><i class="fa fa-download"></i> &{'View'}</a>
+                                </li>
+
+                                #{if user.getPermissionType(controllers.Consts.permissionMonitorDrawing) == 3}
+                                    <li onclick="edit(this)"><a><i class="fa fa-wrench "></i> &{'Edit'}</a>
+                                    </li>
+                                #{/if}
+                                <li>
+                                    <a href="${rev.dir + '.' + rev.extension}"
+                                       download="${drawing.title + '.' + rev.extension}">
+                                        <i class="fa fa-download"></i> &{'Download'}
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="panel panel-default" style="height: 241px;">
+                            <div class="panel-body">
+                                <div class="thmb">
+                                    <div style="height: 200px">
+                                        <div class="thmb-prev" style="height: 155px; border: solid grey 1px; background-position: center; background-image: url('${rev.dir + 't.' + "jpg"}'); background-size: contain; background-repeat: no-repeat;">
+                                            <img src="${rev.dir + ".png"}"
+                                                 class="img-responsive dhidden">
+                                        </div>
+                                        <h5 class="media-title"><a
+                                                title="">${drawing.Number + "-" + drawing.title}</a>
+                                        </h5>
+                                        <textarea class="dhidden"></textarea>
+                                    </div>
+                                    <small class="text-muted pull-left">№ <span>${drawing.id}</span></small>
+                                    <small class="text-muted pull-right">${drawing.createdDate.format("yyyy-MM-dd")}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                #{/list}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<img class="img dhidden"/>
+<div class="modal fade" id="uploadModal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-body"></div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="imgView" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-full">
+        <div class="modal-content">
+            <div class="modal-header" style="height: 50px;!important;">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-10">
+                        <svg id="svgView" xmlns="http://www.w3.org/2000/svg" version="1.1"
+                             style="width: 100%; min-height: 550px; position: relative;height: 100%;">
+                            <foreignObject width="900" height="701" class="imgPanel" id="view_outer_group"
+                                           style="border: solid black 3px;stroke-width: 1.5px;"
+                                           transform="translate(1,1)scale(1)" scaler="1">
+                                <svg id="view_stage"></svg>
+                            </foreignObject>
+                        </svg>
+                        <input type="hidden" id="data2" name="data2"/>
+                    </div>
+                    <div class="col-md-2">
+                        <div style="width: 100%; text-align: center">
+                            <h5 class="media-title">
+                                <a class="imageName"></a>
+                            </h5>
+                        </div>
+                        <div style="width: 100%">
+                            <span>&{'DrawingDescription'}:</span>
+
+                            <p class="text"
+                               style="width:100%;; min-height: 20px;"></p>
+                        </div>
+                        <div style="width: 100%">
+                            <span>&{'Request'}:</span>
+
+                            <p class="request"
+                               style="width:100%;">...</p>
+                        </div>
+                        <div class="dhidden" class="panel panel-default withScroll mCustomScrollbar _mCS_12"
+                             style="width: 100%; max-height: 300px; overflow-y: scroll; border: solid black 1px;">
+                            <table id="uses" style="width: 100%; margin: 0;" border="1" cellpadding="0" cellspacing="0">
+                            </table>
+                        </div>
+                        <div style="width: 100%; margin-top: 10px; text-align: center;">
+                            <button class="btn btn-primary" style="width: 100%;" id="drawImage"><i
+                                    class="fa fa-pencil m-r-10"></i>&{'Draw'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="imgDraw" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-full">
+        <div class="modal-content">
+            <div class="modal-header" style="height: 50px;!important;">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <svg id="svg" xmlns="http://www.w3.org/2000/svg" version="1.1"
+                         style="width: 100%; min-height: 550px; position: relative;height: 100%;">
+                        <foreignObject width="900" height="701" class="imgPanel" id="outer_group"
+                                       style="border: solid black 3px;stroke-width: 1.5px;"
+                                       transform="translate(90,1)scale(1)" scaler="1">
+                            <svg id="stage"></svg>
+                        </foreignObject>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="Greater" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="height: 50px;!important;">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="sendForm" method="post">
+                        <input type="hidden" id="jsonString" name="tag"/>
+                    </form>
+                #{if user.getPermissionType(controllers.Consts.permissionGreatePunchList) == 3}
+                    <button id="punch-submit" class="btn btn-primary">&{'CreatePunchList'}</button>
+                #{/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="Dtexter" tabindex="-1" role="dialog" aria-hidden="true" style="margin:0; padding: 0">
+    <div class="modal-dialog modal-sm" style="margin:0; padding: 0; width: 250px;">
+        <div class="modal-content" style="margin:0; padding: 0">
+            <div class="modal-body" style="margin:0; padding: 0">
+                <div class="row" style="margin:0; padding: 0;">
+                    <div style="width: 250px;margin:0; padding: 0;">
+                        <textarea id="pinText" rows="6" style="width: 100%; resize: vertical;"></textarea>
+
+                        <div style="width: 100%;">
+                            <div style="width: 85%; padding-left: 3%; float:left;">
+                                <input id="textFont" type="range" min="12" max="24" step="4" value="12"/>
+                            </div>
+                            <span style="width:12%; float: left; text-align: center">12</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-default btn-sm" style="width: 100%; height: 30px; margin:0; padding: 0;"
+                            id="addTextView"><i
+                            class="fa fa-plus f-14"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="draw-tools" style="display: none;">
+    <ul class="navbar dark" id="editor_tools">
+        <li><i class="fa fa-arrows f-24" title="&{'Hand'}" style="color: lightgrey"></i></li>
+        <li><i id="fa-edit" class="fa fa-edit f-24" title="&{'Tool'}" style="color: lightgrey"></i>
+            <ul id="pen-tools" style="width: 308px!important;">
+                <li><i class="fa fa-pencil f-24" value="Path" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-minus f-24" value="Line" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-square-o f-24" value="Rectangle" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-circle-o f-24" value="Circle" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-long-arrow-right f-24" value="ArrowLine" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-exchange f-24" value="DoubleArrowLine" style="color: lightgrey"></i></li>
+            </ul>
+        </li>
+        <li><i class="fa fa-color fa-circle f-24" title="&{'Color'}" style="color: red"></i>
+            <ul id="pen-color" style="width: 264px!important;">
+                <li><i class="fa fa-circle f-24" style="color: black;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: red;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: blue;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: green;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: yellow;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: brown;"></i></li>
+            </ul>
+        </li>
+        <li>
+            <i style="height: 44px; vertical-align: middle;" title="&{'Width'}">
+                <i class="fa fa-circle"
+                   style=" padding-top: 0!important;; padding-bottom: 0!important;color: lightgrey; font-size: 4px"></i></i>
+            <ul id="pen-width" style="width: 200px;">
+                <li style="width: 92%; padding-left: 4%; padding-right: 4%;">
+                    <i class="f-24">
+                        <input id="width" type="range" min="2" max="8" step="3" value="2"/>
+                    </i>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <i style="height: 44px; vertical-align: middle; color:white" title="&{'Aplha'}">
+                0%
+            </i>
+            <ul id="pen-width" style="width: 200px;">
+                <li style="width: 92%; padding-left: 4%; padding-right: 4%;">
+                    <i class="f-24">
+                        <input id="fillAlpha" type="range" min="0" max="10" step="2" value="0"/>
+                    </i>
+                </li>
+            </ul>
+        </li>
+        <li><i class="fa fa-font f-24" title="&{'Text'}" style="color: lightgrey"></i>
+        </li>
+        <li>
+            <i class="fa fa-mail-reply f-24" title="&{'Undo'}" style="color: #696969" onclick="undo()"></i>
+        </li>
+        <li>
+            <i class="fa fa-mail-forward f-24" title="&{'Redo'}" style="color: #696969" onclick="redo()"></i>
+        </li>
+        <li>
+            <i class="fa fa-trash-o f-24" title="&{'Clean'}" style="color: #696969" onclick="cleaning()"></i>
+        </li>
+        <li>
+            <i class="fa fa-thumb-tack f-24" title="&{'Punch'}" style="color: lightgrey"></i>
+        </li>
+    </ul>
+</div>
+<div id="shapeGroup" class="dhidden" style="border: solid orange 2px;">
+    <button class="btn btn-sm btn-warning" style="margin: auto;"><i class="fa-fa-arrows" style="color: white;"></i></button>
+</div>
+<script>
+    var _type = "Path";
+    var _color = "red";
+    var _opacity = 1.0;
+    var _width = 4;
+    var _text = "";
+    var _fontSize = 12;
+    var _offset = $("#outer_group").offset();
+    var _drawing = false;
+    var _clicking = false;
+    var newElement = null;
+    var _fillAplha = 0;
+    var _points = [];
+    var startPoint = [];
+    var endPoint = [];
+    var activityHistory = [];
+    var activityJson = [];
+    var svg = d3.select("#svg");
+    var svg_group = d3.select('#outer_group');
+    var svg_view = d3.select("#svgView");
+    var svg_view_group = d3.select('#view_outer_group');
+    var group = document.getElementById('stage');
+    var view_group = document.getElementById('view_stage');
+    var _mouseEnter = false;
+    var _keyDown = false;
+    var displayCounter = 0;
+    var erasing = false;
+    var zoom = d3.behavior.zoom()
+            .translate([0, 0])
+            .scale(1)
+            .scaleExtent([.5, 20])
+            .on("zoom", zoomed);
+    var zoomView = d3.behavior.zoom()
+            .translate([0, 0])
+            .scale(1)
+            .scaleExtent([.5, 20])
+            .on("zoom", view_zoomed);
+    var no_zoom = d3.behavior.zoom();
+    function zoomed() {
+        svg_group.style("stroke-width", 1.5 / d3.event.scale + "px");
+        svg_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg_group.attr("scaler", d3.event.scale);
+    }
+    function view_zoomed() {
+        svg_view_group.style("stroke-width", 1.5 / d3.event.scale + "px");
+        svg_view_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg_view_group.attr("scaler", d3.event.scale);
+    }
+    function sector(ban) {
+        var shapeGroup = $(ban);
+
+    }
+    function addHistory(element) {
+        var factorHistory = activityHistory;
+        activityHistory = [];
+        var factorJson = activityJson;
+        activityJson = [];
+        for (var i = 0; i < displayCounter; i++) {
+            activityHistory.push(factorHistory[i]);
+            activityJson.push(factorJson[i]);
+        }
+        var jsonElement = {
+            type: _type,
+            color: _color,
+            width: _width,
+            text: _text,
+            fontSize: _fontSize,
+            path: points_to_string(),
+            start: startPoint,
+            end: endPoint
+        };
+        activityHistory.push(element);
+        if (element.type == "CLEAN" || element.type == "erase") activityJson.push("");
+        else activityJson.push(jsonElement);
+        displayCounter++;
+        factorJson = toDisplay();
+        toStringer(factorJson);
+    }
+    function toStringer(factorJson) {
+        $("#jsonString").val(JSON.stringify(factorJson));
+        if (displayCounter == 0) $("i.fa-mail-reply").css("color", "#696969");
+        else  $("i.fa-mail-reply").css("color", "lightgrey");
+        if (displayCounter == activityHistory.length) $("i.fa-mail-forward").css("color", "#696969");
+        else $("i.fa-mail-forward").css("color", "lightgrey");
+        if (displayCounter == 0)
+            $("i.fa-trash-o").css("color", "#696969");
+        else {
+            if (activityHistory[displayCounter - 1].type == "CLEAN")
+                $("i.fa-trash-o").css("color", "#696969");
+            else
+                $("i.fa-trash-o").css("color", "lightgrey");
+        }
+    }
+    function readerJson(stringer) {
+        var factorJson = jQuery.parseJSON(stringer);
+        var dan = 1;
+        for (var i = 0; i < factorJson.length; i++) {
+            var json = factorJson[i];
+            newElement = null;
+            _type = json.type;
+            _color = json.color;
+            _width = json.width;
+            _fontSize = json.fontSize;
+            _text = json.text;
+            _points = [];
+            startPoint = [];
+            endPoint = [];
+            if (_type == "Path") {
+                var path = json.path;
+                var p = path.split(",");
+                path = "M" + p[0] / dan + "," + p[1] / dan;
+                _points.push([p[0], p[1]]);
+                for (var j = 2, n = p.length - 1; j < n; j += 2) {
+                    path += "L" + p[j] / dan + "," + p[j + 1] / dan;
+                    _points.push([p[j], p[j + 1]]);
+                }
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Path");
+                var pather = document.crerateElementNS("http://www.w3.org/2000/svg", 'path');
+                pather.setAttribute("fill", "none");
+                pather.setAttribute("d", path);
+                pather.style.strokeLinecap = "round";
+                pather.style.strokeLinejoin = "round";
+                pather.style.stroke = _color;
+                pather.style.strokeWidth = _width;
+                newElement.appendChild(pather);
+            }
+            if (_type == "Rectangle") {
+                startPoint = json.start;
+                endPoint = json.end;
+                var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Rectangle");
+                var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                recter.setAttribute("fill", "none");
+                recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+                recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+                recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+                recter.style.stroke = _color;
+                recter.style.strokeWidth = _width;
+                newElement.appendChild(recter);
+            }
+            if (_type == "Circle") {
+                startPoint = json.start;
+                endPoint = json.end;
+                var a = (startPoint[0] - endPoint[0]) / 2, b = (startPoint[1] - endPoint[1]) / 2;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Circle");
+                var circler = document.createElementNS("http://www.w3.org/2000/svg", 'ellipse');
+                circler.setAttribute("fill", _color);
+                circler.setAttribute("fill-opacity", "0.5");
+                circler.setAttribute("cx", (startPoint[0] + endPoint[0]) / (2 * dan));
+                circler.setAttribute("cy", (startPoint[1] + endPoint[1]) / (2 * dan));
+                circler.setAttribute("rx", a < 0 ? -a / dan : a / dan);
+                circler.setAttribute("ry", b < 0 ? -b / dan : b / dan);
+                circler.style.strokeLinecap = "round";
+                circler.style.strokeLinejoin = "round";
+                circler.style.stroke = _color;
+                circler.style.strokeWidth = _width;
+                newElement.appendChild(circler);
+            }
+            if (_type == "Line") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Line");
+                var liner = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                liner.setAttribute("fill", "none");
+                liner.setAttribute("x1", startPoint[0] / dan);
+                liner.setAttribute("y1", startPoint[1] / dan);
+                liner.setAttribute("x2", endPoint[0] / dan);
+                liner.setAttribute("y2", endPoint[1] / dan);
+                liner.style.strokeLinecap = "round";
+                liner.style.strokeLinejoin = "round";
+                liner.style.stroke = _color;
+                liner.style.strokeWidth = _width;
+                newElement.appendChild(liner);
+            }
+            if (_type == "ArrowLine") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "ArrowLine");
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 3) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "DoubleArrowLine") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "DoubleArrowLine");
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 5) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                    lineangle = Math.atan2(startPoint[1] - endPoint[1], startPoint[0] - endPoint[0]);
+                    angle1 = lineangle + Math.PI + angle;
+                    topx = startPoint[0] + Math.cos(angle1) * h;
+                    topy = startPoint[1] + Math.sin(angle1) * h;
+                    angle2 = lineangle + Math.PI - angle;
+                    botx = startPoint[0] + Math.cos(angle2) * h;
+                    boty = startPoint[1] + Math.sin(angle2) * h;
+                    trangle = null;
+                    trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + startPoint[0] / dan + "," + startPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "Text") {
+                startPoint = json.start;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Text");
+                var texter = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+                texter.setAttributeNS(null, "fill", _color);
+                texter.setAttributeNS(null, "x", startPoint[0] / dan);
+                texter.setAttributeNS(null, "y", (parseFloat(startPoint[1]) + parseFloat(_fontSize)) / dan);
+                texter.setAttributeNS(null, "font-size", _fontSize);
+                var textNode = document.createTextNode(_text);
+                texter.appendChild(textNode);
+                newElement.appendChild(text);
+            }
+            if (_type == "Punch") {
+                startPoint = json.start;
+                endPoint = json.end;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Punch");
+                var puncher = document.createElementNS("http://www.w3.org/2000/svg", 'image');
+                puncher.setAttributeNS(null, 'height', 50);
+                puncher.setAttributeNS(null, 'width', 50);
+                puncher.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/redPunch.png');
+                puncher.setAttributeNS(null, 'x', (startPoint[0] - 30) / dan);
+                puncher.setAttributeNS(null, 'y', (startPoint[1] - 25) / dan);
+                puncher.setAttributeNS(null, 'class', 'pinned');
+                newElement.appendChild(puncher);
+            }
+            view_group.appendChild(newElement);
+        }
+        _type = "Path";
+        _color = "red";
+        _opacity = 1.0;
+        _width = 4;
+        _text = "";
+        _fontSize = 12;
+        newElement = null;
+        _points = [];
+        startPoint = [];
+        endPoint = [];
+        activityHistory = [];
+        activityJson = [];
+    }
+    function cleaning() {
+        if (displayCounter != 0) {
+            if (activityHistory[displayCounter - 1].type != "CLEAN") {
+                addHistory({type: "CLEAN"});
+            }
+        }
+
+    }
+    function undo() {
+        if (displayCounter != 0) {
+            displayCounter--;
+            var factorJson = toDisplay();
+            toStringer(factorJson);
+        }
+    }
+    function redo() {
+        if (displayCounter < activityHistory.length) {
+            displayCounter++;
+            var factorJson = toDisplay();
+            toStringer(factorJson);
+        }
+    }
+    function toDisplay() {
+        var factorHistory = [];
+        var factorJson = [];
+        for (var i = 0; i < displayCounter; i++) {
+            if (activityHistory[i].type == "CLEAN") {
+                factorHistory = [];
+                factorJson = [];
+            }
+            else {
+                if (activityHistory[i].type == "erase") {
+                    var element = activityHistory[i].element;
+                    for (var j = 0; j < factorHistory.length; j++) {
+                        if (factorHistory[j] == element) {
+                            factorHistory.splice(j, 1);
+                            factorJson.splice(j, 1);
+                        }
+                    }
+                } else {
+                    factorHistory.push(activityHistory[i]);
+                    factorJson.push(activityJson[i]);
+                }
+            }
+        }
+        $("svg#stage").empty();
+        for (var i = 0; i < factorHistory.length; i++)
+            group.appendChild(factorHistory[i]);
+        return factorJson;
+    }
+
+    $("ul#pen-tools li i.fa").click(function () {
+        $("#pen-tools").parent().find("i#fa-edit").attr("class", $(this).attr("class"));
+        $("#Dtexter").modal("hide");
+        svg.call(no_zoom);
+        _type = $(this).attr("value");
+        editing(true);
+    });
+    $("input#textFont").mousemove(function () {
+        _fontSize = $(this).val();
+        $(this).parent().parent().find("span").html(_fontSize);
+        var dan = svg_group.attr("scaler");
+        $("#pinText").css("font-size", _fontSize / dan + "px");
+    });
+    $("button#addTextView").click(function () {
+        var dan = svg_group.attr("scaler");
+        newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+        newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+        newElement.setAttribute("type", "Text");
+        var texter = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+        texter.setAttributeNS(null, "fill", _color);
+        texter.setAttributeNS(null, "x", startPoint[0] / dan);
+        texter.setAttributeNS(null, "y", (parseFloat(startPoint[1]) + parseFloat(_fontSize)) / dan);
+        texter.setAttributeNS(null, "font-size", _fontSize / dan);
+        newElement.appendChild(texter);
+        _text = $("#pinText").val();
+        var textNode = document.createTextNode(_text);
+        newElement.appendChild(textNode);
+        group.appendChild(newElement);
+        addHistory(newElement);
+        zooming();
+        $("#pinText").val("");
+        _fontSize = 12;
+        $("input#textFont").val(_fontSize);
+        $("input#textFont").parent().find("span").html(_fontSize);
+        $("#Dtexter").modal("hide");
+        newElement = null;
+    });
+    $("ul#editor_tools i.fa-thumb-tack").click(function () {
+        $("#Dtexter").modal("hide");
+        _type = "Punch";
+        editing(true);
+    });
+    $("ul#editor_tools i.fa-font").click(function () {
+        _type = "Text";
+        editing(true);
+    });
+    $("ul#editor_tools li i.fa-arrows").click(function () {
+        $("#Dtexter").modal("hide");
+        $("#pen-tools").parent().find("i#fa-edit").attr("class", "fa fa-edit f-24");
+        zooming();
+    });
+    $("ul#pen-color li i").click(function () {
+        _color = $(this).css("color");
+        $("#pen-color").parent().find("i.fa-color").css("color", $(this).css("color"));
+        $("#svg").unbind("mousedown", _mousedown);
+        $("#svg").unbind("mousemove", _mousemove);
+        $("#svg").unbind("mouseup", _mouseup);
+        editing(_drawing);
+    });
+    $("input#width").mousemove(function () {
+        $("#Dtexter").modal("hide");
+        _width = $(this).val();
+        $("#pen-width").parent().find("i:first-child i").css("font-size", $(this).val() + "px");
+    });
+    function zooming() {
+        svg.call(zoom);
+        editing(false);
+    }
+
+    function no_zooming() {
+        svg.call(no_zoom);
+        editing(true);
+    }
+
+    function editing(mode) {
+        _drawing = mode;
+        if (_drawing) {
+            _offset = $("#outer_group").offset();
+            $("#svg").css("cursor", "crosshair");
+                $("#svg").mousedown(_mousedown);
+                $("#svg").mousemove(_mousemove);
+                $("#svg").mouseup(_mouseup);
+            // iPhone Events
+            var agent = navigator.userAgent;
+            if (agent.indexOf("iPhone") > 0 || agent.indexOf("iPod") > 0) {
+                $("#svg").bind("touchstart", _touchstart);
+                $("#svg").bind("touchmove", _touchmove);
+                $("#svg").bind("touchend", _touchend);
+            }
+
+        } else {
+            $("#svg").css("cursor", " move");
+            $("#svg").unbind("mousedown", _mousedown);
+            $("#svg").unbind("mousemove", _mousemove);
+            $("#svg").unbind("mouseup", _mouseup);
+            // iPhone Events
+            var agent = navigator.userAgent;
+            if (agent.indexOf("iPhone") > 0 || agent.indexOf("iPod") > 0) {
+                $("#svg").unbind("touchstart", _touchstart);
+                $("#svg").unbind("touchmove", _touchmove);
+                $("#svg").unbind("touchend", _touchend);
+            }
+        }
+    }
+    function _touchstart(e) {
+        alert();
+        e = e.originalEvent;
+        e.preventDefault();
+
+        if (e.touches.length == 1) {
+            var touch = e.touches[0];
+            _mousedown(touch);
+        }
+    }
+
+    function _touchmove(e) {
+        e = e.originalEvent;
+        e.preventDefault();
+
+        if (e.touches.length == 1) {
+            var touch = e.touches[0];
+            _mousemove(touch);
+        }
+    }
+
+    function _touchend(e) {
+        e = e.originalEvent;
+        e.preventDefault();
+
+        _mouseup(e);
+    }
+
+    function _mousedown(e) {
+        if (_drawing == true) {
+            _clicking = true;
+            start(e, self);
+        }
+    }
+
+    function _mousemove(e) {
+        if (_clicking == true) {
+            if (_type != "Text") {
+                move(e);
+            }
+        }
+    }
+
+    function _mouseup(e) {
+        if (_clicking == true) {
+            _clicking = false;
+            addHistory(newElement);
+            _points = [];
+            newElement = null;
+        }
+    }
+
+    function start(e) {
+        _drawing = true;
+        var x = e.pageX - _offset.left,
+                y = e.pageY - _offset.top;
+        startPoint = [x, y];
+        _points.push(startPoint);
+        if (_type == "Text") {
+            var dan = svg_group.attr("scaler");
+            $("#Dtexter").css("top", e.pageY + "px");
+            $("#Dtexter").css("left", e.pageX + "px");
+            $("#pinText").css("font-size", _fontSize / dan + "px");
+            $("#Dtexter").modal("show");
+            $("#svg").css("cursor", "default");
+            $("#svg").unbind("mousedown", _mousedown);
+            $("#svg").unbind("mousemove", _mousemove);
+            $("#svg").unbind("mouseup", _mouseup);
+            _drawing = false;
+            _clicking = false;
+            _points = [];
+            no_zooming();
+        }
+        if (_type == "Punch") {
+            var dan = svg_group.attr("scaler");
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Punch");
+            newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+            var puncher = document.createElementNS("http://www.w3.org/2000/svg", 'image');
+            puncher.setAttributeNS(null, 'height', 50);
+            puncher.setAttributeNS(null, 'width', 50);
+            puncher.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/redPunch.png');
+            puncher.setAttributeNS(null, 'x', (startPoint[0] - 30) / dan);
+            puncher.setAttributeNS(null, 'y', (startPoint[1] - 25) / dan);
+            puncher.setAttributeNS(null, 'class', 'pinned');
+            puncher.appendChild(puncher);
+            group.appendChild(newElement);
+            addHistory(newElement);
+            _drawing = false;
+            _clicking = false;
+            _points = [];
+            zooming();
+            newElement = null;
+            showSend();
+        }
+    }
+
+    function move(e) {
+        var x = e.pageX - _offset.left,
+                y = e.pageY - _offset.top;
+        if (_type == "Path") {
+            _points.push([x, y]);
+            draw();
+        }
+        if (_type == "Rectangle" || _type == "Circle" || _type == "Line" || _type == "ArrowLine" || _type == "DoubleArrowLine") {
+            endPoint = [x, y];
+            draw();
+        }
+    }
+
+    function draw() {
+        if (newElement != null) {
+            newElement.remove();
+        }
+        var dan = svg_group.attr("scaler");
+        newElement = null;
+        if (_type == "Path") {
+            var path;
+            var p = _points[0];
+            path = "M" + p[0] / dan + "," + p[1] / dan;
+            for (var i = 1, n = _points.length; i < n; i++) {
+                p = _points[i];
+                path += "L" + p[0] / dan + "," + p[1] / dan;
+            }
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Path");
+            newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+            var pather = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+            pather.setAttribute("fill", "none");
+            pather.setAttribute("d", path);
+            pather.style.strokeLinecap = "round";
+            pather.style.strokeLinejoin = "round";
+            pather.style.stroke = _color; //Set stroke colour
+            pather.style.strokeWidth = _width; //Set stroke width
+            newElement.appendChild(pather);
+        }
+        if (_type == "Rectangle") {
+            var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Rectangle");
+            newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+            var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+            recter.setAttribute("fill", "none");
+            recter.setAttribute("fill-opacity", "0");
+            recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+            recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+            recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+            recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+            recter.style.stroke = _color; //Set stroke colour
+            recter.style.strokeWidth = _width; //Set stroke width
+            newElement.appendChild(recter);
+        }
+        if (_type == "Circle") {
+            var a = (startPoint[0] - endPoint[0]) / 2, b = (startPoint[1] - endPoint[1]) / 2;
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Circle");
+            newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+            var circler = document.createElementNS("http://www.w3.org/2000/svg", 'ellipse');
+            circler.setAttribute("fill", _color);
+            circler.setAttribute("fill-opacity", "0");
+            circler.setAttribute("cx", (startPoint[0] + endPoint[0]) / (2 * dan));
+            circler.setAttribute("cy", (startPoint[1] + endPoint[1]) / (2 * dan));
+            circler.setAttribute("rx", a < 0 ? -a / dan : a / dan);
+            circler.setAttribute("ry", b < 0 ? -b / dan : b / dan);
+            circler.style.strokeLinecap = "round";
+            circler.style.strokeLinejoin = "round";
+            circler.style.stroke = _color; //Set stroke colour
+            circler.style.strokeWidth = _width; //Set stroke width
+            newElement.appendChild(circler);
+        }
+        if (_type == "Line") {
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Line");
+            newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+            var liner = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+            liner.setAttribute("fill", "none");
+            liner.setAttribute("x1", startPoint[0] / dan);
+            liner.setAttribute("y1", startPoint[1] / dan);
+            liner.setAttribute("x2", endPoint[0] / dan);
+            liner.setAttribute("y2", endPoint[1] / dan);
+            liner.style.strokeLinecap = "round";
+            liner.style.strokeLinejoin = "round";
+            liner.style.stroke = _color; //Set stroke colour
+            liner.style.strokeWidth = _width; //Set stroke width
+            newElement.appendChild(liner);
+        }
+        if (_type == "ArrowLine") {
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "ArrowLine");
+            newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+            var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+            line.setAttribute("x1", startPoint[0] / dan);
+            line.setAttribute("y1", startPoint[1] / dan);
+            line.setAttribute("x2", endPoint[0] / dan);
+            line.setAttribute("y2", endPoint[1] / dan);
+            line.style.stroke = _color; //Set stroke colour
+            line.style.strokeWidth = _width; //Set stroke width
+            newElement.appendChild(line);
+
+            var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+            if (D > _width * 3) {
+                var angle = 20 * Math.PI / 180;
+                var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                var h = Math.abs(_width * 2 / Math.cos(angle));
+                var angle1 = lineangle + Math.PI + angle;
+                var topx = endPoint[0] + Math.cos(angle1) * h;
+                var topy = endPoint[1] + Math.sin(angle1) * h;
+                var angle2 = lineangle + Math.PI - angle;
+                var botx = endPoint[0] + Math.cos(angle2) * h;
+                var boty = endPoint[1] + Math.sin(angle2) * h;
+                var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                newElement.setAttribute("fill", _color);
+                trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                trangle.style.stroke = _color;
+                trangle.style.strokeWidth = _width;
+                newElement.appendChild(trangle);
+            }
+        }
+        if (_type == "DoubleArrowLine") {
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "DoubleArrowLine");
+            newElement.setAttributeNS(null, 'onclick', 'sector(this)');
+            var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+            line.setAttribute("x1", startPoint[0] / dan);
+            line.setAttribute("y1", startPoint[1] / dan);
+            line.setAttribute("x2", endPoint[0] / dan);
+            line.setAttribute("y2", endPoint[1] / dan);
+            line.style.stroke = _color; //Set stroke colour
+            line.style.strokeWidth = _width; //Set stroke width
+            newElement.appendChild(line);
+            var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+            if (D > _width * 5) {
+                var angle = 20 * Math.PI / 180;
+                var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                var h = Math.abs(_width * 2 / Math.cos(angle));
+                var angle1 = lineangle + Math.PI + angle;
+                var topx = endPoint[0] + Math.cos(angle1) * h;
+                var topy = endPoint[1] + Math.sin(angle1) * h;
+                var angle2 = lineangle + Math.PI - angle;
+                var botx = endPoint[0] + Math.cos(angle2) * h;
+                var boty = endPoint[1] + Math.sin(angle2) * h;
+                var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                newElement.setAttribute("fill", _color);
+                trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                trangle.style.stroke = _color;
+                trangle.style.strokeWidth = _width;
+                newElement.appendChild(trangle);
+
+                lineangle = Math.atan2(startPoint[1] - endPoint[1], startPoint[0] - endPoint[0]);
+                angle1 = lineangle + Math.PI + angle;
+                topx = startPoint[0] + Math.cos(angle1) * h;
+                topy = startPoint[1] + Math.sin(angle1) * h;
+                angle2 = lineangle + Math.PI - angle;
+                botx = startPoint[0] + Math.cos(angle2) * h;
+                boty = startPoint[1] + Math.sin(angle2) * h;
+                trangle = null;
+                trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                newElement.setAttribute("fill", _color);
+                trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + startPoint[0] / dan + "," + startPoint[1] / dan);
+                trangle.style.stroke = _color;
+                trangle.style.strokeWidth = _width;
+                newElement.appendChild(trangle);
+            }
+        }
+        group.appendChild(newElement);
+    }
+
+    function points_to_string() {
+        var _path = "";
+        if (_points.length > 1) {
+            for (var i = 0; i < _points.length - 1; i++) {
+                _path += "" + _points[i][0] + "," + _points[i][1] + ",";
+            }
+            _path += "" + _points[_points.length - 1][0] + "," + _points[_points.length - 1][1];
+        }
+        return _path;
+    }
+</script>
+<script type="text/javascript">
+    function submit() {
+        $("form#editForm").submit();
+    }
+    function edit(ban) {
+        var div = $(ban).parent().parent().parent().find("div.thmb");
+        $("#editDesc").find("input.drawingId").val(div.find("small.pull-left").find("span").html());
+        $("#editDesc").find("input.drawingDir").val(div.find("img").attr("fileDir"));
+        $("#editDesc").find("input.drawingExt").val(div.find("img").attr("extension"));
+        $("#editDesc").find("input.drawingName").val(div.find("img").attr("fileName"));
+        $("#editDesc").find("textarea.drawingDesc").val(div.find("h5").attr("title"));
+        $("#editDesc").find("div#imgCooler").html(div.find("div.thmb-prev").html());
+        $("#editDesc").find("div#imgCooler").find("img").attr("style", "margin:auto; max-height: 200px!important;");
+        $("#editDesc").modal("show");
+        uploadType = "Upload";
+    }
+    $("div#imgCooler").on("click", function () {
+        uploadType = "Edit";
+        $("div#file-uploader-demo1").find("div.qq-upload-button").find("input").attr("accept", "image/*");
+        $("div#file-uploader-demo1").find("div.qq-upload-button").find("input").attr("multiple", "false");
+        $("#file-uploader-demo1 .qq-upload-button input").click();
+
+    });
+    $("#editDesc").on('hide.bs.modal', function (e) {
+        $("#editDesc").find("input.drawingId").val("");
+        $("#editDesc").find("input.drawingDir").val("");
+        $("#editDesc").find("input.drawingExt").val("");
+        $("#editDesc").find("input.drawingName").val("");
+        $("#editDesc").find("textarea.drawingDesc").val("");
+        $("#editDesc").find("div#imgCooler").html("");
+    });
+    function view(ban) {
+        ban = $(ban).parent().parent().parent().find("div.thmb");
+        viewModal(ban);
+    }
+    function trPreview(ban) {
+        var tr = $(ban);
+        $("svg#view_stage").empty();
+        tr.parent().find("tr").each(function () {
+            $(this).removeClass("selected");
+        });
+        tr.addClass("selected");
+        $("#imgView").find("p.request").html(tr.find("input.descString").val());
+        svg_view_group.style("stroke-width", "1.5px");
+        svg_view_group.attr("transform", "translate(1,1)scale(1)");
+        svg_view_group.attr("scaler", "1");
+        readerJson(tr.find("input.pinString").val());
+    }
+    $("div.thmb").on("click", function () {
+        viewModal(this);
+    });
+    function viewModal(ban) {
+        $("#imgView").find("a.imageName").html($(ban).find("h5 a").html());
+        $("#imgView").find("p.text").html($(ban).find("textarea.dhidden").val());
+        $("input#drawingId").val($(ban).find("small.pull-left span").html());
+        var t = $(ban).find("table#imgUses").html();
+        $("img.img").attr("src", $(ban).find("img").attr("src"));
+        var wid = $("img.img").css("width");
+        var hei = $("img.img").css("height");
+        var foreign = document.getElementById('view_outer_group');
+        foreign.setAttribute('width', wid.substr(0, wid.length - 2));
+        foreign.setAttribute('height', hei.substr(0, hei.length - 2));
+        foreign.setAttribute('scaler', "1");
+        var svging = document.getElementById('view_stage');
+        svging.setAttribute('style', "background: url('" + $("img.img").attr("src") + "') no-repeat center;");
+        svg_view.call(zoomView);
+        $("#imgView").modal('show');
+    }
+    function drawDan(ban) {
+        ban = $(ban).parent().parent().parent().find("div.thmb");
+        $("img.img").attr("src", ban.find("img").attr("src"));
+        $("input#drawingId").val(ban.find("small.pull-left span").html());
+        drawModal();
+    }
+    $("#rfi-submit").click(function () {
+        $("form#sendForm").attr("action", "/rfiBlankDrawing");
+        $("form#sendForm").submit();
+    });
+    $("#punch-submit").click(function () {
+        $("form#sendForm").attr("action", "/punchListBlankDrawing");
+        $("form#sendForm").submit();
+    });
+    $("button#drawImage").on("click", function () {
+        $("#imgView").modal('hide');
+        drawModal();
+    });
+    function showSend() {
+        $("#Greater").modal('show');
+    }
+    function drawModal() {
+        var wid = $("img.img").css("width");
+        var hei = $("img.img").css("height");
+        var foreign = document.getElementById('outer_group');
+        foreign.setAttribute('width', wid.substr(0, wid.length - 2));
+        foreign.setAttribute('height', hei.substr(0, hei.length - 2));
+        foreign.setAttribute('scaler', "1");
+        var svging = document.getElementById('stage');
+        svging.setAttribute('style', "background: url('" + $("img.img").attr("src") + "') no-repeat center;");
+        $("#draw-tools").css("display", "block");
+        zooming();
+        $("#imgDraw").modal('show');
+        $(window).scrollTop(0);
+    }
+    $("#uploadDesc").on('hide.bs.modal', function (e) {
+        $('div#pros').html("");
+        $("#text").val("");
+        $("#na").val("");
+
+    });
+    $("#imgView").on('hide.bs.modal', function (e) {
+        $("#imgView").find("foreignObject.imgPanel").removeAttr("style");
+        $("svg#view_stage").empty();
+    });
+    $("#imgDraw").on('hide.bs.modal', function (e) {
+        $("#imgDraw").find("div.imgPanel").removeAttr("style");
+        $("#imgDraw").find("input#listId").val("");
+        $("#imgDraw").find("input#type").val("");
+        $("#imgDraw").find("input#jsonString").val("[]");
+        $("#imgDraw").find("input#id").val("");
+        $("div#buttonGroup").find("div.adder").addClass("dhidden");
+        $("div#buttonGroup").find("div.saver").addClass("dhidden");
+        $("div#buttonGroup").find("div.deleter").addClass("dhidden");
+        svg_group.style("stroke-width", "1.5px");
+        svg_group.attr("transform", "translate(90,1)scale(1)");
+        svg_group.attr("scaler", "1");
+        $("svg#stage").empty();
+        _drawing = false;
+        _clicking = false;
+        newElement = null;
+        _points = [];
+        startPoint = [];
+        endPoint = [];
+        activityHistory = [];
+        displayCounter = 0;
+        activityJson = [];
+        _type = "Path";
+        _color = "red";
+        _opacity = 1.0;
+        _width = 4;
+        _text = "";
+        _fontSize = 12;
+        $("#pinText").val("");
+        $("input#textFont").val(_fontSize);
+        $("input#textFont").parent().find("span").html(_fontSize);
+        $("#Dtexter").modal("hide");
+        $("#draw-tools").css("display", "none");
+        $("#pen-tools").parent().find("i#fa-edit").attr("class", "fa fa-edit f-24");
+        $("#pen-color").parent().find("i.fa-color").css("color", "red");
+        $("input#width").val(_width);
+        $("#pen-width").parent().find("i:first-child i").css("font-size", _width + "px");
+        $("#pinText").val("");
+        $("i.fa-mail-forward").css("color", "#696969");
+        $("i.fa-mail-reply").css("color", "#696969");
+        $("i.fa-trash-o").css("color", "#696969");
+    });
+    var uploadType = "";
+</script>
+<style type="text/css">
+    img.imgIcon {
+        width: 50px;
+        height: 50px;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    div#pros {
+        vertical-align: middle;
+        padding: auto;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    table#uses tr {
+        cursor: pointer;
+    }
+
+    div.thmb:hover {
+        cursor: pointer;
+    }
+
+    tr.selected {
+        background-color: #808080 !important;
+    }
+
+    tr.selected td {
+        background-color: #808080 !important;
+    }
+
+    svg#svgView {
+        cursor: move;
+    }
+
+    svg {
+        width: 100%;
+        height: 100%;
+        outline: 1px solid black;
+    }
+
+    .pinned:hover {
+        cursor: pointer;
+    }
+
+    #draw-tools {
+        top: 80px;
+        left: 30px;
+        width: 44px;
+        height: 360px;
+        margin: 0;
+        z-index: 6000;
+        position: fixed;
+        border-radius: 3px !important;
+    }
+
+    #draw-tools .navbar {
+        height: 44px;
+        padding: 0;
+        padding-bottom: 10px;
+        margin: 0;
+        position: fixed;
+        border-radius: 3px !important;
+    }
+
+    #draw-tools .navbar li {
+        height: 44px;
+        width: 44px;
+        /*float: left;  */
+        object-position: top;
+        text-align: center;
+        list-style: none;
+        font: normal bold 12px/1.2em Arial, Verdana, Helvetica;
+        padding: 0;
+        margin: 0;
+        background-color: #313335;
+    }
+
+    #draw-tools .navbar i {
+        padding: 10px 0;
+        text-decoration: none;
+        color: #000;
+        display: block;
+    }
+
+    #pen-tools li {
+        float: left;
+    }
+
+    #draw-tools .navbar li:hover {
+        background-color: #515151;
+    }
+
+    #draw-tools .navbar li ul {
+        display: none;
+        margin-left: 44px;
+        margin-top: -44px;
+        float: left;
+        height: 44px;
+    }
+
+    #draw-tools .navbar li:hover ul {
+        float: left;
+        display: block;
+        z-index: 6000;
+        padding-left: 0;
+
+    }
+
+    #draw-tools .navbar li ul li {
+        float: left;
+        background-color: #313335;
+    }
+
+    #draw-tools .navbar li ul li:hover {
+        background-color: #515151;
+        border-color: #515151;
+    }
+
+    #draw-tools .navbar li ul li i {
+        z-index: 7001;
+    }
+
+    i.fa-plus:hover {
+        background-color: transparent;
+    }
+
+</style>
+#{drawing-config /}
+#{fileupload-config /}
+#{checkFileExtension /}
+#{ImgThumbnail div:'div#pros'/}
+#{fancybox-config /}

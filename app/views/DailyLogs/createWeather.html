@@ -1,0 +1,63 @@
+#{if isList}
+    #{list items:weathers,as:'weather'}
+    %{contractor=weather.owner.userTeam.contractor && !contractorUser}%
+    <tr id="weather${weather.id}" class=${contractor?'warning':''}>
+        <td></td>
+        <td taskId="t${weather.task?.id}">${(weather.task)?(weather.task?.name):(weather.myPlan?.name)}</td>
+        <td conditionId="${weather.weatherCondition.id}">${weather?.weatherCondition?.conditionWeather?.raw()}</td>
+        <td>${weather?.startDate?.format("HH:mm")}</td>
+        <td>${weather?.finishDate?.format("HH:mm")}</td>
+        <td><strong>${contractor?(weather.owner.toString() +":  "):''}</strong> <span>${weather?.notes?.raw()}</span>
+        </td>
+        <td>
+            #{if weather.attaches.size()>0}
+                <div class="post-images" id="post-images-weather-${weather.id}">
+                    #{list items:weather.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                    #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-weather-"+weather.id).raw()}
+            #{/if}
+        </td>
+        <td>
+            #{if contractor}
+                <button onclick="copyWeather(${weather.id})" data-rel="tooltip" title="Хуулах"
+                        class="add btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-check"></i></button>
+            #{/if}
+            #{else }
+                <button onclick="deleteWeather(${weather.id})" data-rel="tooltip" title="Устгах"
+                        class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+            #{/else}
+
+        </td>
+    </tr>
+    #{/list}
+#{/if}
+#{else }
+<tr id="weather${weather.id}">
+    <td></td>
+    <td>${(weather.task)?(weather.task?.name):(weather.myPlan?.name)}</td>
+    <td>${weather?.weatherCondition?.conditionWeather?.raw()}</td>
+    <td>
+    ${weather?.startDate?.format("HH:mm")}
+    </td>
+    <td>
+    ${weather?.finishDate?.format("HH:mm")}
+    </td>
+    <td>${weather?.notes?.raw()}</td>
+    <td>
+        #{if weather.attaches.size()>0}
+            <div class="post-images" id="post-images-weather-${weather.id}">
+                #{list items:weather.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-weather-"+weather.id).raw()}
+        #{/if}
+    </td>
+    <td>
+        <button onclick="deleteWeather(${weather.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

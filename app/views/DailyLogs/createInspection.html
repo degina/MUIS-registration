@@ -1,0 +1,60 @@
+#{if isList}
+#{list items:inspections,as:'inspection'}
+<tr id="trInspection${inspection.id}">
+    <td></td>
+    <td>${(inspection.task)?(inspection.task?.name):(inspection.myPlan?.name)}</td>
+    <td>${inspection.startHour.format("HH:mm")}</td>
+    <td>${inspection.finishHour.format("HH:mm")}</td>
+    <td>${inspection.inspectionType}</td>
+    <td>${inspection.inspectorName}</td>
+    <td>${inspection.area}</td>
+    <td>${inspection.comments}</td>
+    <td>
+    #{if inspection.attaches.size()>0}
+        <div class="post-images" id="post-images-inspection-${inspection.id}">
+            #{list items:inspection.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+        </div>
+    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-inspection-"+inspection.id).raw()}
+    #{/if}
+    </td>
+    <td></td>
+    <td>
+        <button onclick="deleteInspection(${inspection.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/list}
+#{/if}
+
+#{else }
+<tr id="trInspection${inspection.id}">
+    <td></td>
+    <td>${(inspection.task)?(inspection.task?.name):(inspection.myPlan?.name)}</td>
+    <td >${inspection.startHour.format("HH:mm")}</td>
+    <td >${inspection.finishHour.format("HH:mm")}</td>
+    <td>${inspection.inspectionType}</td>
+    <td>${inspection.inspectorName}</td>
+    <td>${inspection.area}</td>
+    <td>${inspection.comments}</td>
+    <td>
+        #{if inspection.attaches.size()>0}
+            <div class="post-images" id="post-images-inspection-${inspection.id}">
+                #{list items:inspection.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-inspection-"+inspection.id).raw()}
+        #{/if}
+
+    </td>
+    <td></td>
+    <td>
+        <button onclick="deleteInspection(${inspection.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

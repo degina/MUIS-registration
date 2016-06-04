@@ -1,0 +1,879 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: pid==0?'Файлын архив':'Төслийн файлууд'/}
+#{FolderShare-Config /}
+#{checkFileExtension /}
+#{alertMessages /}
+<style>
+    #sortable1, #sortable2 {
+        min-height: 20px;
+        list-style-type: none;
+    }
+
+    #sortable1 li, #sortable2 li {
+        margin: 0 5px 5px 5px;
+        padding: 2px 5px;
+        cursor: pointer;
+        font-weight: normal;
+        color: #000000;
+        /*border-bottom: 1px solid #ddd;*/
+    }
+</style>
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<link rel="stylesheet" href="/assets/plugins/jstree/src/themes/default/style.css">
+<link rel="stylesheet" href="/public/jquery-ui-1.11.2.custom/jquery-ui.css">
+#{if admin}
+<div class="modal fade" id="modal-permission" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" mtype="0">Хандах эрх</h4>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                <button type="button" class="btn btn-success" onclick="savePermission()">Хадгалах</button>
+            </div>
+        </div>
+    </div>
+</div>
+#{/if}
+<div id="main-content" style="padding: 5px">
+    <table border="0" cellspacing="0" cellpadding="0" id="mainTable" style="width: 100%">
+        <tr>
+            <td rowspan="2" style="width: auto;vertical-align: top">
+                <div id="tree1"
+                     class="jstree jstree-1 jstree-default jstree-default-responsive panel noselect"
+                     role="tree"
+                     style="overflow-y: auto;overflow-x:auto; height:100vh;margin-bottom: 0;">
+                </div>
+            </td>
+            <td style="vertical-align: top;height: 10px">
+                <input id=searchTextInput type="text" placeholder="Файлын нэрээр хайх"
+                       style="width: 99%;margin: 0 5px;padding: 2px 10px;text-align: center"/>
+
+                <div id=fileContent
+                     style="overflow-y: auto;margin-bottom: -5px;width: 100%;padding-right: 5px;padding-left: 5px"
+                     class="col-sm-9 noselect">
+                    <ul class="media-header" style="margin: 0;">
+                        <li>
+                            <a class="filter active" filter="0"><i
+                                    class="glyphicon glyphicon-list-alt"></i>&nbsp;<strong>Бүгд</strong>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="filter" filter="2"><i
+                                    class="glyphicon glyphicon-font"></i>
+                                &nbsp;АutoCad</a>
+                        </li>
+                        <li>
+                            <a class="filter" filter="4"><i
+                                    class="glyphicon glyphicon-folder-open"></i>
+                                &nbsp;Бичиг баримт</a>
+                        </li>
+                        <li>
+                            <a class="filter" filter="1"><i
+                                    class="glyphicon glyphicon-picture"></i>
+                                &nbsp;Зураг</a>
+                        </li>
+                        <li>
+                            <a class="filter" filter="3"><i
+                                    class="glyphicon glyphicon-book"></i>&nbsp;PDF</a>
+                        </li>
+
+                        <li>
+                            <a class="filter" filter="5"><i
+                                    class="glyphicon glyphicon-indent-right"></i>&nbsp;Хавсралт</a>
+                        </li>
+                        <li>
+                            <a class="filter" filter="6"><i
+                                    class="glyphicon glyphicon-file"></i>&nbsp;Загвар</a>
+                        </li>
+
+                        <li class="pull-right">
+                            <a data-target="#add-file" onclick="clickUploadButton()"><i
+                                    class="fa fa-cloud-download c-white"></i>&nbsp;Файл
+                                хуулах</a>
+                        </li>
+                    </ul>
+                    <div id="fileUploadContainer" class="updivs" style="margin-bottom: 1px">
+                        <div id="file-uploader-demo1">
+                            <noscript>
+                                <p>Please enable JavaScript to use file uploader.</p>
+                                <!-- or put a simple form for upload here -->
+                            </noscript>
+                        </div>
+                        <span class="uploadingWait" style="display: none">Файл хуулж байна, түр хүлээнэ үү...</span>
+
+                        <div style="width: 100%;font-size: 12px" id="description" class="dhidden">
+                            Тайлбар:</br>
+                            <textarea style="width: 100%;height: 100px;"></textarea>
+                        </div>
+                    </div>
+                    <div id="fileShareControl" class="updivs dhidden">
+                        <label for="">Харагдах хэлбэр:</label>
+                        <span><input id=fileTypeAll type="radio" name="fileType" class="fileType" ftype="0"
+                                     checked><span
+                                class="ftypeName">Нийтийн</span></span>
+                        <input id=fileTypeMe type="radio" name="fileType" class="fileType" ftype="1"><span
+                            class="ftypeName">Зөвхөн надад</span>
+                        <input id=fileTypeChoose type="radio" name="fileType" class="fileType" ftype="2"><span
+                            class="ftypeName">Сонголттой</span>
+
+                        <div id="personSelect" class="dhidden">
+                            <div id="sendUserTag"></div>
+                            <button type="button" class="btn btn-effect btn-default" data-toggle="modal"
+                                    data-target="#modal-select"
+                                    id="selectSendUserButton">Хүн сонгох
+                            </button>
+                        #{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:false /}
+                        </div>
+                        <button class="btn btn-success m-t-10" style="font-size: 12px;padding: 4px 12px;float: right"
+                                onclick="saveFiles()"><i
+                                class="fa fa-check"></i>Хадгалах
+                        </button>
+                        <button class="btn btn-default m-r-10 m-t-10"
+                                onclick="cancelUploadFile($('div#description'),$('div#fileShareControl'))"
+                                style="font-size: 12px;padding: 4px 12px;float: right">
+                            <i class="fa fa-reply"></i>&nbsp;Хаах
+                        </button>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="vertical-align: top">
+                <div class="col-md-12" style="padding-left: 4px;padding-right: 4px">
+                    <div class="panel panel-default" style="margin-bottom: 0;">
+                        <div class="panel-body" style="padding-top: 15px">
+                            <div class="row">
+                                <div id=loaderDiv class="col-md-12 col-sm-12 col-xs-12 table-responsive"
+                                     style="overflow-y: auto"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+<div style="display: none">
+    <div id="uploadStatus" style="margin: 20px">
+
+        <table cellpadding="6" cellspacing="0" border="1" style="min-width: 800px;margin-bottom:20px;">
+            <thead>
+            <tr>
+                <th style="width: 30px"></th>
+                <th>Файлын нэр</th>
+                <th>Хэмжээ</th>
+                <th>Төлөв</th>
+            </tr>
+            </thead>
+            <tbody id="fileStatusContainer"></tbody>
+        </table>
+        <div>
+            <button id="uploadReadyFiles" class="btn btn-success" style="float: right;margin-left: 10px"
+                    onclick="startUploadingNow()">Хуулах
+            </button>
+            <button id="cancelUploadStatus" class="btn btn-default" style="float: right"
+                    onclick="cancelFileUploadCheck()">&{'Cancel'}</button>
+            <div id="howManyReady"></div>
+        </div>
+    </div>
+    <a id="showUploadStatus" href="#uploadStatus"></a>
+</div>
+<div id=editShow style="display: none"></div>
+
+
+<div style="display:none;" id="pdfmake">
+</div>
+
+<div class="modal fade" id="modalAkt" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="akt">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="galleryModal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="akt">
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalAktStyle" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="aktStyle">
+        </div>
+    </div>
+</div>
+
+<script>
+    var selectedFolder = 0;
+    var selectedFolderLocked = false;
+    var selectedFileType = 0;
+    var editShowed = false;
+    var selectedNode;
+    $(function () {
+        var hh = $('div#tree1');
+        $('table#mainTable div#loaderDiv').height(hh.height() - 198);
+        hh.height(hh.height() - 52);
+    #{if admin}
+        $('#tree1').jstree({
+            'core': {
+                'data': {
+                    type: "POST",
+                    'url': '/folderShareTree',
+                    'data': function (node) {
+                        return {'id': node.id};
+                    }
+                },
+                check_callback: true
+            },
+            "plugins": [
+                "contextmenu", "unique"
+            ],
+            "contextmenu": {
+                items: function (o, cb) { // Could be an object directly
+                    return {
+                        "create": {
+                            "separator_before": false,
+                            "separator_after": true,
+                            "_disabled": false, //(this.check("create_node", data.reference, {}, "last")),
+                            "label": "Хавтас үүсгэх",
+                            "icon": "fa fa-folder-o",
+                            "action": function (data) {
+                                var inst = $.jstree.reference(data.reference),
+                                        obj = inst.get_node(data.reference);
+                                inst.create_node(obj, {}, "after", function (new_node) {
+                                    new_node.icon = "fa fa-folder-o c-orange";
+                                    new_node.text = "Шинэ хавтас";
+                                    setTimeout(function () {
+                                        inst.edit(new_node);
+                                    }, 0);
+                                });
+                            }
+                        },
+                        "create2": {
+                            "separator_before": false,
+                            "separator_after": true,
+                            "_disabled": false, //(this.check("create_node", data.reference, {}, "last")),
+                            "label": "Хавтас нэмэх",
+                            "icon": "fa fa-folder-open-o",
+                            "action": function (data) {
+                                var inst = $.jstree.reference(data.reference),
+                                        obj = inst.get_node(data.reference);
+                                inst.create_node(obj, {}, "last", function (new_node) {
+                                    new_node.icon = "fa fa-folder-o c-orange";
+                                    new_node.text = "Шинэ хавтас";
+                                    setTimeout(function () {
+                                        inst.edit(new_node);
+                                    }, 0);
+                                });
+                            }
+                        },
+                        "rename": {
+                            "separator_before": false,
+                            "separator_after": false,
+                            "_disabled": false, //(this.check("rename_node", data.reference, this.get_parent(data.reference), "")),
+                            "label": "Нэр өөрчлөх",
+                            "icon": "fa fa-edit",
+                            "action": function (data) {
+                                var inst = $.jstree.reference(data.reference),
+                                        obj = inst.get_node(data.reference);
+                                inst.edit(obj);
+                            }
+                        },
+                        "remove": {
+                            "separator_before": true,
+                            "icon": "fa fa-minus",
+                            "separator_after": false,
+                            "_disabled": false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+                            "label": "Устгах",
+                            "action": function (data) {
+                                var inst = $.jstree.reference(data.reference),
+                                        obj = inst.get_node(data.reference);
+                                if (confirm(obj.text + " -г устгах уу?")) {
+                                    selectedFolder = 0;
+                                    if (inst.is_selected(obj)) {
+                                        inst.delete_node(inst.get_selected());
+                                    } else {
+                                        inst.delete_node(obj);
+                                    }
+                                    $.ajax({
+                                        type: "POST",
+                                        data: {
+                                            id: obj.id
+                                        },
+                                        url: "/folderShareFDelete"
+                                    });
+                                }
+                            }
+                        },
+                        "settings": {
+                            "separator_before": true,
+                            "icon": "fa fa-gear",
+                            "separator_after": false,
+                            "_disabled": false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+                            "label": "Тохиргоо",
+                            "action": function (data) {
+                                var inst = $.jstree.reference(data.reference),
+                                        obj = inst.get_node(data.reference);
+                                selectedNode = data;
+                                $('div#modal-permission').modal('show').find('h4.modal-title').html('Тохиргоо').attr("mtype", 1);
+                                loading2('#modal-permission div.modal-body');
+                                $.ajax({
+                                    type: "POST",
+                                    data: {
+                                        id: obj.id
+                                    },
+                                    url: "/folderShareFSettings"
+                                }).success(function (data) {
+                                    $('div#modal-permission div.modal-body').html(data);
+                                });
+                            }
+                        },
+                        "permission": {
+                            "separator_before": true,
+                            "icon": "fa fa-lock",
+                            "separator_after": false,
+                            "_disabled": false, //(this.check("delete_node", data.reference, this.get_parent(data.reference), "")),
+                            "label": "Хандах эрх",
+                            "action": function (data) {
+                                var inst = $.jstree.reference(data.reference),
+                                        obj = inst.get_node(data.reference);
+                                selectedNode = data;
+                                $('div#modal-permission').modal('show').find('h4.modal-title').html('Хандах эрх').attr("mtype", 0);
+                                loading2('#modal-permission div.modal-body');
+                                $.ajax({
+                                    type: "POST",
+                                    data: {
+                                        id: obj.id
+                                    },
+                                    url: "/folderShareFPermission"
+                                }).success(function (data) {
+                                    $('div#modal-permission div.modal-body').html(data);
+                                });
+                            }
+                        }
+                    };
+                }
+            }
+        }).on("rename_node.jstree", function (e, data) {
+            $.ajax({
+                type: "POST",
+                data: {id: data.node.id, parent: data.instance.get_parent(data.node), name: data.text},
+                url: "/folderShareFRename"
+            }).success(function (dataId) {
+                selectedFolder = parseInt(dataId.split('_')[0]);
+                data.instance.set_id(data.node, selectedFolder);
+                data.node.data = dataId.split('_')[1];
+            });
+        }).on('changed.jstree', function (e, data) {
+            var obj = data.instance.get_node(data.selected[0]);
+            if (obj.id != undefined)selectTreeChild(obj.id, obj.data, (obj.icon.indexOf("fa-lock") > -1));
+        });
+    #{/if} #{else}
+        $('#tree1').jstree({
+            'core': {
+                'data': {
+                    type: "POST",
+                    'url': '/folderShareTree',
+                    'data': function (node) {
+                        return {'id': node.id};
+                    }
+                }
+            }
+        }).on('changed.jstree', function (e, data) {
+            var obj = data.instance.get_node(data.selected[0]);
+            selectTreeChild(obj.id, obj.data, (obj.icon.indexOf("fa-lock") > -1));
+        });
+    #{/else}
+    });
+    function selectTreeChild(id, ext, iflock) {
+        selectedFolder = id;
+        selectedFolderLocked = iflock;
+        if (selectedFolder != undefined &&
+                ext != undefined && ext.length > 0)uploader._options.allowedExtensions = ext.split(',');
+        cancelUploadFile($('div#description'), $('div#fileShareControl'));
+        loadFiles(id, 1);
+    }
+    function clickUploadButton() {
+        if (selectedFolder > 0) {
+            fileNameLength = true;
+            uploadValidation = true;
+            $("div#fileUploadContainer div.qq-upload-button input").on('change', function () {
+                if (uploadValidation)handleUploadingFiles(this.files);
+            }).click();
+        }
+        else showErrorMessageCustom("Хуулах хавтсаа сонгоно уу?", "right", "top", 2000);
+    }
+    var searchFieldText = "";
+
+    $(document).ready(function () {
+        createUploader();
+        $("a#showUploadStatus").fancybox();
+        $("input#searchTextInput").keypress(function (e) {
+            if (e.keyCode == 13)searchFile($("input#searchTextInput").val(), 1);
+        });
+    });
+
+    var fileAlreadyNamed = #{jsAction @controllers.FolderShare.fileAlreadyNamed(":fid",":fileName") /};
+    var readyFiles = [];
+    var fileStatusTemplate = "<tr><td>#num</td><td>#filename</td><td>#filesize</td><td id='#fileStatusId'>#fileStatus</td></tr>",
+            inProgressText = "Хуулж байна...",
+            fileExistsTemplate =
+                    "<div class='fileExistsDetail'><span>Хэрэглэгч:#fileUploader</span><span>Хуулсан огноо:#fileCreatedAt</span></div>";
+    var fileStatusCheckStop;
+    var uploader;
+    var fileNameUpload, fileId, startUploading = false, completedFileCount, uploadValidation = true;
+    var fileNameLength = true;
+
+    function createUploader() {
+        uploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo1'),
+            action: '@{FileUploader.uploadFile}',
+            showMessage: function (message) {
+                uploadValidation = false;
+                showErrorMessageCustom(message, "center", "center", 5000);
+            },
+            onSubmit: function (id, fileName) {
+                if (fileName.length > 50) {
+                    showErrorMessage("Файлын нэрийн урт 50 тэмдэгтээс дээшгүй байх ёстой!");
+                    fileNameLength = false;
+                    return false;
+                }
+                uploader.setParams({filename: fileName, uploadPath: "/FolderShare/"});
+                $('.fileUploadContainer .error').hide();
+                fileNameUpload = fileName;
+                fileId = id;
+//                handleUploadingFiles(uploader.acceptFiles);
+                return startUploading;
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadingProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onError: function (id, fileName, xhr) {
+                uploadValidation = false;
+                console.log("Upload: onError");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var list = $("ul.qq-upload-list li#li" + id);
+                list.attr('uploadedPath', responseJSON['filedir'])
+                        .append("<span style='float:left' onclick=deleteFileSelection(" + id + ")><i class='fa fa-minus-circle asterisk'></i></span>").
+                        attr('filename', responseJSON['filename']).
+                        attr('extension', responseJSON['extension']).
+                        attr('filesize', responseJSON['filesize']);
+                completedFileCount++;
+                if (readyFiles.length == completedFileCount) {
+//                    $("#submitUpload").removeAttr("disabled");
+                    $(".uploadingWait").hide();
+                }
+            }
+        });
+    }
+    function checkLockedPermission() {
+        if (selectedFolderLocked) {
+            $('div#fileShareControl input#fileTypeAll').parent().hide();
+            $('div#fileShareControl input#fileTypeChoose').prop('checked', true);
+            $('div#personSelect').removeClass("dhidden");
+        } else {
+            $('div#fileShareControl input#fileTypeAll').prop('checked', true).parent().show();
+            $('div#personSelect').addClass("dhidden");
+        }
+    }
+    function startUploadingNow() {
+//        $("ul.qq-upload-list").addClass("alert").addClass("bg-gray-light");
+        var rem = $('div#description');
+        var ftypeDiv = $('div#fileShareControl');
+        cancelUploadFile(rem, ftypeDiv);
+        checkLockedPermission();
+        $.ajax({
+            type: "POST",
+            data: {id: selectedFolder},
+            url: "/folderGetPermissionedUsers"
+        }).success(function (data) {
+            $('div#editShow').html(data);
+            rem.removeClass('dhidden');
+            ftypeDiv.removeClass('dhidden');
+            startUploading = true;
+            $.fancybox.close();
+//        $("#submitUpload").attr("disabled", "disabled");
+            completedFileCount = 0;
+            $(".uploadingWait").show();
+            uploader._uploadFileList(readyFiles);
+
+            startUploading = false;
+        });
+    }
+
+    function handleUploadingFiles(uploadingFiles) {
+        if (fileNameLength) {
+            //Clean previews uploaded files
+            readyFiles = [];
+            var con = $("#fileStatusContainer"), filledTemplate;
+            con.html("");
+
+            $("#uploadReadyFiles").attr('disabled', 'disabled');
+            for (var i = 0; i < uploadingFiles.length; i++) {
+                filledTemplate = fileStatusTemplate.replace("#filename", uploadingFiles[i].name).replace("#filesize", uploader._formatSize(uploadingFiles[i].size)).
+                        replace("#fileStatusId", i).replace("#fileStatus", inProgressText).replace("#num", i + 1);
+                con.append(filledTemplate);
+            }
+
+            fileStatusCheckStop = false;
+            $("a#showUploadStatus").click();
+
+            var statusEl;
+            for (i = 0; i < uploadingFiles.length && !fileStatusCheckStop; i++) {
+                statusEl = con.find("#" + i);
+                //Check already named on server.
+                $.ajax({
+                    url: fileAlreadyNamed({fid: selectedFolder, fileName: uploadingFiles[i].name}),
+                    dataType: 'text',
+                    type: 'POST',
+                    async: false,
+
+                    success: function (data) {
+                        data = data.split(',');
+                        if (data[0] === 'false') {
+                            //Allow this file name
+                            readyFiles.push(uploadingFiles[i]);
+                            statusEl.html("<label class='success'>Бэлэн</label>")
+                        } else {
+                            //Exists on server.
+                            statusEl.html("<label class='alreadyNamed'>Файлын нэр давхардаж байна</label>" +
+                                    fileExistsTemplate.replace("#fileUploader", data[1]).replace("#fileCreatedAt", data[2]));
+                        }
+                    }
+                });
+            }
+            if (readyFiles.length > 0) $("#uploadReadyFiles").removeAttr('disabled');
+            $("#howManyReady").html(readyFiles.length + " ширхэг файл хуулахад бэлэн боллоо.");
+        }
+    }
+
+    function cancelFileUploadCheck() {
+        fileStatusCheckStop = true;
+        $.fancybox.close();
+    }
+    var deleteFileAction = #{jsAction @FileUploader.deleteUploadFile(":fileDir",":extension") /};
+    function deleteFileSelection(id) {
+        if (confirm("Файлыг устгах уу?")) {
+            var li = $('div#fileUploadContainer .qq-upload-list li#li' + id);
+            $.ajax({
+                url: deleteFileAction({fileDir: li.attr('uploadedPath'), extension: li.attr('extension')}),
+                complete: function () {
+                },
+                type: "POST"
+            });
+            li.remove();
+        }
+    }
+    $('div#fileShareControl input.fileType').click(function () {
+        if ($(this).attr('ftype') == 2) {
+            $('div#personSelect').removeClass("dhidden");
+        } else $('div#personSelect').addClass("dhidden");
+    });
+    var fileSaveId = 0;
+    function saveFiles() {
+        var count = 0, dir = [], filename = [], extension = [], fileSize = [], fileSizeM = [];
+        var desc = $('div#description');
+        $('div#fileUploadContainer .qq-upload-list li.qq-upload-success').each(function () {
+            dir[count] = $(this).attr('uploadedPath');
+            filename[count] = $(this).attr('filename');
+            extension[count] = encodeURIComponent($(this).attr('extension'));
+            fileSizeM[count] = $(this).attr('filesize');
+            fileSize[count] = $(this).find('span.qq-upload-size').text();
+            count++;
+        });
+        if (count > 0) {
+            var ftypeDiv = $('div#fileShareControl');
+            var uid = [];
+            count = 0;
+            ftypeDiv.find('div#sendUserTag li').each(function () {
+                uid[count] = $(this).attr('uid');
+                count++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    fileSaveId: fileSaveId,
+                    fid: selectedFolder,
+                    dir: dir,
+                    filename: filename,
+                    extension: extension,
+                    fileSize: fileSize,
+                    fileSizeM: fileSizeM,
+                    ftype: ftypeDiv.find('input.fileType:checked').attr('ftype'),
+                    uid: uid,
+                    description: desc.find('textarea').val()
+                },
+                url: "/saveShareFile"
+            }).complete(
+                    function () {
+                        cancelUploadFile(desc, ftypeDiv);
+                        loadFiles(selectedFolder, 1);
+                    });
+        }
+    }
+    function cancelUploadFile(desc, ftypeDiv) {
+        editShowed = false;
+        if (fileSaveId > 0)fileSaveId = 0;
+        desc.addClass('dhidden');
+        $('div#fileShareControl').addClass('dhidden');
+        $('div#fileUploadContainer ul.qq-upload-list').html("");
+        desc.find('textarea').val('');
+        ftypeDiv.find('input.fileType:first').prop('checked', true);
+        ftypeDiv.find('div#sendUserTag').html('');
+    }
+    function deleteFiles(file) {
+        $.ajax({
+            type: "POST",
+            data: {id: file.attr('fileId')},
+            url: "/folderShareDelete"
+        });
+    }
+    function editShow(file) {
+        if (!editShowed) {
+            file.append("<img src='/public/images/loading.gif' alt='Loading'/>");
+            $.ajax({
+                type: "POST",
+                data: {id: file.attr('fileId')},
+                url: "/folderShareEditShow"
+            }).success(function (data) {
+                editShowed = true;
+                $('div#editShow').html(data);
+                file.find('img').remove();
+            });
+        } else showErrorMessage("Файл хуулах хэсгийг хаана уу!")
+    }
+    //  load files
+    function loadFiles(fid, page) {
+        if (selectedFileType == 6) {
+            loading2('div#loaderDiv');
+            var actUrl = "/aktStyleList";
+
+            $.ajax({
+                type: "POST",
+                data: {fid: fid, ftype: selectedFileType, CurrentPageNumber: page},
+                url: actUrl
+            }).success(function (data) {
+                $('div#loaderDiv').html(data);
+            });
+        }
+        else if (selectedFileType == 5) {
+            loading2('div#loaderDiv');
+            var actUrl = "/aktList";
+
+            $.ajax({
+                type: "POST",
+                data: {fid: fid, ftype: selectedFileType, CurrentPageNumber: page},
+                url: actUrl
+            }).success(function (data) {
+                $('div#loaderDiv').html(data);
+            });
+        }
+        else {
+            loading2('div#loaderDiv');
+            $.ajax({
+                type: "POST",
+                data: {fid: fid, ftype: selectedFileType, CurrentPageNumber: page},
+                url: "/folderShareLoadFiles"
+            }).success(function (data) {
+                $('div#loaderDiv').html(data);
+            });
+        }
+    }
+    function searchFile(seaVal, page) {
+        if (seaVal.length > 1) {
+            loading2('div#loaderDiv');
+            $.ajax({
+                type: "POST",
+                data: {search: seaVal, CurrentPageNumber: page},
+                url: "/folderShareSearchFiles"
+            }).success(function (data) {
+                $('div#loaderDiv').html(data);
+            });
+        }
+    }
+    $('div#fileContent a.filter').on('click', function () {
+        if ($(this).attr('filter') == 6) {
+            $('div#fileContent a.filter').each(function () {
+                $(this).removeClass('active');
+            });
+            selectedFileType = $(this).attr('filter');
+            $(this).addClass('active');
+            loadFiles(selectedFolder, 1);
+        }
+        else {
+            if (selectedFolder > 0) {
+                $('div#fileContent a.filter').each(function () {
+                    $(this).removeClass('active');
+                });
+                selectedFileType = $(this).attr('filter');
+                $(this).addClass('active');
+                loadFiles(selectedFolder, 1);
+            }
+        }
+    });
+    var downloadAction = #{jsAction @FunctionController.downloadFile(":fileDir",":fileName",":extension") /};
+    function handleAttachmentClickFileCenter(image) {
+        $.ajax({
+            type: "POST",
+            data: {id: image.attr('fileId')},
+            url: "/fSharedownloadHistorySave"
+        });
+        if (image.attr('openType') == 0) {
+            var ext = checkFileExtension(image.attr('extension'));
+            if (ext == imageFile) {
+                $.fancybox.open(image.attr('fileDir') + "." + image.attr('extension'));
+            } else {
+                if (ext == pdfFile) {
+                    window.open(image.attr('fileDir') + "." + image.attr('extension'));
+                } else if ((ext == wordFile || ext == excelFile || ext == powerPointFile) &&
+                        (image.attr('filesize').length == 0 || parseFloat(image.attr('filesize')) < 10)) {
+                    var pathArray = location.href.split('/');
+//                    protocol = pathArray[0];
+//                    host = pathArray[2];
+//                    url = protocol + '//' + host;
+                    window.open("http://view.officeapps.live.com/op/view.aspx?src=" + pathArray[2] + image.attr('fileDir') + "." + image.attr('extension'));
+                } else {
+                    $('body').append("<iframe height='0' width='0' style='display:none' src='" + downloadAction({
+                                fileDir: image.attr("fileDir"),
+                                fileName: image.attr("fileName"),
+                                extension: image.attr("extension")
+                            }) + "'/>");
+                }
+            }
+        } else
+            $('body').append("<iframe height='0' width='0' style='display:none' src='" + downloadAction({
+                        fileDir: image.attr("fileDir"),
+                        fileName: image.attr("fileName"),
+                        extension: image.attr("extension")
+                    }) + "'/>");
+    }
+    function showMoreInfo(file, ftype) {
+        file.append("<img src='/public/images/loading.gif' alt='Loading'/>");
+        $.ajax({
+            type: "POST",
+            data: {id: file.attr('fileId'), ftype: ftype},
+            url: "/folderShareShowMoreInfo"
+        }).success(
+                function (data) {
+                    file.find('img').remove();
+                    $.fancybox.open(data);
+                });
+    }
+
+    function aktStyleBlank(obj, atype) {
+        // showMoreAktStyleInfo(obj.id, 2, selectedFolder);
+        if (atype == 1 || atype == 3) {
+            var file = obj;
+            file.append("<img src='/public/images/loading.gif' alt='Loading'/>");
+            //alert(ftype+":"+file.attr('fileId'));
+            $.ajax({
+                type: "POST",
+                data: {id: file.attr('fileId'), ftype: atype},
+                url: "/aktStyleBlank"
+            }).success(function (data) {
+                file.find('img').remove();
+                var modalDiv = $("div#modalAktStyle");
+                modalDiv.modal('show');
+                modalDiv.find("div.modal-content").html(data);
+            });
+        }
+        else {
+            var file = obj.id;
+            $('#' + file).append("<img src='/public/images/loading.gif' alt='Loading'/>");
+            $.ajax({
+                type: "POST",
+                data: {id: $('#' + file).attr('fileId'), ftype: atype},
+                url: "/aktStyleBlank"
+            }).success(function (data) {
+                $('#' + file).find('img').remove();
+                var modalDiv = $("div#modalAktStyle");
+                modalDiv.modal('show');
+                modalDiv.find("div.modal-content").html(data);
+            });
+        }
+    }
+
+    function aktBlank(obj, ftype) {
+        if (ftype == 1) {
+            var file = obj;
+            file.append("<img src='/public/images/loading.gif' alt='Loading'/>");
+            $.ajax({
+                type: "POST",
+                data: {id: file.attr('fileId'), ftype: ftype, fid: selectedFolder},
+                url: "/aktStyleChoose"
+            }).success(function (data) {
+                file.find('img').remove();
+                var modalDiv = $("div#modalAkt");
+                modalDiv.modal('show');
+                modalDiv.find("div.modal-content").html(data);
+            });
+        }
+        else {
+            var file = obj.id
+            $('#' + file).append("<img src='/public/images/loading.gif' alt='Loading'/>");
+            $.ajax({
+                type: "POST",
+                data: {id: $('#' + file).attr('fileId'), ftype: ftype, fid: selectedFolder},
+                url: "/aktStyleChoose"
+            }).success(function (data) {
+                $('#' + file).find('img').remove();
+                var modalDiv = $("div#modalAkt");
+                modalDiv.modal('show');
+                modalDiv.find("div.modal-content").html(data);
+            });
+        }
+    }
+
+
+
+    #{if admin}
+    function savePermission() {
+        var permDialog = $('div#modal-permission');
+        permDialog.modal('hide');
+        var mtype = permDialog.find('.modal-title').attr('mtype');
+        if (mtype == 0) {
+            var rightUsers = permDialog.find('#sortable2 li').length;
+            var users = ",";
+            permDialog.find('#sortable1 li').each(function () {
+                users += $(this).attr('id') + ",";
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: permDialog.find('#mainId').val(),
+                    unseens: rightUsers, users: users
+                },
+                url: "/folderShareFPermissionSave"
+            }).success(function (data) {
+                var inst = $.jstree.reference(selectedNode.reference);
+                inst.set_icon(selectedNode.reference, "fa " + data);
+                selectedFolderLocked = (data.indexOf("fa-lock") > -1);
+            });
+        } else {
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: permDialog.find('#mainId').val(),
+                    cid: permDialog.find('input[name=fcolor]:checked').val(),
+                    tid: permDialog.find('input[name=ftype]:checked').val(),
+                    eid: permDialog.find('input[name=fextension]:checked').val(),
+                    queue: permDialog.find('#queue').val()
+                },
+                url: "/folderShareFSettingSave"
+            }).success(function (data) {
+                var inst = $.jstree.reference(selectedNode.reference);
+                inst.set_icon(selectedNode.reference, "fa " + data);
+            });
+        }
+    }
+    #{/if}
+</script>

@@ -1,0 +1,172 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: 'Төслийн хандах эрхүүд'/}
+#{set activeMenu: 'Organization'/}
+#{set activeMenuSub:'Permission'/}
+#{set 'moreScripts'}
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+<script src="/assets/plugins/jquery-mobile/jquery.mobile-1.4.2.js"></script>
+#{/set}
+<style>
+    div#main-content td,
+    div#main-content th {
+        font-size: 12px;
+        padding: 0;
+        vertical-align: middle;
+    }
+
+    div#main-content td span.description {
+        padding: 2px 4px;
+    }
+
+    div#main-content th.rotate {
+        height: 140px;
+        max-width: 12px;
+        vertical-align: bottom;
+        text-align: center;
+    }
+
+    div#main-content th.rotate > div {
+        white-space: nowrap;
+    }
+
+    div#main-content td.rotate {
+        max-width: 20px;
+        vertical-align: middle;
+        text-align: center;
+    }
+
+    div#main-content th.rotate > div {
+        transform: translate(1px, -18px) rotate(270deg);
+    }
+
+    div#main-content td.rotate > div {
+        transform: translate(1px, 1px) rotate(270deg);
+    }
+
+    div#main-content tr:hover {
+        background-color: #fffb99;
+    }
+
+    div#main-content .ui-radio .ui-btn {
+        padding: 9px 14px 9px 24px;
+        background-color: transparent;
+    }
+
+    div#main-content .ui-btn:hover {
+        background-color: #fffb99;
+    }
+
+    div#main-content .hover {
+        background: #fffb99;
+    }
+</style>
+<div id="main-content" style="padding: 0">
+    <form action="@{controllers.OrganizationCharts.permissionSave()}" method="post"
+          accept-charset="utf-8" enctype="multipart/form-data">
+        <div class="panel panel-default" style="margin-bottom: 0">
+            <div class="panel-body" style="padding: 10px">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th rowspan="2" class="rotate" style="width: 60px">
+                            <div style="margin-bottom: 40px">Хандалт</div>
+                        </th>
+                        <th rowspan="2" style="padding: 10px;width: 200px">Эрх</th>
+                    #{list items:organizationTeams,as:'team'}
+                        <th colspan="${team.organizationCharts.size()}"
+                            style="text-align: center;font-size: 10px">${team.name}</th>
+                    #{/list}
+                        <th rowspan="2"></th>
+                    </tr>
+                    <tr>
+                    #{list items:organizationTeams,as:'team'}
+                        #{list items:team.organizationCharts,as:'org'}
+                            <th class="rotate"
+                                style="width: 8px;${team.organizationCharts.size()==1?'padding-bottom: 10px':''}">
+                                <div>${org.user.toString()}</div>
+                            </th>
+                        #{/list}
+                    #{/list}
+                    </tr>
+                    </thead>
+                    <tbody>
+                    #{list items:permissions,as:'permission'}
+                    %{selectedPermission=[];ucount=0;}%
+                    <tr>
+                        <td class="rotate" rowspan="${permission.permissionTypes.size()+1}"
+                            style="padding: 0 ${permission.name.contains(' ')?'0':'10px'}">
+                            <div>${permission.name}</div>
+                        </td>
+                        <td>
+                            <span class="description">Ашиглахгүй</span>
+                        </td>
+                        #{list items:organizationTeams,as:'team'}
+                            #{list items:team.organizationCharts,as:'org'}
+                            %{selectedPermission[ucount]=org.getPermission(permission.id);ucount++;}%
+                                <td title="${org.user.toString()}"><label>
+                                    <input type="radio" name="permission-${permission.id}-${org.id}" value="0"
+                                           style="display: none" checked/>
+                                </label></td>
+                            #{/list}
+                        #{/list}
+                        <td></td>
+                    </tr>
+                        #{list items:permission.permissionTypes,as:'permissionType'}
+                        %{ucount=0;}%
+                        <tr>
+                            <td><span class="description">${permissionType.description}</span></td>
+                            #{list items:organizationTeams,as:'team'}
+                                #{list items:team.organizationCharts,as:'org'}
+                                    <td title="${org.user.toString()}"><label style="text-align: center">
+                                        <input type="radio" name="permission-${permission.id}-${org.id}"
+                                               value="${permissionType.value}" ${selectedPermission[ucount]==permissionType.value?'checked':''}
+                                               style="display: none"/>
+                                    </label></td>
+                                %{ucount++;}%
+                                #{/list}
+                            #{/list}
+                            <td></td>
+                        </tr>
+                        #{/list}
+                    #{/list}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <button id=SaveButton type="submit" class="btn btn-success btn-transparent"
+                style="z-index:3;position: fixed;top: 50px;right:10px;width: 120px">
+            Хадгалах
+        </button>
+    </form>
+</div>
+#{flashCrud /}
+<script>
+    $("div#main-content td").hover(function () {
+        $el = $(this);
+        $el.parent().addClass("hover");
+
+        if ($el.parent().has('td[rowspan]').length == 0)
+            $el.parent()
+                    .prevAll('tr:has(td[rowspan]):first')
+                    .find('td[rowspan]')
+                    .addClass("hover");
+
+    }, function () {
+        $el.parent()
+                .removeClass("hover")
+                .prevAll('tr:has(td[rowspan]):first')
+                .find('td[rowspan]')
+                .removeClass("hover");
+
+    });
+</script>

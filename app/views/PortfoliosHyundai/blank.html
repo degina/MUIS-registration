@@ -1,0 +1,1016 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    .portfolioArea h3 {
+        font-family: arial;
+    }
+
+    .post-column-left {
+        padding: 10px 10px 20px 35px;
+    }
+
+    .post-column-right {
+        background-color: #2b2e33;
+        padding: 20px;
+        margin: 10px;
+        color: #eaeaea;
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .page-title a span {
+        display: inline-block;
+        margin-top: 14px;
+    }
+
+    .page-title a {
+        display: inline-block;
+        margin-bottom: 15px;
+        margin-top: 15px;
+        color: #888b91;
+    }
+
+    .page-title .fa {
+        margin-right: 13px;
+        padding: 5px 15px;
+        float: left;
+    }
+
+    div.tab-content .btn {
+        padding: 3px 24px;
+    }
+
+    div.tab-content input.form-control {
+        padding: 5px 8px;
+    }
+
+    .deleteButton {
+        display: block;
+        color: #fff !important;
+        border: none !important;
+        text-decoration: none;
+        position: absolute;
+        background: #c75757;
+        border-radius: 3px;
+        font-weight: bold;
+        padding: 0 3px;
+        top: 18px;
+        left: 0;
+        font-size: 16px;
+    }
+
+    span.contact-span {
+        display: inline-block;
+        min-width: 100px;
+    }
+    span.contact-long {
+        display: inline-block;
+        min-width: 200px;
+    }
+    #profilePicture img {
+        min-height: 212px;
+    }
+
+</style>
+<div id="main-content">
+    <div class="modal fade" id="myModalButeegDehuun" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Бүтээгдэхүүн</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Бүтээгдэхүүн<span>:</span></label>
+
+                            <div class="col-sm-7">
+                                <select class="form-control" id="productName">
+                                #{list items:portfolioProducts,as:'product'}
+                                    <option value="${product.id}">${product.name}</option>
+                                #{/list}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Техникикийн үзүүлэлт<span>:</span></label>
+
+                            <div class="col-sm-7">
+                                <textarea rows="3" id="productRate" class="form-control"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Бүтээгдэхүүний тоо<span>:</span></label>
+
+                            <div class="col-sm-7">
+                                <input type="text" class="form-control" id="productAmount">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                    <button type="button" class="btn btn-primary" onclick="addProduct()">Нэмэх</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModalHariutsagch" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Хариуцагч</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Нэр<span>:</span></label>
+
+                            <div class="col-sm-7">
+                                <input type="text" class="form-control" id="hariutsagchName">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Албан тушаал<span>:</span></label>
+
+                            <div class="col-sm-7">
+                                <input type="text" class="form-control" id="hariutsagchTushaal">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-5 control-label">Утас<span>:</span></label>
+
+                            <div class="col-sm-7">
+                                <input type="text" class="form-control" id="hariutsagchUtas">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                    <button type="button" class="btn btn-primary" onclick="addHariutsagch()">Нэмэх</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myModalUgsrahHeseg" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Угсрах хэсэг</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Баг<span>:</span></label>
+
+                            <div class="col-sm-7">
+                                <select id="selectUgsrahBag">
+                                #{list items:userTeams,as:'team'}
+                                    <option value="${team.name}">${team.name}</option>
+                                #{/list}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">Ахлагч<span>:</span></label>
+                            <div class="col-sm-7">
+                                <select id="selectUgsrahAhlagch" data-live-search="true">
+                                #{list items:userTeams,as:'team'}
+                                    <optgroup label="${team.name}">
+                                        #{list items:team.users,as:'userCurrent'}
+                                            <option data-subtext="${userCurrent.userPosition}"
+                                                    value="${userCurrent}">${userCurrent}</option>
+                                        #{/list}
+                                    </optgroup>
+                                #{/list}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                    <button type="button" class="btn btn-primary" onclick="addUgsrahHeseg()">Нэмэх</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="clearfix">
+        <div class="page-title pull-left">
+            <i class="icon-custom-left"></i>
+            <h3><strong>Шинэ Төсөл</strong></h3>
+            *{<a href="@{controllers.PortfoliosHyundai.list()}"><i class="fa fa-angle-left"></i>}*
+                *{<span>Төслүүдийн жагсаалт руу буцах</span></a>}*
+            *{<br>}*
+        </div>
+    </div>
+    <form id="addProject" action="@{controllers.PortfoliosHyundai.create()}" method="post" accept-charset="utf-8"
+          enctype="multipart/form-data" data-parsley-validate>
+        <input name="portfolioId" type="hidden" value="${portfolio?.id}"/>
+
+        <div class="row p-15">
+            <div class="tabcordion">
+                <ul id="myTab" class="nav nav-tabs">
+                    <li class="active"><a href="#portfolio_general" data-toggle="tab">Төслийн мэдээлэл</a></li>
+                    <li><a href="#portfolio_production" data-toggle="tab">Үйлдвэрлэлийн мэдээлэл</a></li>
+                    <li><a href="#portfolio_construction" data-toggle="tab">Угсралтын мэдээлэл</a></li>
+                    <li><a href="#portfolio_services" data-toggle="tab">Ашиглалтын мэдээлэл</a></li>
+                    <li><a href="#portfolio_location" data-toggle="tab" onclick="reloadMap()">Төслийн байршил</a></li>
+                </ul>
+                <div class="tab-content col-md-12">
+                    <div class="tab-pane fade active in" id="portfolio_general">
+                        <div class="row">
+                            <div class="col-md-8 post-column-left">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-horizontal">
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Төслийн нэр <span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolio?.project?.name}"
+                                                           name="projectName">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Хариуцагч <span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" id="selectOwnerId" name="selectOwner"
+                                                            data-live-search="true">
+                                                        <option data-subtext="Сонгох" value="0">Сонгох</option>
+                                                    #{list items:userTeams,as:'team'}
+                                                        <optgroup label="${team.name}">
+                                                            #{list items:team.users,as:'userCurrent'}
+                                                                <option data-subtext="${userCurrent.userPosition}"
+                                                                        value="${userCurrent.id}"
+                                                                        #{if portfolio?.owner?.id == userCurrent.id}selected#{/if}
+                                                                        >${userCurrent}</option>
+                                                            #{/list}
+                                                        </optgroup>
+                                                    #{/list}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Төлөв <span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" name="selectStatus">
+                                                    #{list items:portfolioStages,as:'stage'}
+                                                        <option #{if portfolioHyundai?.stage?.id == stage.id}selected#{/if}
+                                                                value="${stage.id}">${stage.name}</option>
+                                                    #{/list}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Барилгын зориулалт <span>:</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.zoruilalt}"
+                                                           name="projectZoruilalt">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Байршил<span>:</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <select class="form-control" name="selectLocationId">
+                                                    #{list items:portfolioLocations,as:'loc'}
+                                                        <option #{if portfolioHyundai?.location?.id == loc.id}selected#{/if}
+                                                                value="${loc.id}">${loc.name}</option>
+                                                    #{/list}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Барилгын
+                                                    хаяг<span>:</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolio?.address}"
+                                                           name="projectAddress">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Захиалагч <span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.zahialagch}"
+                                                           name="projectZahialagch">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Захиалагчийг төлөөлөгч<span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.zahialagchToloologch}"
+                                                           name="projectZahialagchToloologch">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Албан тушаал <span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.zahialagchTushaal}"
+                                                           name="zahialagchTushaal">
+                                                </div>
+                                                <label class="col-sm-3 control-label">Утасны дугаар<span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.zahialagchUtas}"
+                                                           name="zahialagchUtas">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Барилга хариуцагч<span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-9">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.hariutsagch}"
+                                                           name="ugsraltHariutsagch">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Албан тушаал <span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.hariutsagchTushaal}"
+                                                           name="ugsraltHariutsagchTushaal">
+                                                </div>
+                                                <label class="col-sm-3 control-label">Утасны дугаар<span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control"
+                                                           value="${portfolioHyundai?.hariutsagchUtas}"
+                                                           name="ugsraltHariutsagchUtas">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Эхэлсэн<span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control datetimepicker"
+                                                           value="${portfolio?.project?.startDate?.format("yyyy-MM-dd")}"
+                                                           name="projectStartDate">
+                                                </div>
+                                                <label class="col-sm-3 control-label">Дуусах<span
+                                                        class="asterisk">*</span></label>
+
+                                                <div class="col-sm-3">
+                                                    <input type="text" class="form-control datetimepicker"
+                                                           value="${portfolio?.project?.finishDate?.format("yyyy-MM-dd")}"
+                                                           name="projectFinishDate">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-sm-3 control-label">Тусгай тэмдэглэл:</label>
+
+                                                <div class="col-sm-9">
+                                                    <textarea rows="2" class="form-control"
+                                                           name="tusgaiTemdeglel">${portfolioHyundai?.tusgaiTemdeglel}</textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="post-column-right">
+                                    <div class="form-group">
+                                        <div class="row">
+                                            <h5 class="pull-left m-t-0">Зураг <span class="asterisk">*</span></h5>
+                                            <button type="button" onclick="uploadImageButton()"
+                                                    class="pull-right c-gray"><i
+                                                    class="fa fa-plus"></i> <strong>Хуулах</strong></button>
+                                        </div>
+                                        <div class="row" id="portfolioImg">
+                                            <div id="profilePicture" class="crudField crud_text ">
+                                        <span>
+                                           <img
+                                           #{if portfolio?.imageUrl == null}src="/public/images/no-image-logo.jpg" #{/if}
+                                           #{else  }src="${portfolio.imageUrl}.jpg"#{/else}
+                                           class="img-responsive" id="image_crop2">
+                                        </span>
+                                                <h4 id="uploadProgress"></h4>
+
+                                                <div id="file-uploader-demo2"
+                                                     style="visibility:hidden;height:0;width:0;float:left;">
+                                                    <noscript>
+                                                        <p>Please enable JavaScript to use file uploader.</p>
+                                                    </noscript>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input name="projectImageUrl" id="imageUrlId" type="hidden"
+                                               value="#{if portfolio?.imageUrl != null}${portfolio?.imageUrl}#{/if}"/>
+                                        <input type="hidden" id="x" name="x"/>
+                                        <input type="hidden" id="y" name="y"/>
+                                        <input type="hidden" id="w" name="w"/>
+                                        <input type="hidden" id="h" name="h"/>
+                                        <input type="hidden" id="w2" name="w2"/>
+                                        <input type="hidden" id="h2" name="h2"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="portfolio_production">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Борлуулалтын менежер:</label>
+
+                                        <div class="col-sm-5">
+                                            <div id="sendUserTag">
+                                            %{if( portfolioHyundai != null) { borluulalt =
+                                                portfolioHyundai?.borluulaltName?.split(',');
+                                                }%
+                                                <ul>
+                                                #{list items:borluulalt,as:'userId'}
+                                                    #{if userId!=null&& !userId.equals("")}
+                                                        <li id="u-${userId}" seltype="u" uid="${userId}"><span
+                                                                onclick="sendToUserRemoveSelection('u','${userId}')">
+                                                <i class="fa fa-minus-circle asterisk"></i> ${controllers.Functions.getUserById(userId)}</span>
+                                                        </li>
+                                                    #{/if}
+                                                #{/list}
+                                                </ul>
+                                            %{}}%
+                                            </div>
+                                            <input name="borluulaltName" type="hidden" value=""/>
+                                            <button type="button" class="btn btn-default" data-toggle="modal"
+                                                    data-target="#modal-select" id="selectSendUserButton">Хүн нэмэх
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Бүтээгдэхүүний үйлдвэрийн дугаар:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control"
+                                                   value="${portfolioHyundai?.uildveriinDugaar}"
+                                                   name="uildveriinDugaar">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Үйлдвэр:</label>
+
+                                        <div class="col-sm-5">
+                                            <select class="form-control"
+                                                    name="uildverId">
+                                            #{list items:portfolioFactories,as:'factory'}
+                                                <option #{if portfolioHyundai?.factory?.id == factory.id}selected#{/if}
+                                                        value="${factory.id}">${factory.name}
+                                                </option>
+                                            #{/list}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Бүтээгдэхүүний төрлүүд:</label>
+
+                                        <div class="col-sm-8">
+                                            <div id="productDiv">
+                                                <ul>
+                                                %{if( portfolioHyundai != null) {}%
+                                                #{list items:portfolioHyundai.portfolioProductLists,as:'productList'}
+                                                    <li><span><i class="fa fa-minus-circle asterisk"></i>
+                                                        <strong>Бүтээгдэхүүн: </strong> <span
+                                                                class="contact-span">${productList.product.name}</span>
+                                                        <strong>Тоо: </strong><span
+                                                                class="contact-span">${productList.amount}</span>
+                                                    </span>
+                                                        <input name="productName" type="hidden"
+                                                               value="${productList.product.id}"/>
+                                                        <input name="productRate" type="hidden"
+                                                               value="${productList.rate}"/>
+                                                        <input name="productAmount" type="hidden"
+                                                               value="${productList.amount}"/>
+                                                    </li>
+                                                #{/list}
+                                                %{}}%
+                                                </ul>
+                                            </div>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal"
+                                                    data-target="#myModalButeegDehuun">
+                                                Бүтээгдэхүүн нэмэх
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Гэрээ хийсэн огноо :</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.gereeHiisen?.format("yyyy-MM-dd")}"
+                                                   name="gereeHiisen">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Зураг баталсан огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.zuragBatalsan?.format("yyyy-MM-dd")}"
+                                                   name="zuragBatalsan">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Үйлдвэрлэл эхэлсэн огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.uildverlelEhelsen?.format("yyyy-MM-dd")}"
+                                                   name="uildverlelEhelsen">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Үйлдвэрлэл дууссан огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.uildverlelDuussan?.format("yyyy-MM-dd")}"
+                                                   name="uildverlelDuussan">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Тээвэрлэлт хийсэн огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.teeverleltHiisen?.format("yyyy-MM-dd")}"
+                                                   name="teeverleltHiisen">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Гааль дээр ирсэн огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.gaaliDeerIrsen?.format("yyyy-MM-dd")}"
+                                                   name="gaaliDeerIrsen">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Барилгын талбай дээр ирсэн огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.talbaiDeerIrsen?.format("yyyy-MM-dd")}"
+                                                   name="talbaiDeerIrsen">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="portfolio_construction">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Угсрах хэсэг:</label>
+
+                                        <div class="col-sm-8">
+                                            <div id="ugsrahHesegDiv">
+                                                <ul>
+                                                %{if( portfolioHyundai != null) {}%
+                                                #{list items:portfolioHyundai.installTeams,as:'intstall'}
+                                                    <li>
+                                                    <span><i class="fa fa-minus-circle asterisk"></i>
+                                                    <strong>Баг: </strong> <span
+                                                                class="contact-long">${intstall.teamName} </span>
+                                                    <strong>Ахлагч: </strong><span
+                                                                class="contact-long">${intstall.leaderName}</span>
+                                                </span>
+                                                        <input name="ugsrahBag" type="hidden"
+                                                               value="${intstall.teamName}"/>
+                                                        <input name="ugsrahAhlagch" type="hidden"
+                                                               value="${intstall.leaderName}"/>
+                                                    </li>
+                                                #{/list}
+                                                %{}}%
+                                                </ul>
+                                            </div>
+                                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal"
+                                                    data-target="#myModalUgsrahHeseg">
+                                                Хэсэг нэмэх
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Эхэлсэн хугацаа:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.ugsrahStartDate?.format("yyyy-MM-dd")}"
+                                                   name="ugsrahStartDate">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Дуусах хугацаа:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.ugsrahEndDate?.format("yyyy-MM-dd")}"
+                                                   name="ugsrahEndDate">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="portfolio_services">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Ашиглагч байгууллага:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control" value="${portfolioHyundai?.ashiglagch}"
+                                                   name="ashiglagch">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Хариуцагч:</label>
+
+                                        <div class="col-sm-8">
+                                            <div id="hariutsagchDiv">
+                                                <ul>
+                                                %{if( portfolioHyundai != null) {}%
+                                                #{list items:portfolioHyundai.portfolioServiceUsers,as:'services'}
+                                                    <li>
+                                                    <span><i class="fa fa-minus-circle asterisk"></i>
+                                                    <strong>Нэр: </strong> <span
+                                                                class="contact-span">${services.name} </span>
+                                                    <strong>Тушаал: </strong><span
+                                                                class="contact-span">${services.albanTushaal}</span>
+                                                    <strong>Утас: </strong><span
+                                                                class="contact-span">${services.utas}</span>
+                                                </span>
+                                                        <input name="hariutsagchName" type="hidden"
+                                                               value="${services.name}"/>
+                                                        <input name="hariutsagchTushaal" type="hidden"
+                                                               value="${services.albanTushaal}"/>
+                                                        <input name="hariutsagchUtas" type="hidden"
+                                                               value="${services.utas}"/>
+                                                    </li>
+                                                #{/list}
+                                                %{}}%
+                                                </ul>
+                                            </div>
+                                            <button type="button" class="btn btn-default btn-lg" data-toggle="modal"
+                                                    data-target="#myModalHariutsagch">
+                                                Хариуцагч нэмэх
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Хариуцсан баг:</label>
+
+                                        <div class="col-sm-5">
+                                            <select name="ashiglaltHariutsagchBag" data-live-search="true">
+                                            #{list items:userTeams,as:'team'}
+                                                <option #{if portfolioHyundai?.ashiglaltBag?.equals(team.name)} selected #{/if}
+                                                                                                         value="${team.name}">${team.name}</option>
+                                            #{/list}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Ахлагч:</label>
+
+                                        <div class="col-sm-5">
+                                            <select name="ashiglaltHariutsagchAhlagch" data-live-search="true">
+                                            #{list items:userTeams,as:'team'}
+                                                <optgroup label="${team.name}">
+                                                    #{list items:team.users,as:'userCurrent'}
+                                                        <option data-subtext="${userCurrent.userPosition}"
+                                                            #{if portfolioHyundai?.ashiglaltAhlagch?.equals(userCurrent.toString())}
+                                                                selected #{/if}
+                                                                value="${userCurrent}">${userCurrent}</option>
+                                                    #{/list}
+                                                </optgroup>
+                                            #{/list}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Гэрээ хийсэн огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.ashiglaltGereeHiisen?.format("yyyy-MM-dd")}"
+                                                   name="uildverlelDuussan">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Эхэлсэн огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.ashiglaltEhelsen?.format("yyyy-MM-dd")}"
+                                                   name="uildverlelDuussan">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Дуусах огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.ashiglaltDuusah?.format("yyyy-MM-dd")}"
+                                                   name="uildverlelDuussan">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-4 control-label">Магадлал хийсэн огноо:</label>
+
+                                        <div class="col-sm-5">
+                                            <input type="text" class="form-control datetimepicker"
+                                                   value="${portfolioHyundai?.ashiglaltMagdlal?.format("yyyy-MM-dd")}"
+                                                   name="uildverlelDuussan">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="portfolio_location">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id=map-canvas style="height: 420px"></div>
+                            </div>
+                            <input name="mapLon" type="hidden" value="${portfolio?.mapLon==null?'106.91750764847':portfolio.mapLon}"/>
+                            <input name="mapLat" type="hidden" value="${portfolio?.mapLat==null?'47.919045645075':portfolio.mapLat}"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                <a href="@{controllers.PortfoliosHyundai.list()}" class="btn btn-default m-r-10 m-t-10"><i
+                        class="fa fa-reply"></i> Буцах</a>
+            #{if portfolio != null}<button type="button" onclick="deleteProject()"
+                                           class="btn btn-danger m-r-10 m-t-10"><i class="fa fa-times"></i> Устгах</button>#{/if}
+                <button type="submit" class="btn btn-success m-t-10"><i class="fa fa-check"></i> Хадгалах</button>
+            </div>
+        </div>
+    </form>
+</div>
+#{if portfolio != null}
+<form id="deleteProject" action="/portfolioHyundaiDelete/${portfolio.id}" method="get"
+      accept-charset="utf-8"></form>
+#{/if}
+
+%{
+def prox=0;
+def proy=0;
+def prow=265;
+def proh=106;
+if(portfolio!=null){
+prox=portfolio.x;
+proy=portfolio.y;
+prow=portfolio.w;
+proh=portfolio.h;
+}
+}%
+<!-- END MAIN CONTENT -->
+#{portfolios-blank-config /}
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+<script>
+    var uploader;
+    var nowDate = new Date();
+    var w2, h2;
+    var map, marker;
+    var lat = '${portfolio?.mapLat==null?'47.919045645075':portfolio.mapLat}';
+    var lon = '${portfolio?.mapLon==null?'106.91750764847':portfolio.mapLon}';
+    function createUploader() {
+        uploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo2'),
+            action: '@{FileUploader.uploadFileCustom}',
+            allowedExtensions:['jpg','jpeg','bmp','png'],
+            onSubmit: function (id, fileName) {
+                uploader.setParams({
+                    uploadPath: "${controllers.Consts.uploadProjectPath}", filename: fileName,
+                    upfilename: nowDate.getTime(), ratio: "1200x800"
+                });
+
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var profileUrl = responseJSON['filedir'] + responseJSON['filename'];
+                var d = new Date();
+                $("#profilePicture span img").attr('src', profileUrl + ".jpg?" + d.getTime());
+                $("div#main-content #uploadProgress").text('');
+                $("div#main-content input#imageUrlId").val(profileUrl);
+                findImageSize();
+            }
+        });
+    }
+    $(document).ready(function () {
+        jQuery(' .datetimepicker').each(function () {
+            $(this).datetimepicker({lang: 'mn', timepicker: false, format: 'Y-m-d', scrollMonth: false});
+        });
+        $("#profilePicture span img").click(function () {
+            $("div#portfolioImg .qq-upload-button input").click();
+        });
+        createUploader();
+        findImageSize();
+        cropImage();
+        $('div#productDiv ul li').each(function () {
+            $(this).find('i').click(function () {
+                $(this).parent('span').parent('li').remove();
+            });
+        });
+        $('div#hariutsagchDiv ul li').each(function () {
+            $(this).find('i').click(function () {
+                $(this).parent('span').parent('li').remove();
+            });
+        });
+        $('div#ugsrahHesegDiv ul li').each(function () {
+            $(this).find('i').click(function () {
+                $(this).parent('span').parent('li').remove();
+            });
+        });
+        initialize();
+    });
+    function uploadImageButton() {
+        $("div#portfolioImg .qq-upload-button input").click();
+    }
+    var crop_2;
+
+    $(window).resize(function () {
+//        img_width = $('.jcrop-holder img').parent().parent().parent().width() - 40;
+//        $('.jcrop-holder img').width(img_width);
+//        $('.jcrop-holder img').height('auto');
+    });
+
+    function cropImage() {
+        // Grab some information about the preview pane
+        $('div#main-content #image_crop2').Jcrop({
+            // start off with jcrop-light class
+            aspectRatio: 2.5,
+            bgOpacity: 0.5,
+            bgColor: 'black',
+            onSelect: updateCoords,
+            onChange: updateCoords
+        }, function () {
+            crop_2 = this;
+            crop_2.setSelect([${prox}, ${proy}, parseInt(${prow}) + parseInt(${prox}), parseInt(${proh}) + parseInt(${proy})]);
+            crop_2.setOptions({
+                bgFade: true,
+                allowSelect: false,
+                allowResize: true
+            });
+            crop_2.ui.selection.addClass('jcrop-selection');
+        });
+    }
+    function updateCoords(c) {
+        findImageSize();
+        $('div#main-content #x').val(c.x);
+        $('div#main-content #y').val(c.y);
+        $('div#main-content #w').val(c.w);
+        $('div#main-content #h').val(c.h);
+        $('div#main-content #w2').val(w2);
+        $('div#main-content #h2').val(h2);
+    }
+    function findImageSize() {
+        w2 = $("div#main-content img#image_crop2").width();
+        h2 = $("div#main-content img#image_crop2").height();
+    }
+    $('div#main-content form').submit(function () {
+        var hun = $('input[name=borluulaltName]');
+        $('div#sendUserTag').find("li").each(function () {
+            hun.val(hun.val() + this.id.substring(2, this.id.length) + ",");
+        });
+        hun.val(hun.val().substring(0, (hun.val().length() - 1)));
+        return true;
+    });
+
+    function addProduct() {
+        $('div#productDiv ul').append("<li ><span><i class='fa fa-minus-circle asterisk' ></i> <strong>Бүтээгдэхүүн:</strong> <span class='contact-span'>" +
+        $('div#myModalButeegDehuun select#productName option:selected').text() + "</span> <strong>Тоо:</strong><span class='contact-span'> "
+        + $('div#myModalButeegDehuun input#productAmount').val() + "</span></span>" +
+        "<input name=productName type=hidden value='" + $('div#myModalButeegDehuun select#productName').val() + "'/>" +
+        "<input name=productRate type=hidden value='" + $('div#myModalButeegDehuun textarea#productRate').val() + "' />" +
+        "<input name=productAmount type=hidden value=" + $('div#myModalButeegDehuun input#productAmount').val() + " /> </li>");
+        productClear();
+        $('div#productDiv ul li:last-child').find('i').click(function () {
+            $(this).parent('span').parent('li').remove();
+        });
+        $('div#myModalButeegDehuun').modal('hide');
+    }
+    function productClear() {
+        $('div#myModalButeegDehuun textarea#productRate').val("")
+        $('div#myModalButeegDehuun input#productAmount').val("");
+    }
+    function hariutsagchClear() {
+        $('div#myModalHariutsagch input#hariutsagchName').val("");
+        $('div#myModalHariutsagch input#hariutsagchTushaal').val("");
+        $('div#myModalHariutsagch input#hariutsagchUtas').val("");
+    }
+    function addHariutsagch() {
+        $('div#hariutsagchDiv ul').append("<li ><span><i class='fa fa-minus-circle asterisk' ></i>  <strong>Нэр: </strong> <span class='contact-span'>" +
+        $('div#myModalHariutsagch input#hariutsagchName').val() + "</span>  <strong>Тушаал: </strong> <span class='contact-span'>" + $('div#myModalHariutsagch input#hariutsagchTushaal').val()
+        + "</span> <strong>Утас: </strong> <span class='contact-span'>" + $('div#myModalHariutsagch input#hariutsagchUtas').val() + "</span> </span>" +
+        "<input name=hariutsagchName type=hidden value='" + $('div#myModalHariutsagch input#hariutsagchName').val() + "'/>" +
+        "<input name=hariutsagchTushaal type=hidden value='" + $('div#myModalHariutsagch input#hariutsagchTushaal').val() + "' />" +
+        "<input name=hariutsagchUtas type=hidden value=" + $('div#myModalHariutsagch input#hariutsagchUtas').val() + " /> </li>");
+        hariutsagchClear();
+        $('div#hariutsagchDiv ul li:last-child').find('i').click(function () {
+            $(this).parent('span').parent('li').remove();
+        });
+        $('div#myModalHariutsagch').modal('hide');
+    }
+    function initialize() {
+        var mapOptions = {
+            zoom: 16,
+            center: new google.maps.LatLng(lat, lon),
+            disableDefaultUI: true,
+            mapTypeId: google.maps.MapTypeId.HYBRID
+        };
+        map = new google.maps.Map(document.getElementById('map-canvas'),
+                mapOptions);
+
+        marker = new google.maps.Marker({
+            map: map,
+            draggable: true,
+            animation: google.maps.Animation.DROP,
+            position: new google.maps.LatLng(lat, lon),
+            title: 'Төслийн байршил'
+        });
+        google.maps.event.addListener(marker, 'click', toggleBounce);
+        google.maps.event.addListener(marker, 'dragend', dragendMap);
+    }
+    function toggleBounce() {
+        if (marker.getAnimation() != null) {
+            marker.setAnimation(null);
+        } else {
+            marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
+    }
+    function dragendMap(evt) {
+        $('div#portfolio_location input[name=mapLon]').val(evt.latLng.lng().toFixed(3));
+        $('div#portfolio_location input[name=mapLat]').val(evt.latLng.lat().toFixed(3));
+        lon = evt.latLng.lng().toFixed(3);
+        lat = evt.latLng.lat().toFixed(3);
+    }
+    function reloadMap() {
+        setTimeout(function () {
+            initialize();
+        }, 2000);
+    }
+    function addUgsrahHeseg(){
+        $('div#ugsrahHesegDiv ul').append("  <li> <span><i class='fa fa-minus-circle asterisk'></i>"+
+                "<strong>Баг: </strong> <span class='contact-long' >"+ $('div#myModalUgsrahHeseg select#selectUgsrahBag').val()+"</span>"+
+                "<strong>Ахлагч: </strong><span class='contact-long' > "+ $('div#myModalUgsrahHeseg select#selectUgsrahAhlagch').val()+"</span></span>"+
+                "<input name=ugsrahBag type=hidden value='"+ $('div#myModalUgsrahHeseg select#selectUgsrahBag').val()+"'/>"+
+                "<input name=ugsrahAhlagch type=hidden value='"+$('div#myModalUgsrahHeseg select#selectUgsrahAhlagch').val()+"'/> </li>");
+        $('div#ugsrahHesegDiv ul li:last-child').find('i').click(function () {
+            $(this).parent('span').parent('li').remove();
+        });
+        $('div#myModalUgsrahHeseg').modal('hide');
+    }
+    #{if portfolio != null}
+    function deleteProject() {
+        if (confirm('Төслийг устгах уу?\nУг төсөлтэй холбоотой бүх өгөгдөл устах болно!'))$('form#deleteProject').submit();
+    }
+    #{/if}
+</script>

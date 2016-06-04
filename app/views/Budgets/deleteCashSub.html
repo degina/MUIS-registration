@@ -1,0 +1,8 @@
+<script>
+    $("table#tableCash td#tdTotalInflow"+"${budgetCash.id}").html("${controllers.Functions.getDecimal(budgetCash.inflow)}");
+    $("table#tableCash td#tdTotalOutflow"+"${budgetCash.id}").html("${controllers.Functions.getDecimal(budgetCash.outflow)}");
+    var currentTd= $("table#tableCash td#tdTotalNetFlow"+"${budgetCash.id}");
+    %{ value = budgetCash.netflow;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+</script>

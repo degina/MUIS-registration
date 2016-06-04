@@ -1,0 +1,305 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    div#main-content > button {
+        margin: 0 1em 1em 0;
+        width: 90px;
+    }
+
+    div#main-content > div#buttons {
+        margin: 0 0 1em 0;
+    }
+
+    div#main-content > div#send {
+        margin: 0 20px 1em 0;
+    }
+
+    div#main-content > div#sendReceive {
+        border-bottom: 1px solid #eee;
+        margin: 0;
+        padding: 0 0 10px 0;
+    }
+
+    div#main-content > div#sendReceive > div {
+        display: inline-block;
+        width: calc(50% - 20px);
+    }
+
+    div#main-content > form {
+        margin: 0 0 1em 0;
+        white-space: nowrap;
+    }
+
+    div#main-content > form span {
+        font-weight: 300;
+        margin: 0 1em 0 0;
+        white-space: normal;
+    }
+
+    div#main-content > textarea {
+        color: #444;
+        font-size: 0.9em;
+        font-weight: 300;
+        height: 7.0em;
+        padding: 5px;
+        width: calc(100% - 10px);
+    }
+
+    div#main-content > button {
+        background-color: #d84a38;
+        border: none;
+        border-radius: 2px;
+        color: white;
+        font-family: 'Roboto', sans-serif;
+        font-size: 0.8em;
+        margin: 0 0 1em 0;
+        padding: 0.5em 0.7em 0.6em 0.7em;
+    }
+
+    div#main-content > button:active {
+        background-color: #cf402f;
+    }
+
+    div#main-content >  button:hover {
+        background-color: #cf402f;
+    }
+
+    div#main-content > button[disabled] {
+        color: #ccc;
+    }
+
+    div#main-content > button[disabled]:hover {
+        background-color: #d84a38;
+    }
+
+
+</style>
+<div id="main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <h1><a href="//webrtc.github.io/samples/" title="WebRTC samples homepage">WebRTC samples</a>
+                <span>Transmit text</span></h1>
+
+            <div id="buttons">
+                <button id="startButton">Start</button>
+                <button id="sendButton" disabled>Send</button>
+                <button id="closeButton" disabled>Stop</button>
+            </div>
+
+            <div id="sendReceive">
+                <div id="send">
+                    <h2>Send</h2>
+            <textarea id="dataChannelSend" disabled
+                      placeholder="Press Start, enter some text, then press Send."></textarea>
+                </div>
+                <div id="receive">
+                    <h2>Receive</h2>
+                    <textarea id="dataChannelReceive" disabled></textarea>
+                </div>
+            </div>
+
+            <p>View the console to see logging.</p>
+
+            <p>The <code>RTCPeerConnection</code> objects <code>localConnection</code> and <code>remoteConnection</code>
+                are in
+                global scope, so you can inspect them in the console as well.</p>
+
+            <p>For more information about RTCDataChannel, see <a
+                    href="http://www.html5rocks.com/en/tutorials/webrtc/basics/#toc-rtcdatachannel"
+                    title="RTCDataChannel section of HTML5 Rocks article about WebRTC">Getting Started With WebRTC</a>.
+            </p>
+
+            <a href="https://github.com/webrtc/samples/tree/master/src/content/datachannel/basic"
+               title="View source for this page on GitHub" id="viewSource">View source on GitHub</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <video id="local_video" autoplay></video>
+            <video id="remote_video" autoplay></video>
+        </div>
+    </div>
+</div>
+</div>
+#{webRTC-config /}
+<script>
+    var signalingChannel;
+    $(document).ready(function () {
+        signalingChannel = socket;
+        var josn={
+            ner:"dorj",
+            ajil:"togooch"
+        }
+        signalingChannel.send(JSON.stringify(josn));
+        signalingChannel.onmessage = function (msg) {
+           console.log(msg.data);
+            var response = JSON.parse(msg.data);
+           console.log(response.ner);
+        }
+    });
+    var localConnection;
+    var remoteConnection;
+    var sendChannel;
+    var receiveChannel;
+    var pcConstraint;
+    var dataConstraint;
+    var dataChannelSend = document.querySelector('textarea#dataChannelSend');
+    var dataChannelReceive = document.querySelector('textarea#dataChannelReceive');
+    var startButton = document.querySelector('button#startButton');
+    var sendButton = document.querySelector('button#sendButton');
+    var closeButton = document.querySelector('button#closeButton');
+
+    startButton.onclick = createConnection;
+    sendButton.onclick = sendData;
+    closeButton.onclick = closeDataChannels;
+
+    function enableStartButton() {
+        startButton.disabled = false;
+    }
+
+    function disableSendButton() {
+        sendButton.disabled = true;
+    }
+
+    function createConnection() {
+        dataChannelSend.placeholder = '';
+        var servers = {"iceServers": [
+            {"url": "stun:stun.l.google.com:19302"},
+            {"url": "turn:turnserver.com", "username": "user", "credential": "pass"}
+        ]};
+        pcConstraint = null;
+        dataConstraint = null;
+        trace('Using SCTP based data channels');
+        // SCTP is supported from Chrome 31 and is supported in FF.
+        // No need to pass DTLS constraint as it is on by default in Chrome 31.
+        // For SCTP, reliable and ordered is true by default.
+        // Add localConnection to global scope to make it visible from the browser console.
+        window.localConnection = localConnection =
+                new RTCPeerConnection(servers, pcConstraint);
+        trace('Created local peer connection object localConnection');
+
+        sendChannel = localConnection.createDataChannel('sendDataChannel',
+                dataConstraint);
+        trace('Created send data channel');
+
+        localConnection.onicecandidate = iceCallback1;
+        sendChannel.onopen = onSendChannelStateChange;
+        sendChannel.onclose = onSendChannelStateChange;
+
+        // Add remoteConnection to global scope to make it visible from the browser console.
+        window.remoteConnection = remoteConnection =
+                new RTCPeerConnection(servers, pcConstraint);
+        trace('Created remote peer connection object remoteConnection');
+
+        remoteConnection.onicecandidate = iceCallback2;
+        remoteConnection.ondatachannel = receiveChannelCallback;
+
+        localConnection.createOffer(gotDescription1, onCreateSessionDescriptionError);
+        startButton.disabled = true;
+        closeButton.disabled = false;
+    }
+
+    function onCreateSessionDescriptionError(error) {
+        trace('Failed to create session description: ' + error.toString());
+    }
+
+    function sendData() {
+        var data = dataChannelSend.value;
+        sendChannel.send(data);
+        trace('Sent Data: ' + data);
+    }
+
+    function closeDataChannels() {
+        trace('Closing data channels');
+        sendChannel.close();
+        trace('Closed data channel with label: ' + sendChannel.label);
+        receiveChannel.close();
+        trace('Closed data channel with label: ' + receiveChannel.label);
+        localConnection.close();
+        remoteConnection.close();
+        localConnection = null;
+        remoteConnection = null;
+        trace('Closed peer connections');
+        startButton.disabled = false;
+        sendButton.disabled = true;
+        closeButton.disabled = true;
+        dataChannelSend.value = '';
+        dataChannelReceive.value = '';
+        dataChannelSend.disabled = true;
+        disableSendButton();
+        enableStartButton();
+    }
+
+    function gotDescription1(desc) {
+        localConnection.setLocalDescription(desc);
+        trace('Offer from localConnection \n' + desc.sdp);
+        remoteConnection.setRemoteDescription(desc);
+        remoteConnection.createAnswer(gotDescription2,
+                onCreateSessionDescriptionError);
+    }
+
+    function gotDescription2(desc) {
+        remoteConnection.setLocalDescription(desc);
+        trace('Answer from remoteConnection \n' + desc.sdp);
+        localConnection.setRemoteDescription(desc);
+    }
+
+    function iceCallback1(event) {
+        trace('local ice callback');
+        if (event.candidate) {
+            remoteConnection.addIceCandidate(event.candidate,
+                    onAddIceCandidateSuccess, onAddIceCandidateError);
+            trace('Local ICE candidate: \n' + event.candidate.candidate);
+        }
+    }
+
+    function iceCallback2(event) {
+        trace('remote ice callback');
+        if (event.candidate) {
+            localConnection.addIceCandidate(event.candidate,
+                    onAddIceCandidateSuccess, onAddIceCandidateError);
+            trace('Remote ICE candidate: \n ' + event.candidate.candidate);
+        }
+    }
+
+    function onAddIceCandidateSuccess() {
+        trace('AddIceCandidate success.');
+    }
+
+    function onAddIceCandidateError(error) {
+        trace('Failed to add Ice Candidate: ' + error.toString());
+    }
+
+    function receiveChannelCallback(event) {
+        trace('Receive Channel Callback');
+        receiveChannel = event.channel;
+        receiveChannel.onmessage = onReceiveMessageCallback;
+        receiveChannel.onopen = onReceiveChannelStateChange;
+        receiveChannel.onclose = onReceiveChannelStateChange;
+    }
+
+    function onReceiveMessageCallback(event) {
+        trace('Received Message');
+        dataChannelReceive.value = event.data;
+    }
+
+    function onSendChannelStateChange() {
+        var readyState = sendChannel.readyState;
+        trace('Send channel state is: ' + readyState);
+        if (readyState === 'open') {
+            dataChannelSend.disabled = false;
+            dataChannelSend.focus();
+            sendButton.disabled = false;
+            closeButton.disabled = false;
+        } else {
+            dataChannelSend.disabled = true;
+            sendButton.disabled = true;
+            closeButton.disabled = true;
+        }
+    }
+
+    function onReceiveChannelStateChange() {
+        var readyState = receiveChannel.readyState;
+        trace('Receive channel state is: ' + readyState);
+    }
+
+</script>

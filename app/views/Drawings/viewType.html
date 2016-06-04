@@ -1,0 +1,107 @@
+#{if type == "thumb"}
+    #{if disciplines.size() > 0}
+    <div class="col-md-12">
+        <div class="col-md-12"
+             style="border-top: solid lightgray 1px; padding-top: 5px; padding-bottom: 5px; padding-right: 0;">
+            <label style="float: right;"><input type="checkbox" id="propCheckAll" class="m-r-10"
+                                                onchange="propCheckAll(this)"/>Бүх
+                зургийг сонгох</label>
+        </div>
+    </div>
+    <div id="DrawingFullView">
+        #{list items:disciplines, as:'discipline'}
+            #{if discipline.drawings.size() > 0}
+                <div class="col-md-12">
+                    <div class="col-md-12"
+                         style="background-color: #f3f3f3; color: #888888; border-bottom: 1px solid #cccccc; border-top: 1px solid #cccccc; padding: 10px; font-weight: bold; font-size: 15px;">
+                        <i>${discipline.name}</i>
+                    </div>
+                    <div class="col-md-12" style="padding: 0;">
+                    %{drawings = controllers.Drawings.sortDrawing(discipline.drawings);}%
+                        #{list items:drawings, as:'drawing'}
+                            <div class="drawing"
+                                 style=" width: 200px; height: 200px; margin-left: 0; margin-right: 30px; margin-top: 15px; margin-bottom: 15px; float: left; border: solid lightgrey 1px; border-radius: 5px;">
+                                <input type="checkbox" did="${drawing.id}" onchange="propCheckList()"
+                                       style="position: absolute; z-index: 20; margin-left: 10px; margin-top: 10px;"/>
+                            %{ rev = drawing.lastRevision();}%
+                                <div onclick="prepareToDraw(${rev.id})"
+                                     style="width: 200px; margin-left: auto; margin-right: auto;">
+                                    <div style="height: 150px; width: 100%; background-position: center; background-image: url('${rev.dir + 't.' + "jpg"}'); background-size: contain; background-repeat: no-repeat;">
+                                        <img src="${rev.dir + "." + rev.extension}"
+                                             class="img-responsive dhidden">
+                                    </div>
+                                    <div style="width: 100%; text-align: center;">
+                                        <label style="color: #888888;">${drawing.Number + " - " + drawing.title}</label><br/>
+                                        <span style="color: #bbbbbb; font-size: 12px;">Хувилбар: ${rev.number}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        #{/list}
+                    </div>
+                </div>
+            #{/if}
+        #{/list}
+    </div>
+    #{/if}
+    #{else}
+    #{/else}
+<style>
+    div.drawing:hover {
+        box-shadow: 3px 3px 3px lightgrey;
+        cursor: pointer;
+    }
+</style>
+#{/if}
+#{if type == "list"}
+<div id="DrawingFullView">
+    <div class="col-md-12">
+        #{if disciplines != null}
+            <table class="table table-tools"
+                   style="font-size: 13px; margin-top: 0!important; border-top: solid lightgray 1px;">
+                <thead>
+                <td style="width: 15%;">Зургийн #</td>
+                <td style="width: auto;">Гарчиг</td>
+                <td style="width: 10%; text-align: center">Хувилбар</td>
+                <td style="width: 20%;">Төрөл</td>
+                <td style="width: 5%; text-align: center"><input type="checkbox" id="propCheckAll"
+                                                                 onchange="propCheckAll(this)"/>
+                </td>
+                </thead>
+                <tbody>
+                    #{list items:disciplines, as:'discipline'}
+                        #{if discipline.drawings.size() > 0}
+                        <tr>
+                            <td colspan="5"
+                                style="background-color: #f3f3f3; color: #888888; border-bottom: 1px solid #cccccc; border-top: 1px solid #cccccc; padding: 8px; font-weight: bold; font-size: 15px;">
+                                <i>${discipline.name}</i>
+                            </td>
+                        </tr>
+                        %{drawings = controllers.Drawings.sortDrawing(discipline.drawings);}%
+                            #{list items:drawings, as:'drawing'}
+                            %{ rev = drawing.lastRevision();}%
+                            <tr class="drawing">
+                                <td onclick="prepareToDraw(${rev.id})">${drawing.Number}</td>
+                                <td onclick="prepareToDraw(${rev.id})">${drawing.title}</td>
+                                <td style=" text-align: center; text-decoration: underline;"
+                                    onclick="prepareToDraw(${rev.id})">${rev.number}</td>
+                                <td onclick="prepareToDraw(${rev.id})">${discipline.name}</td>
+                                <td style=" text-align: center"><input type="checkbox" did="${drawing.id}"
+                                                                       onchange="propCheckList()"/></td>
+                            </tr>
+                            #{/list}
+                        #{/if}
+                    #{/list}
+                </tbody>
+            </table>
+        #{/if}
+        #{else}
+        #{/else}
+    </div>
+</div>
+<style>
+    tr.drawing:hover {
+        background-color: lightgrey;
+        cursor: pointer;
+    }
+</style>
+#{/if}

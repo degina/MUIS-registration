@@ -1,0 +1,499 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Inventory'/}
+#{set activeMenuSub:'InventoryWastes'/}
+#{jqueryui-config /}
+#{fileupload-config /}
+#{ckeditor-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+#{flashCrud /}
+
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}" xmlns="http://www.w3.org/1999/html"
+        xmlns="http://www.w3.org/1999/html"></script>
+<script src="/public/javascripts/jquery.resizableColumns.min.js"></script>
+
+
+%{inventoryProjectPermission = user.getPermissionType(controllers.Consts.permissionInventory);}%
+<div id="main-content" class="dhidden" ${inventoryProjectPermission>=2 ? "" : "hidden=\"true\""}>
+    <div>
+        <div class="m-b-0 clearfix">
+            <div class="page-title pull-left">
+                <h3 class="pull-left"><strong>&{'waste'}</strong></h3>
+            </div>
+            <div class="pull-right">
+            #{if inventoryProjectPermission==4 || inventoryProjectPermission==5}
+                <button class="btn btn-success m-t-10" id="addwaste" data-toggle="modal" data-target="#modal-addwaste">
+                    <i
+                            class="fa fa-plus p-r-10"></i> &{'add_new_waste'}</button>
+            #{/if}
+            </div>
+        </div>
+        <form id="filterForm" action="@{InventoryWastes.list()}" method="get">
+            <div class="col-md-2" style=" padding: 0; padding-right: 6px">
+                <div id="reportrange" class="form-control m-b-10" style="padding-left: 10px;padding-right: 10px;">
+                    <i class="fa fa-calendar fa-lg p-r-0"></i><span>#{if filterStartDate=="" && filterEndDate==""}
+                    Өдрөөр хайх...#{/if}#{else}${filterStartDate}
+                    -${filterEndDate}#{/else}</span>
+                    <input type="text" hidden="true" name="filterStartDate" id="filter_start"
+                           value="${filterStartDate}"/>
+                    <input type="text" hidden="true" name="filterEndDate" id="filter_end"
+                           value="${filterEndDate}"/>
+                </div>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="inventory_filter"
+                        class="form-control" name="inventory_filter">
+                    <option value="0">&{'AllInventory'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Inventorys,as: 'inventory'}
+                    <option value="${inventory.id}" ${inventory.id.toString() == inventory_filter ? 'selected' : ''}>${inventory.item}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="location_filter"
+                        class="form-control" name="location_filter">
+                    <option value="0">&{'AllLocation'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Locations,as: 'location'}
+                    <option value="${location.id}" ${location.id.toString() == location_filter ? 'selected' : ''}>${location.name}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="waster_filter"
+                        class="form-control" name="waster_filter">
+                    <option value="0">&{'AllUsers'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Waters,as: 'waster'}
+                    <option value="${waster.id}" ${waster.id.toString() == waster_filter ? 'selected' : ''}>${waster.lastnameFirstCharacter}
+                        . ${waster.firstName}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <input type="text" class="form-control" style=";"
+                       placeholder="&{'Search'}!" name="keyword" value="${keyword}"/>
+            </div>
+            <div class="col-md-1" style="padding: 0;">
+                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+            </div>
+            <div class="col-md-1" style="padding: 0;">
+                <input type="hidden" name="CurrentPageNumber" value="1"/>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                <table style="font-weight: 500;" id="products-table"
+                                       class="table table-tools table-hover"
+                                       data-resizable-columns-id="inventorywaste-resizalbe-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="width: 10%;text-align: center" data-resizable-column-id="#">
+                                        </th>
+                                        <th style="width: auto;text-align: center;" data-resizable-column-id="item">
+                                            <strong>&{'item'}</strong>
+                                        </th>
+                                        <th style="width: auto;text-align: center" data-resizable-column-id="quantity">
+                                            <strong>&{'quantity'}</strong>
+                                        </th>
+                                        <th style="width: auto;text-align: center" data-resizable-column-id="from">
+                                            <strong>&{'from'}</strong>
+                                        </th>
+                                        <th style="width: auto;text-align: center" data-resizable-column-id="waster">
+                                            <strong>&{'waster'}</strong>
+                                        </th>
+                                        <th style="width: 12%;text-align: center" data-resizable-column-id="date">
+                                            <strong>&{'date'}</strong>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:Wastes, as: 'waste'}
+                                    <tr>
+                                        <td><strong>${waste.id}</strong></td>
+                                        <td>#{if waste.item.item.size()<30}${waste.item.item}#{/if}#{else}${waste.item.item.substring(0,30)}#{/else}
+                                            / ${waste.item.inventoryMeasure.measure}</td>
+                                        <td>${waste.quantity.format("##################.###############")}</td>
+                                        <td>#{if waste.location.name.size()<30}${waste.location.name}#{/if}#{else}${waste.location.name.substring(0,30)}#{/else}</td>
+                                        <td>${waste.waster}</td>
+                                        <td>${waste.date.format("YYYY/MM/dd")}</td>
+                                    </tr>
+                                    #{/list}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    #{if MaxPageNumber>1}
+                        <div class="page-navigation" style="width: 100%; text-align: right;">
+                            <a style="text-decoration: none;"
+                               href="@{controllers.InventoryWastes.list(CurrentPageNumber - 1,filterStartDate,filterEndDate,keyword,inventory_filter,location_filter,waster_filter,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber - 1 <= 0 ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="<"/>
+                            </a>
+                        %{
+                            int threeDots = 0;
+                            for(int i = 1; i <= MaxPageNumber; i++){
+                            if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                            (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                            (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                            }%
+                            <a style="text-decoration: none;"
+                               #{if CurrentPageNumber != i}href="@{controllers.InventoryWastes.list(i,filterStartDate,filterEndDate,keyword,inventory_filter,location_filter,waster_filter,message)}"#{/if}>
+                                <input
+                                        class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="${i}"/>
+                            </a>
+                        %{ }else{
+                            if( i == 2 || i == MaxPageNumber - 1 ){
+                            threeDots = 1;
+                            }
+                            if(threeDots == 1){
+                            }%
+                            <span style="font-size: x-large;"><strong>...</strong></span>
+                        %{
+                            threeDots = 0;
+                            }
+                            }
+                            }
+                            }%
+                            <a style="text-decoration: none;"
+                               href="@{controllers.InventoryWastes.list(CurrentPageNumber + 1,filterStartDate,filterEndDate,keyword,inventory_filter,location_filter,waster_filter,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber >= MaxPageNumber ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value=">"/>
+                            </a>
+                        </div>
+                    #{/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-addwaste" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 700px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'add_new_waste'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventoryWastes.addWaste()}" class="form-horizontal" method="post"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in" id="product_general">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-2 control-label">&{'item'} <span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <select data-live-search="true" id="item_add" title="&{'item'}"
+                                                                    class="form-control" name="item">
+                                                            #{list items:Inventorys,as: 'inventory'}
+                                                                <option value="${inventory.id}"
+                                                                        data-subtext="${inventory.inventoryMeasure.measure}">${inventory.item}
+                                                                </option>
+                                                            #{/list}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-2 control-label">&{'location'} <span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <select data-live-search="true" id="location_add" title="&{'location'}"
+                                                                    class="form-control" name="location">
+                                                            #{list items:Locations,as: 'location'}
+                                                                <option value="${location.id}">${location.name}</option>
+                                                            #{/list}
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-2 control-label">&{'quantity'} <span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   maxlength="7"
+                                                                   placeholder=&{'quantity'}...
+                                                                   required="true"
+                                                                   name="quantity" id="quantity_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-2 control-label">&{'note'} <span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                        <textarea rows="5" style="resize: none"
+                                                                  class="form-control valid" required="true"
+                                                                  name="note" id="note_add"
+                                                                  placeholder=&{'note'}...></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">&{'attachment'} <span
+                                                                class="asterisk">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <ul class="uploadBox" id="u1">
+                                                                <li>
+                                                                <span>
+                                                                <button type="button"
+                                                                        class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                                        data-rel="tooltip" title="Хавсаргах"><i
+                                                                        class="fa fa-cloud-upload"></i></button>
+                                                                </span>
+                                                                </li>
+                                                            </ul>
+                                                        </div>
+                                                        <div id="add_attach"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-0 m-b-0 align-center">
+                                <button id="add_submit" class="btn btn-success m-t-10"><i
+                                        class="fa fa-check"></i> &{'save'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-previewwaste" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 700px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'waste'}</strong></h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#{include "SharedView/AttachsMulti.html"/}
+<script>
+    $(window).load(function () {
+        $('div#main-content').removeClass('dhidden');
+        $(function () {
+            $("table").resizableColumns({
+                store: window.store
+            });
+        });
+    });
+    $(document).ready(function () {
+        var opt = {};
+
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", 'sEmptyTable': "Үр дүн байхгүй байна."} ,
+                opt.iDisplayLength = 40,
+
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["csv", "xls", "pdf", "print"]
+                };
+        opt.aaSorting = [[0, 'desc']]
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': []}
+        ];
+
+
+        var oTable = $('#products-table').dataTable(opt);
+        oTable.fnDraw();
+
+        $("div#modal-addwaste input#quantity_add").forceNumericOnly();
+
+        $('button#add_submit').on('click', function (e) {
+            e.preventDefault();
+            var obj = $('div#add_attach');
+            if ($('div#modal-addwaste input#quantity_add').val() != "" && $('div#modal-addwaste input#note_add').val() != "") {
+                $("div#modal-addwaste form ul.uploadBox img.imgIcon").each(function () {
+                    obj.append("<input type=\"hidden\" name=\"filename\" value=" + $(this).attr('filename') + ">" +
+                    "<input type=\"hidden\" name=\"filedir\" value=" + $(this).attr('filedir') + ">" +
+                    "<input type=\"hidden\" name=\"extension\" value=" + $(this).attr('extension') + ">"+
+                    "<input type=\"hidden\" name=\"filesize\" value=" + $(this).attr('filesize') + ">");
+                });
+
+                $("div#modal-addwaste form").submit();
+            }
+            else
+                showErrorMessage("Шаардалгатай нүдийг бөглөнө үү?");
+        });
+
+        $('table#products-table tbody tr').on('click', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                data: {id: $(this).find("td strong").html()},
+                url: "/inventoryspreviewwaste"
+            }).success(
+                    function (data) {
+                        $('div#modal-previewwaste div.modal-body').html(data);
+                        $('div#modal-previewwaste').modal('show');
+                    });
+        });
+
+        $('input#quantity_add').change(function () {
+            $.ajax({
+                type: "POST",
+                data: {
+                    location_id: $('select#location_add').val(),
+                    inventory_id: $('select#item_add').val(),
+                    quantity: $('input#quantity_add').val()
+                },
+                url: "/inventorywastescheckquantity"
+            }).success(
+                    function (data) {
+                        if (data === "false") {
+                            showErrorMessage("Алдагдалын хэмжээ агуулхын хэмжээнээс их байж болохгүй.");
+                            $('input#quantity_add').val("");
+                        }
+                    });
+        });
+        $('select#item_add').change(function () {
+            $.ajax({
+                type: "POST",
+                data: {
+                    location_id: $('select#location_add').val(),
+                    inventory_id: $('select#item_add').val(),
+                    quantity: $('input#quantity_add').val()
+                },
+                url: "/inventorywastescheckquantity"
+            }).success(
+                    function (data) {
+                        if (data === "false") {
+                            showErrorMessage("Алдагдалын хэмжээ агуулхын хэмжээнээс их байж болохгүй.");
+                            $('input#item_add').val("");
+                        }
+                    });
+        });
+        $('select#location_add').change(function () {
+            $.ajax({
+                type: "POST",
+                data: {
+                    location_id: $('select#location_add').val(),
+                    inventory_id: $('select#item_add').val(),
+                    quantity: $('input#quantity_add').val()
+                },
+                url: "/inventorywastescheckquantity"
+            }).success(
+                    function (data) {
+                        if (data === "false") {
+                            showErrorMessage("Алдагдалын хэмжээ агуулхын хэмжээнээс их байж болохгүй.");
+                            $('input#item_add').val("");
+                        }
+                    });
+        });
+
+        var startDate = $('input#filter_start');
+        var endDate = $('input#filter_end');
+
+
+        $('#reportrange').daterangepicker({
+                    ranges: {
+                        'Өнөөдөр': [moment(), moment()],
+                        'Өчигдөр': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                        'Сүүлийн 7 хоног': [moment().subtract('days', 6), moment()],
+                        'Сүүлийн 30 хоног': [moment().subtract('days', 29), moment()],
+                        'Энэ сар': [moment().startOf('month'), moment().endOf('month')],
+                        'Өнгөрсөн сар': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                    },
+                    startDate: moment().subtract('days', 29),
+                    endDate: moment(),
+                    format: 'YYYY/MM/DD',
+                    locale: {
+                        applyLabel: 'Болсон',
+                        cancelLabel: 'Болих',
+                        fromLabel: 'Аас',
+                        toLabel: 'Хүртэл',
+                        customRangeLabel: 'Өөрөөр сонгох',
+                        dayNames: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+                        daysOfWeek: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+                        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+                        firstDay: 1
+                    }
+                },
+                function (start, end) {
+                    $('#reportrange span').html(start.format('YYYY/MM/DD') + '-' + end.format('YYYY/MM/DD'));
+                }
+        );
+        $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+            console.log("apply event fired, start/end dates are "
+                    + picker.startDate.format('YYYY/MM/DD')
+                    + "-"
+                    + picker.endDate.format('YYYY/MM/DD')
+            );
+            startDate.val(picker.startDate.format('YYYY/MM/DD'));
+            endDate.val(picker.endDate.format('YYYY/MM/DD'));
+        });
+        $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
+            console.log("cancel event fired");
+            $('#reportrange span').html("Өдрөөр хайх...");
+            startDate.val("");
+            endDate.val("");
+        });
+
+    });
+
+</script>
+<style>
+    .panel-body {
+        background-color: #FFF;
+        padding: 0px;
+        padding-left: 0px;
+    }
+
+    div#main-content body, div#main-content ul, div#main-content li {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 21px;
+        text-align: left;
+    }
+</style>
+
+
+#{AttachScriptMulti uploadPath:controllers.Consts.uploadInventoryPath/}
+#{inventory-config /}
+#{ImgThumbnail /}

@@ -1,0 +1,54 @@
+<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered">
+    <tr>
+        <td style="width: 50%">Дараалал:<input type="number" id="queue" min="0" style="margin-left: 4px"
+                                               value="${folderStructure.queue}"/></td>
+    </tr>
+</table>
+<input type="hidden" id=mainId value="${folderStructure.id}"/>
+<table cellpadding="0" cellspacing="0" border="0" class="table table-bordered">
+    <thead>
+    <tr>
+        <th style="width: 33%">Өнгө</th>
+        <th style="width: 33%">Хэлбэр</th>
+        <th style="width: 33%">Файлын төрөл</th>
+    </tr>
+    </thead>
+%{def row=folderColors.size();
+    if(row < folderTypes.size())row=folderTypes.size();
+    if(row < controllers.Functions.fileShareExtensions.size())row=controllers.Functions.fileShareExtensions.size();
+    for(r=0;r < row;r++){
+    if(folderColors.size()>r)folderColor=folderColors.get(r);
+    else folderColor=null;
+    if(folderTypes.size()>r)folderType=folderTypes.get(r);
+    else folderType=null;
+    if(controllers.Functions.fileShareExtensions.size()>r)fileExtension=controllers.Functions.fileShareExtensions[r];
+    else fileExtension=null;
+    }%
+    <tr>
+        <td>#{if folderColor!=null}
+            <input type="radio" name=fcolor
+                   value="${folderColor.id}" ${folderStructure.folderColor.id==folderColor.id?'checked':''  }>
+            <span style="margin-left: 4px"><i class="fa fa-folder-o ${folderColor.color}"
+                                              style="margin-right: 4px"></i>${folderColor.name}</span>
+        #{/if}</td>
+        <td>#{if folderType!=null}
+            <input type="radio" name=ftype
+                   value="${folderType.id}" ${folderStructure.folderType.id==folderType.id?'checked':''}>
+            <span style="margin-left: 4px"><i class="fa ${folderType.val}"
+                                              style="margin-right: 4px"></i>${folderType.name}</span>
+        #{/if}</td>
+        <td>
+        #{if fileExtension!=null}
+            <input type="radio" name=fextension
+                   value="${r}" ${folderStructure.extension==r?'checked':''}>
+            <span style="margin-left: 4px">${fileExtension}</span>
+        #{/if}
+        </td>
+    </tr>
+%{}}%
+</table>
+<script>
+    $(function () {
+        $('input#queue').forceNumericInt();
+    });
+</script>

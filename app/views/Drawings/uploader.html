@@ -1,0 +1,468 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Drawing'/}
+#{set activeMenuSub:'DrawingUpload'/}
+<script src="/assets/plugins/currentset/d3.js"></script>
+<div id="main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body" style="padding: 60px;">
+                    <div class="row">
+                        <div class="col-md-12" id="stepNumbers">
+                            <div>
+                                <div class="label-primary"
+                                     style="float: left; height: 40px; width: 40px; color: white; border-radius: 3px; font-size: 27px;padding: 0; text-align: center; vertical-align: middle;">
+                                    1
+                                </div>
+                                <div style="float: left; height: 40px; padding-left:10px;">
+                                    <div><strong>Алхам 1:</strong></div>
+                                    <div>Зураг оруулах</div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="label-default"
+                                     style="margin-left: 40px; float: left; height: 40px; width: 40px; color: white; border-radius: 3px; font-size: 27px;padding: 0; text-align: center; vertical-align: middle;">
+                                    2
+                                </div>
+                                <div style="float: left; height: 40px; padding-left:10px; color: grey">
+                                    <div><strong>Алхам 2:</strong></div>
+                                    <div>Зураг хянах</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <hr/>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <form id="uploaderWizard">
+                                <input type="hidden" name="drawingId" id="drawingId"/>
+                                <input type="hidden" name="pdfId" id="pdfId"/>
+                                <input type="hidden" name="pdfName" id="pdfName"/>
+                                <input type="hidden" name="pdfUrl" id="pdfUrl" value=""/>
+
+                                <div id="sectionBodyDiv" class="col-md-12" style="padding:20px;">
+                                    <div class="sectionBody" style="background-color: slategray;">
+                                        <div class="col-md-10">
+                                            <div id="uploadPDFProgress" class="form-group" style="display: none;">
+                                                <div class="progress progress-striped active">
+                                                    <div class="progress-bar progress-bar-info" role="progressbar"
+                                                         aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"
+                                                         style="width: 0%; text-align: right; padding-right: 10px;">
+                                                        <span class="sr-only"></span>0%
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2" id="uploadPDFLabel">
+                                        </div>
+                                        <div class="col-md-12" style="text-align: center;">
+                                            <button id="uploadPDFbutton" class="btn btn-warning btn-transparent"
+                                                    type="button"
+                                                    onclick="uploadPDF()" style="margin-left: auto; margin-right:auto;">
+                                                <i class="fa fa-file-o m-r-10"></i>Зураг оруулах
+                                            </button>
+                                        </div>
+                                        <div class="col-md-12" style="text-align: center;">
+                                            <hr/>
+                                            <span id="uploadFileName"
+                                                  style="color: grey;">Оруулсан зураг байхгүй байна.</span>
+                                        </div>
+                                        <div class="col-md-12" style="margin-top: 40px;">
+                                            <div>
+                                                <button class="btn btn-warning disabled" type="button"
+                                                        onclick="extendPDFSlider()" id="continueButton"
+                                                        style="margin-right: 20px;">Үргэлжлүүлэх
+                                                </button>
+                                                <a href="@{controllers.Drawings.thumbnails()}"
+                                                   style="vertical-align: bottom; color: black; cursor: pointer;">Болих
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="sectionBody dhidden">
+                                        <div class="col-md-12" style="font-size: 25px; padding-bottom:20px;">
+                                            Хянагдаагүй байгаа ажлын зураг (<span id="remainingPages"></span> үлдсэн)
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Дугаар:</label>
+                                                <input type="text" id="drawingNumber" name="drawingNumber"
+                                                       class="form-control"
+                                                       onkeyup="checkDrawingRevision()">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Шифр:</label>
+                                                <input type="text" id="drawingCipher" name="drawingCipher"
+                                                       class="form-control">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Гарчиг:</label>
+                                                <input type="text" id="drawingTitle" name="drawingTitle"
+                                                       class="form-control">
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label for="userName">Зурагдсан огноо:</label>
+                                                <input id="drawingDate" name="drawingDate" type="text"
+                                                       class="form-control" value="${today.format("yyyy-MM-dd")}">
+                                            </div>
+                                            <div id="disciplineNameShowGroup">
+                                                <div class="form-group">
+                                                    <label>Шинэ төрөл оруулах:</label>
+
+                                                    <div class="input-group">
+                                                        <input id="disciplineNameInput" type="text"
+                                                               name="disciplineName"
+                                                               class="form-control"
+                                                               aria-describedby="set-name-addon1"/>
+                                                        <span class="input-group-addon" id="set-name-addon1"
+                                                              title="Select from an existing Disciplines"
+                                                              onclick="changeDisciplineNameSelector(1)">
+                                                        <i class="fa fa-exchange"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div id="disciplineNameHiddenGroup" class="dhidden">
+                                                <div class="form-group">
+                                                    <label>Төрөл сонгох:</label>
+
+                                                    <div class="input-group">
+                                                        <select id="disciplineNameSelect" name="disciplineId"
+                                                                class="form-control"
+                                                                aria-describedby="set-name-addon2">
+                                                            <option value=""></option>
+                                                        #{list items:disciplines, as:'discipline'}
+                                                            <option value="${discipline.id}">
+                                                            ${discipline.name}
+                                                            </option>
+                                                        #{/list}
+                                                        </select>
+                                                    <span class="input-group-addon" id="set-name-addon2"
+                                                          title="Input a Discipline's Name"
+                                                          onclick="changeDisciplineNameSelector(2)">
+                                                        <i class="fa fa-exchange"></i></span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="userName">Хувилбар:</label>
+                                                <input id="drawingRevision" name="drawingRevision" type="text"
+                                                       class="form-control" value="" disabled>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <div>
+                                                    <button type="button" class="btn btn-warning"
+                                                            onclick="createDrawingRevision()" id="createDrawingButton">
+                                                        Оруулах
+                                                    </button>
+                                                    <a onclick="cancelDrawing()"
+                                                       style="vertical-align: bottom; color: black; margin-left:20px; text-decoration: underline; cursor: pointer;">Алгасах
+                                                    </a>
+                                                </div>
+                                                <div class="dhidden">
+                                                    <div class="progress progress-striped active">
+                                                        <div class="progress-bar progress-bar-info active"
+                                                             role="progressbar" aria-valuenow="100" aria-valuemin="0"
+                                                             aria-valuemax="100" style="width: 100%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8" id="PDFSliderPanel" style="height: 500px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="file-uploader-demo1" style="visibility:hidden;height:0;width:0">
+</div>
+<div class="modal fade" id="activityIndicator" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-md">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img src="/public/images/activity-indicator.gif" style="margin-left: auto; margin-right: auto;"/>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var discip = 2;
+    var drawingExist = false;
+    var disciplineIder = 0;
+    var cipherIder = "";
+    var isChangePDFpages = false;
+    function checkDrawingRevision() {
+        $.ajax({
+            type: "POST",
+            data: {number: $("input#drawingNumber").attr("value")},
+            url: "/drawing/checkDrawingRevision"
+        }).success(function (data) {
+            if (data.isExist) {
+                $("input#drawingId").attr("value", data.id);
+                $("input#drawingTitle").attr("value", data.title);
+                $("input#drawingCipher").attr("value", data.cipher);
+                $("input#drawingRevision").attr("value", data.newRevision);
+                var ids = 0;
+                $("select#disciplineNameSelect").selectpicker('val', data.disciplineId);
+//                $("select#disciplineNameSelect").find("option").each(function () {
+//                    if ($(this).attr("value") == data.disciplineId + "")
+//                        $("select#disciplineNameSelect").val(ids);
+//                    ids++;
+//                });
+                changeDisciplineNameSelector(1);
+                $("form#uploaderWizard").find("input").each(function () {
+                    $(this).prop("disabled", true);
+                });
+                $("form#uploaderWizard").find("select").each(function () {
+                    $(this).prop("disabled", true);
+                });
+                $("input#drawingDate").removeAttr("disabled");
+                $("input#drawingNumber").removeAttr("disabled");
+                $("select#disciplineNameSelect").selectpicker("refresh");
+                drawingExist = true;
+            } else {
+                $("input#drawingId").attr("value", "");
+                $("input#drawingTitle").attr("value", "");
+                $("input#drawingCipher").attr("value", cipherIder);
+                $("input#drawingRevision").attr("value", 0);
+                $("input#drawingDate").attr("value", '${today.format("yyyy-MM-dd")}');
+                $("select#disciplineNameSelect").val(disciplineIder);
+                $("select#disciplineNameSelect").selectpicker("refresh");
+                $("input#disciplineNameInput").attr("value", "");
+                $("form#uploaderWizard").find("input").each(function () {
+                    $(this).prop("disabled", false);
+                });
+                $("form#uploaderWizard").find("select").each(function () {
+                    $(this).prop("disabled", false);
+                });
+                $("input#drawingRevision").prop("disabled", true);
+                drawingExist = false;
+            }
+            $("select#disciplineNameSelect").selectpicker("refresh");
+        });
+    }
+    function createDrawingRevision() {
+        if (checkValidation()) {
+            $.ajax({
+                type: "POST",
+                data: {
+                    imageBase64String: $("input#imageBase64String").val(),
+                    disciplineId: $("select#disciplineNameSelect").val(),
+                    disciplineName: $("input#disciplineNameInput").val(),
+                    pdfId: $("input#pdfId").val(),
+                    pdfName: $("input#pdfName").val(),
+                    pdfUrl: $("input#pdfUrl").val(),
+                    pdfPageCount: $("input#pdfPageCount").val(),
+                    pageNumber: $("input#pageNumber").val(),
+                    drawingId: $("input#drawingId").val(),
+                    drawingTitle: $("input#drawingTitle").val(),
+                    drawingCipher: $("input#drawingCipher").val(),
+                    drawingNumber: $("input#drawingNumber").val(),
+                    drawingDate: $("input#drawingDate").val()
+                },
+                url: "/drawing/createDrawingRevision",
+                beforeSend: function () {
+                }
+            }).success(function (data) {
+                $("input#pdfId").attr("value", data.pdfId);
+                if (data.disciplineCreate) {
+                    $("select#disciplineNameSelect").append("<option value='" + data.disciplineId + "'>" + $("input#disciplineNameInput").val() + "</option>");
+                    $("select#disciplineNameSelect").selectpicker('val', data.disciplineId);
+                    changeDisciplineNameSelector(1);
+                }
+                else $("select#disciplineNameInput").attr("value", "");
+                $("input#drawingId").attr("value", "");
+                $("input#drawingNumber").attr("value", "");
+                $("input#drawingTitle").attr("value", "");
+//                $("input#drawingCipher").attr("value", "");
+                $("input#drawingRevision").attr("value", 0);
+                $("input#drawingDate").attr("value", '${today.format("yyyy-MM-dd")}');
+                $("select#disciplineNameSelect").selectpicker("refresh");
+                extendPDF(parseInt($("input#pageNumber").val()) + 1);
+            });
+            disciplineIder = $("select#disciplineNameSelect").val();
+            cipherIder = $("input#drawingCipher").val();
+        }
+    }
+    function cancelDrawing() {
+        $("input#drawingId").attr("value", "");
+        $("input#drawingNumber").attr("value", "");
+        $("input#drawingTitle").attr("value", "");
+        $("input#drawingCipher").attr("value", cipherIder);
+        $("input#drawingRevision").attr("value", 0);
+        $("input#drawingDate").attr("value", '${today.format("yyyy-MM-dd")}');
+        $("select#disciplineNameSelect").val(disciplineIder);
+        $("select#disciplineNameSelect").selectpicker("refresh");
+        extendPDF(parseInt($("input#pageNumber").val()) + 1);
+    }
+    function checkValidation() {
+        if ($("input#drawingNumber").attr("value") == "") {
+            alert("Зургийн дугаар оруулна уу!");
+            return false;
+        }
+        if ($("input#drawingCipher").attr("value") == "") {
+            alert("Зургийн шифр оруулна уу!");
+            return false;
+        }
+        if ($("input#drawingTitle").attr("value") == "") {
+            alert("Зургийн гарчиг оруулна уу!");
+            return false;
+        }
+        if ($("input#drawingDate").attr("value") == "") {
+            alert("Зурагдсан огноог оруулна уу!");
+            return false;
+        }
+        if (discip == 2 && $("input#disciplineNameInput").attr("value") == "") {
+            alert("Зургийн төрлийг оруулна уу!");
+            return false;
+        }
+        if (discip == 1 && $("select#disciplineNameSelect").val() == "") {
+            alert("Зургийн төрлийг сонгоно уу!");
+            return false;
+        }
+        return true;
+    }
+    $(document).ready(function () {
+        createDrawingUploader();
+        jQuery('#drawingDate').datetimepicker({lang: 'mn', timepicker: false, format: "Y-m-d", maxDate: "0"});
+    });
+    function changeDisciplineNameSelector(id) {
+        if (!drawingExist && $("select#disciplineNameSelect option").length > 1) {
+            discip = id;
+            if (id == 1) {
+                $("div#disciplineNameHiddenGroup").removeClass("dhidden");
+                $("div#disciplineNameShowGroup").addClass("dhidden");
+            } else {
+                $("div#disciplineNameHiddenGroup").addClass("dhidden");
+                $("div#disciplineNameShowGroup").removeClass("dhidden");
+                $("select#disciplineNameSelect").val(0);
+                $("select#disciplineNameSelect").selectpicker("refresh");
+            }
+        }
+    }
+    function changeSection(number) {
+        if (number == 2) {
+        } else {
+
+        }
+        $("div#sectionBodyDiv").find("div.sectionBody").each(function () {
+            $(this).addClass("dhidden");
+        });
+        $("div#sectionBodyDiv div.sectionBody:nth-child(" + number + ")").removeClass("dhidden");
+    }
+    function uploadPDF() {
+        $("div#file-uploader-demo1").find("div.qq-upload-button").find("input").attr("accept", ".pdf");
+        $("div#file-uploader-demo1").find("div.qq-upload-button").find("input").removeAttr("multiple");
+        $("#file-uploader-demo1 .qq-upload-button input").click();
+    }
+    function createDrawingUploader() {
+        var tt = 0;
+        var uploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo1'),
+            action: '@{FileUploader.uploadFile}',
+            allowedExtensions: ['pdf'],
+            onSubmit: function (id, fileName) {
+                uploader.setParams({
+                    uploadPath: '${controllers.Consts.uploadDrawingPDFPath}',
+                    filename: fileName
+                });
+                $("button#uploadPDFbutton").addClass("disabled");
+                $("button#continueButton").addClass("disabled");
+                $("span#uploadFileName").html("<strong>" + fileName + "</strong>");
+                $("div#uploadPDFProgress").css("display", "block");
+                $("div#uploadPDFProgress").find("div.progress-bar").css("width", "0%");
+                $("div#uploadPDFProgress").find("div.progress-bar").html("0%");
+                $("div#uploadPDFProgress").find("div.progress-bar").removeClass("progress-bar-success");
+                $("div#uploadPDFProgress").find("div.progress-bar").addClass("progress-bar-info");
+                $("div#uploadPDFProgress").find("div.progress").addClass("active");
+                $("div#uploadPDFLabel").html('<label class="label label-default">Хуулагдсан</label><img src="/public/images/loading.gif"/>');
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                tt = Math.round((loaded * 100 / total) * 10) / 10;
+                $("div#uploadPDFProgress").find("div.progress-bar").css("width", tt + "%");
+                $("div#uploadPDFProgress").find("div.progress-bar").html(tt + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                if (responseJSON['success'] == true) {
+                    var fileDir = responseJSON['filedir'],
+                            fileName = responseJSON['filename'],
+                            extension = responseJSON['extension'];
+                    $("input#pdfName").val(fileName);
+                    $("input#pdfUrl").val(fileDir + "." + extension);
+                    $("div#uploadPDFProgress").find("div.progress-bar").addClass("progress-bar-success");
+                    $("div#uploadPDFProgress").find("div.progress-bar").removeClass("progress-bar-info");
+                    $("div#uploadPDFLabel").html('<label class="label label-success">Хуулагдсан</label>');
+                    $("button#uploadPDFbutton").removeClass("disabled");
+                    $("button#continueButton").removeClass("disabled");
+                    $("button#uploadPDFbutton").html('<i class="fa fa-file-o m-r-10"></i>Зураг солих');
+                    $("div#uploadPDFProgress").find("div.progress").removeClass("active");
+                }
+            }
+        });
+    }
+    function extendPDFSlider() {
+        extendPDF(1);
+    }
+    function extendPDF(num) {
+        $.ajax({
+            type: "POST",
+            data: {
+                pdfUrl: $("input#pdfUrl").attr("value"),
+                pageNum: num
+            },
+            url: "/drawing/extendPDFSlider",
+            beforeSend: function () {
+                if (num == 1) {
+                    $("button#uploadPDFbutton").addClass("disabled");
+                    $("button#continueButton").parent().html('<div class="progress progress-striped active">' +
+                            '<div class="progress-bar progress-bar-info active" role="progressbar"' +
+                            'aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div></div>');
+                }
+                else {
+                    $("div#PDFSliderPanel").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+                    $("button#createDrawingButton").parent().parent().find("div:first-child").addClass("dhidden");
+                    $("button#createDrawingButton").parent().parent().find("div:last-child").removeClass("dhidden");
+                }
+                isChangePDFpages = false;
+            }
+        }).success(function (data) {
+            $("div#PDFSliderPanel").html(data);
+            if (num == 1) {
+                changeSection(2);
+                var ban = $("div#stepNumbers").find("div.label-primary");
+                ban.removeClass("label-primary");
+                ban.addClass("label-success");
+                ban.html("<i class='fa fa-check-circle' style='font-size: 27px;'></i>");
+                ban = $("div#stepNumbers").find("div.label-default");
+                ban.removeClass("label-default");
+                ban.addClass("label-primary");
+                $("div#stepNumbers div:last-child div:last-child").css("color", "black");
+            } else {
+                $("button#createDrawingButton").parent().parent().find("div:first-child").removeClass("dhidden");
+                $("button#createDrawingButton").parent().parent().find("div:last-child").addClass("dhidden");
+
+            }
+        });
+    }
+    function remainingPages(pagenum, num) {
+        var pages = pagenum - num + 1;
+        if (pages == 0) {
+            alert("Амжилттай дууслаа");
+            window.location.href = "@{controllers.Drawings.thumbnails()}"
+        }
+        $("span#remainingPages").html(pages);
+        isChangePDFpages = true;
+    }
+</script>
+#{drawing-config /}
+#{fileupload-config /}
+#{checkFileExtension /}

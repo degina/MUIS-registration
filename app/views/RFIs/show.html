@@ -1,0 +1,413 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'RFI'/}
+#{fancybox-config /}
+<div id="main-content" style="font-weight: 500;padding-top: 20px">
+    <div class="row ">
+        <div class="col-md-12">
+            <!-- Header -->
+            <div style="padding-left: 1%; height: 34px; vertical-align: middle; margin-bottom: 10px;">
+                <h4 style="float: left;"><strong>RFI #${rfi.No}:</strong> ${rfi.subject}</h4>
+                *{<button onclick="historyPreviousPage()" class="btn btn-default"}*
+                   *{style="float: right; padding-right: 10px">}*
+                *{&{'Back'}}*
+                    *{<i class="fa fa-angle-double-right m-r-5"></i>}*
+                *{</button>}*
+            </div>
+            <!-- end Header -->
+
+            <!-- General info -->
+            <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+        <span style="float: left;">
+            &{'RFI'} #${rfi.No} &{'MoreInfo'}
+        </span>
+            </div>
+            <div class="panel no-bd" style="padding-left: 1%;padding-right: 1%;">
+                <div class="panel-heading" style="">
+                    <h4 class="panel-title" style=""><strong>&{'RFIGeneralInfo'}</strong></h4>
+                </div>
+                <div class="panel-body" style="padding: 0 4% 10px 4%; ">
+                    <div class="row well">
+                        <div class="col-md-12" style="">
+                            <form class="form-horizontal">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'AssignedTo'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${rfi.assignee}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'CreatedDate'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${rfi.createDate.format("yyyy-MM-dd HH:mm")}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'CostImpact'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        &{rfi.costImpact.impact}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Project'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${rfi.project.name}
+                                        </div>
+                                    </div>
+                                #{if rfi.location != null}
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Location'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${rfi.location}
+                                        </div>
+                                    </div>
+                                #{/if}
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'OpenRFIs'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${rfi.questionReceivedFrom}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'DueDate'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${rfi.dueDate.format("yyyy-MM-dd")}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'ScheduleImpact'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        &{rfi.scheduleImpact.impact}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'status'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        #{if rfi.status.status=='Open'}
+                                        &{'Open'}
+                                        #{/if}
+                                #{elseif rfi.status.status=='Closed'}
+                                        &{'Closed'}
+                                        #{/elseif}
+                                #{else }
+                                        &{'Draft'}
+                                        #{/else}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Distribution'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        #{if rfi.distributions.size()}
+                                            #{list items:rfi.distributions, as:'dist'}
+                                            ${dist_index == 1 ? dist.getName() : ", " + dist.getName()}
+                                            #{/list}
+                                        #{/if}
+                                        #{else }
+                                        &{'NoDistribution'}
+                                        #{/else}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Privacy'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        #{if rfi.private_}
+                                        &{'privated'}
+                                        #{/if}
+                                        #{else }
+                                        &{'public'}
+                                        #{/else}
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            #{if user.id == rfi.questionReceivedFrom.id}
+                <div class="panel bd-0 bd-t-dark">
+                    <div class="panel-heading" style="height: 60px;">
+                        #{if rfi.questionReceivedFrom.id == user.id && rfi.status.status == "Closed"}
+                            <p style="width: 70%;" class="pull-left">&{'RFIOpenContent'}</p>
+                            <a type="button" href="@{controllers.RFIs.close(rfi.id)}"
+                               class="btn btn-dark pull-right">
+                            &{'open'}
+                            </a>
+                        #{/if}
+                        #{elseif rfi.questionReceivedFrom.id == user.id && rfi.status.status == "Open"}
+                            <p style="width: 70%;" class="pull-left">&{'RFICloseContent'}</p>
+                            <a type="button" href="@{controllers.RFIs.close(rfi.id)}"
+                               class="btn btn-dark pull-right">
+                            &{'Close'}
+                            </a>
+                        #{/elseif}
+                    </div>
+                </div>
+            #{/if}
+            </div>
+            <!-- end General info -->
+
+            <!-- question info-->
+            <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+        <span style="float: left;">
+            <i class="fa fa-question m-r-5"></i>
+        &{'Question'}:
+            (${rfi.questionReceivedFrom}
+        &{'openRFIs'})
+        </span>
+        <span style="float: right; margin-right: 1%">
+            <i class="fa fa-clock-o"></i> ${rfi.createDate.format("yyyy-MM-dd HH:mm")}
+        </span>
+            </div>
+            <div class="panel no-bd">
+                <div class="panel-body" style="padding: 0 0 0 0;">
+                    <table style="">
+                        <tr>
+                            <td style="width: 5%;padding-left:10px;padding-right: 10px;">
+                                <center>
+                                    <span class="glyphicon glyphicon-comment"></span>
+                                </center>
+                            </td>
+                            <td style="padding-left: 5px; padding-right: 10px;">
+                                <p>${rfi.question.raw()}</p>
+                            </td>
+                        </tr>
+                    #{if rfi.attaches.size()>0}
+                        <tr>
+                            <td style="width: 5%;padding-left:10px;padding-right: 10px;">
+                                <center>
+                                    <span class="glyphicon glyphicon-paperclip"></span>
+                                </center>
+                            </td>
+                            <td style="padding-left: 5px; padding-right: 10px;">
+                                <div style="height: 50px;" id="post-images-rfi-${rfi.id}">
+                                    #{list items:rfi.attaches, as:'attach'}
+                                        <div class="rfi-images align-center" style="float:left;  margin-right: 10px;">
+                                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension, attach.filesize).raw()}
+                                        </div>
+                                    #{/list}
+                                </div>
+                            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-rfi-"+rfi.id).raw()}
+                            </td>
+                        </tr>
+                    #{/if}
+                    </table>
+                    <br/>
+                </div>
+            </div>
+            <!-- end question info -->
+
+            <!-- answer info -->
+        #{list items:rfi.trackings, as:'track'}
+            <div style="border-radius: 3px; margin-left: 7%;padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #808285; color: white;">
+            <span style="float: left;">
+                #{if track.author.id == user.id}
+                    <i class="fa fa-reply m-r-5"></i>
+                #{/if}
+                #{else }
+                    <i class="fa fa-share m-r-5"></i>
+                #{/else}
+            &{'Reply'}:
+                (${track.author}
+            &{'repliedBy'}.)
+            </span>
+            <span style="float: right; padding-right: 1%">
+                <i class="fa fa-clock-o"></i> ${track.createDate.format("yyyy-MM-dd HH:mm")}
+            </span>
+            </div>
+            <div class="panel no-bd" style="margin-left: 7%;padding-left: 1%;padding-right: 1%;">
+                <div class="panel-body" style="padding: 0 0 0 0;">
+                    <table>
+                        <tr>
+                            <td style="width: 5%; padding-left: 10px; padding-right: 10px;">
+                                <center>
+                                    <span class="glyphicon glyphicon-comment" style="color: #808285"></span>
+                                </center>
+                            </td>
+                            <td style="width: 95%;padding-left: 5px; padding-right: 10px;">
+                                <p>${track.note.raw()}</p>
+                            </td>
+                        </tr>
+                        #{if track.attaches.size()>0}
+                            <tr>
+                                <td style="width: 5%;padding-left:10px;padding-right: 10px;">
+                                    <center>
+                                        <span class="glyphicon glyphicon-file" style="color: #808285"></span>
+                                    </center>
+                                </td>
+                                <td style="padding-left: 5px; padding-right: 10px;">
+                                    <div style="margin-bottom: 10px;height: 50px;" id="post-images-reply-${track.id}">
+                                        #{list items:track.attaches, as:'attach'}
+                                            <div class="rfi-images align-center"
+                                                 style="float:left;  margin-right: 10px;">
+                                            ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                            </div>
+                                        #{/list}
+                                    </div>
+                                ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-reply-"+track.id).raw()}
+                                </td>
+                            </tr>
+                        #{/if}
+                    </table>
+                </div>
+            </div>
+        #{/list}
+        #{if rfi.status.status == "Open" && rfi.isAllowTracking(user.id)}
+            <div style="border-radius: 3px;padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+            <span style="float: left;">
+                <i class="fa fa-pencil m-r-5"></i>
+            &{'writeReply'}:
+                (${user}
+            &{'repliedBy'})
+            </span>
+            </div>
+            <div class="panel-footer">
+                <div class="row">
+                    <div class="col-md-12">
+                        <form action="@{controllers.RFIs.track()}" id="rfiTrackingFeild" role="form" method="post">
+                            <div class="form-group">
+                                <input type="hidden" name="id" id="rfiId" value="${rfi.id}"/>
+                                <textarea name="note" id="replytext" rows="5" style="resize: vertical;"
+                                          class="form-control"></textarea>
+                            </div>
+                            <div style="width: 100%;min-height: 50px;">
+                                <div style="">
+                                    <div style="display:none">
+                                        <div id="showPictureZoom">
+                                            <img id="zoomedPicture" src=""/>
+                                        </div>
+                                        <a id="showPictureZoomA" href="#showPictureZoom"></a>
+                                    </div>
+                                    <div id="punchListRFIAttachContainer" style="height: 25px;">
+                                        <div style="display: none" id="documentImageTemplate">
+                                            <li>
+                                                        <span>
+                                                            <span></span>
+                                                        </span>
+                                            </li>
+                                        </div>
+                                        <div style="display: none" id="deleteImageTemplate">
+                                            <img height='12' class='deleteUploadedImage' width='12'
+                                                 src="@{'/public/images/delete-image.png'}"
+                                                 fileDir='#fileDir' extension='#extension'/>
+                                        </div>
+                                        <ul id="uploadBox">
+                                            <li>
+                                                        <span>
+                                                            <span></span>
+                                                        </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div id="rfiAttachs"></div>
+                                </div>
+                            </div>
+                            <div style="width: 30%; padding-top: 20px;">
+                                <button style="" type="button" id="send"
+                                        onclick="writeTrackingToRFI()"
+                                        class="btn btn-primary ">&{'Send'}</button>
+                                <button style=" margin-right: 2%" id="formClear" type="reset"
+                                        class="btn btn-default">
+                                &{'Clear'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        #{/if}
+        #{else}
+            <div style="height: 30px!important;"></div>
+        #{/else}
+            <!-- end answer info -->
+        </div>
+    </div>
+</div>
+<script>
+    #{if stat != null && stat != ""}
+    $(window).load(function () {
+        notificationOn("success", "${stat}");
+    });
+    #{/if}
+    function writeTrackingToRFI() {
+        var obj = $('div#rfiAttachs');
+        $("div#punchListRFIAttachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type='hidden' name='filename' value='" + $(this).attr('filename') + "'>" +
+                    "<input type='hidden' name='filedir' value='" + $(this).attr('filedir') + "'>" +
+                    "<input type='hidden' name='extension' value='" + $(this).attr('extension') + "'>" +
+                    "<input type='hidden' name='filesize' value='" + $(this).attr('filesize') + "'>");
+        });
+        $("form#rfiTrackingFeild").submit();
+    }
+    $("button#formClear").click(function () {
+        $("div#punchListRFIAttachContainer ul#uploadBox").html($("div#punchListRFIAttachContainer div#documentImageTemplate").html());
+    });
+    //            function uploadRFIClick(ban) {
+    //                var image = $(ban).find('img');
+    //                if (image.length > 0) {
+    //                    handleAttachmentClick(image);
+    //                } else {
+    //                    selectedUbox = "rfiFileAttach";
+    //                    $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").removeAttr("accept");
+    //                    $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").attr("multiple", "multiple");
+    //                    $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").click();
+    //                }
+    //            }
+
+    $(document).ready(function () {
+        $("#mCSB_3").mCustomScrollbar({
+            theme: "dark-2"
+        });
+    });
+
+</script>
+<style xmlns="http://www.w3.org/1999/html">
+    table#det_table tr:first-child td, table#min_table tr:first-child td {
+        font-size: 16px;
+    }
+
+    table#det_table tr td {
+        font-size: 14px;
+    }
+
+    table#det_table tr, table#min_table tr {
+        height: 32px;
+        background-color: white;
+        color: #000000;
+    }
+
+    table#det_table tr td {
+        border-bottom: solid black 1px;
+    }
+
+    table#det_table tr:last-child td {
+        border-bottom: none;
+    }
+
+    div.rfi-images img, img.imgIcon {
+        height: 40px !important;
+        width: 40px !important;
+        cursor: pointer;
+        margin: 5px 5px 0 0;
+        box-shadow: 0 0 1px gray;
+        border: 1px solid #333;
+        border-radius: 2px;
+        background: white;
+    }
+</style>
+#{ImgThumbnail div:'div.rfi-images', divid:'rfishowp'/}
+#{PunchList-RFI-upload /}
+#{punchList-rfi-config name:'RFIs' /}

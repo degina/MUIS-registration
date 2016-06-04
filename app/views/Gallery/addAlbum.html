@@ -1,0 +1,121 @@
+<script>
+    $(document).ready(function () {
+        $('.album').hover( function() {
+            $(this).find('.album_header').show('slide', { direction: 'left' }, 70);
+        }, function() {
+            $(this).find('.album_header').hide('slide', { direction: 'left' }, 70);
+        });
+    });
+</script>
+#{if album_id.equals("")}
+<div class="album mix col-xs-6 col-sm-4 col-md-3" id="gAlbum_${galleryAlbum.id}" albumID="${galleryAlbum.id}" uploaderID="${galleryAlbum.uploader.id}" style="display:block;">
+    <div class="btn-group media-group" >
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+            <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu media-menu" role="menu">
+            #{if galleryAlbum.uploader.id == user.id}
+                <li onclick="editAlbum(${galleryAlbum.id},${galleryAlbum.type},'${galleryAlbum.name}')"><a href="#"><i class="fa fa-pencil"></i> Засах</a>
+                </li>
+                <li onclick="deleteAlbum(${galleryAlbum.id})"><a href="#"><i class="fa fa-trash-o"></i> Устгах</a>
+                </li>
+            #{/if}
+            <li onclick="show_album(${galleryAlbum.id})"><a href="#"><i class="fa fa-search"></i> Харах</a>
+            </li>
+        </ul>
+    </div>
+    <div class="panel panel-default" onclick="show_album(${galleryAlbum.id})">
+        <div class="panel-body">
+            <div class="thmb">
+                <div class="thmb-prev">
+                    <a href="#">
+                        <div class="album_header" style="display:none;">
+                            <center>
+                                <ul>
+                                    <li style="color:white;"><strong> ${galleryAlbum.galleryPictures.size()} </strong></li>
+                                    <li style="color:white;"><strong> зураг </strong></li>
+                                    #{if galleryAlbum.galleryPictures.size()>1}
+                                        <li><img src="${galleryAlbum.galleryPictures.get(1).pathTumb}.jpg" class="img-responsive" /> </li>
+                                    #{/if}
+                                    #{if galleryAlbum.galleryPictures.size()>2}
+                                        <li><img src="${galleryAlbum.galleryPictures.get(2).pathTumb}.jpg" class="img-responsive" /> </li>
+                                    #{/if}
+                                </ul>
+                            </center>
+                        </div>
+                        #{if galleryAlbum.galleryPictures.size()>0}
+                            <img onclick="show_album(${galleryAlbum.id})" src="${galleryAlbum.galleryPictures.get(0).pathTumb}.jpg" class="img-responsive"/>
+                        #{/if}
+                        #{else}
+                            <img onclick="show_album(${galleryAlbum.id})" src="/public/images/no-photo-gallery.jpg" class="img-responsive"/>
+                        #{/else}
+                    </a>
+                </div>
+                <h5 class="media-title">
+                    <a data-rel="tooltip" data-placement="bottom" id="gAlbum_name_${galleryAlbum.id}"
+                       data-original-title="#{if !galleryAlbum.name.equals(galleryAlbum.getNameMax())}${galleryAlbum.name}#{/if}">
+                    ${galleryAlbum.getNameMax()}
+                    </a>
+                </h5>
+                <small class="text-muted pull-left">${galleryAlbum.galleryPictures.size()} зураг</small>
+                <small class="text-muted pull-right">${galleryAlbum.createdDate.format("yyyy-MM-dd")}</small>
+            </div>
+        </div>
+    </div>
+</div>
+#{/if}
+#{else }
+<div class="btn-group media-group" >
+    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu media-menu" role="menu">
+        #{if galleryAlbum.uploader.id == user.id}
+            <li onclick="editAlbum(${galleryAlbum.id},${galleryAlbum.type},'${galleryAlbum.name}')"><a href="#"><i class="fa fa-pencil"></i> Засах</a>
+            </li>
+            <li onclick="deleteAlbum(${galleryAlbum.id})"><a href="#"><i class="fa fa-trash-o"></i> Устгах</a>
+            </li>
+        #{/if}
+        <li onclick="show_album(${galleryAlbum.id})"><a href="#"><i class="fa fa-search"></i> Харах</a>
+        </li>
+    </ul>
+</div>
+<div class="panel panel-default" onclick="show_album(${galleryAlbum.id})">
+    <div class="panel-body">
+        <div class="thmb">
+            <div class="thmb-prev">
+                <a href="#">
+                    <div class="album_header" style="display:none;">
+                        <center>
+                            <ul>
+                                <li style="color:white;"><strong> ${galleryAlbum.galleryPictures.size()} </strong></li>
+                                <li style="color:white;"><strong> зураг </strong></li>
+                                #{if galleryAlbum.galleryPictures.size()>1}
+                                    <li><img src="${galleryAlbum.galleryPictures.get(1).pathTumb}.jpg" class="img-responsive" /> </li>
+                                #{/if}
+                                #{if galleryAlbum.galleryPictures.size()>2}
+                                    <li><img src="${galleryAlbum.galleryPictures.get(2).pathTumb}.jpg" class="img-responsive" /> </li>
+                                #{/if}
+                            </ul>
+                        </center>
+                    </div>
+                    #{if galleryAlbum.galleryPictures.size()>0}
+                        <img onclick="show_album(${galleryAlbum.id})" src="${galleryAlbum.galleryPictures.get(0).pathTumb}.jpg" class="img-responsive"/>
+                    #{/if}
+                    #{else}
+                        <img onclick="show_album(${galleryAlbum.id})" src="/public/images/no-photo-gallery.jpg" class="img-responsive"/>
+                    #{/else}
+                </a>
+            </div>
+            <h5 class="media-title">
+                <a data-rel="tooltip" data-placement="bottom" id="gAlbum_name_${galleryAlbum.id}"
+                   data-original-title="#{if !galleryAlbum.name.equals(galleryAlbum.getNameMax())}${galleryAlbum.name}#{/if}">
+                ${galleryAlbum.getNameMax()}
+                </a>
+            </h5>
+            <small class="text-muted pull-left">${galleryAlbum.galleryPictures.size()} зураг</small>
+            <small class="text-muted pull-right">${galleryAlbum.createdDate.format("yyyy-MM-dd")}</small>
+        </div>
+    </div>
+</div>
+#{/else}

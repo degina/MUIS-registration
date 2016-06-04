@@ -1,0 +1,468 @@
+%{
+    Long sid = 0L;
+    String type1="none";
+    String type2="none";
+    String type3="none";
+
+    if(aktStyle!=null){
+        sid=aktStyle.id;
+        if(aktStyle.aktType.id==1)
+            type1="block";
+        if(aktStyle.aktType.id==2)
+            type2="block";
+        if(aktStyle.aktType.id==3)
+            type3="block";
+    }
+    else{
+        type1="block";
+    }
+}%
+<script>
+    function cancelled() {
+        var modalDiv = $("div#modalAktStyle");
+        modalDiv.modal('hide');
+        modalDiv.find('#aktStyle').html("");
+    }
+
+    document.getElementById('aktTypeSelect').addEventListener('change', function () {
+        if (this.value == 1) {
+            document.getElementById('type1').style.display = 'block';
+            document.getElementById('type2').style.display = 'none';
+            document.getElementById('type3').style.display = 'none';
+        }
+        if (this.value == 2) {
+            document.getElementById('type1').style.display = 'none';
+            document.getElementById('type2').style.display = 'block';
+            document.getElementById('type3').style.display = 'none';
+        }
+        if (this.value == 3) {
+            document.getElementById('type1').style.display = 'none';
+            document.getElementById('type2').style.display = 'none';
+            document.getElementById('type3').style.display = 'block';
+        }
+    });
+
+    var aktuploader;
+    var aktLogoDir;
+    function createAktStyleUploader() {
+        aktuploader = new qq.FileUploader({
+            element: document.getElementById('file-uploader-demo2'),
+            action: '@{FileUploader.uploadFileCustom}',
+            allowedExtensions: ["png", "jpg"],
+            onSubmit: function (id, fileName) {
+                aktuploader.setParams({
+                    uploadPath: "${controllers.Consts.uploadAktStyleImagePath}", filename: fileName,
+                    upfilename: "uploaded", ratio: "120x70"
+                });
+            },
+            onProgress: function (id, fileName, loaded, total) {
+                var s = $("#uploadProgress");
+                if (s.length > 0)
+                    s.text(parseInt(loaded * 100 / total) + "%");
+            },
+            onComplete: function (id, fileName, responseJSON) {
+                var profileUrl = responseJSON['filedir'] + responseJSON['filename'] + ".jpg";
+                $(aktLogoDir + "Img").attr('src', profileUrl);
+                $("#uploadProgress").text('');
+                $(aktLogoDir + "1").val(profileUrl);
+            }
+        });
+    }
+
+    function addAktStyle() {
+        //alert("orj irj bnshde surtei ii");
+        var div = $('#aktstylecreate');
+
+        $.ajax({
+            type: "POST",
+            data: {
+                aktTypeSelect: div.find('#aktTypeSelect').val(),
+                name: div.find('#name').val(),
+                agentLogo1: div.find('#agentLogo1').val(),
+                clientLogo1: div.find('#clientLogo1').val(),
+                agentStaffName: div.find('#agentStaffName').val(),
+                clientStaffName: div.find('#clientStaffName').val(),
+                agentStaffPos: div.find('#agentStaffPos').val(),
+                clientStaffPos: div.find('#clientStaffPos').val(),
+                agentStaffName1: div.find('#agentStaffName1').val(),
+                clientStaffName1: div.find('#clientStaffName1').val(),
+                agentStaffPos1: div.find('#agentStaffPos1').val(),
+                clientStaffPos1: div.find('#clientStaffPos1').val(),
+                sid: ${sid}
+            },
+            url: "/aktStyleCreate",
+            beforeSend: function () {
+                $("div#modalAktStyle").find("div.modal-content").html("<div style='width:100%; text-align: center'><img src='/public/images/activity-indicator.gif'/></div>");
+            }
+        }).success(function (data) {
+            var modalDiv = $("div#modalAktStyle");
+            modalDiv.modal('hide');
+            modalDiv.find('#aktStyle').html("");
+            //$.fancybox.close();
+            loadFiles(selectedFolder, 1); //Invoking your data function
+        });
+    }
+
+    $(document).ready(function () {
+        createAktStyleUploader();
+
+        $("#agentLogo").click(function () {
+            $("#use_upload .qq-upload-button input").click();
+            aktLogoDir = "#agentLogo";
+        });
+
+        $("#clientLogo").click(function () {
+            $("#use_upload .qq-upload-button input").click();
+            aktLogoDir = "#clientLogo";
+        });
+    });
+
+</script>
+
+<form action="javascript:addAktStyle()">
+    <div class="modal-header bg-dark" style="height: 50px;!important;">
+        <span style="color: white; font-weight: 500; font-size: 16px;">Загвар оруулах цонх!!!</span>
+        <i class="fa fa-times" onclick="cancelled()" data-dismiss="modal" aria-hidden="true" style="float:right; margin-right: 10px;"></i>
+    </div>
+    <center>
+        <div class="modal-body">
+            #{if ftype!=3}
+            <!-- upload hiihed ashiglagdana -->
+            <div id="use_upload">
+                <h3 id="uploadProgress"></h3>
+
+                <div id="file-uploader-demo2" style="visibility:hidden;height:0;width:0;float:left;">
+                    <noscript>
+                        <p>Please enable JavaScript to use file uploader.</p>
+                        <!-- or put a simple form for upload here -->
+                    </noscript>
+                </div>
+            </div>
+            #{/if}
+            <div id='aktstylecreate'>
+                <!-- akt style songoj bui div -->
+                #{if ftype!=3}
+                <div class="col-md-12 text-left">
+                    Актын төрлөөс сонгоно уy:
+                    <div class="btn-group">
+                        <div>
+                            <select id="aktTypeSelect" class="form-control" data-live-search="true"
+                                    name="aktTypeSelect">
+                            #{if aktStyle!=null && aktStyle.aktType.id==1}
+                                <option value="1" selected>1 Зурагтай</option>
+                            #{/if}
+                            #{else }
+                                <option value="1">1 Зурагтай</option>
+                            #{/else}
+                            #{if aktStyle!=null && aktStyle.aktType.id==2}
+                                <option value="2" selected>2 Зурагтай</option>
+                            #{/if}
+                            #{else }
+                                <option value="2">2 Зурагтай</option>
+                            #{/else}
+                            #{if aktStyle!=null && aktStyle.aktType.id==3}
+                                <option value="3" selected>4 Зурагтай</option>
+                            #{/if}
+                            #{else }
+                                <option value="3">4 Зурагтай</option>
+                            #{/else}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <br/>
+                <br/>
+                <br/>
+                #{/if}
+                <div style="width:595px;height:842px;border: solid 1px black" class="panel panel-default">
+                    <!--header-->
+                    <table style="width:100%;height: 13%;">
+                        <tr>
+                            <td style="width:25%;padding-top: 30px;">
+                            #{if aktStyle==null}
+                                <div class="thumbnail" style="float:left; margin-left: 20px;">
+                                    <div class="overlay">
+                                        <div class="thumbnail-actions">
+                                            <a href="#" id="agentLogo"
+                                               class="btn btn-default btn-icon btn-rounded magnific" title=""><i
+                                                    class="fa fa-upload"></i></a>
+                                        </div>
+                                    </div>
+                                    <img id="agentLogoImg" src="/public/images/akt/akt_add_logo.jpg"
+                                         style="width:120px;height:70px;">
+                                </div>
+                                <input id="agentLogo1" type="hidden" name="agentLogo1"
+                                       value="/public/images/akt/akt_add_logo.jpg"/>
+                            #{/if}
+                            #{else }
+                                <div class="thumbnail" style="float:left; margin-left: 20px;">
+                                    <div class="overlay">
+                                        <div class="thumbnail-actions">
+                                            <a href="#" id="agentLogo"
+                                               class="btn btn-default btn-icon btn-rounded magnific" title=""><i
+                                                    class="fa fa-upload"></i></a>
+                                        </div>
+                                    </div>
+                                    <img id="agentLogoImg" src="${aktStyle.logoAgent}" style="width:120px;height:70px;">
+                                </div>
+                                <input id="agentLogo1" type="hidden" name="agentLogo1" value="${aktStyle.logoAgent}"/>
+                            #{/else}
+                            </td>
+                            <td style="width:50%;padding-top: 10px;">
+                                <center>
+                                    <h5 style="width:100%;">${projectName}</h5>
+                                </center>
+                            </td>
+                            <td style="width:25%;padding-top: 30px;">
+                            #{if aktStyle==null}
+                                <div class="thumbnail" style="float:right; margin-right: 20px;">
+                                    <div class="overlay">
+                                        <div class="thumbnail-actions">
+                                            <a href="#" id="clientLogo"
+                                               class="btn btn-default btn-icon btn-rounded magnific" title=""><i
+                                                    class="fa fa-upload"></i></a>
+                                        </div>
+                                    </div>
+                                    <img id="clientLogoImg" src="/public/images/akt/akt_add_logo.jpg"
+                                         style="width:120px;height:70px;">
+                                </div>
+                                <input id="clientLogo1" type="hidden" name="clientLogo1"
+                                       value="/public/images/akt/akt_add_logo.jpg"/>
+                            #{/if}
+                            #{else }
+                                <div class="thumbnail" style="float:right; margin-right: 20px;">
+                                    <div class="overlay">
+                                        <div class="thumbnail-actions">
+                                            <a href="#" id="clientLogo"
+                                               class="btn btn-default btn-icon btn-rounded magnific" title=""><i
+                                                    class="fa fa-upload"></i></a>
+                                        </div>
+                                    </div>
+                                    <img id="clientLogoImg" src="${aktStyle.logoClient}"
+                                         style="width:120px;height:70px;">
+                                </div>
+                                <input id="clientLogo1" type="hidden" name="clientLogo1"
+                                       value="${aktStyle.logoClient}"/>
+                            #{/else}
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!--sub header-->
+                    <table style="width:100%;height:3%;font-size: xx-small;margin-top: -20px">
+                        <tr>
+                            <td colspan="3" style="width:100%;">
+                                <center>
+                                    <p style="width:30%; ">№ ...</p>
+                                </center>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="width:100%;">
+                                <center>
+                                #{if aktStyle==null}
+                                    <input id="name" name="name" type="text" placeholder="Ажлын нэр..."
+                                           style="width:50%; "
+                                           oninvalid="this.setCustomValidity('Ажлын нэрийг оруулна уу!!!')"
+                                           oninput="setCustomValidity('')" required>
+                                #{/if}
+                                #{else }
+                                    <input id="name" name="name" type="text" placeholder="Ажлын нэр..."
+                                           value="${aktStyle.name}" style="width:50%; " required
+                                           oninvalid="this.setCustomValidity('Ажлийн нэрийг оруулна уу!!!')"
+                                           oninput="setCustomValidity('')">
+                                #{/else}
+                                </center>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!--main-content or images-and-description-->
+                    <div id="type1" style="display:${type1};margin:2% 3%;width:94%;height: 60%;">
+                        <table style="width:100%;height: 100%;">
+                            <tr>
+                                <td style="width:100%;text-align: center">
+                                    <img src="/public/images/akt/akt_image1.jpg" style="width:535px;height:380px;">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="type2" class="imgTable" style="display: ${type2};margin:2% 3%;width:94%;height: 60%;">
+                        <table style="width:100%;height: 100%;">
+                            <tr>
+                                <td><img src="/public/images/akt/akt_image2_1.jpg" style="width: 557px;height:186px">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><img src="/public/images/akt/akt_image2_2.jpg" style="width: 557px;height:186px">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div id="type3" class="imgTable" style="display: ${type3};margin:2% 3%;width:94%;height: 60%;">
+                        <table style="width:100%;height: 100%;">
+                            <tr>
+                                <td style="padding:3px;">
+                                    <img src="/public/images/akt/akt_image3_1.jpg" style="width:264px; height:186px;">
+                                </td>
+                                <td style="padding:3px;">
+                                    <img src="/public/images/akt/akt_image3_2.jpg" style="width:264px; height:186px;">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="padding:3px;">
+                                    <img src="/public/images/akt/akt_image3_3.jpg" style="width:264px; height:186px;">
+                                </td>
+                                <td style="padding:3px;">
+                                    <img src="/public/images/akt/akt_image3_4.jpg" style="width:264px; height:186px;">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <!--sub footer-->
+                    <table style="margin:2% 3%;width:94%;height: 9%;">
+                        <tr>
+                            <td style="width: 50%;padding:3px;">
+                                <p>Гүйцэтгэгчийг төлөөлж:</p>
+
+                                <div style="border:solid 1px black">
+                                    <div style="padding:7px;width: 100%;">
+                                    #{if aktStyle==null}
+                                        <input id="agentStaffPos" name="agentStaffPos" type="text"
+                                               placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required
+                                               oninvalid="this.setCustomValidity('Албан тушаалыг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="agentStaffName" name="agentStaffName" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required oninvalid="this.setCustomValidity('Нэрийг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+                                    #{/if}
+                                    #{else }
+                                        <input id="agentStaffPos" value="${aktStyle.agentStaffPos}" name="agentStaffPos"
+                                               type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required
+                                               oninvalid="this.setCustomValidity('Албан тушаалыг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="agentStaffName" value="${aktStyle.agentStaffName}"
+                                               name="agentStaffName" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required oninvalid="this.setCustomValidity('Нэрийг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+                                    #{/else}
+                                    </div>
+                                    <div style="padding:7px;width: 100%;">
+                                    #{if aktStyle==null}
+                                        <input id="agentStaffPos1" name="agentStaffPos1" type="text"
+                                               placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="agentStaffName1" name="agentStaffName1" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+                                    #{/if}
+                                    #{else }
+                                        <input id="agentStaffPos1" value="${aktStyle.agentStaffPos1}"
+                                               name="agentStaffPos1" type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="agentStaffName1" value="${aktStyle.agentStaffName1}"
+                                               name="agentStaffName1" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+                                    #{/else}
+                                    </div>
+                                </div>
+                            </td>
+                            <td style="width: 50%;padding:3px;">
+                                <p>Захиалагчийг төлөөлж:</p>
+
+                                <div style="border:solid 1px black">
+                                    <div style="padding:7px;width: 100%;">
+                                    #{if aktStyle==null}
+                                        <input id="clientStaffPos" name="clientStaffPos" type="text"
+                                               placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required
+                                               oninvalid="this.setCustomValidity('Албан тушаалыг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="clientStaffName" name="clientStaffName" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required oninvalid="this.setCustomValidity('Нэрийг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+                                    #{/if}
+                                    #{else }
+                                        <input id="clientStaffPos" value="${aktStyle.clientStaffPos}"
+                                               name="clientStaffPos" type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required
+                                               oninvalid="this.setCustomValidity('Албан тушаалыг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="clientStaffName" value="${aktStyle.clientStaffName}"
+                                               name="clientStaffName" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"
+                                               required oninvalid="this.setCustomValidity('Нэрийг оруулна уу!!!')"
+                                               oninput="setCustomValidity('')"/>
+                                    #{/else}
+                                    </div>
+                                    <div style="padding:7px;width: 100%;">
+                                    #{if aktStyle==null}
+                                        <input id="clientStaffPos1" name="clientStaffPos1" type="text"
+                                               placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="clientStaffName1" name="clientStaffName1" type="text"
+                                               placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+                                    #{/if}
+                                    #{else }
+                                        <input id="clientStaffPos1" value="${aktStyle.clientStaffPos1}"
+                                               name="clientStaffPos1" type="text" placeholder="Албан тушаал"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+
+                                        <p style="display:inline-block;margin: auto">/.............../</p>
+                                        <input id="clientStaffName1" value="${aktStyle.clientStaffName1}"
+                                               name="clientStaffName1" type="text" placeholder="Нэр"
+                                               style="font-size:x-small;display:inline-block;margin:auto;width: 35%"/>
+                                    #{/else}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <br/>
+            </div>
+        </div>
+        <div class="modal-footer bg-dark" style="height: 50px;!important;">
+            <button onclick="cancelled()"
+                    style="height: 30px !important;padding:3px 20px;float:right;margin:-10px 10px;" type="button"
+                    class="btn btn-default close" data-dismiss="modal" aria-hidden="true">
+                <i class="fa fa-times m-r-10"></i> Болих
+            </button>
+            #{if ftype!=3}
+            <button style="height: 30px !important;padding:3px 20px;float:right;margin:-10px 10px;" type="submit"
+                    class="btn btn-success">
+                <i class="fa fa-save m-r-10"></i> Хадгалах
+            </button>
+            #{/if}
+        </div>
+    </center>
+</form>
+<style>
+    div.imgTable td {
+        text-align: center;
+    }
+</style>

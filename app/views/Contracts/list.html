@@ -1,0 +1,271 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu: 'Contract'/}
+#{set activeMenuSub: 'ContractList'/}
+#{contract-config /}
+<style>
+    .top-menu {
+        border-bottom: 1px solid #FFF;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+    #tableContract {
+        margin-top: 15px;
+        background: #fff;
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    #tableContract thead {
+        background: #2b2e33;
+        color: #eaeaea;
+        text-align: center !important;
+    }
+
+    #tableContract > thead > tr > th {
+        vertical-align: top !important;
+        padding: 10px 5px !important;
+        font-size: 15px !important;
+    }
+
+    #tableContract .table > tbody > tr > td {
+        padding: 8px 6px;
+    }
+
+    div.events-filter {
+        background-color: #fff;
+        padding: 20px 10px 10px 10px;
+        -moz-border-radius: 3px;
+        -webkit-border-radius: 3px;
+        border-radius: 3px;
+    }
+</style>
+<div id="main-content" style="">
+    <div class="top-menu">
+        <button class="btn btn-dark" onclick="statusClick('All')" id="statusAll"><strong>Бүгд</strong> <span
+                class="label label-danger m-l-10">${contracts.size()}</span></button>
+    #{list items:statuses,as:'status'}
+        <button type="button" class="btn btn-default" onclick="statusClick(${status.id})"
+                id='status${status.id}'>${status.status}<span
+                class="label label-default m-l-10">${status.contracts.size()}</span></button>
+    #{/list}
+    #{if user.getUserPermissionType(controllers.Consts.permissionContract)==3}
+        <a href="@{Contracts.blank()}" style="float: right;margin-left: 4px" class="btn btn-success"><i
+                class="fa fa-plus p-r-10"></i> Гэрээ
+            нэмэх</a>
+    #{/if}
+        <button type="button" class="btn btn-primary" onclick="searchFilter(1)" style="float: right"><i
+                class="fa fa-filter p-r-10"></i> Шүүж харах
+        </button>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="events-filter clearfix">
+                <div class="col-md-2">
+                    <select name="" data-width="100%" id="contractorsId" class="form-control m-b-10">
+                        <option value="All">Бүх гэрээлэгч</option>
+                    #{list items:contracts,as:'contractorcompane'}
+                        <option value='${contractorcompane.companyName}'> ${contractorcompane.companyName}</option>
+                    #{/list}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select data-width="100%" id="categoryId" class="form-control m-b-10">
+                        <option value="All">Бүх ангилал</option>
+                    #{list items:categories,as:'categ'}
+                        <option value='${categ.id}'> ${categ.category}</option>
+                    #{/list}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select data-width="100%" id="paymentId" class="form-control m-b-10">
+                        <option value="All">Бүх нөхцөл</option>
+                    #{list items:payments,as:'pay'}
+                        <option value='${pay.id}'> ${pay.payment}</option>
+                    #{/list}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div id="reportrange" class="form-control m-b-10">
+                        <i class="fa fa-calendar fa-lg p-r-10"></i> <span>Огноо...</span>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <input class="form-control m-b-10" data-toggle="modal" data-target="#modal-basic" id="priceInput"
+                           placeholder="Үнийн дүнгээр шүүх...">
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control m-b-10" id="searchName" placeholder="Хайх түлхүүр үг...">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 table-responsive" id="ContentTable">
+        #{include '/Contracts/listFilter.html'/}
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-basic" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><strong>Үнийн дүнгээр шүүх</strong></h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control numberic" id="startPrice" placeholder="доод үнэ">
+                    </div>
+                    <div class="col-md-5">
+                        <input type="text" class="form-control numberic" id="endPrice" placeholder="дээд үнэ">
+                    </div>
+                    <div class="col-md-2">
+                        <input id="tolborNegj" type="checkbox" checked data-on-color="primary"
+                               data-off-color="info" class="switch" data-size="small"
+                               data-on-text="₮"
+                               data-off-text="$">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Болих</button>
+                <button type="button" class="btn btn-success" data-dismiss="modal" onclick="uneRange()">Болсон</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script type="text/javascript">
+    $('input.numberic').forceNumericOnly(true);
+    var priceAll = true;
+    var startPrice = "All";
+    var endPrice = "All";
+    var anhniiStatus = "All";
+    var startDate = "";
+    var endDate = "";
+
+    function uneRange() {
+        startPrice = $('#startPrice').val();
+        endPrice = $('#endPrice').val();
+        if (startPrice == "" && endPrice == "") {
+            startPrice = "All";
+            endPrice = "All";
+            $('#priceInput').val("");
+            console.log(startPrice + " bugd");
+        } else
+            $('#priceInput').val(startPrice + " -c " + endPrice);
+        console.log(startPrice + " ehlelel");
+    }
+
+    function searchFilter(page) {
+        loading2("div#ContentTable");
+
+        $.ajax({
+            type: "POST",
+            data: {
+                CurrentPageNumber: page,
+                filterStatus: anhniiStatus,
+                filterContractor: $('select#contractorsId option:checked').val(),
+                filterCategory: $('select#categoryId option:checked').val(),
+                filterPayment: $('select#paymentId option:checked').val(),
+                filterSearchName: $('input#searchName').val(),
+                filterStartPrice: startPrice,
+                filterEndPrice: endPrice,
+                filterStartDate: startDate,
+                filterEndDate: endDate
+            }, url: "/contractListFilter"
+        }).success(
+                function (data) {
+                    $("div#ContentTable").html(data);
+                });
+    }
+
+    function statusClick(id) {
+        $('button#status' + anhniiStatus).removeClass('btn-dark').addClass("btn-default");
+        $('button#status' + anhniiStatus + '>span').removeClass('label-danger').addClass("label-default");
+        anhniiStatus = id;
+        $('button#status' + id).removeClass('btn-default').addClass("btn-dark");
+        $('button#status' + anhniiStatus + '>span').removeClass('label-default').addClass("label-danger");
+        console.log(id);
+
+        $('#priceInput').val("");
+        $('#searchName').val("");
+        $('select#contractorsId').val("");
+        $('#reportrange span').html('Өдөр сонгох...');
+
+        loading2("div#ContentTable");
+        $.ajax({
+            type: "POST",
+            data: {
+                CurrentPageNumber: 1,
+                filterStatus: id,
+                filterContractor: "All",
+                filterCategory: "All",
+                filterPayment: "All",
+                filterSearchName: "",
+                filterStartPrice: "All",
+                filterEndPrice: "All",
+                filterStartDate: startDate,
+                filterEndDate: endDate
+            }, url: "/contractListFilter"
+        }).success(
+                function (data) {
+                    $("div#ContentTable").html(data);
+
+                });
+
+    }
+
+    $(document).ready(function () {
+        $('#reportrange').daterangepicker({
+                    ranges: {
+                        'Өнөөдөр': [moment(), moment()],
+                        'Өчигдөр': [moment().subtract('days', 1), moment().subtract('days', 1)],
+                        'Сүүлийн 7 хоног': [moment().subtract('days', 6), moment()],
+                        'Сүүлийн 30 хоног': [moment().subtract('days', 29), moment()],
+                        'Энэ сар': [moment().startOf('month'), moment().endOf('month')],
+                        'Өнгөрсөн сар': [moment().subtract('month', 1).startOf('month'), moment().subtract('month', 1).endOf('month')]
+                    },
+                    startDate: moment().subtract('days', 29),
+                    endDate: moment(),
+                    format: 'YYYY/MM/DD',
+                    locale: {
+                        applyLabel: 'Болсон',
+                        cancelLabel: 'Болих',
+                        fromLabel: 'Аас',
+                        toLabel: 'Хүртэл',
+                        customRangeLabel: 'Өөрөөр сонгох',
+                        dayNames: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+                        daysOfWeek: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+                        monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+                        firstDay: 1
+                    }
+                },
+                function (start, end) {
+                    $('#reportrange span').html(start.format('YYYY-MM-DD') + ' -c ' + end.format('YYYY-MM-DD'));
+                }
+        );
+        $('#reportrange').on('apply.daterangepicker', function (ev, picker) {
+            console.log("apply event fired, start/end dates are "
+                    + picker.startDate.format('YYYY-MM-DD')
+                    + " to "
+                    + picker.endDate.format('YYYY-MM-DD')
+            );
+            startDate = picker.startDate.format('YYYY-MM-DD');
+            endDate = picker.endDate.format('YYYY-MM-DD');
+        });
+        $('#reportrange').on('cancel.daterangepicker', function (ev, picker) {
+            console.log("cancel event fired");
+            $('#reportrange span').html("Өдрөөр хайх...");
+            startDate = "All";
+            endDate = "All";
+        });
+        $(".clickable-row").click(function () {
+            window.document.location = $(this).data("href");
+        });
+    });
+</script>

@@ -1,0 +1,512 @@
+<!-- BEGIN PAGE LEVEL SCRIPTS -->
+<script src="/assets/plugins/bootstrap-switch/bootstrap-switch.js"></script>
+<script src="/assets/plugins/bootstrap-progressbar/bootstrap-progressbar.js"></script>
+<script src="/assets/plugins/datatables/dynamic/jquery.dataTables.min.js"></script>
+<script src="/assets/plugins/datatables/dataTables.bootstrap.js"></script>
+<script src="/assets/plugins/datatables/dataTables.tableTools.js"></script>
+<script src="/assets/plugins/datatables/table.editable.js"></script>
+<script src="/assets/plugins/jnotify/jNotify.jquery.min.js"></script>
+<script src="/assets/js/notifications.js"></script>
+<script src="/assets/plugins/modal/js/classie.js"></script>
+<script src="/assets/plugins/modal/js/modalEffects.js"></script>
+
+
+
+<!-- END  PAGE LEVEL SCRIPTS -->
+
+
+<div id="showOrderTransfer">
+    <div class="modal fade" id="modal-editorder_notify" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 80%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'order'}</strong></h4>
+                </div>
+                <div class="modal-body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="modal-ordercomment_notify" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 50%">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'Comment'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="#" class="form-horizontal" method="get"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <input id="comment-row" hidden="true"/>
+
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">&{'orderer'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                    <textarea class="form-control valid" id="view-orderer-comment"
+                                                              rows="5"
+                                                              readonly style="resize: none;"
+                                                              name="comment"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">&{'approver'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                    <textarea class="form-control valid"
+                                                              id="view-approver-comment" rows="5" readonly
+                                                              style="resize: none;"
+                                                              name="comment"></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label class="col-sm-2 control-label">&{'issuer'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                    <textarea class="form-control valid"
+                                                              id="view-issuer-comment" rows="5" readonly
+                                                              style="resize: none;"
+                                                              name="comment"></textarea>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 m-t-0 m-b-0 align-center">
+                                                <button type="button" id="save_comment" class="btn btn-success dhidden">
+                                                    <i
+                                                            class="fa fa-check"></i> &{'save'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-edittransfer_notify" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 1150px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'transfer'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script title="showOrderTransfer" type="text/javascript">
+
+
+    function showInventoryOrder(id, notificationId) {
+        var index = id;
+
+        $.ajax({
+            type: "POST",
+            data: {id: index},
+            url: "/inventoryorderseditorder",
+            beforeSend: function () {
+                $("div#modal-editorder_notify").find("div.modal-body").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+                $('div#modal-editorder_notify').modal('show');
+            }
+        }).success(
+                function (data) {
+                    $('div#modal-editorder_notify div.modal-body').html(data);
+
+
+                    $('div#modal-editorder_notify select#location_edit').attr("disabled");
+                    $('div#modal-editorder_notify input#datepick_edit').attr("disabled");
+                    $('div#modal-editorder_notify div#add_new_button').attr('hidden', true);
+                    $('div#modal-editorder_notify select#location_edit').attr("disabled");
+                    $('div#modal-editorder_notify select#location_edit').selectpicker('render');
+                    $('div#modal-editorder_notify table#table-editable_editorder tbody tr').each(function () {
+                        var location_quantity = $(this).find("td:nth-child(5) input");
+                        var item = $('select option:selected', $(this).find("td:first-child")).val();
+                        if (item == null) {
+                            item = $('input:nth-child(2)', $(this).find("td:first-child")).val();
+                        }
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                inv: item,
+                                loc: $('select#location_edit option:selected').val()
+                            },
+                            url: "/inventoryordersgetlocationquantity"
+                        }).success(
+                                function (data) {
+                                    location_quantity.val(data);
+                                });
+
+                        $(this).find("td:nth-child(3) input:first-child").change(function () {
+                            var approver_quantity = $(this);
+                            var item = $(this).parent("td").parent("tr").find("td:first-child input:nth-child(2)").val();
+                            $.ajax({
+                                type: "POST",
+                                data: {
+                                    inv: item,
+                                    loc: $('select#location_edit option:selected').val()
+                                },
+                                url: "/inventoryordersgetlocationquantity"
+                            }).success(
+                                    function (data) {
+                                        if (parseFloat(data) < parseFloat(approver_quantity.val())) {
+                                            showErrorMessage("Зөвшөөрөх хэмжээ агуулахын нөөцөөс их байж болохгүй.");
+                                            approver_quantity.val("");
+                                        }
+                                    });
+
+                        });
+                        $(this).find("td:nth-child(4) input:first-child").change(function () {
+                            var issuer_quantity = $(this).parent("td").parent("tr").find("td:first-child input:nth-child(2)").val();
+                            var item = $(this).parent("td").parent("tr").find("td:first-child input:nth-child(2)").val();
+                            if (parseFloat(data) < parseFloat(issuer_quantity.val())) {
+                                showErrorMessage("Олгох хэмжээ зөвшөөрсөн хэмжээнээс их байж болохгүй.");
+                                issuer_quantity.val("");
+                            }
+
+                        });
+
+                    });
+
+                    if (notificationId != undefined && $('li#noti' + notificationId).hasClass('unseen')) {
+                        $('li#noti' + notificationId).removeClass('unseen');
+                        notificationCounterChange(1, -1);
+                    }
+                });
+
+    }
+
+    function showInventoryTransfer(id, notificationId) {
+        var index = id;
+
+        $.ajax({
+            type: "POST",
+            data: {id: index},
+            url: "/inventorytransfersedittransfer",
+            beforeSend: function () {
+                $("div#modal-edittransfer_notify").find("div.modal-body").html('<div style="width:100%; text-align: center"><img src="public/images/activity-indicator.gif"/></div>');
+                $('div#modal-edittransfer_notify').modal('show');
+            }
+        }).success(
+                function (data) {
+                    $('div#modal-edittransfer_notify div.modal-body').html(data);
+
+                    if (notificationId != undefined && $('li#noti' + notificationId).hasClass('unseen')) {
+                        $('li#noti' + notificationId).removeClass('unseen');
+                        notificationCounterChange(1, -1);
+                    }
+                });
+
+
+    }
+
+
+    $(document).ready(function () {
+        $('#table-editable_editorder').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [2]
+            }
+            ]
+        });
+
+
+        $('div#modal-editorder_notify button#edit_approve').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            var is = 0;
+            $('div#modal-editorder_notify table tbody tr').each(function () {
+                if ($(this).find('td:nth-child(3) input').val() == "")
+                    is++;
+            });
+            if (is == 0) {
+                $.ajax({
+                    type: "POST",
+                    data: $("div#modal-editorder_notify form").serialize(),
+                    url: "/inventoryordersapproveorder"
+                }).success(
+                        function () {
+                            location.reload();
+                        });
+            } else {
+                showErrorMessage("Бүх нүдийг бөглөнө үү?");
+            }
+        });
+
+        $('div#modal-editorder_notify button#edit_ready').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            var is = 0;
+            $('div#modal-editorder_notify table tbody tr').each(function () {
+                if ($(this).find('td:nth-child(4) input').val() == "")
+                    is++;
+            });
+            if (is == 0) {
+                $.ajax({
+                    type: "POST",
+                    data: $("div#modal-editorder_notify form").serialize(),
+                    url: "/inventoryordersreadyorder"
+                }).success(
+                        function () {
+                            location.reload();
+                        });
+            } else {
+                showErrorMessage("Бүх нүдийг бөглөнө үү?");
+            }
+
+        });
+
+        $('div#modal-editorder_notify button#edit_recieve').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventoryordersrecieveorder"
+            }).success(
+                    function () {
+                        location.reload();
+                    });
+
+        });
+
+        $('div#modal-editorder_notify button#edit_cancel').live('click', function (e) {
+            e.preventDefault();
+            var index = $('input#order_id_edit').val();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventoryorderscancelorder"
+            }).success(
+                    function () {
+                        location.reload();
+                    });
+
+        });
+
+        $('div#modal-editorder_notify #table-editable_editorder a.comment').live('click', function (e) {
+            e.preventDefault();
+            $('div#modal-ordercomment_notify textarea#view-orderer-comment').html("");
+            $('div#modal-ordercomment_notify textarea#view-approver-comment').html(" ");
+            $('div#modal-ordercomment_notify textarea#view-issuer-comment').html(" ");
+            var nRow = $(this).parent('div').parent('td').parent("tr");
+            var orderer_comment = nRow.find("td:nth-child(2) input:nth-child(2)");
+            var approver_comment = nRow.find("td:nth-child(3) input:nth-child(2)");
+            var issuer_comment = nRow.find("td:nth-child(4) input:nth-child(2)");
+            var permission = $('div#modal-editorder_notify input#order_permission_edit').val();
+            var status = $('div#modal-editorder_notify input#order_status_edit').val();
+            commentRow = $(this).parent('div').parent('td').parent("tr");
+            $('div#modal-ordercomment_notify input#comment-row').val();
+
+            if (orderer_comment.innerHTML == "" && approver_comment.innerHTML == "" && issuer_comment.innerHTML == "") {
+                showErrorMessage("Тэмдэглэл алга.");
+            }
+            else {
+                $('div#modal-ordercomment_notify textarea#view-orderer-comment').val(orderer_comment.val());
+                $('div#modal-ordercomment_notify textarea#view-approver-comment').val(approver_comment.val());
+                $('div#modal-ordercomment_notify textarea#view-issuer-comment').val(issuer_comment.val());
+                $('div#modal-ordercomment_notify').modal('show');
+            }
+            if ((permission == "2" || permission == "3") && status == "1") {
+                $('div#modal-ordercomment_notify textarea#view-approver-comment').removeAttr("readonly");
+                $('div#modal-ordercomment_notify button#save_comment').removeClass("dhidden");
+            }
+            if ((permission == "4" || permission == "5") && status == "2") {
+                $('div#modal-ordercomment_notify textarea#view-issuer-comment').removeAttr("readonly");
+                $('div#modal-ordercomment_notify button#save_comment').removeClass("dhidden");
+            }
+
+        });
+
+        $('div#modal-ordercomment_notify button#save_comment').live('click', function (e) {
+            e.preventDefault();
+            var permission = $('div#modal-editorder_notify input#order_permission_edit').val();
+            var status = $('div#modal-editorder_notify input#order_status_edit').val();
+
+            $('div#modal-editorder_notify table#table-editable_editorder tbody tr').each(function () {
+                if (this.innerHTML == commentRow.html()) {
+                    if ((permission == "2" || permission == "3") && status == "1") {
+                        $(this).find("td:nth-child(3) input:nth-child(2)").val($('div#modal-ordercomment_notify textarea#view-approver-comment').val());
+                        $(this).find("td:nth-child(7) div a").html('<i class="fa fa-comment">');
+                        $('div#modal-ordercomment_notify').modal('hide');
+                    }
+                    if ((permission == "4" || permission == "5") && status == "2") {
+                        $(this).find("td:nth-child(4) input:nth-child(2)").val($('div#modal-ordercomment_notify textarea#view-issuer-comment').val());
+                        $(this).find("td:nth-child(7) div a").html('<i class="fa fa-comment">');
+                        $('div#modal-ordercomment_notify').modal('hide');
+                    }
+                }
+            });
+        });
+        $('button#edit_save').click(function () {
+            $('div#modal-editorder_notify form#save').submit();
+        });
+
+
+        $('#table-editable_edittransfer').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [0, 1, 2, 3, 4]
+            }
+            ]
+        });
+
+        $('div#modal-edittransfer_notify button#edit_recieve').live('click', function (e) {
+            e.preventDefault();
+            var index = $('div#modal-edittransfer_notify input#transfer_id_edit').val();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorytransfersrecievetransfer"
+            }).success(
+                    function (data) {
+                        if (data == "success")
+                            location.reload();
+                        if (data == "failed") {
+                            showErrorMessage("Амжилтүй боллоо.");
+                        }
+                    });
+
+        });
+
+        $('div#modal-edittransfer_notify button#edit_cancel').live('click', function (e) {
+            e.preventDefault();
+            if (confirm("Та цуцлахдаа итгэлтэй байна уу?") == false) {
+                return;
+            }
+            var index = $('div#modal-edittransfer_notify input#transfer_id_edit').val();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorytransferscanceltransfer"
+            }).success(
+                    function (data) {
+                        if (data == "success")
+                            location.reload();
+                        if (data == "failed") {
+                            showErrorMessage("Амжилтүй боллоо.");
+                        }
+                    });
+
+        });
+
+
+    });
+</script>
+
+<style>
+    div#showOrderTransfer body {
+        font-family: arial, sans-serif;
+    }
+
+    .rc-handle-container {
+        position: relative;
+    }
+
+    .rc-handle {
+        position: absolute;
+        width: 7px;
+        cursor: ew-resize;
+        margin-left: -3px;
+        z-index: 2;
+    }
+
+    div#showOrderTransfer .table.rc-table-resizing {
+        cursor: ew-resize;
+    }
+
+    div#showOrderTransfer table.rc-table-resizing thead,
+    div#showOrderTransfer table.rc-table-resizing thead > th,
+    div#showOrderTransfer table.rc-table-resizing thead > th > a {
+        cursor: ew-resize;
+    }
+
+    div#showOrderTransfer table.rc-table-resizing td,
+    div#showOrderTransfer table.rc-table-resizing tr,
+    div#showOrderTransfer table.rc-table-resizing th {
+        border: 1px solid #ddd;
+    }
+
+    div#showOrderTransfer ul.uploadBox li img.imgIcon {
+        height: 25px !important;
+        width: 25px !important;
+        border-radius: 4px !important;
+    }
+
+    div#showOrderTransfer ul.uploadBox li img.deleteUploadedImage {
+        left: 9px !important;
+        top: 9px !important;
+    }
+
+    div#showOrderTransfer table thead tr {
+        background: lightgrey
+    }
+
+    div#showOrderTransfer input {
+        cursor: default
+    }
+</style>
+#{ImgThumbnail div:'showOrderTransfer', divid:'order_notify_imgthumbnail'/}

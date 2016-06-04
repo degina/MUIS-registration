@@ -1,0 +1,60 @@
+#{if rtype==1}
+    #{list items:taskInventoryRels,as:'rel'}
+    <div id=fi-s${rel.id} class="resVals">
+        <select name="" style="min-width: 140px">
+            #{list items:inventories,as:'inventory'}
+                <option value="${inventory.id}"
+                        measure="${inventory.inventoryMeasure.measure}" ${rel.inventory.id==inventory.id?'selected':''}>
+                ${inventory.item}</option>
+            #{/list}
+        </select>
+        <input id=${rel.id} type="text" style="width: 70px;height: 23px" value="${controllers.Functions.getFloatFormat(rel.value,1)}"/>
+        <span class="measure">${rel.inventory.inventoryMeasure.measure}</span>
+        <span class='teamworkIcon delAssig' style='cursor: pointer'
+              onclick='removeResource(${rtype},${rel.id},1)'>d</span>
+    </div>
+    #{/list}
+<script>
+    $('div#resourceValues select').on('change', function () {
+        $(this).parent().find('span.measure').html($(this).find('option:selected').attr('measure'));
+    });
+    $('div#resourceValues input').forceNumericOnly(false);
+</script>
+#{/if}
+#{elseif rtype==2}
+    #{list items:taskEquipmentRels,as:'rel'}
+    <div id=fi-s${rel.id} class="resVals">
+        <select name="" style="min-width: 140px">
+            #{list items:equipments,as:'equipment'}
+                <option value="${equipment.id}" ${rel.equipment.id==equipment.id?'selected':''}>
+                ${equipment.name}</option>
+            #{/list}
+        </select>
+        <input id=${rel.id} type="text" style="width: 80px;height: 23px" value="${controllers.Functions.getFloatFormat(rel.value,1)}"/>
+        <span class="measure">мотцаг</span>
+        <span class='teamworkIcon delAssig' style='cursor: pointer'
+              onclick='removeResource(${rtype},${rel.id},1)'>d</span>
+    </div>
+    #{/list}
+<script>
+    $('div#resourceValues input').forceNumericOnly(false);
+</script>
+#{/elseif}
+#{elseif rtype==3}
+    #{list items:taskManPowerRels,as:'rel'}
+    <div id=fi-s${rel.id} class="resVals">
+        <select name="" style="min-width: 140px">
+            #{list items:manPowers,as:'manPower'}
+                <option value="${manPower.id}" ${rel.manPower.id==manPower.id?'selected':''}>
+                ${manPower.name}</option>
+            #{/list}
+        </select>
+        <input id=${rel.id} type="text" style="width: 80px;height: 23px" value="${rel.amount}"/>
+        <span class='teamworkIcon delAssig' style='cursor: pointer'
+              onclick='removeResource(${rtype},${rel.id},1)'>d</span>
+    </div>
+    #{/list}
+<script>
+    $('div#resourceValues input').forceNumericInt();
+</script>
+#{/elseif}

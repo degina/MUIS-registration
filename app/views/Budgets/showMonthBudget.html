@@ -1,0 +1,535 @@
+<div class="page-title"><i class="icon-custom-left"></i>
+    <h3><strong>${budget.date.format("yyyy")} оны ${budget.date.format("MM")}-р сарын тайлан</strong> /.мян ₮/</h3>
+</div>
+<div class="row m-t-20">
+    <div class="col-md-12">
+        <div class="tabcordion">
+            <ul id="myTab" class="nav nav-tabs">
+                <li class="active"><a href="#budget_result" data-toggle="tab">Орлого, үр дүн</a></li>
+                <li><a href="#budget_balance" data-toggle="tab">Баланс</a></li>
+                <li><a href="#budget_information" data-toggle="tab">Тулгарсан асуудал</a></li>
+            </ul>
+            <div id="myTabContent" class="tab-content">
+                <div class="tab-pane fade active in" id="budget_result">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-tools table-bordered" id="tableIncomeResult">
+                                <thead>
+                                <tr>
+                                    <th style="width: 227px;"></th>
+                                    <th style="width: 120px;" class="text-center">
+                                        <strong>Төсөвлөлт</strong>
+                                    </th>
+                                    <th style="width: 120px;" class="text-center">
+                                        <strong>Гүйцэтгэл</strong>
+                                    </th>
+                                    <th class="text-center" colspan="2"><strong>Хэмнэлт,Хэтрэлт</strong>
+                                    </th>
+                                    <th class="text-center"><strong>Тайлбар</strong>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr onclick="showDetails(0,'iNetSales')" class="pointer">
+                                    <td><i style="color: #C75757" class="fa fa-plus-square-o"
+                                           id="iNetSales" ></i>
+                                        Борлуулалтын орлого
+                                        <input id="budgetId" type="hidden" value="${budget.id}"/>
+                                    </td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.netSales.totalBudget)}</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.netSales.totalActual)}</td>
+                                    <td class="text-right" id="tdNetSalesVariance"
+                                        style="width:120px; ">%{ value =budget.netSales.variance;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td style="width:50px;"
+                                        class="text-right">${controllers.Functions.getFloatFormat(budget.netSales.variancePercent,2)}%</td>
+                                    <td>${budget.netSales.description}</td>
+                                </tr>
+                                <tr onclick="showDetails(1,'iNetCogs')" class="pointer">
+                                    <td><i style="color: #C75757" class="fa fa-plus-square-o"
+                                           id="iNetCogs" ></i>
+                                        Борлуулалтын өртөг
+                                    </td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.cogs.totalBudget)}</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.cogs.totalActual)}</td>
+                                    <td class="text-right">%{ value = budget.cogs.variance;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right"
+                                        id="tdNetCogsVariancePercent">${controllers.Functions.getFloatFormat(budget.cogs.variancePercent,2)}%</td>
+                                    <td>${budget.cogs.description}</td>
+                                </tr>
+                                <tr class="success pointer"  onclick="showDetails(2,'iNetProfit')">
+                                    <td><i style="color: #C75757" class="fa fa-plus-square-o"
+                                           id="iNetProfit"></i> <label style="margin-left: 10px;"> Нийт ашиг</label></td>
+                                    <td class="text-right">%{ value =
+                                        budget.grossMargin.totalBudget;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)}%{
+                                        }}%</td>
+                                    <td class="text-right">%{ value =
+                                        budget.grossMargin.totalActual;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)}%{
+                                        }}%</td>
+                                    <td class="text-right">%{ value =budget.grossMargin.variance;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{}
+                                        else { }%${controllers.Functions.getDecimal(value)}%{
+                                        }}%</td>
+                                    <td class="text-right">${controllers.Functions.getFloatFormat(budget.grossMargin.variancePercent,2)}%</td>
+                                    <td>${budget.grossMargin.description}</td>
+                                </tr>
+                                <tr onclick="showDetails(3,'iNetOpex')" class="pointer">
+                                    <td><i style="color: #C75757" class="fa fa-plus-square-o"
+                                           id="iNetOpex" ></i>
+                                        Үйл ажиллагааны зардал
+                                    </td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.opex.totalBudget)}</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.opex.totalActual)}</td>
+                                    <td class="text-right">%{ value = budget.opex.variance;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-center">${controllers.Functions.getFloatFormat(budget.opex.variancePercent,2)}%</td>
+                                    <td>${budget.opex.description}</td>
+                                </tr>
+                                <tr id="trOperatingProfitInput">
+                                    <td>Үйл ажиллагааны ашиг</td>
+                                    <td class="text-right">%{ value =budget.operatingProfitBudget;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }else { }%${controllers.Functions.getDecimal(value)}%{
+                                        }}%</td>
+                                    <td class="text-right">%{ value = budget.operatingProfitActual;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        } else { }%${controllers.Functions.getDecimal(value)}%{
+                                        }}%</td>
+                                    <td class="text-right" class="text-right">%{
+                                        value = budget.operatingProfitVariance;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)}%{
+                                        }}%</td>
+                                    <td class="text-center">${controllers.Functions.getFloatFormat(budget.operatingProfitVariancePercent,2)}%</td>
+                                    <td>${budget.operatingProfitDescription}
+                                    </td>
+                                </tr>
+                                <tr id="trOtherExpensesInput">
+                                    <td>Бусад зардал</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.otherExpensesBudget)}</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.otherExpensesActual)}</td>
+                                    <td class="text-right">%{ value = budget.otherExpensesVariance;
+                                        if (value != null && value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right">${budget.otherExpensesVariancePercent}%</td>
+                                    <td>${budget.otherExpensesDescription}</td>
+                                </tr>
+                                <tr id="trOtherIncomeInput">
+                                    <td>Бусад орлого</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.otherIncomeBudget)}</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.otherIncomeActual)}</td>
+                                    <td class="text-right">%{ value = budget.otherIncomeVariance;
+                                        if (value != null && value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right">${controllers.Functions.getFloatFormat(budget.otherIncomeVariancePercent,2)}%</td>
+                                    <td>${budget.otherIncomeDescription}
+                                    </td>
+                                </tr>
+                                <tr id="trTaxBeforeProfit">
+                                    <td>Татварын өмнөх ашиг/алдагдал</td>
+                                    <td id="tdTaxBeforeProfitBudget" class="text-right">%{ value =budget.taxBeforeProfitBudget;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td id="tdTaxBeforeProfitActual" class="text-right">%{ value =budget.taxBeforeProfitActual;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right" >%{ value = budget.taxBeforeProfitVariance;
+                                        if (value != null && value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right"
+                                        id="tdTaxBeforeProfitVariancePercent">${controllers.Functions.getFloatFormat(budget.taxBeforeProfitVariancePercent,2)}</td>
+                                    <td>${budget.taxBeforeProfitDescription}</td>
+                                </tr>
+                                <tr>
+                                    <td>Татвар</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.taxBudget)}</td>
+                                    <td class="text-right">${controllers.Functions.getDecimal(budget.taxActual)}</td>
+                                    <td class="text-right" id="tdTaxVariance"></td>
+                                    <td class="text-right"></td>
+                                    <td>${budget.taxDescription}
+                                    </td>
+                                </tr>
+                                <tr class="danger">
+                                    <td>Цэвэр ашиг/алдагдал</td>
+                                    <td class="text-right" id="tdNetIncomeBudget">%{ value =budget.netIncomeBudget;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right" id="tdNetIncomeActual">%{ value = budget.netIncomeActual;
+                                        if (value != null && value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right" id="tdNetIncomeVariance"></td>
+                                    <td class="text-right" id="tdNetIncomeVariancePercent"></td>
+                                    <td>${budget.netIncomeDescription}</td>
+                                </tr>
+                                <tr>
+                                    <td>EBITDA</td>
+                                    <td class="text-right" id="tdEbitdaBudget">%{ value = budget.ebitdaBudget;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right" id="tdEbitdaActual">%{ value =budget.ebitdaActual;
+                                        if (value < 0){ value*=-1; }%
+                                        (${controllers.Functions.getDecimal(value)})%{
+                                        }
+                                        else { }%${controllers.Functions.getDecimal(value)} %{
+                                        }}%</td>
+                                    <td class="text-right" id="tdEbitdaVariance"></td>
+                                    <td class="text-right" id="tdEbitdaVariancePercent"></td>
+                                    <td>${budget.ebitdaDescription}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="budget_balance">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table table-tools table-bordered" id="tableBalance">
+                                <thead>
+                                <tr>
+                                    <th class="text-center" colspan="2"><strong>Хөрөнгө</strong></th>
+                                    <th class="text-center" colspan="2"><strong>Өр төлбөр ба Эзэмшигчдийн
+                                        өмч</strong></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="success">
+                                    <td>Эргэлтийн хөрөнгө</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.currentAssets)}</td>
+                                    <td>Өр төлбөр</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.totalLiabilities)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Мөнгө түүнтэй адилтгах хөрөнгө</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.cashEquivalents)}</td>
+                                    <td>Богино хугацаат өр төлбөр</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.currentLiabilities)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Авлага</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.accountsReceivables)}</td>
+                                    <td>Татварын өглөг</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.taxesPayAbles)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Татварын авлага</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.taxRecoverAbles)}</td>
+                                    <td>Урьдчилж олсон орлого</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.unearnedSales)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Бараа материал</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.inventory)}</td>
+                                    <td>Зээл</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.loans)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Хангамжийн материал</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.supplyMaterial)}</td>
+                                    <td>Урт хугацаат өр төлбөр</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.nonCurrentPayAbles)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Урьдчилж төлсөн төлбөр</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.prepayments)}</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="success">
+                                    <td>Эргэлтийн бус хөрөнгө</td>
+                                    <td >${controllers.Functions.getDecimal(budget.balance.nonCurrentAssets)}</td>
+                                    <td>Эзэмшигчдийн өмч</td>
+                                    <td >${controllers.Functions.getDecimal(budget.balance.totalEquity)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Биет хөрөнгө</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.tangibleAssets)}</td>
+                                    <td>Хувьцаа</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.ordinaryShares)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Биет бус хөрөнгө</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.intangibleAssets)}</td>
+                                    <td>Тайлант үеийн ашиг/алдагдал</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.incomeReporting)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Хөрөнгө оруулалт</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.investments)}</td>
+                                    <td>Хуримтлагдсан ашиг</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.retainedEarnings)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Бусад эргэлтийн бус хөрөнгө</td>
+                                    <td>${controllers.Functions.getDecimal(budget.balance.otherNonCurrentAssets)}</td>
+                                    <td></td>
+                                    <td></td>
+                                </tr>
+                                <tr class="danger">
+                                    <td>Нийт хөрөнгө</td>
+                                    <td >${controllers.Functions.getDecimal(budget.balance.totalAssets)}</td>
+                                    <td>Нийт өр төбөр</td>
+                                    <td >${controllers.Functions.getDecimal(budget.balance.totalLiabilitiesAndEquity)}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="budget_information">
+                    <div class="row">
+                        <div class="col-md-12" style="padding-left: 40px;padding-right: 40px;">
+                            <div class="form-group">
+                                <h5>Тулгарсан асуудлын мэдээлэл:</h5>
+                                <textarea rows="5" class="form-control valid" placeholder="Optional comment..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <h5>Удирдлагын зүгээс анхаарах, дэмжлэг хүсэх асуудал, санал:</h5>
+                                <textarea rows="5" class="form-control valid" placeholder="Optional comment..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row m-t-20">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title" style="width: 100%"><strong>${budget.date.format("yyyy")} оны ${budget.date.format("MM")}-р сарын үйл ажилгааны зардал</strong> /.мян ₮/</h3>
+            </div>
+            <div class="panel-body p-0">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="chart_opex" style="width: 100%; height: 396px;">
+                            <svg style="height:100%;"></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title" style="width: 100%"><strong>${budget.date.format("yyyy")} оны ${budget.date.format("MM")}-р сарын мөнгөн гүйлгээ</strong> /.мян ₮/</h3>
+            </div>
+            <div class="panel-body p-0">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div id="chart_cash" style="width: 100%; height: 396px;">
+                            <svg style="height:100%;"></svg>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var fnIsOpen = [false, false, false];
+    var fnIsDownloaded = [false, false, false];
+
+    function showDetails(type, iId) {
+        if (!fnIsOpen[type]) {
+            /* This row is already open - close it */
+            var pTr = $('i#' + iId).parents('tr');
+            $('i#' + iId).removeClass().addClass('fa fa-minus-square-o');
+            fnIsOpen[type] = true
+            if (fnIsDownloaded[type]) {
+                $('table#tableIncomeResult tr.trNetSalesDetails' + type).each(function () {
+                    $(this).show();
+                });
+            }
+            else {
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        budgetId: $('input#budgetId').val(),
+                        type: type
+                    }, url: "/budget/showNetSalesDetails"
+                }).success(
+                        function (data) {
+                            pTr.after(data);
+                            fnIsDownloaded[type] = true;
+                        });
+            }
+        } else {
+            /* Open this row */
+            $('i#' + iId).removeClass().addClass('fa fa-plus-square-o');
+            fnIsOpen[type] = false;
+            if (fnIsDownloaded[type]) $('table#tableIncomeResult tr.trNetSalesDetails' + type).each(function () {
+                $(this).hide();
+            });
+        }
+    }
+    $(document).ready(function () {
+
+        var exampleData = [
+            {
+                "label": "Алтайн хүдэр ххк",
+                "value": 29.765957771107
+            },
+            {
+                "label": "Шунхлай групп ххк",
+                "value": 2
+            },
+            {
+                "label": "Алтай Констракшн ххк",
+                "value": 32.807804682612
+            },
+            {
+                "label": "Гацуурт ххк",
+                "value": 196.45946739256
+            },
+            {
+                "label": "Траст трейд ххк",
+                "value": 0.19434030906893
+            },
+            {
+                "label": "Синглтон ххк",
+                "value": 98.079782601442
+            },
+            {
+                "label": "Жем Интернэшнл ххк",
+                "value": 13.925743130903
+            },
+            {
+                "label": "Анунгоо ххк",
+                "value": 5.1387322875705
+            }
+        ];
+        nv.addGraph(function () {
+            var chart = nv.models.pieChart()
+                            .x(function (d) {
+                                return d.label
+                            })
+                            .y(function (d) {
+                                return d.value
+                            })
+                            .showLabels(true)     //Display pie labels
+                            .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+                            .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+                            .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+                            .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+                    ;
+
+            d3.select("#chart_cash svg")
+                    .datum(exampleData)
+                    .transition().duration(350)
+                    .call(chart);
+
+            return chart;
+        });
+ //       var exampleDataOpex = ;
+//                [
+//                    {
+//                        "label": "Цалин",
+//                        "value": 2000
+//                    },
+//                    {
+//                        "label": "Бонус",
+//                        "value": 100
+//                    },
+//                    {
+//                        "label": "Албан тасалгааны хангамж",
+//                        "value": 200
+//                    },
+//                    {
+//                        "label": "Түрээсийн зардал",
+//                        "value": 400
+//                    },
+//                    {
+//                        "label": "Тээврийн хэрэгслийн зардал",
+//                        "value": 30
+//                    },
+//                    {
+//                        "label": "Үзвэр үйлчилгээ Спорт үйл ажиллага",
+//                        "value": 120
+//                    },
+//                    {
+//                        "label": "Сургалт",
+//                        "value": 130
+//                    },
+//                    {
+//                        "label": "Бусад",
+//                        "value": 200
+//                    }
+//                ];
+        nv.addGraph(function () {
+            var chart = nv.models.pieChart()
+                            .x(function (d) {
+                                return d.label
+                            })
+                            .y(function (d) {
+                                return d.value
+                            })
+                            .showLabels(true)     //Display pie labels
+                            .labelThreshold(.05)  //Configure the minimum slice size for labels to show up
+                            .labelType("percent") //Configure what type of data to show in the label. Can be "key", "value" or "percent"
+                            .donut(true)          //Turn on Donut mode. Makes pie chart look tasty!
+                            .donutRatio(0.35)     //Configure how big you want the donut hole size to be.
+                    ;
+
+            d3.select("#chart_opex svg")
+                    .datum(${opexChartData.raw()})
+                    .transition().duration(350)
+                    .call(chart);
+
+            return chart;
+        });
+    });
+</script>

@@ -1,0 +1,88 @@
+<table class="table table-striped" style="margin-bottom: 0">
+    <tbody>
+    <tr>
+        <td>Эхлэх огноо</td>
+        <td>${object.startDate.format('yyyy-MM-dd')}</td>
+    </tr>
+    <tr>
+        <td>Үргэлжлэх хоног</td>
+        <td>${object.duration}</td>
+    </tr>
+    <tr>
+        <td>Дуусах огноо</td>
+        <td>${object.finishDate.format('yyyy-MM-dd')}</td>
+    </tr>
+    <tr>
+        <td>Гүйцэтгэл</td>
+        <td>${controllers.Functions.getFloatFormat(object.completedPercent,2)}</td>
+    </tr>
+    #{if vtype==3}
+        #{if object.workCount!=null && object.workCount.length()>0}
+        <tr>
+            <td>Ажлын тоо хэмжээ</td>
+            <td>${object.workCount}</td>
+        </tr>
+        #{/if}
+        #{if object.taskInventoryRels.size()>0}
+        <tr>
+            <td>Материал</td>
+            <td>%{count=0}%
+                #{list items:object.taskInventoryRels,as:'rel'}
+                %{if(count>0){}%
+                    </br>
+                %{}}%
+                ${rel.inventory.item}
+                    : ${controllers.Functions.getFloatFormat(rel.value,1)}${rel.inventory.inventoryMeasure.measure}
+                %{count++}%
+                #{/list}
+            </td>
+        </tr>
+        #{/if}
+        #{if object.taskEquipmentRels.size()>0}
+        <tr>
+            <td>&{'Equipments'}</td>
+            <td>%{count=0}%
+                #{list items:object.taskEquipmentRels,as:'rel'}
+                %{if(count>0){}%
+                    </br>
+                %{}}%
+                ${rel.equipment.name}: ${controllers.Functions.getFloatFormat(rel.value,1)}мотцаг
+                %{count++}%
+                #{/list}
+            </td>
+        </tr>
+        #{/if}
+        #{if object.taskManPowerRels.size()>0}
+        <tr>
+            <td>&{'ManPower'}</td>
+            <td>%{count=0}%
+                #{list items:object.taskManPowerRels,as:'rel'}
+                %{if(count>0){}%
+                    </br>
+                %{}}%
+                ${rel.manPower.name}: ${rel.amount}
+                %{count++}%
+                #{/list}
+            </td>
+        </tr>
+        #{/if}
+        #{if object.taskAssignRels.size()>0}
+        <tr>
+            <td>Хариуцагч</td>
+            <td>%{count=0}%
+                #{list items:object.taskAssignRels,as:'rel'}
+                %{if(count>0){}%
+                    </br>
+                %{}}%
+                ${rel.user}
+                %{count++}%
+                #{/list}
+            </td>
+        </tr>
+        #{/if}
+    #{/if}
+    </tbody>
+</table>
+<script>
+    $("div#show-info .modal-title").html("${object.name}");
+</script>

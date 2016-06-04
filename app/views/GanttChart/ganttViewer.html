@@ -1,0 +1,230 @@
+#{extends 'CRUD/layout.html' /}
+#{set title: 'Ажлын график'/}
+#{set activeMenu: 'GanttChart'/}
+#{set activeMenuSub:'GanttViewer'/}
+<style>
+    svg:not(:root) {
+        overflow: visible !important;
+    }
+</style>
+<script>
+    var project_holidays = "${project.holidays}";
+    project_holidays = "#" + project_holidays;
+    var project_weekend = "${project.weekend}";
+    var setPeriodTimeType = 0;
+</script>
+#{set 'moreStyles'}
+<link rel=stylesheet href="/public/ganttChart/platform.css" type="text/css">
+<link rel=stylesheet href="/public/ganttChart/gantt.css" type="text/css">
+<link rel=stylesheet href="/public/ganttChart/ganttPrint.css" type="text/css" media="print">
+<link rel="stylesheet" type="text/css" href="/public/ganttChart/libs/jquery.svg.css">
+<link rel=stylesheet href="/public/ganttChart/libs/dateField/jquery.dateField.css" type="text/css">
+#{/set}
+
+<script src="/assets/plugins/jquery-migrate-1.2.1.js"></script>
+<script src="/public/jquery-ui-1.11.2.custom/jquery-ui.min.js"></script>
+<script src="/assets/plugins/bootstrap/bootstrap.min.js"></script>
+<script src="/assets/plugins/bootstrap-dropdown/bootstrap-hover-dropdown.min.js"></script>
+<script src="/assets/plugins/bootstrap-select/bootstrap-select.js"></script>
+<script src="/assets/plugins/mcustom-scrollbar/jquery.mCustomScrollbar.concat.min.js"></script>
+<script src="/assets/plugins/mmenu/js/jquery.mmenu.min.all.js"></script>
+<script src="/assets/plugins/nprogress/nprogress.js"></script>
+<script src="/assets/plugins/charts-sparkline/sparkline.min.js"></script>
+<script src="/assets/plugins/breakpoints/breakpoints.js"></script>
+<script src="/assets/plugins/numerator/jquery-numerator.js"></script>
+
+
+<script src="/public/ganttChart/libs/jquery.livequery.min.js"></script>
+<script src="/public/ganttChart/libs/jquery.timers.js"></script>
+<script src="/public/ganttChart/libs/platform.js"></script>
+<script src="/public/ganttChart/libs/date.js"></script>
+<script src="/public/ganttChart/libs/i18nJs.js"></script>
+<script src="/public/ganttChart/libs/dateField/jquery.dateField.js"></script>
+<script src="/public/ganttChart/libs/JST/jquery.JST.js"></script>
+
+<script type="text/javascript" src="/public/ganttChart/libs/jquery.svg.min.js"></script>
+
+<script src="/public/ganttChart/viewer/ganttUtilities_v.js"></script>
+<script src="/public/ganttChart/viewer/ganttTask_v.js"></script>
+<script src="/public/ganttChart/viewer/ganttDrawerSVG_v.js"></script>
+<script src="/public/ganttChart/viewer/ganttGridEditor_v.js"></script>
+<script src="/public/ganttChart/viewer/ganttMaster_v.js"></script>
+
+<div id="main-content" style="background-color: #fff;margin-top: 40px;padding: 0;">
+    <button type="button" class="btn btn-effect btn-default" data-modal="show-info" style="display: none"
+            id="showInfoTaskBtn"></button>
+
+    <div id="workSpace"
+         style="padding:0px; overflow-y:auto; overflow-x:hidden;border:1px solid #e5e5e5;position:relative;margin:0 5px;z-index: 0"></div>
+
+    <div id="taZone" style="display:none;" class="noprint">
+        <textarea rows="8" cols="150" id="ta">${prjData}</textarea>
+    </div>
+    <script type="text/javascript">
+        var ge;  //this is the hugly but very friendly global var for the gantt editor
+        menuWidthAction = true;
+        var workSpace = $("#workSpace");
+        var menuWidthActionValue = 250;
+        $(function () {
+            // here starts gantt initialization
+            ge = new GanttMaster();
+            workSpace.css({width: $(window).width() - 20, height: $(window).height() - 100});
+            ge.init(workSpace);
+
+            //overwrite with localized ones
+            loadI18n();
+
+            //simulate a data load from a server.
+            ge.loadProject(JSON.parse($("#ta").val()));
+            $(window).resize(function () {
+                workSpace.css({
+                    width: $(window).width() - 1 - menuWidthActionValue,
+                    height: $(window).height() - workSpace.position().top
+                });
+                workSpace.trigger("resize.gantt");
+            }).oneTime(150, "resize", function () {
+                $(this).trigger("resize")
+            });
+        });
+        function menuWidthActionFn(w) {
+            menuWidthActionValue = w;
+            workSpace.css({
+                width: $(window).width() - 1 - w,
+                height: $(window).height() - workSpace.position().top
+            });
+            workSpace.trigger("resize.gantt");
+        }
+        function loadI18n() {
+            GanttMaster.messages = {
+                "CANNOT_WRITE": "Бичих эрхгүй",
+                "CHANGE_OUT_OF_SCOPE": "NO_RIGHTS_FOR_UPDATE_PARENTS_OUT_OF_EDITOR_SCOPE",
+                "START_IS_MILESTONE": "START_IS_MILESTONE",
+                "END_IS_MILESTONE": "END_IS_MILESTONE",
+                "TASK_HAS_CONSTRAINTS": "TASK_HAS_CONSTRAINTS",
+                "GANTT_ERROR_DEPENDS_ON_OPEN_TASK": "Шалтгаалах ажилбар",
+                "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK": "GANTT_ERROR_DESCENDANT_OF_CLOSED_TASK",
+                "TASK_HAS_EXTERNAL_DEPS": "TASK_HAS_EXTERNAL_DEPS",
+                "GANTT_ERROR_LOADING_DATA_TASK_REMOVED": "GANTT_ERROR_LOADING_DATA_TASK_REMOVED",
+                "ERROR_SETTING_DATES": "ERROR_SETTING_DATES",
+                "CIRCULAR_REFERENCE": "CIRCULAR_REFERENCE",
+                "CANNOT_DEPENDS_ON_ANCESTORS": "CANNOT_DEPENDS_ON_ANCESTORS",
+                "CANNOT_DEPENDS_ON_DESCENDANTS": "CANNOT_DEPENDS_ON_DESCENDANTS",
+                "INVALID_DATE_FORMAT": "Буруу формат байна!",
+                "TASK_MOVE_INCONSISTENT_LEVEL": "Ажилбарын шилжилт таарахгүй байна",
+
+                "GANTT_QUARTER_SHORT": "Улирал",
+                "GANTT_SEMESTER_SHORT": "Хагас жил"
+            };
+        }
+    </script>
+
+    <div id="gantEditorTemplates" style="display:none;">
+        <div class="__template__" type="GANTBUTTONS">
+        </div>
+        <div class="__template__" type="TASKSEDITHEAD">
+            <table class="gdfTable" cellspacing="0" cellpadding="0" id="mainGanttTable">
+                <thead>
+                <tr style="height:40px">
+                    <th class="gdfColHeader" style="width:25px;"></th>
+                    <th class="gdfColHeader gdfResizable" style="width:200px;">Нэр
+                        <div style="float: right;margin-right: 4px">
+                            <button onclick="print();" class="button textual" title="хэвлэх"><span class="teamworkIcon">p</span>
+                            </button>
+                            <button onclick="$('#workSpace').trigger('zoomMinus.gantt');" class="button textual"
+                                    title="багасгаж харах"><span class="teamworkIcon">)</span></button>
+                            <button onclick="$('#workSpace').trigger('zoomPlus.gantt');" class="button textual"
+                                    title="томруулж харах">
+                                <span class="teamworkIcon">(</span></button>
+                        </div>
+                    </th>
+                    <th class="gdfColHeader gdfResizable" style="width:68px;">Эхлэх</th>
+                    <th class="gdfColHeader gdfResizable" style="width:68px;">Дуусах</th>
+                    <th class="gdfColHeader gdfResizable" style="width:48px;" title="Хоног">Хон</th>
+                    <th class="gdfColHeader gdfResizable noprint" style="width:150px;">
+                        <div style="font-size: 10px;text-align: center">Хариуцагчаар шүүх</div>
+                        <select id="selectUserId" data-live-search="true">
+                        #{include '/GanttChart/getAssignFilter.html'/}
+                        </select>
+                    </th>
+                </tr>
+                </thead>
+            </table>
+        </div>
+
+        <div class="__template__" type="TASKROW"><!--
+  <tr taskId="(#=obj.id#)" class="taskEditRow" level="(#=level#)" id=t(#=obj.id#)>
+    <th class="gdfCell" align="right"><span class="taskRowIndex">(#=obj.getRow()+1#)</span></th>
+    <td class="gdfCell indentCell" style="padding-left:(#=obj.level*10#)px;">
+      <div class="(#=obj.isParent()?'exp-controller expcoll exp':'exp-controller'#)" align="center"></div>
+      <span style="cursor:pointer" onclick="showInfoFn('(#=obj.id#)')" class="(#=obj.isParent()?'groupTask':''#)">(#=obj.name#)</span>
+    </td>
+    <td class="gdfCell"><input type="text" name="start" value="" class="date"></td>
+    <td class="gdfCell"><input type="text" name="end" value="" class="date"></td>
+    <td class="gdfCell"><input type="text" name="duration" value="(#=obj.duration#)"></td>
+    <td style="cursor:pointer" class="gdfCell taskAssigs noprint" id="assign(#=obj.id#)" title="(#=obj.assign#)" onclick="showInfoFn('(#=obj.id#)')">
+    (#=obj.assign#)</td>
+  </tr>
+  --></div>
+        <div class="__template__" type="TASKEMPTYROW"><!--
+  <tr class="taskEditRow emptyRow" >
+    <th class="gdfCell" align="center"></th>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell"></td>
+    <td class="gdfCell noprint"></td>
+  </tr>
+  --></div>
+    </div>
+</div>
+<div class="modal fade" id="show-info" tabindex="-1" role="dialog" aria-hidden="true" style="display: none">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" style="text-align: center"></h4>
+            </div>
+            <div id="modalbody"></div>
+            <div class="modal-footer" style="margin-top: 0;text-align: center">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="md-overlay"></div>
+
+<script type="text/javascript">
+    selectStyle = 1;
+    function closeModalDialog() {
+        $('button.btn-modal').click();
+    }
+    function showInfoFn(id) {
+        $("div#show-info #modalbody").html("<img src='/public/images/loading.gif'/>");
+        $("div#show-info").modal('show');
+        $.ajax({
+            type: "POST",
+            data: {id: id},
+            url: "/ganttViewInfo"
+        }).success(function (data) {
+            $("div#modalbody").html(data);
+        });
+    }
+    var assignFilterSelectedUser = 0;
+    $(function () {
+        $('select#selectUserId').on('change', function () {
+            assignFilterSelectedUser = $(this).val();
+            ge.redraw();
+        });
+    });
+</script>
+<style>
+    select#selectUserId {
+        width: 100%;
+        border: 1px solid lightgrey;
+        padding: 0;
+        background: #91B4B7;
+        font-size: 11px;
+    }
+</style>
+

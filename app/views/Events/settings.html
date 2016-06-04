@@ -1,0 +1,149 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    button.delete:hover {
+        background-color: #c75757;
+        color: #fff !important
+    }
+
+    .pricing-2 .plan .btn {
+        min-width: 5px !important;
+    }
+</style>
+<div id="main-content">
+    <div class="page-title"><i class="icon-custom-left"></i>
+    #{include '/Events/openEvent.html'/}
+        <h2>Тохиргоо:
+            <small>ангилал нэмэх хасах</small>
+        </h2>
+    </div>
+    <form action="@{controllers.Events.saveCategory()}" method="post" accept-charset="utf-8"
+          enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <!-- BEGIN PRICING TABLE 2 -->
+                            <div class="row plans pricing-2">
+                                <div class="col-sm-12">
+                                    <div class="plan">
+                                        <div class="title">Ангилал:</div>
+                                        <div class="description">
+                                        #{list items:eventCategory,as:'category'}
+                                            <div id="category${category.id}">
+                                                <select name="categoryColor" data-width="auto" class="form-control">
+                                                    <option value="c-red"
+                                                            data-icon="fa-square c-red"  #{if category.colorClass.equals('c-red')}
+                                                            selected #{/if}></option>
+                                                    <option value="c-blue"
+                                                            data-icon="fa-square c-blue" #{if category.colorClass.equals('c-blue')}
+                                                            selected #{/if}></option>
+                                                    <option value="c-purple"
+                                                            data-icon="fa-square c-purple" #{if category.colorClass.equals('c-purple')}
+                                                            selected #{/if}></option>
+                                                    <option value="c-brown"
+                                                            data-icon="fa-square c-brown" #{if category.colorClass.equals('c-brown')}
+                                                            selected #{/if}></option>
+                                                    <option value="c-orange"
+                                                            data-icon="fa-square c-orange" #{if category.colorClass.equals('c-orange')}
+                                                            selected #{/if}></option>
+                                                    <option value="c-green"
+                                                            data-icon="fa-square c-green" #{if category.colorClass.equals('c-green')}
+                                                            selected#{/if}></option>
+                                                    <option value="c-dark"
+                                                            data-icon="fa-square c-dark" #{if category.colorClass.equals('c-dark')}
+                                                            selected #{/if}></option>
+                                                </select>
+                                                <input type="text" name="categoryName" style="margin-bottom:10px;"
+                                                       value="${category.name}"/>
+                                                <input type="hidden" name="categoryId" value="${category.id}"/>
+                                                <button type="button" categoryId="${category.id}" data-rel="tooltip"
+                                                        title="Устгах"
+                                                        class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                                                        class="fa fa-times"></i></button>
+                                            </div>
+                                        #{/list}
+                                            <div class="add" id="categoryadd"></div>
+                                        </div>
+                                        <button class="btn btn-success" type="button" onclick="add(2)" id="addbutton2">
+                                            <i class="fa fa-plus"></i> Ангилал нэмэх
+                                        </button>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <!-- END PRICING TABLE 2 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 m-t-20 m-b-40 align-center">
+            <a href="@{controllers.Events.list()}" class="btn btn-default m-r-10 m-t-10"><i class="fa fa-reply"></i>
+                Болих</a>
+            <button type="submit" class="btn btn-danger m-t-10"><i class="fa fa-check"></i> Хадгалах</button>
+        </div>
+    </form>
+</div>
+#{contract-settings-config /}
+#{set title:'Үйл ажиллагааны тохиргоо'/}
+#{set activeMenu: 'Event'/}
+#{set activeMenuSub: 'EventSetting'/}
+<script>
+
+    $('div#main-content div.description button.delete').each(function () {
+        $(this).click(function () {
+            var id = $(this).attr('categoryId');
+            if (id == '0') {
+                $(this).parent('div').remove();
+            } else {
+                var r = confirm("Та устгахдаа итгэлтэй байна уу!!!");
+                if (r == true) {
+                    $.ajax({
+                        type: "POST",
+                        data: {
+                            id: id
+                        }, url: "/event/deleteCategory"
+                    }).success(
+                            function () {
+                                $("div#category" + id).remove();
+                            });
+                }
+            }
+        });
+    });
+    function save() {
+        var data = [];
+
+        $.ajax({
+            type: "POST",
+            data: {
+                type: type
+            }, url: "/event/saveCategory"
+        }).success(
+                function (data) {
+                    console.log("id: " + data.id);
+                });
+    }
+    function add() {
+        $("div#categoryadd").before("<div> <select name=categoryColor data-width=auto class=form-control>" +
+                "<option value=c-red data-icon='fa-square c-red'></option>" +
+                "<option value=c-blue data-icon='fa-square c-blue'></option>" +
+                "<option value=c-purple data-icon='fa-square c-purple'></option>" +
+                "<option value=c-brown data-icon='fa-square c-brown'></option>" +
+                "<option value=c-orange data-icon='fa-square c-orange'></option>" +
+                "<option value=c-green data-icon='fa-square c-green'></option>" +
+                "<option value=c-dark data-icon='fa-square c-dark'></option> </select>" +
+                "<input type=text name=categoryName style='margin-bottom:10px;' value='' />" +
+                "<input type=hidden name=categoryId value='0' />" +
+                "<button type=button data-rel='tooltip' title='Устгах' " +
+                "class='delete btn btn-icon-sm btn-rounded btn-default' > <i class='fa fa-times'></i></button> </div>");
+        $('select[name=categoryColor]').each(function () {
+            $(this).selectpicker('render');
+        });
+        $('div#main-content div.description button:last-child').click(function () {
+            $(this).parent('div').remove();
+        });
+    }
+</script>
+

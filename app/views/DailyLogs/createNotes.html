@@ -1,0 +1,55 @@
+#{if isList}
+    #{list items:dailyLogNotes,as:'dailyLogNote'}
+    %{contractor=dailyLogNote.owner.userTeam.contractor && !contractorUser}%
+    <tr id="trNotes${dailyLogNote.id}" class=${contractor?'warning':''}>
+        <td></td>
+        <td>${(dailyLogNote.task)?(dailyLogNote.task?.name):(dailyLogNote.myPlan?.name)}</td>
+        <td>${dailyLogNote.issue}</td>
+        <td>
+            #{if dailyLogNote.owner.id!=user.id }
+                <strong>${contractor?(dailyLogNote.owner.toString() +":  "):''}</strong>
+            #{/if}${dailyLogNote.comment}
+        </td>
+        <td>
+            #{if dailyLogNote.attaches.size()>0}
+                <div class="post-images" id="post-images-notes-${dailyLogNote.id}">
+                    #{list items:dailyLogNote.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-notes-"+dailyLogNote.id).raw()}
+            #{/if}
+        </td>
+        <td>
+            #{if dailyLogNote.owner.id == user.id }
+                <button onclick="deleteNotes(${dailyLogNote.id})" data-rel="tooltip" title="Устгах"
+                        class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                        class="fa fa-times"></i></button>
+            #{/if}
+        </td>
+    </tr>
+    #{/list}
+#{/if}
+#{else }
+<tr id="trNotes${dailyLogNote.id}">
+    <td></td>
+    <td>${(dailyLogNote.task)?(dailyLogNote.task?.name):(dailyLogNote.myPlan?.name)}</td>
+    <td>${dailyLogNote.issue}</td>
+    <td>${dailyLogNote.comment}</td>
+    <td>
+        #{if dailyLogNote.attaches.size()>0}
+            <div class="post-images" id="post-images-notes-${dailyLogNote.id}">
+                #{list items:dailyLogNote.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-notes-"+dailyLogNote.id).raw()}
+        #{/if}
+    </td>
+    <td>
+        <button onclick="deleteNotes(${dailyLogNote.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

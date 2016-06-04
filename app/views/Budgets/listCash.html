@@ -1,0 +1,42 @@
+#{list items:budget.cashs,as:'cash'}
+<tr class="success trCash${cash.id}" id="trCash${cash.id}">
+    <td>${cash.name}</td>
+    <td id="tdTotalInflow${cash.id}">${controllers.Functions.getDecimal(cash.inflow)}</td>
+    <td id="tdTotalOutflow${cash.id}">${controllers.Functions.getDecimal(cash.outflow)}</td>
+    <td id="tdTotalNetFlow${cash.id}">%{ value = cash.netflow;
+        if (value < 0){ value*=-1; }%(${controllers.Functions.getDecimal(value)})%{ }
+        else { }%${controllers.Functions.getDecimal(value)} %{ }}%</td>
+    <td class="text-right">
+        <button onclick="deleteCash(${cash.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{list items:cash.subContractors,as:'sub'}
+<tr id="trCashSubContractor${sub.id}" class="trCash${cash.id}">
+    <td class="text-right"><label style="width: 80%;text-align: left;">${sub.name}</label></td>
+    <td>${controllers.Functions.getDecimal(sub.inflow)}</td>
+    <td>${controllers.Functions.getDecimal(sub.outflow)}</td>
+    <td>%{ value = sub.netflow;
+        if (value < 0){ value*=-1; }%(${controllers.Functions.getDecimal(value)})%{ }
+        else { }%${controllers.Functions.getDecimal(value)} %{ }}%</td>
+    <td class="text-right">
+        <button onclick="deleteSubContractor(${sub.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/list}
+<tr id="trCashSubInput${cash.id}" class="trCash${cash.id}">
+    <td class="text-right"><input style="width: 80%;" id="cashSubContractorName${cash.id}" type="text" placeholder="гэрээлэгч"/></td>
+    <td><input id="cashSubContractorInflow${cash.id}" type="text" class="numberic"
+               placeholder="Зардал"/></td>
+    <td><input id="cashSubContractorOutflow${cash.id}" type="text" class="numberic"
+               placeholder="Зардал"/></td>
+    <td class="text-right" colspan="2">
+        <button onclick="addCashSubContractor(${cash.id})" data-rel="tooltip" title="Нэмэх"
+                class="add btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-plus"></i></button>
+    </td>
+</tr>
+#{/list}

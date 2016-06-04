@@ -1,0 +1,314 @@
+#{extends 'CRUD/layout.html' /}
+#{fancybox-config /}
+#{contract-show-config /}
+<div id="main-content" class="align-center">
+    <div class="m-t-10 m-b-10 no-print">
+        <a href="@{Contracts.list()}" class="btn btn-default m-r-10 m-b-10"><i class="fa fa-reply"></i> Буцах</a>
+        <a href="@{controllers.Contracts.blank(contract.id)}" class="btn btn-primary m-r-10 m-b-10"><i class="fa fa-edit"></i> Засах</a>
+        <button type="button" class="btn btn-white m-r-10 m-b-10" onclick="printDiv('print-area')"><i
+                class="fa fa-print m-r-10"></i> Хэвлэх
+        </button>
+        <button type="button" class="btn btn-white m-r-10 m-b-10" onclick="window.print();"><i
+                class="fa fa-file-text m-r-10"></i> PDF болгох
+        </button>
+    #{if  contract.owner.id == user.id || permissionType == 3}
+        <button type="button" class="btn btn-danger m-r-10 m-b-10" onclick="deleteContract(${contract.id})"><i class="fa fa-times"></i> Устгах</button>
+        <form action="" id="deleteContract" method="get" accept-charset="utf-8"></form>
+    #{/if}
+    </div>
+
+    <div class="row align-left" id="print-area" style="max-width:830px; display: inline-block; position: relative;">
+        <div class="col-md-12 p-t-0">
+            <div class="panel panel-default p-40">
+                <div class="panel-body p-t-0" style="min-height: 1350px;">
+                    <div class="row">
+                        <div class="col-md-12 align-center m-b-40">
+                            <h4>${contract.title}</h4>
+                        </div>
+                        <div class="col-md-12">
+                            <table class="table general-table">
+                                <thead>
+                                <tr>
+                                    <th colspan="2" style="font-weight: normal;">Үндсэн мэдээлэл:</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td style="width: 50%"><strong>Гэрээний дугаар:</strong></td>
+                                    <td style="width: 50%">${contract.name}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 50%"><strong>Төлөв:</strong></td>
+                                    <td style="width: 50%">${contract.status?.status}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 50%"><strong>Ангилал:</strong></td>
+                                    <td style="width: 50%">${contract.category?.category}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 50%"><strong>Төлбөрийн нөхцөл:</strong></td>
+                                    <td style="width: 50%">${contract.payment?.payment}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th colspan="2" style="font-weight: normal;">Хугацааны мэдээлэл:</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td style="width: 50%"><strong>Баталсан огноо:</strong></td>
+                                    <td style="width: 50%">${contract.approvedDate?.format('yyyy/MM/dd')}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 50%"><strong>Эхэлсэн огноо:</strong></td>
+                                    <td style="width: 50%">${contract.startDate?.format('yyyy/MM/dd')}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 50%"><strong>Дуусах огноо:</strong></td>
+                                    <td style="width: 50%">${contract.endDate?.format('yyyy/MM/dd')}</td>
+                                </tr>
+                                <tr>
+                                    <td style="width: 50%"><strong>Дүгнэх огноо:</strong></td>
+                                    <td style="width: 50%">${contract.reviewDate?.format('yyyy/MM/dd')}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table" id="table-index">
+                                <thead>
+                                <tr>
+                                    <th>Төлбөрийн хуваарь</th>
+                                    <th style="width:145px" class="text-center">Үнэ</th>
+                                    <th style="width:95px" class="text-center">Хувь</th>
+                                    <th class="text-center">Огноо</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="item-row">
+                                    <td>
+                                        <div>&{'ContractAmount'}:</div>
+                                    </td>
+                                    <td class="text-center">
+                                    ${controllers.Functions.getDecimal(contract.totalAmount?.amount)}
+                                    </td>
+                                    <td class="text-center ">
+                                        <label>${contract.totalAmount?.huvi}%</label>
+                                    </td>
+                                    <td class="text-center"></td>
+                                </tr>
+                                #{if initialDeposit != null}
+                                <tr class="item-row">
+                                    <td>
+                                        <div>&{'InitialDeposit'}:</div>
+                                    </td>
+                                    <td class="text-center">
+                                    ${controllers.Functions.getDecimal(initialDeposit?.amount)}
+                                    </td>
+                                    <td class="text-center ">
+                                        <label>${initialDeposit.huvi}%</label>
+                                    </td>
+                                    <td class="text-center">${initialDeposit.date?.format('yyyy/MM/dd')}</td>
+                                </tr>
+                                #{/if}
+                                #{list items:progressPayment,as:'ywts'}
+                                <tr class="item-row">
+                                    <td>
+                                        <div>&{'ProgressPayment'} ${ywts_index}:</div>
+                                    </td>
+                                    <td class="text-center">
+                                    ${controllers.Functions.getDecimal(ywts?.amount)}
+                                    </td>
+                                    <td class="text-center ">
+                                        <label>${ywts.huvi}%</label>
+                                    </td>
+                                    <td class="text-center">${ywts.date?.format('yyyy/MM/dd')}</td>
+                                </tr>
+                                #{/list}
+                                <tr class="item-row">
+                                    <td>
+                                        <div>&{'Final'}:</div>
+                                    </td>
+                                    <td class="text-center">${controllers.Functions.getDecimal(finalTolbor.amount)}</td>
+                                    <td class="text-center ">
+                                        <label>${finalTolbor.huvi}%</label>
+                                    </td>
+                                    <td class="text-center">${finalTolbor.date?.format('yyyy-MM-dd')}</td>
+                                </tr>
+                                #{list items:retention,as:'bartsia'}
+                                <tr class="item-row">
+                                    <td>
+                                        <div>&{'Retention'} ${bartsia_index}:</div>
+                                    </td>
+                                    <td class="text-center">
+                                    ${controllers.Functions.getDecimal(bartsia?.amount)}
+                                    </td>
+                                    <td class="text-center ">
+                                        <label>${bartsia.huvi}%</label>
+                                    </td>
+                                    <td class="text-center">${bartsia.date?.format('yyyy-MM-dd')}</td>
+                                </tr>
+                                #{/list}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row" style="position: absolute;bottom: 100px;width: 100%;">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <strong> ГЭРЭЭ БАТАЛСАН:</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row"></div>
+                        <div class="col-md-12 m-t-10">
+                            <div class="col-md-6">
+                                ЗАХИАЛАГЧИЙГ ТӨЛӨӨЛЖ:
+                                <div class="m-t-10">${contract.acceptedA}</div>
+                                <div class="m-t-10">${contract.acceptedB}</div>
+                                <div class="m-t-10">${contract.acceptedC}</div>
+                            </div>
+                            <div class="col-md-6">
+                                ГЭРЭЭЛЭГЧИЙГ ТӨЛӨӨЛЖ:
+                                <div class="m-t-10">
+                                ${contract.companyName.raw()}
+                                </div>
+                                <div class="m-t-10">${contract.acceptedTA}</div>
+                                <div class="m-t-10">${contract.acceptedTB}</div>
+                                <div class="m-t-10">${contract.acceptedTC}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 p-t-0">
+            <div class="panel panel-defualt p-40">
+                <div class="panel-body p-t-0" style="min-height:1122px;">
+                #{if warrantyItems != null && !warrantyItems.isEmpty()}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <table class="table">
+                                <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>&{'WarrantyItem'}</th>
+                                    <th class="text-center">Эхлэх</th>
+                                    <th class="text-center">Дуусах</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                    #{list items:warrantyItems,as:'item'}
+                                    <tr>
+                                        <td><strong>${item_index}</strong></td>
+                                        <td> ${item?.name} </td>
+                                        <td class="text-center"> ${item?.startDate?.format('yyyy-MM-dd')}</td>
+                                        <td class="text-center"> ${item?.endDate?.format('yyyy-MM-dd')} </td>
+                                    </tr>
+                                    #{/list}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                #{/if}
+                    <div class="row m-t-10"><strong>Бусад мэдээлэл:</strong></div>
+                    <div class="row m-b-20 m-t-20">
+                        <div>
+                        ${contract.notes.raw()}
+                        </div>
+                    </div>
+                    <div class="row"><strong>Хавсралт:</strong></div>
+                    <div class="row">
+                        <div class="col-md-12 m-t-20 m-b-40">
+                        #{if contract.contractAttachments.size()>0}
+                            <div class="post-images" id="post-images-contract-attach">
+                                #{list items:contract.contractAttachments, as:'attach'}
+                                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                            #{/list}
+                            </div>
+                        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-contract-attach").raw()}
+                        #{/if}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#{checkFileExtension /}
+#{set activeMenu: 'Contract'/}
+#{set activeMenuSub: 'ContractList'/}
+#{ImgThumbnail div:'div.post-images'/}
+<script>
+    #{if  contract.owner.id == user.id || permissionType == 3}
+    function deleteContract(contractId) {
+        var r = confirm("Та устгахдаа итгэлтэй байна уу!!!");
+        if (r == true) {
+            $("form#deleteContract").attr("action", "/contractsDeleteContract/" + contractId).submit();
+        }
+    }
+    #{/if}
+    function printDiv(divName) {
+        var printContents = document.getElementById(divName).innerHTML;
+        var originalContents = document.body.innerHTML;
+
+        document.body.innerHTML = printContents;
+
+        window.print();
+
+        document.body.innerHTML = originalContents;
+    }
+</script>
+<style>
+    .post-images img {
+        height: 70px;
+        width: 70px;
+    }
+
+    table .general-table > th {
+        font-weight: normal;
+    }
+
+    table .general-table > td {
+        width: 50%;
+        padding: 3px;
+    }
+
+    @media print {
+        body {
+            margin-top: 0
+        }
+
+        #main-content {
+            padding: 0;
+            background-color: transparent
+        }
+
+        .no-print, .no-print *, .navbar, #sidebar {
+            display: none !important
+        }
+
+        #print-area {
+            width: 100%!important;
+            height: 100%!important;
+            padding: 0 !important;
+            border: 0
+        }
+    }
+</style>

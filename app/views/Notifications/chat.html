@@ -1,0 +1,444 @@
+<style>
+    .chat-opened {
+        visibility: visible !important;
+    }
+
+    .my-chat {
+        width: 300px !important;
+        overflow: hidden;
+        right: -300px;
+        top: 40px;
+        bottom: 0;
+        position: fixed;
+        max-width: 100%;
+        max-height: 100%;
+        z-index: 89;
+        display: block !important;
+        background: #fff;
+        color: rgba(0, 0, 0, 0.6);
+        box-shadow: 0px 0px 8px 0px rgba(0, 0, 0, 0.2);
+    }
+
+    .mm-menu.mm-right .mm-panel {
+        padding-top: 100px;
+    }
+
+    .mm-menu.mm-right {
+        right: -300px;
+    }
+
+    .mm-menu .mm-panel.mm-opened {
+        left: 0;
+        width: 302px;
+    }
+
+    .mm-search {
+        border-bottom: 1px solid #E4EAEC;
+        padding: 15px 10px;
+    }
+
+    .conversation {
+        position: absolute;
+        top: 0px;
+        right: -100%;
+        z-index: 1700;
+        width: 100%;
+        height: 100%;
+        background-color: #FFF;
+        transition: all 0.3s ease 0s;
+    }
+
+    .conversation.active {
+        right: 0px;
+    }
+
+    .conversation-header {
+        border-bottom: 1px solid #E4EAEC;
+    }
+
+    .conversation-more, .conversation-return {
+        color: rgba(55, 71, 79, 0.4);
+        cursor: pointer;
+        margin-top: 34px !important;
+        font-size: 25px;
+        font-weight: 600;
+    }
+
+    .conversation-more:hover, .conversation-return:hover {
+        text-decoration: none;
+    }
+
+    .conversation-header > * {
+        padding: 0px 30px;
+        margin: 0px;
+        line-height: 90px;
+    }
+
+    .conversation-title {
+        position: relative;
+        top: 1px;
+        z-index: -1;
+        color: #37474F;
+        text-align: center;
+    }
+
+    .chats {
+        padding: 30px 15px;
+        position: absolute;
+        top: 90px;
+        bottom: 96px;
+        -webkit-overflow-scrolling: touch;
+        overflow: scroll;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+
+    .chat-left .chat-avatar {
+        float: left;
+    }
+
+    .chat-avatar {
+        float: right;
+    }
+
+    .chat-avatar .avatar {
+        width: 30px;
+    }
+
+    .avatar {
+        position: relative;
+        display: inline-block;
+        width: 40px;
+        white-space: nowrap;
+        vertical-align: bottom;
+        border-radius: 1000px;
+    }
+
+    .avatar img {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        border: 0px none;
+        border-radius: 1000px;
+    }
+
+    .chat-left .chat-body {
+        margin-right: 0px;
+        margin-left: 30px;
+    }
+
+    .chat-body {
+        display: block;
+        margin: 10px 30px 0px 0px;
+        overflow: hidden;
+    }
+
+    .chat-left .chat-content {
+        float: left;
+        margin: 0px 0px 10px 20px;
+        color: #76838F;
+        background-color: #DFE9EF;
+    }
+
+    .chat-content {
+        position: relative;
+        display: block;
+        float: right;
+        padding: 8px 15px;
+        margin: 0px 20px 10px 0px;
+        clear: both;
+        color: #FFF;
+        background-color: #62A8EA;
+        border-radius: 4px;
+    }
+
+    .chat-left .chat-time {
+        color: #A3AFB7;
+    }
+
+    .chat-time {
+        display: block;
+        margin-top: 8px;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .conversation-reply {
+        position: absolute;
+        bottom: 40px;
+        padding: 10px 0px;
+        border-top: 1px solid #E4EAEC;
+    }
+
+    .conversation-reply .form-control {
+        border-width: medium 1px medium medium;
+        border-style: none solid none none;
+        border-color: #E4EAEC;
+        border-image: none;
+    }
+
+    .chat-left .chat-content::before {
+        right: auto;
+        left: -10px;
+        border-right-color: #DFE9EF;
+        border-left-color: transparent;
+    }
+
+    .chat-content::before {
+        position: absolute;
+        top: 10px;
+        right: -10px;
+        width: 0px;
+        height: 0px;
+        content: "";
+        border-width: 5px;
+        border-style: solid;
+        border-color: transparent transparent transparent #62A8EA;
+        -moz-border-top-colors: none;
+        -moz-border-right-colors: none;
+        -moz-border-bottom-colors: none;
+        -moz-border-left-colors: none;
+        border-image: none;
+    }
+
+    .chat-left .chat-content + .chat-content::before {
+        border-color: transparent;
+    }
+
+    .chat-content + .chat-content::before {
+        border-color: transparent;
+    }
+
+    li.img.no-arrow:focus, li.img.no-arrow:hover {
+        background-color: #F3F7F9;
+    }
+
+    .btn-chat {
+        padding: 7px 10px;
+        border: none !important;
+        background-color: transparent;
+        color: #62A8EA !important;
+    }
+    div.noti-chat img {
+        float: left;
+        margin: -5px 10px -5px 0;
+        width: 35px;
+        border-radius: 50%;
+    }
+    div.noti-chat span {
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: visible!important;
+        color: inherit;
+        line-height: 14px;
+        display: block;
+        padding: 10px 10px 10px 20px;
+        margin: 0;
+    }
+
+
+</style>
+<nav id="menu-right" class="my-chat mm-menu mm-right">
+    <div class="mm-search">
+        <div class="chat-header">Contacts</div>
+        <input placeholder="Search" type="text" autocomplete="off">
+    </div>
+    <ul class="mm-list mm-panel mm-opened mm-current" id="mm-m0-p0">
+        <li class="mm-label label-big">ONLINE</li>
+    #{list items:controllers.UserLiveRoom.getOnlineOfflineUsers(),as:'userOnline'}
+        #{if userOnline.tabCount > 0}
+            <li class="img no-arrow" id="li-${userOnline.userId}">
+                <span class="inside-chat">
+                    <i class="online"></i>
+                    <img src="${userOnline.avatar}" alt="avatar">
+                    <a class="mm-subopen mm-fullsubopen" href="#mm-m0-p1"></a><span
+                        class="chat-name">${userOnline.name}</span>
+                    #{if userOnline.msgCount > 0}
+                        <span class="pull-right badge badge-danger animated bounceIn">${userOnline.msgCount}</span>
+                    #{/if}
+                    <span>${userOnline.team}</span>
+                </span>
+            </li>
+        #{/if}
+    #{/list}
+        <li id="li-offline" class="mm-label label-big m-t-30">OFFLINE</li>
+    #{list items:controllers.UserLiveRoom.getOnlineOfflineUsers(),as:'userOnline'}
+        #{if userOnline.tabCount == 0}
+            <li class="img no-arrow" id="li-${userOnline.userId}">
+                <span class="inside-chat">
+                    <i class="offline"></i>
+                    <img src="${userOnline.avatar}" alt="avatar">
+                    <a class="mm-subopen mm-fullsubopen" href="#mm-m0-p6"></a><span
+                        class="chat-name">${userOnline.name}</span>
+                    #{if userOnline.msgCount > 0}
+                        <span class="pull-right badge badge-danger animated bounceIn">${userOnline.msgCount}</span>
+                    #{/if}
+                    <span>${userOnline.team}</span>
+                </span>
+            </li>
+        #{/if}
+    #{/list}
+    </ul>
+    <div id="conversation" class="conversation">
+        <div class="conversation-header">
+            <a class="conversation-more pull-right" href="javascript:void(0)">
+                <i class="fa fa-phone"></i>
+            </a>
+            <a class="conversation-return pull-left" href="javascript:void(0)" data-toggle="close-chat">
+                <i class="fa fa-angle-left"></i>
+            </a>
+
+            <div class="conversation-title">Mike</div>
+        </div>
+        <div class="chats">
+            <div class="chat chat-left">
+                <div class="chat-avatar">
+                    <a class="avatar" data-toggle="tooltip" href="#" data-placement="left" title="Edward Fletcher">
+                        <img src="/assets/img/avatars/avatar3.png" alt="Edward Fletcher">
+                    </a>
+                </div>
+                <div class="chat-body">
+                    <div class="chat-content">
+                        <p>
+                            I'm just looking around.
+                        </p>
+
+                        <p>Will you tell me something about yourself? </p>
+                        <time class="chat-time" datetime="2015-06-01T08:35">8:35 am</time>
+                    </div>
+                    <div class="chat-content">
+                        <p>
+                            Are you there? That time!
+                        </p>
+                        <time class="chat-time" datetime="2015-06-01T08:40">8:40 am</time>
+                    </div>
+                </div>
+            </div>
+            <div class="chat">
+                <div class="chat-avatar">
+                    <a class="avatar" data-toggle="tooltip" href="#" data-placement="right" title="June Lane">
+                        <img src="/assets/img/avatars/avatar3.png" alt="June Lane">
+                    </a>
+                </div>
+                <div class="chat-body">
+                    <div class="chat-content">
+                        <p>
+                            Hello. What can I do for you?
+                        </p>
+                        <time class="chat-time" datetime="2015-06-01T08:30">8:30 am</time>
+                    </div>
+                    <div class="chat-content">
+                        <p>
+                            Hello. What can I do for you?
+                        </p>
+                        <time class="chat-time" datetime="2015-06-01T08:30">8:30 am</time>
+                    </div>
+                    <div class="chat-content">
+                        <p>
+                            Hello. What can I do for you?
+                        </p>
+                        <time class="chat-time" datetime="2015-06-01T08:30">8:30 am</time>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="conversation-reply">
+            <div class="input-group">
+                <input class="form-control" placeholder="Say something" type="text">
+                 <span class="input-group-btn">
+                     <button type="button" class="btn btn-default btn-chat"><i class="fa fa-picture-o"></i></button>
+                     <button type="button" class="btn btn-default btn-chat"><i class="fa fa-video-camera"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script>
+    var selectChatUserMessage;
+    function chatSidebar() {
+        /* Open / Close right sidebar */
+        $('#chat-toggle').on('click', function () {
+            var charmenu = $('nav#menu-right');
+            if (charmenu.hasClass("chat-opened")) {
+                charmenu.removeClass("chat-opened");
+                charmenu.animate({right: '-300px'});
+
+            } else {
+                charmenu.addClass("chat-opened");
+                charmenu.animate({right: '0px'});
+            }
+            $('#chat-notification').hide();
+            setTimeout(function () {
+                $('.mm-panel .badge-danger').each(function () {
+                    $(this).removeClass('hide').addClass('animated bounceIn');
+                });
+            }, 1000);
+        });
+
+        /* Remove current message when opening */
+        $('.have-message').on('click', function () {
+            $(this).removeClass('have-message');
+            $(this).find('.badge-danger').fadeOut();
+        });
+
+        $('.img.no-arrow').on('click', function () {
+            $('.conversation').addClass('active');
+        });
+        $('a.conversation-return').on('click', function () {
+            $('.conversation').removeClass('active');
+        });
+
+        /* Send messages */
+        $('.send-message').keypress(function (e) {
+            if (e.keyCode == 13) {
+                var chatVal = $(this).val();
+                if (chatVal.length > 0) {
+                    var chat_message = '<li class="img">' +
+                            '<span>' +
+                            '<div class="chat-detail chat-right">' +
+                            '<img src=' + loggedUserProFilePic + ' data-retina-src=' + loggedUserProFilePic + '/>' +
+                            '<div class="chat-detail">' +
+                            '<div class="chat-bubble">' +
+                            chatVal +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</span>' +
+                            '</li>';
+                    socket.send('{ "toid":"' + selectChatUserMessage + '" ,"msgType":"msg", "message":"' + chatVal + '" }');
+                    //$(chat_message).hide().appendTo($(this).parent().parent()).fadeIn();
+                    var mainMenuUl = $(this).parent().parent().parent();
+                    mainMenuUl.find("li.img:last").before(chat_message).fadeIn();
+                    mainMenuUl.height(screen.height - 300);
+                    $(this).val("");
+                }
+            }
+        });
+    }
+    function sendMessageClick(id) {
+        selectChatUserMessage = id;
+        $.ajax({
+            type: "POST",
+            data: "toid=" + selectChatUserMessage,
+            url: "/getMessageHistory"
+        }).success(
+                function (data) {
+                    var messCon;
+                    messCon = $("nav#menu-right ul#mpanel-message-" + selectChatUserMessage + " li.mm-subtitle");
+                    messCon.parent().find('li.img').each(function () {
+                        $(this).remove();
+                    });
+                    messCon.after(data);
+                    var liMess = $("nav#menu-right li#message-user-" + selectChatUserMessage + " span.badge-danger");
+                    liMess.hide().html('0');
+                    messCon.parent().scrollTop = messCon.parent().scrollHeight;
+                    var vchat = messCon.parent().find("span.chat-input input");
+                    if (!vchat.hasClass('videoChat')) {
+                        vchat.addClass('videoChat').before(
+                                "<i class='fa fa-video-camera' style='margin: 12px 5px 0 -12px;cursor: pointer;float:left' onclick='showVideoChat(" + selectChatUserMessage + ")'></i>");
+                    }
+                });
+    }
+    chatSidebar();
+</script>
+

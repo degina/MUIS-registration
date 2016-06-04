@@ -1,0 +1,64 @@
+#{if isList}
+    #{list items:safeties,as:'safety'}
+    %{contractor=safety.owner.userTeam.contractor && !user.userTeam.contractor;}%
+    <tr id="trSafety${safety.id}"  class="${contractor?'warning':''}">
+        <td></td>
+        <td taskId="${safety.task?'t'+safety.task?.id:'m'+safety.myPlan?.id}">${(safety.task)?(safety.task?.name):(safety.myPlan?.name)}</td>
+        <td>${safety.safetyDate.format("HH:mm")}</td>
+        <td>${safety.safetyNotice}</td>
+        <td>${safety.issuedTo}</td>
+        <td>${safety.complianceDue}</td>
+        <td><strong>${contractor?(safety.owner.toString() +":  "):''}</strong> <span>${safety.comments}</span></td>
+        <td>
+            #{if safety.attaches.size()>0}
+                <div class="post-images" id="post-images-safety-${safety.id}">
+                    #{list items:safety.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                          #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-safety-"+safety.id).raw()}
+            #{/if}
+        </td>
+        <td></td>
+        <td>
+            #{if contractor}
+                <button onclick="copySafety(${safety.id})" data-rel="tooltip" title="Хуулах"
+                        class="add btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-check"></i></button>
+            #{/if}
+            #{else }
+                <button onclick="deleteSafety(${safety.id})" data-rel="tooltip" title="Устгах"
+                        class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                        class="fa fa-times"></i></button>
+            #{/else }
+        </td>
+    </tr>
+    #{/list}
+#{/if}
+
+#{else }
+<tr id="trSafety${safety.id}">
+    <td></td>
+    <td>${(safety.task)?(safety.task?.name):(safety.myPlan?.name)}</td>
+    <td>${safety.safetyDate.format("HH:mm")}</td>
+    <td>${safety.safetyNotice}</td>
+    <td>${safety.issuedTo}</td>
+    <td>${safety.complianceDue}</td>
+    <td>${safety.comments}</td>
+    <td>
+        #{if safety.attaches.size()>0}
+            <div class="post-images" id="post-images-safety-${safety.id}">
+                #{list items:safety.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-safety-"+safety.id).raw()}
+        #{/if}
+    </td>
+    <td></td>
+    <td>
+        <button onclick="deleteSafety(${safety.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

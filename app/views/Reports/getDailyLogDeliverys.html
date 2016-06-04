@@ -1,0 +1,43 @@
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h3 class="panel-title">Хүргэлт хүлээн авсан</h3>
+    </div>
+    <div class="panel-body">
+        <table class="table table-hover">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Цаг</th>
+                <th>Хаанаас</th>
+                <th>Дугаар/Код</th>
+                <th>Агуулга</th>
+                <th>Тэмдэглэл</th>
+            </tr>
+            </thead>
+            <tbody>
+            %{count2=1;}%
+            #{list items:dataListSub,as:'delivery'}
+            <tr>
+                <td>${count2}</td>
+                <td>${delivery.deliveryHour.format("HH:mm")}</td>
+                <td>${delivery.deliveryFrom}</td>
+                <td>${delivery.trackingNumber}</td>
+                <td>${delivery.content}</td>
+                <td>
+                    <div class="notes">${controllers.ReportClass.ReportFunctionLocal.getBreakLine(delivery.comments).raw()}</div>
+                    #{if delivery.attaches.size()>0}
+                        <div class="post-images" id="post-images-delivery-${delivery.id}">
+                            #{list items:delivery.attaches, as:'attach'}
+                              ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                            #{/list}
+                        </div>
+                    ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-delivery-"+delivery.id).raw()}
+                    #{/if}
+                </td>
+            </tr>
+            %{count2++}%
+            #{/list}
+            </tbody>
+        </table>
+    </div>
+</div>

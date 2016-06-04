@@ -1,0 +1,168 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    .panel-stat .glyph-icon {
+        opacity: .5;
+        font-size: 55px;
+    }
+
+    .btn-group > .active {
+        background-color: #38c !important;
+        border-color: #38c;
+        color: #fff !important;
+        text-shadow: 0 1px 0 #059;
+    }
+
+</style>
+<div id="main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h3 class="m-b-30">Үнэ болон тоо хэмжээ </h3>
+
+                            <div id="axis-chart"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="row">
+                                <div class="btn-group" data-toggle="buttons">
+                                    <label class="btn btn-default btn-transparent active">
+                                        <input type="radio" name="options" value="cat" autocomplete="off" checked>
+                                        Ангилал
+                                    </label>
+                                    <label class="btn btn-default btn-transparent">
+                                        <input type="radio" name="options" value="status" autocomplete="off"> Төлөв
+                                    </label>
+                                    <label class="btn btn-default btn-transparent">
+                                        <input type="radio" name="options" value="condition" autocomplete="off"> Нөхцөл
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div id="pie-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#{contract-chart-config /}
+<script>
+    $(document).ready(function () {
+        var pieChart = c3.generate({
+            bindto: '#pie-chart',
+            data: {
+                // iris data from R
+                json: {
+                #{list items:categories,as:'cat'}
+                    '${cat.category}': ${cat.percent},
+                #{/list}
+                },
+                type: 'pie',
+                onclick: function (d, i) {
+                    console.log("onclick", d, i);
+                },
+            }
+        });
+        $('input[type=radio][name=options]').change(function () {
+            if (this.value == 'cat') {
+                pieChart.unload();
+                setTimeout(function () {
+                    pieChart.load({
+                        json: {
+                        #{list items:categories,as:'cat'}
+                            '${cat.category}': ${cat.percent},
+                        #{/list}
+                        },
+                        type: 'pie',
+                    });
+                }, 300);
+
+            } else if (this.value == 'status') {
+                pieChart.unload();
+                setTimeout(function () {
+                    pieChart.load({
+                        json: {
+                        #{list items:statuses,as:'cat'}
+                            '${cat.status}': ${cat.percent},
+                        #{/list}
+                        },
+                        type: 'pie',
+                    });
+                }, 300);
+
+            } else if (this.value == 'condition') {
+                pieChart.unload();
+                setTimeout(function () {
+                    pieChart.load({
+                        json: {
+                            #{list items:payments,as:'cat'}
+                                '${cat.payment}': ${cat.percent},
+                            #{/list}
+                            },
+                        type: 'pie',
+                    });
+                }, 300);
+            }
+
+        });
+
+
+        var chart = c3.generate({
+            bindto: '#axis-chart',
+            data: {
+                x: 'x',
+                rows:[
+                        ['x','Үнийн дүн','Тоо хэмжээ'],
+                    #{list items:contractCharts ,as:'data' }
+                        [ '${data.date.format("yyyy-MM-dd")}' , ${data.amount}, ${data.number} ],
+                    #{/list}
+                ],
+                axes: {
+                    'Тоо хэмжээ': 'y2'
+                },
+                types: {
+                    'Тоо хэмжээ': 'bar'
+                }
+            },
+            axis: {
+                y: {
+                    label: {
+                        text: 'Үнийн дүн сая ₮',
+                        position: 'outer-middle'
+                    },
+                    tick: {
+                        format: function (d) { return d+" сая ₮"; }
+                    }
+                },
+                y2: {
+                    show: true,
+                    label: {
+                        text: 'Тоо хэмжээ',
+                        position: 'outer-middle'
+                    }
+                },
+                x: {
+                    type: 'timeseries',
+                    tick: {
+                        format: '%Y-%m-%d'
+                    }
+                }
+            }
+        });
+    })
+    ;
+</script>

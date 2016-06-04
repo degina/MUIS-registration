@@ -1,0 +1,14 @@
+<tr id="trCashSubContractor${subContractor.id}" class="trCash${subContractor.cash.id}">
+    <td class="text-right"><label style="width: 80%; text-align: left;">${subContractor.name}</label></td>
+    <td>${controllers.Functions.getDecimal(subContractor.inflow)}</td>
+    <td>${controllers.Functions.getDecimal(subContractor.outflow)}</td>
+    <td>%{ value = subContractor.netflow;
+        if (value < 0){ value*=-1; }%(${controllers.Functions.getDecimal(value)})%{ }
+        else { }%${controllers.Functions.getDecimal(value)} %{ }}%</td>
+    <td class="text-right">
+        <button onclick="deleteSubContractor(${subContractor.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i
+                class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{include 'Budgets/deleteCashSub.html'/}

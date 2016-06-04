@@ -1,0 +1,748 @@
+<script>
+    $(document).ready(function () {
+        //alert("aktid:");
+        generatePdf($('#aktinfo'));
+    });
+
+    function generatePdf(file){
+        var akttype = file.attr('aktType');
+        var logoAgent = file.attr('aktLogoAgent');
+        var logoClient = file.attr('aktLogoClient');
+
+        var projectName = file.attr('aktProjectName');
+        var queue = file.attr('aktQueue');
+        var name = file.attr('aktName');
+
+        var agentStaffPos = file.attr('aktAgentStaffPos')+':';
+        var agentStaffName = '/'+file.attr('aktAgentStaffName')+'/';
+        var agentStaffPos1 = file.attr('aktAgentStaffPos1');
+        if(agentStaffPos1!='' && agentStaffPos1!=null && agentStaffPos1!='null' )
+            agentStaffPos1 = agentStaffPos1 +":";
+        var agentStaffName1 = file.attr('aktAgentStaffName1');
+        if(agentStaffName1!='' && agentStaffName1!=null && agentStaffName1!='null' )
+            agentStaffName1 = '/' + agentStaffName1+ '/';
+
+        var clientStaffPos = file.attr('aktClientStaffPos')+':';
+        var clientStaffName = '/'+file.attr('aktClientStaffName')+'/';
+        var clientStaffPos1 = file.attr('aktClientStaffPos1');
+        if(clientStaffPos1!='' && clientStaffPos1!=null && clientStaffPos1!='null' )
+            clientStaffPos1 = clientStaffPos1 +":";
+        var clientStaffName1 = file.attr('aktClientStaffName1');
+        if(clientStaffName1!='' && clientStaffName1!=null && clientStaffName1!='null' )
+            clientStaffName1 = '/' + clientStaffName1+ '/';
+
+        var Img1Date = file.attr('aktImg1Date');
+        var Img1Txt = file.attr('aktImg1Txt');
+        var Img1Img = file.attr('aktImg1Img');
+        var Img2Txt,Img2Img,Img2Date,
+                Img3Txt,Img3Img,Img3Date,
+                Img4Txt,Img4Img,Img4Date;
+        if(akttype==2 || akttype==3){
+            Img2Date = file.attr('aktImg2Date');
+            Img2Txt = file.attr('aktImg2Txt');
+            Img2Img = file.attr('aktImg2Img');
+        }
+        if(akttype==3){
+            Img3Date = file.attr('aktImg3Date');
+            Img3Txt = file.attr('aktImg3Txt');
+            Img3Img = file.attr('aktImg3Img');
+
+            Img4Date = file.attr('aktImg4Date');
+            Img4Txt = file.attr('aktImg4Txt');
+            Img4Img = file.attr('aktImg4Img');
+        }
+
+        var docDefinition;
+        if(akttype=='1')
+            docDefinition = {
+                pageSize: 'A4',
+                pageMargins : [ 0, 0, 0, 0 ],
+                content: [
+                    //header
+                    {
+                        columns: [
+                            {
+                                margin: [25,30,5,0],
+                                alignment: 'left',
+                                width: 110,
+                                height:80,
+                                image: logoAgent
+                            },
+                            {
+                                margin: [50,55,55,0],
+                                width: 375,
+                                fontSize: 13,
+                                height:110,
+                                alignment: 'center',
+                                text: projectName
+                            },
+                            {
+                                margin: [5,30,12,0],
+                                width: 110,
+                                height:80,
+                                alignment: 'right',
+                                image: logoClient
+                            }
+                        ]
+                    },
+
+                    //subheader
+                    {
+                        text:'№'+queue,
+                        margin: [0,20,0,0],
+                        alignment: 'center',
+                    },
+                    {
+                        text:name,
+                        margin: [0,10,0,0],
+                        alignment: 'center',
+                    },
+
+                    //main- content
+                    {
+                        text:Img1Date,
+                        margin: [50,30,30,0],
+                        alignment: 'justify',
+                    },
+                    {
+                        image:Img1Img,
+                        margin: [30,5,30,0],
+                        width: 535,
+                        height:380,
+                        alignment: 'left',
+                    },
+                    {
+                        text:'Тайлбар: '+Img1Txt,
+                        margin: [50,5,50,0],
+                        alignment: 'justify',
+                    },
+
+                    //footer
+                    {
+                        columns: [
+                            {
+                                margin: [50,50,25,0],
+                                text:'Гүйцэтгэгч талаас: ',
+                                alignment:'left'
+                            },
+                            {
+                                margin: [25,50,50,0],
+                                text:'Захиалагч талаас: ',
+                                alignment:'left'
+                            }
+                        ]
+                    },
+                    {
+                        canvas: [
+                            {
+                                type: 'line',
+                                x1: 50,
+                                y1: 5,
+                                x2: 595/2 - 20,
+                                y2: 5,
+                                lineWidth: 2
+                            }
+                        ]
+                    },
+                    {
+                        canvas: [
+                            {
+                                type: 'line',
+                                x1: 595/2+20,
+                                y1: 0,
+                                x2: 595-50,
+                                y2: 0,
+                                lineWidth: 2
+                            }
+                        ]
+                    },
+                    {
+                        fontSize: 10,
+                        columns: [
+                            {
+                                margin: [50,10,25,0],
+                                columns: [
+                                    {
+                                        text:agentStaffPos,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:agentStaffName,
+                                        alignment:'right'
+                                    },
+                                ]
+                            },
+                            {
+                                margin: [25,10,50,0],
+                                columns: [
+                                    {
+                                        text:clientStaffPos,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:clientStaffName,
+                                        alignment:'right'
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        fontSize: 10,
+                        columns: [
+                            {
+                                margin: [50,10,25,50],
+                                columns: [
+                                    {
+                                        text:agentStaffPos1,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:agentStaffName1,
+                                        alignment:'right'
+                                    },
+                                ]
+                            },
+                            {
+                                margin: [25,10,50,50],
+                                columns: [
+                                    {
+                                        text:clientStaffPos1,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:clientStaffName1,
+                                        alignment:'right'
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+        if(akttype=='2')
+            docDefinition = {
+                pageSize: 'A4',
+                pageMargins : [ 0, 0, 0, 0 ],
+                content: [
+                    //header
+                    {
+                        columns: [
+                            {
+                                margin: [25,30,5,0],
+                                alignment: 'left',
+                                width: 110,
+                                height:80,
+                                image: logoAgent
+                            },
+                            {
+                                margin: [50,55,55,0],
+                                width: 375,
+                                fontSize: 13,
+                                height:110,
+                                alignment: 'center',
+                                text: projectName
+                            },
+                            {
+                                margin: [5,30,12,0],
+                                width: 110,
+                                height:80,
+                                alignment: 'right',
+                                image: logoClient
+                            }
+                        ]
+                    },
+
+                    //subheader
+                    {
+                        text:'№'+queue,
+                        margin: [0,20,0,0],
+                        alignment: 'center',
+                    },
+                    {
+                        text:name,
+                        margin: [0,10,0,0],
+                        alignment: 'center',
+                    },
+
+                    //main- content
+                    {
+                        text:Img1Date,
+                        margin: [50,20,30,0],
+                        alignment: 'justify',
+                    },
+                    {
+                        image:Img1Img,
+                        margin: [30,5,30,0],
+                        width: 535,
+                        height:180,
+                        alignment: 'left',
+                    },
+                    {
+                        fontSize: 10,
+                        text:'Тайлбар: '+Img1Txt,
+                        margin: [50,5,50,0],
+                        alignment: 'justify',
+                    },
+
+                    {
+                        text:Img2Date,
+                        margin: [50,30,30,0],
+                        alignment: 'justify',
+                    },
+                    {
+                        image:Img2Img,
+                        margin: [30,5,30,0],
+                        width: 535,
+                        height:180,
+                        alignment: 'left',
+                    },
+                    {
+                        fontSize: 10,
+                        text:'Тайлбар: '+Img2Txt,
+                        margin: [50,5,50,0],
+                        alignment: 'justify',
+                    },
+
+                    //footer
+                    {
+                        columns: [
+                            {
+                                margin: [50,30,25,0],
+                                text:'Гүйцэтгэгч талаас: ',
+                                alignment:'left'
+                            },
+                            {
+                                margin: [25,30,50,0],
+                                text:'Захиалагч талаас: ',
+                                alignment:'left'
+                            }
+                        ]
+                    },
+                    {
+                        canvas: [
+                            {
+                                type: 'line',
+                                x1: 50,
+                                y1: 5,
+                                x2: 595/2 - 20,
+                                y2: 5,
+                                lineWidth: 2
+                            }
+                        ]
+                    },
+                    {
+                        canvas: [
+                            {
+                                type: 'line',
+                                x1: 595/2+20,
+                                y1: 0,
+                                x2: 595-50,
+                                y2: 0,
+                                lineWidth: 2
+                            }
+                        ]
+                    },
+                    {
+                        fontSize: 10,
+                        columns: [
+                            {
+                                margin: [50,10,25,0],
+                                columns: [
+                                    {
+                                        text:agentStaffPos,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:agentStaffName,
+                                        alignment:'right'
+                                    },
+                                ]
+                            },
+                            {
+                                margin: [25,10,50,0],
+                                columns: [
+                                    {
+                                        text:clientStaffPos,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:clientStaffName,
+                                        alignment:'right'
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        fontSize: 10,
+                        columns: [
+                            {
+                                margin: [50,10,25,50],
+                                columns: [
+                                    {
+                                        text:agentStaffPos1,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:agentStaffName1,
+                                        alignment:'right'
+                                    },
+                                ]
+                            },
+                            {
+                                margin: [25,10,50,50],
+                                columns: [
+                                    {
+                                        text:clientStaffPos1,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:clientStaffName1,
+                                        alignment:'right'
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+        if(akttype=='3')
+            docDefinition = {
+                pageSize: 'A4',
+                pageMargins : [ 0, 0, 0, 0 ],
+                content: [
+                    //header
+                    {
+                        columns: [
+                            {
+                                margin: [25,30,5,0],
+                                alignment: 'left',
+                                width: 110,
+                                height:80,
+                                image: logoAgent
+                            },
+                            {
+                                margin: [50,55,55,0],
+                                width: 375,
+                                fontSize: 13,
+                                height:110,
+                                alignment: 'center',
+                                text: projectName
+                            },
+                            {
+                                margin: [5,30,12,0],
+                                width: 110,
+                                height:80,
+                                alignment: 'right',
+                                image: logoClient
+                            }
+                        ]
+                    },
+
+                    //subheader
+                    {
+                        text:'№'+queue,
+                        margin: [0,20,0,0],
+                        alignment: 'center',
+                    },
+                    {
+                        text:name,
+                        margin: [0,10,0,0],
+                        alignment: 'center',
+                    },
+
+                    //main- content
+                    {
+                        //date img1,2
+                        columns: [
+                            {
+                                margin: [32, 20, 0, 0],
+                                text: Img1Date
+                            },
+                            {
+                                margin: [10, 20, 30, 0],
+                                text: Img2Date
+                            }
+                        ]
+                    },
+                    {
+                        //img img1,2
+                        columns: [
+                            {
+                                margin: [30, 2, 30, 0],
+                                width: 260,
+                                height: 180,
+                                image: Img1Img
+                            },
+                            {
+                                margin: [45, 2, 30, 0],
+                                width: 260,
+                                height: 180,
+                                image: Img2Img
+                            }
+                        ]
+                    },
+                    {
+                        fontSize:10,
+                        //txt img1,2
+                        columns: [
+                            {
+                                alignment:'justify',
+                                margin: [32,2,30,0],
+                                text:'Тайлбар:'+Img1Txt
+                            },
+                            {
+                                alignment:'justify',
+                                margin: [10,2,30,0],
+                                text:'Тайлбар:'+Img2Txt
+                            }
+                        ]
+                    },
+
+                    {
+                        //date img1,2
+                        columns: [
+                            {
+                                margin: [32, 20, 0, 0],
+                                text: Img3Date
+                            },
+                            {
+                                margin: [10, 20, 30, 0],
+                                text: Img3Date
+                            }
+                        ]
+                    },
+                    {
+                        //img img1,2
+                        columns: [
+                            {
+                                margin: [30, 2, 30, 0],
+                                width: 260,
+                                height: 180,
+                                image: Img3Img
+                            },
+                            {
+                                margin: [45, 2, 30, 0],
+                                width: 260,
+                                height: 180,
+                                image: Img4Img
+                            }
+                        ]
+                    },
+                    {
+                        fontSize:10,
+                        //txt img1,2
+                        columns: [
+                            {
+                                alignment:'justify',
+                                margin: [32,2,30,0],
+                                text:'Тайлбар:'+Img3Txt
+                            },
+                            {
+                                alignment:'justify',
+                                margin: [10,2,30,0],
+                                text:'Тайлбар:'+Img4Txt
+                            }
+                        ]
+                    },
+
+                    //footer
+                    {
+                        columns: [
+                            {
+                                margin: [50,50,25,0],
+                                text:'Гүйцэтгэгч талаас: ',
+                                alignment:'left'
+                            },
+                            {
+                                margin: [25,50,50,0],
+                                text:'Захиалагч талаас: ',
+                                alignment:'left'
+                            }
+                        ]
+                    },
+                    {
+                        canvas: [
+                            {
+                                type: 'line',
+                                x1: 50,
+                                y1: 5,
+                                x2: 595/2 - 20,
+                                y2: 5,
+                                lineWidth: 2
+                            }
+                        ]
+                    },
+                    {
+                        canvas: [
+                            {
+                                type: 'line',
+                                x1: 595/2+20,
+                                y1: 0,
+                                x2: 595-50,
+                                y2: 0,
+                                lineWidth: 2
+                            }
+                        ]
+                    },
+                    {
+                        fontSize: 10,
+                        columns: [
+                            {
+                                margin: [50,10,25,0],
+                                columns: [
+                                    {
+                                        text:agentStaffPos,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:agentStaffName,
+                                        alignment:'right'
+                                    },
+                                ]
+                            },
+                            {
+                                margin: [25,10,50,0],
+                                columns: [
+                                    {
+                                        text:clientStaffPos,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:clientStaffName,
+                                        alignment:'right'
+                                    },
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        fontSize: 10,
+                        columns: [
+                            {
+                                margin: [50,10,25,50],
+                                columns: [
+                                    {
+                                        text:agentStaffPos1,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:agentStaffName1,
+                                        alignment:'right'
+                                    },
+                                ]
+                            },
+                            {
+                                margin: [25,10,50,50],
+                                columns: [
+                                    {
+                                        text:clientStaffPos1,
+                                        alignment:'left'
+                                    },
+                                    {
+                                        text:clientStaffName1,
+                                        alignment:'right'
+                                    },
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+
+        // download the PDF (temporarily Chrome-only)
+        pdfMake.createPdf(docDefinition).getDataUrl(function(dataURL) {
+            //alert(dataURL);
+            $.ajax({
+                type: "POST",
+                data: {
+                    pdf: dataURL,
+                    id: ${object.id},
+                    ftype: ${ftype},
+                    name: name
+                },
+                url: "/uploadPdfData"
+            }).complete(function () {
+                loadFiles(selectedFolder,1);
+                //alert('successpdf');
+            });
+        });
+    }
+</script>
+
+#{if object.aktStyle.aktType.id==1}
+<span id="aktinfo"
+      aktType="${object.aktStyle.aktType.id}"
+      aktLogoAgent="${logoAgent}"
+      aktLogoClient = "${logoClient}"
+      aktProjectName = "${object.aktStyle.project.name}"
+      aktQueue="${object.queue}"
+      aktName = "${name}"
+      aktImg1Date = "${object.aktImage1.date}"
+      aktImg1Img = "${img1}"
+      aktImg1Txt = "${object.aktImage1.description}"
+      aktAgentStaffPos = "${agentStaffPos}"
+      aktAgentStaffPos1 = "${agentStaffPos1}"
+      aktAgentStaffName = "${agentStaffName}"
+      aktAgentStaffName1 = "${agentStaffName1}"
+      aktClientStaffPos = "${clientStaffPos}"
+      aktClientStaffPos1 = "${clientStaffPos1}"
+      aktClientStaffName = "${clientStaffName}"
+      aktClientStaffName1 = "${clientStaffName1}"
+      style="cursor: pointer">${object.id}</span>
+#{/if}
+#{elseif object.aktStyle.aktType.id==2}
+<span id="aktinfo"
+      aktType="${object.aktStyle.aktType.id}"
+      aktLogoAgent="${logoAgent}"
+      aktLogoClient = "${logoClient}"
+      aktProjectName = "${object.aktStyle.project.name}"
+      aktQueue="${object.queue}"
+      aktName = "${name}"
+      aktImg1Date = "${object.aktImage1.date}"
+      aktImg1Img = "${img1}"
+      aktImg1Txt = "${object.aktImage1.description}"
+      aktImg2Date = "${object.aktImage2.date}"
+      aktImg2Img = "${img2}"
+      aktImg2Txt = "${object.aktImage2.description}"
+      aktAgentStaffPos = "${agentStaffPos}"
+      aktAgentStaffPos1 = "${agentStaffPos1}"
+      aktAgentStaffName = "${agentStaffName}"
+      aktAgentStaffName1 = "${agentStaffName1}"
+      aktClientStaffPos = "${clientStaffPos}"
+      aktClientStaffPos1 = "${clientStaffPos1}"
+      aktClientStaffName = "${clientStaffName}"
+      aktClientStaffName1 = "${clientStaffName1}"
+      style="cursor: pointer">${object.id}</span>
+#{/elseif}
+#{else}
+<span id="aktinfo"
+      aktType="${object.aktStyle.aktType.id}"
+      aktLogoAgent="${logoAgent}"
+      aktLogoClient = "${logoClient}"
+      aktProjectName = "${object.aktStyle.project.name}"
+      aktQueue="${object.queue}"
+      aktName = "${name}"
+      aktImg1Date = "${object.aktImage1.date}"
+      aktImg1Img = "${img1}"
+      aktImg1Txt = "${object.aktImage1.description}"
+      aktImg2Date = "${object.aktImage2.date}"
+      aktImg2Img = "${img2}"
+      aktImg2Txt = "${object.aktImage2.description}"
+      aktImg3Date = "${object.aktImage3.date}"
+      aktImg3Img = "${img3}"
+      aktImg3Txt = "${object.aktImage3.description}"
+      aktImg4Date = "${object.aktImage4.date}"
+      aktImg4Img = "${img4}"
+      aktImg4Txt = "${object.aktImage4.description}"
+      aktAgentStaffPos = "${agentStaffPos}"
+      aktAgentStaffPos1 = "${agentStaffPos1}"
+      aktAgentStaffName = "${agentStaffName}"
+      aktAgentStaffName1 = "${agentStaffName1}"
+      aktClientStaffPos = "${clientStaffPos}"
+      aktClientStaffPos1 = "${clientStaffPos1}"
+      aktClientStaffName = "${clientStaffName}"
+      aktClientStaffName1 = "${clientStaffName1}"
+      style="cursor: pointer">${object.id}</span>
+#{/else}

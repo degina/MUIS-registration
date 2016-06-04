@@ -1,0 +1,141 @@
+<style>
+    #back_chooseGallery:hover{
+        color:darkorange;
+        cursor: pointer;
+    }
+</style>
+<script>
+    $(document).ready(function() {
+        $(".fancybox-button").fancybox({
+            prevEffect		: 'none',
+            nextEffect		: 'none',
+            closeBtn		: false,
+
+            beforeShow: function () {
+                this.title = $(this.element).attr('title');
+                this.title = '<h4>' + this.title + '</h4>' + '<br /> <p>' + $(this.element).attr('alt') + '</p>';
+            },
+            helpers		: {
+                title	: { type : 'over'},
+                buttons	: {}
+            },
+            afterShow: function() {
+                var imageWidth = $(".fancybox-image").width();
+                $(".fancybox-title-over-wrap").css({
+                    "width": imageWidth,
+                    "paddingLeft": 0,
+                    "paddingRight": 0,
+                    "textAlign": "center"
+                });
+            }
+        });
+    });
+
+    function choose_picture(id){
+        var div = $('#gal_down_pic_'+id);
+        var imgUrl = div.attr('fileDir')+"."+div.attr('extension')
+        var dateUrl = div.attr('fileDate');
+        var descUrl = div.attr('fileDesc');
+
+
+        $(aktLogoDir+"_img").attr('src', imgUrl);
+        $(aktLogoDir+"_date").val(dateUrl);
+        $("#uploadProgress").text('');
+        $(aktLogoDir+"_input").val(imgUrl);
+        $(aktLogoDir+"_txt").html(descUrl);
+
+        alert(aktLogoDir);
+
+        var modalDiv = $("div#galleryModal");
+        modalDiv.modal('hide');
+        modalDiv.find('#gallery').html("");
+
+        var modalAkt = $('div#modalAkt');
+        modalAkt.modal('show');
+    }
+
+    function back_filter(){
+
+        if(album!=0){
+            $.ajax({
+                type: "POST",
+                data: {albumId: album},
+                url: "/show_album",
+                beforeSend: function () {
+                    $("div#gallery").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+                }
+            }).success( function (data) {
+                $('div#gallery').html(data);
+            });
+        }
+        else{
+            $.ajax({
+                type: "POST",
+                data: {dir: aktLogoDir},
+                url: "/chooseGalleryImages"
+            }).success( function (data) {
+                var modalDiv = $("div#galleryModal");
+                modalDiv.modal('show');
+                modalDiv.find("div.modal-content").html(data);
+            });
+        }
+    }
+</script>
+
+<div id="album_header" style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+    <span id="album_name" class="pull-left">Хайлтын үр дүн</span>
+    <span class="pull-right m-r-10" id="back_chooseGallery" onclick="back_filter()" >
+         <i class="fa fa-angle-right"></i> Буцах
+    </span>
+</div>
+
+<div class="row" style="padding: 0px 1% 10px 1%;">
+    <div id="album_images_parent" class="row media-manager" style="padding: 0px 6% 10px 5%; " >
+        <div id="album_images" class="gallery row" style="">
+        #{if galleryPicture.size()>0}
+            #{list items:galleryPicture,as:'picture'}
+                <div class="mix col-xs-6 col-sm-4 col-md-3" id="gal_pic_${picture.id}" style="display:block;">
+                    <div class="btn-group media-group" >
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu media-menu" role="menu">
+                            <li id="gal_down_pic_${picture.id}" onclick="choose_picture(${picture.id})"
+                                fileId="${picture.id}"
+                                fileDir="${picture.path}"
+                                fileDate="${picture.date.format("yyyy-MM-dd")}"
+                                fileDesc="${picture.description}"
+                                fileName="${picture.name}"
+                                extension="${picture.extension}"><a href="#"><i class="fa fa-download"></i> Сонгох</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div class="thmb">
+                                <div class="thmb-prev">
+                                    <a id="fancyBox_data_${picture.id}" class="fancybox-button" rel="fancybox-button" href="${picture.path}.${picture.extension}" title="${picture.name}" alt="${picture.description}">
+                                        <img src="${picture.pathTumb}.jpg"  class="img-responsive" alt="">
+                                    </a>
+                                </div>
+                                <h5 class="media-title">
+                                    <a style="font-size: small;" href="#" data-rel="tooltip" data-placement="bottom" id="gal_pic_title_${picture.id}"
+                                       data-original-title="#{if !picture.name.equals(picture.getNameMax())}${picture.name}#{/if}"
+                                       title="#{if !picture.name.equals(picture.getNameMax())}${picture.name}#{/if}">
+                                    ${picture.getNameMax()}
+                                    </a>
+                                </h5>
+                                <small class="text-muted pull-left">${picture.uploader.firstName}.${picture.uploader.lastnameFirstCharacter}</small>
+                                <small class="text-muted pull-right">${picture.date.format("yyyy-MM-dd")}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            #{/list}
+        #{/if}
+        #{else }
+            <h4 id="empty_album">Хоосон</h4>
+        #{/else}
+        </div>
+    </div>
+</div>

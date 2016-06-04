@@ -1,0 +1,20 @@
+<script>
+    $('button#add_submit').on('click', function (e) {
+        e.preventDefault();
+        alert();
+        if ($('div#modal-addsupplier form input#name_add').val() == "" ||
+                $('div#modal-addsupplier form input#person_add').val() == "" ||
+                $('div#modal-addsupplier form textarea#address_add').val() == "" ||
+                $('div#modal-addsupplier form input#phone_add').val() == "") {
+            showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+        }
+        else
+            $('div#modal-addsupplier form').submit();
+    })
+    $('div#modal-editsupplier form input#phone_edit').forceNumericInt();
+    $('div#modal-editsupplier form input#phone_alternative_edit').forceNumericInt();
+    $('div#modal-addsupplier form input#phone_add').forceNumericInt();
+    $('div#modal-addsupplier form input#phone_alternative_add').forceNumericInt();
+
+
+</script>

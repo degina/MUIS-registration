@@ -1,0 +1,17 @@
+<script>
+    $('table#tableOpex td#tdOpexEmployeeRelatedActual').html("${controllers.Functions.getDecimal(budget.opex.employeeActual)}");
+    $('table#tableOpex td#tdOpexEmployeeRelatedBudget').html("${controllers.Functions.getDecimal(budget.opex.employeeBudget)}");
+
+    $('table#tableOpex td#tdOpexTotalActual').html("${controllers.Functions.getDecimal(budget.opex.totalActual)}");
+    $('table#tableOpex td#tdOpexTotalBudget').html("${controllers.Functions.getDecimal(budget.opex.totalBudget)}");
+
+
+    $('table#tableIncomeResult td#tdOpexTotalActual').html("${controllers.Functions.getDecimal(budget.opex.totalActual)}");
+    $('table#tableIncomeResult td#tdOpexTotalBudget').html("${controllers.Functions.getDecimal(budget.opex.totalBudget)}");
+
+    var currentTd = $('table#tableIncomeResult td#tdOpexTotalVariance');
+    %{ value = budget.opex.variance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+</script>
+#{include "Budgets/calculateResultScript.html"/}

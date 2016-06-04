@@ -1,0 +1,189 @@
+<form action="@{Inventorys.saveItem()}" class="form-horizontal" method="get" accept-charset="utf-8"
+      enctype="multipart/form-data" id="form_edit">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tabcordion">
+                <div id="myTabContent" class="tab-content">
+                    <div class="tab-pane fade active in" id="product_general_edit">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+
+                                    <label class="col-sm-2 control-label">&{'name'} <span
+                                            class="asterisk">*</span>
+                                    </label>
+
+                                    <div class="col-sm-10">
+                                        <input type="text" class="form-control"
+                                               placeholder=&{'name'}...
+                                               required="true" id="item_name" value="${inventory.item}"
+                                               name="item">
+                                        <input hidden="true" id="item_id" name="id" value="${inventory.id}">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">&{'description'}
+                                    </label>
+
+                                    <div class="col-sm-10">
+                                                <textarea rows="3" class="form-control" name="description"
+                                                          id="item_description"
+                                                          style="resize: none"
+                                                          placeholder=&{'description'}...>${inventory.description}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label class="col-sm-2 control-label">&{'category'} <span
+                                            class="asterisk">*</span></label>
+
+                                    <div class="col-sm-5">
+                                        <select data-live-search="true" id="item_category_edit"
+                                                class="form-control"
+                                                title="&{'category'}" name="subcategory"
+                                                required="true">
+                                        #{list items:Categories,as:'category'}
+                                            <optgroup label="${category.name}">
+                                                #{list items:category.subCategories, as:'subCategory' }
+                                                    <option value="${subCategory.id}"
+                                                            #{if inventory.inventorySubCategory.id==subCategory.id}selected #{/if}>
+                                                    ${subCategory.name}
+                                                    </option>
+                                                #{/list}
+                                            </optgroup>
+                                        #{/list}
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <button type="button" class="btn btn-success"
+                                                id="add_new_category"
+                                                style="width: 100%" data-toggle="modal"
+                                                data-target="#modal-addcategory"><span
+                                                style="float: left;"><i
+                                                class="fa fa-plus p-r-10"></i> &{'add_new_category'}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">&{'measure'} <span
+                                            class="asterisk">*</span></label>
+
+                                    <div class="col-sm-5">
+                                        <select data-live-search="true" id="measure_edit"
+                                                class="form-control"
+                                                title="&{'measure'}" name="measure" required="true">
+
+                                        #{list items:Measures,as:'measure'}
+                                            <option value="${measure.id}"
+                                                    #{if inventory.inventoryMeasure.id==measure.id}selected #{/if}>
+                                            ${measure.measure}
+                                            </option>
+                                        #{/list}
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-5">
+                                        <button type="button" class="btn btn-success"
+                                                id="add_new_measure"
+                                                style="width: 100%;" data-toggle="modal"
+                                                data-target="#modal-addmeasure"><span
+                                                style="float: left;"><i
+                                                class="fa fa-plus p-r-10"></i> &{'add_new_measure'}</span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">&{'note'}
+                                    </label>
+
+                                    <div class="col-sm-10">
+                                                    <textarea rows="3" class="form-control valid" name="item_note"
+                                                              id="item_note"
+                                                              style="resize: none"
+                                                              placeholder=&{'note'}...>${inventory.itemNote}</textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">&{'website'}
+                                    </label>
+
+                                    <div class="col-sm-10">
+                                        <input rows="5" class="form-control valid"
+                                               name="item_website"
+                                               id="item_website"
+                                               style="resize: none" value="${inventory.website}"
+                                               placeholder=&{'website'}...>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-sm-2 control-label">&{'attachment'}
+                                    </label>
+
+                                    <div class="col-sm-10" id="inventorys-edititem-attach">
+                                        <ul class="uploadBox" id="u2">
+                                        #{list items:inventory.inventoryAttachment, as:'attach'}
+                                            <li>
+                                            <span>
+                                                ${controllers.Functions.handleDocumentAttachment(attach.filedir,attach.filename,attach.extension,attach.filesize).raw()}
+                                                ${controllers.Functions.handleDocumentAttachmentDel(attach.filedir,attach.filename,attach.extension).raw()}
+                                            </span>
+                                            </li>
+                                        #{/list}
+                                        ${controllers.Functions.handleDocumentAttachmentImgGallery("inventorys-edititem-attach").raw()}
+                                            <li>
+                                                <span>
+                                                    <button type="button"
+                                                            class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                            data-rel="tooltip" title="Хавсаргах"><i
+                                                            class="fa fa-cloud-upload"></i></button>
+                                                </span>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div id="edit_attach"></div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 m-b-40 align-center">
+            <button type="button" id="edit_save" class="btn btn-success m-t-10 dhidden"><i
+                    class="fa fa-check"></i> &{'save'}
+            </button>
+            <button type="button" id="edit_delete"
+                    class="btn btn-danger m-t-10 dhidden"><i
+                    class="fa fa-times-circle"></i> &{'delete'}
+            </button>
+        </div>
+    </div>
+</form>
+
+<script>
+    $('button#edit_save').on('click', function (e) {
+        e.preventDefault();
+        var obj = $('div#edit_attach');
+        if ($('input#item_name').val() == "") {
+            showErrorMessage("Шардлагатай нүдийг бөглөнө үү?");
+        }
+        else {
+            $("div#modal-edititem form ul.uploadBox img.imgIcon").each(function () {
+                obj.append("<input type=\"hidden\" name=\"filename\" value=" + $(this).attr('filename') + ">" +
+                "<input type=\"hidden\" name=\"filedir\" value=" + $(this).attr('filedir') + ">" +
+                "<input type=\"hidden\" name=\"extension\" value=" + $(this).attr('extension') + ">"+
+                "<input type=\"hidden\" name=\"filesize\" value=" + $(this).attr('filesize') + ">");
+            });
+
+            $.ajax({
+                type: "POST",
+                data: $('div#modal-edititem form').serialize(),
+                url: "/inventoryssaveitem"
+            }).complete(
+                    function () {
+                        location.reload();
+                    });
+        }
+    });
+</script>

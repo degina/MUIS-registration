@@ -1,0 +1,76 @@
+<div class="row">
+    <table class="table">
+        <tbody>
+        <tr>
+            <td><strong>Гарчиг:</strong></td>
+            <td colspan="3">${meetingTopic?.title}</td>
+        </tr>
+        <tr>
+            <td><strong>Хариуцагч:</strong></td>
+            <td >
+            #{list items:meetingTopic?.topicUserRels,as:'userRt'}
+            ${userRt.user.lastnameFirstCharacter}.${userRt.user.firstName} <br/>
+            #{/list}</td>
+            <td><strong>Ш/Х</strong></td>
+            <td>${meetingTopic?.newOld?.newOld}</td>
+        </tr>
+        <tr>
+            <td class="col-md-3"><strong>Ач холбогдол:</strong></td>
+            <td class="col-md-3">${meetingTopic?.priority.priority}</td>
+            <td class="col-md-2"><strong>Төлөв:</strong></td>
+            <td class="col-md-4">${meetingTopic?.status.status}</td>
+        </tr>
+        <tr>
+            <td><strong>Тайлбар:</strong></td>
+            <td colspan="3"> ${meetingTopic?.description}</td>
+        </tr>
+        <tr>
+            <td ><strong>Хавсралт:</strong></td>
+            <td colspan="3">
+            #{if meetingTopic?.topicAttachments.size()>0}
+                <div class="post-imagesShow" id="post-images-topic-attach">
+                    #{list items:meetingTopic?.topicAttachments, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                    #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-topic-attach").raw()}
+            #{/if}
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<script>
+    var objTumb = $('div#ImgThumbnail');
+    $("div.post-imagesShow img.imgIcon").mouseenter(
+            function () {
+                if ($(this).attr('type') == "${controllers.Consts.imageFileType}") {
+                    var loc = $(this).offset();
+                    objTumb.html("<img style='box-shadow: 0 0.5px 5px gray; border-radius: 12px'" +
+                    " src=" + $(this).attr('src') + ">");
+                    if(loc.top>200)loc.top -= 200;
+                    if ((screen.width / 2) < loc.left)loc.left -= 420;
+                    else loc.left += 50;
+                    loc.top -= $(document).scrollTop();
+                    objTumb.css('top', loc.top + "px");
+                    objTumb.css('left', loc.left + "px");
+                    objTumb.removeClass('dhidden');
+                }
+            }).mouseleave(function () {
+                objTumb.addClass('dhidden');
+            }).on('click', function () {
+                handleAttachmentClick($(this));
+            });
+</script>
+<style>
+    div.post-imagesShow img {
+        height: 50px;
+        width: 50px;
+        cursor: pointer;
+        margin: 5px 5px 0 0;
+        box-shadow: 0 0 1px gray;
+        border: 1px solid #333;
+        border-radius: 2px;
+        background: white;
+    }
+</style>

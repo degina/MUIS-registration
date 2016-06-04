@@ -1,0 +1,4 @@
+#{list items:projectObject.floors,as:'floor'}
+<div id=fi-s${floor.id}><input id="${floor.id}" class=floorName type='text' style="width: 250px" value="${floor.name}">
+    <span class='teamworkIcon delAssig' style='cursor: pointer' onclick='removeFloor("${floor.id}",1)'>d</span></div>
+#{/list}

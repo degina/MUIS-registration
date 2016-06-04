@@ -1,0 +1,284 @@
+<style>
+    div.album{
+        margin-bottom: 20px;
+    }
+
+    div.album:hover{
+        cursor: pointer;
+        opacity: 0.8;
+    }
+
+    div.album_content {
+        position: relative;
+    }
+
+    div.album_header{
+        width:60px;
+        padding: 10px;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        position:absolute;
+        z-index: 5;
+        display: none;
+    }
+
+    div.album_header ul li img {
+        margin-top: 10px;
+    }
+
+    div.album_header ul li strong {
+        font-size: small;
+    }
+
+    div.album_footer h5 {
+        font-size: small;
+    }
+</style>
+
+<div class="modal-header bg-dark" style="height: 50px;!important;">
+    <span style="color: white; font-weight: 500; font-size: 16px;">Зургийн цомог</span>
+    <i class="fa fa-times" onclick="cancelled_gallery()" style="float:right; margin-right: 10px;"></i>
+</div>
+<div class="modal-body" >
+    <div id="galleryImages" >
+        <div class="row media-manager">
+            <div class="col-sm-9" id="div_filter">
+                <div class="col-sm-12">
+                    <div class="col-sm-4" style="padding: 5px 5px;">
+                        <select class="form-control" data-live-search="true" id="menuActive" name="menuActive"  style="padding-top:5px; padding-bottom:5px;">
+                            <option value="all" selected>Бүх газар</option>
+                            <option value="general" >Ажлын цомог</option>
+                            <option value="dailylog" >Өдрийн тайлан</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4" style="padding: 5px 5px;">
+                        <select class="form-control" data-live-search="true" id="byUser" name="byUser"  style="padding-top:5px; padding-bottom:5px;">
+                            <option value="0">Хуулсан хүнээр</option>
+                        #{list items:userTeams,as:'team'}
+                            <optgroup label="${team.name}">
+                                #{list items:team.organizationCharts,as:'chart'}
+                                    <option value="${chart.user.id}" ${chart.user.id==byUser?'selected':''}>${chart.user.toString()}</option>
+                                #{/list}
+                            </optgroup>
+                        #{/list}
+                        </select>
+                    </div>
+                    <div class="col-sm-4" style="padding: 5px 5px;">
+                        <select name="byTask" id="byTask" class="form-control" data-live-search="true"  style="padding-top:5px; padding-bottom:5px;">
+                            <option value="0">Ажилд хамааралгүй</option>
+                        #{list items:projectObjects, as:'object'}
+                            #{if object.tasks.size()}
+                                <optgroup label="${object.name}">
+                                    #{list items:object.tasks, as:'task'}
+                                        <option value="${task.id}" ${task.id==byTask?'selected':''}>${task.name}</option>
+                                    #{/list}
+                                </optgroup>
+                            #{/if}
+                        #{/list}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-12">
+                    <div class="col-sm-4" style="padding: 5px 5px;">
+                        Эхлэх огноо:&nbsp;
+                        <input type="text" id="object_startDate"
+                               style="width: 90px;float:right"
+                               aria-readonly="true"
+                               value="${dateS.format('yyyy-MM-dd')}" name="dateS">
+                    </div>
+                    <div class="col-sm-4" style="padding: 10px 5px;">
+                        Дуусах огноо:
+                        <input type="text" id="object_finishDate"
+                               style="width: 90px;float:right"
+                               aria-readonly="true"
+                               value="${dateF.format('yyyy-MM-dd')}" name="dateF">
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <button class="btn btn-primary" type="button" onclick="filter_search()" >
+                    <i class="fa fa-search"></i> Ачаалах
+                </button>
+            </div>
+
+            <div class="col-sm-12">
+                <!-- BEGIN GALLERY -->
+                <div id="gallery" style="padding-top:0px;">
+                #{if gallery_menu=="all" || gallery_menu=="general"}
+                    <div id="workAlbum">
+                        <div style="border-radius: 3px; padding-left: 1%;margin-top:0px; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+                            <span >
+                                Ажлийн цомог
+                            </span>
+                        </div>
+                        <div class="row" id="generalAlbums" style="padding: 10px 1% 10px 1%;">
+                            #{if generalAlbums.size()>0}
+                                #{list items:generalAlbums,as:'dAlbum'}
+                                    <div class="album col-md-3" albumID="${dAlbum.id}" uploaderID="${dAlbum.uploader.id}">
+                                        <div class="album_content" style="">
+                                            <div class="album_header" style="">
+                                                <center>
+                                                    <ul>
+                                                        <li style="color:white;"><strong> ${dAlbum.galleryPictures.size()} </strong></li>
+                                                        <li style="color:white;"><strong> зураг </strong></li>
+                                                        #{if dAlbum.galleryPictures.size()>1}
+                                                            <li><img src="${dAlbum.galleryPictures.get(1).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                        #{/if}
+                                                        #{if dAlbum.galleryPictures.size()>2}
+                                                            <li><img src="${dAlbum.galleryPictures.get(2).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                        #{/if}
+                                                    </ul>
+                                                </center>
+                                            </div>
+                                            #{if dAlbum.galleryPictures.size()>0}
+                                                <img src="${dAlbum.galleryPictures.get(0).pathTumb}.jpg" class="img-responsive"/>
+                                            #{/if}
+                                            #{else}
+                                                <img src="/public/images/no-photo-gallery.jpg" class="img-responsive"/>
+                                            #{/else}
+                                        </div>
+                                        <div class="album_footer panel-footer" style="padding: 0 5px 5px 5px">
+                                            <h5>
+                                                <p style="color: #0480be"
+                                                   data-rel="tooltip" data-placement="bottom" data-original-title="#{if !dAlbum.name.equals(dAlbum.getNameMax())}${dAlbum.name}#{/if}"> ${dAlbum.getNameMax()}</p>
+                                                <small>
+                                                ${dAlbum.galleryPictures.size()} зураг | ${dAlbum.createdDate.format("yyyy-MM-dd")}
+                                                </small>
+                                            </h5>
+                                        </div>
+                                    </div>
+                                #{/list}
+                            #{/if}
+                            #{else }
+                                <h3 id="empty_gallery" style="margin: 2%">Хоосон</h3>
+                            #{/else}
+                        </div>
+                    </div>
+                #{/if}
+                #{if gallery_menu=="all" || gallery_menu=="dailylog"}
+                    <div id="dailyLog">
+                        <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+                            <span style="float: left;">
+                                Өдрийн тайлан цомог
+                            </span>
+                        </div>
+                        <div class="row" id="dailylogAlbums" style="padding: 1% 1% 10px 1%; ">
+                            #{if dailyLogAlbums.size()>0}
+                                #{list items:dailyLogAlbums,as:'dAlbum'}
+                                    <div class="album col-md-3" albumID="${dAlbum.id}">
+                                        <div class="album_content" style="">
+                                            <div class="album_header" style="">
+                                                <center>
+                                                    <ul>
+                                                        <li style="color:white;"><strong> ${dAlbum.galleryPictures.size()} </strong></li>
+                                                        <li style="color:white;"><strong> зураг </strong></li>
+                                                        #{if dAlbum.galleryPictures.size()>1}
+                                                            <li><img src="${dAlbum.galleryPictures.get(1).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                        #{/if}
+                                                        #{if dAlbum.galleryPictures.size()>2}
+                                                            <li><img src="${dAlbum.galleryPictures.get(2).pathTumb}.jpg" class="img-responsive" /> </li>
+                                                        #{/if}
+                                                    </ul>
+                                                </center>
+                                            </div>
+                                            #{if dAlbum.galleryPictures.size()>0}
+                                                <img src="${dAlbum.galleryPictures.get(0).pathTumb}.jpg" class="img-responsive"/>
+                                            #{/if}
+                                            #{else}
+                                                <img src="/public/images/no-photo-gallery.jpg" class="img-responsive"/>
+                                            #{/else}
+
+                                        </div>
+                                        <div class="album_footer panel-footer" style="padding: 0 5px 5px 5px">
+                                            <h5>
+                                                <p style="color: #0480be"> ${dAlbum.name}</p>
+                                                <small>
+                                                ${dAlbum.galleryPictures.size()} зураг | ${dAlbum.createdDate.format("yyyy-MM-dd")}
+                                                </small>
+                                            </h5>
+                                        </div>
+                                    </div>
+                                #{/list}
+                            #{/if}
+                            #{else }
+                                <h3 style="margin: 2%">Хоосон</h3>
+                            #{/else}
+                        </div>
+                    </div>
+                #{/if}
+                </div>
+                <!-- END GALLERY -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var album=0;
+    var filter=0;
+
+    function cancelled_gallery() {
+        var modalDiv = $("div#galleryModal");
+        modalDiv.modal('hide');
+        modalDiv.find('#gallery').html("");
+
+        var modalAkt = $('div#modalAkt');
+        modalAkt.modal('show');
+    }
+
+    function filter_search(){
+        filter = 1;
+        var div = $('div#div_filter');
+        var byUser = div.find('select#byUser').val();
+        var byTask = div.find('select#byTask').val();
+        var startDate = div.find('input#object_startDate').val();
+        var finishDate = div.find('input#object_finishDate').val();
+        var menuActive = div.find('select#menuActive').val();
+
+        $.ajax({
+            type: "POST",
+            data: {
+                albumId: album,
+                menuActive:menuActive ,
+                byUser: byUser,
+                byTask: byTask,
+                startDate:startDate,
+                finishDate: finishDate
+            },
+            url: "/choose_gallery_filter",
+            beforeSend: function () {
+                $("div#gallery").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+            }
+        }).success( function (data) {
+            $('div#gallery').html(data);
+        });
+    }
+
+    $("div.album").click(function(){
+        album = $(this).attr('albumID');
+        $.ajax({
+            type: "POST",
+            data: {albumId: album},
+            url: "/show_album",
+            beforeSend: function () {
+                $("div#gallery").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+            }
+        }).success( function (data) {
+            $('div#gallery').html(data);
+        });
+    });
+
+    $(document).ready(function () {
+        // createUploader();
+
+        jQuery('input#object_startDate').datetimepicker({lang: 'mn', timepicker: false, format: 'Y-m-d'});
+        jQuery('input#object_finishDate').datetimepicker({lang: 'mn', timepicker: false, format: 'Y-m-d'});
+
+        $('.album').hover( function() {
+            $(this).find('.album_header').show('slide', { direction: 'left' }, 70);
+        }, function() {
+            $(this).find('.album_header').hide('slide', { direction: 'left' }, 70);
+        });
+    });
+
+</script>

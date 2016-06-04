@@ -1,0 +1,65 @@
+#{extends 'CRUD/layout.html' /}
+#{blankConfig title:messages.get('ManPower')/}
+#{set activeMenu: 'Admin'/}
+#{set activeMenuSub: 'ManPower'/}
+
+<div id="main-content">
+    <div class="row">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div class="row">
+                    <form action="/manpowers" method="get" accept-charset="utf-8"
+                          enctype="application/x-www-form-urlencoded">
+                        <div class="col-md-4">
+                            <input type="text" name="search" id="member-finder" class="form-control" placeholder="Хайх"
+                                   value="${search}">
+                        </div>
+                    </form>
+                    <div style="float: right;margin-right: 15px">
+                        <a href="@{blank()}" class="btn btn-success btn-transparent"><i class="fa fa-plus p-r-10"></i>
+                        &{'ManPower'} &{'add'}</a>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <table class="table table-hover">
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Нэр</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            %{count=1}%
+                            #{list items:objects,as:'object'}
+                            <tr>
+                                <td>${count}</td>
+                                <td>${object.name}</td>
+                                <td><a href="@{controllers.ManPowers.show(object.id)}"
+                                       class="edit btn btn-sm btn-default"><i
+                                        class="fa fa-pencil"></i> Засах</a></td>
+                            </tr>
+                            %{count++}%
+                            #{/list}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    #{crud.pagination /}
+
+    </div>
+</div>
+<script>
+    $('div#main-content').css('min-height', screen.height - 138);
+</script>
+<style>
+    p.crudCount {
+        display: none;
+    }
+</style>

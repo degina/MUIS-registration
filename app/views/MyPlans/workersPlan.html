@@ -1,0 +1,377 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    .bootstrap-select.btn-group:not(.input-group-btn), .bootstrap-select.btn-group[class*="span"] {
+        float: none;
+        display: inline-block;
+        margin-bottom: 0;
+        margin-left: 0;
+    }
+
+    .ui-checkbox, .ui-radio {
+        margin: 0;
+        position: relative;
+    }
+
+    .tooltip {
+        white-space: normal;
+    }
+
+    .ui-page-theme-a .ui-btn:hover {
+        background-color: transparent;
+    }
+
+    .badge {
+        z-index: 1001;
+        position: relative;
+        display: inline-block;
+        min-width: 10px;
+        margin-top: 1px;
+        padding: 2px 4px;
+        font-size: 9px;
+        font-weight: bold;
+        line-height: 1;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        background-color: #999;
+        border-radius: 3px;
+    }
+
+    div#show-weather-modal .table {
+        border: 1px solid #ddd;
+        margin-bottom: 0;
+    }
+
+    div#show-weather-modal .table > thead > tr > th {
+        vertical-align: middle;
+        text-transform: none;
+        font-size: 13px;
+        padding: 4px 8px;
+    }
+
+    div#show-weather-modal .table > tbody > tr > td {
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    div#show-weather-modal .table-bordered thead th {
+        background-color: #EFEFEF;
+    }
+
+    .bg-gray {
+        background-color: #b6b6b6 !important;
+        color: #000 !important;
+        border: 1px solid #b6b6b6;
+    }
+
+    .bg-gray-light {
+        background-color: #ececec !important;
+        color: #000 !important;
+        border: 1px solid #ececec;
+    }
+
+    .bg-red {
+        background-color: #c75757 !important;
+        color: #fff !important;
+        border: 1px solid #c75757;
+    }
+
+    .bg-white {
+        background-color: #fff !important;
+        color: #000 !important
+    }
+
+    .bg-green {
+        background-color: #18a689 !important;
+        color: #fff !important;
+        border: 1px solid #18a689;
+    }
+
+    .bg-blue {
+        background-color: #0090d9 !important;
+        color: #fff !important;
+        border: 1px solid #0090d9;
+    }
+
+    .bg-orange {
+        background-color: #f27835 !important;
+        color: #fff !important;
+        border: 1px solid #f27835;
+    }
+
+    .bg-purple {
+        background-color: #b57ee0 !important;
+        color: #fff !important;
+        border: 1px solid #b57ee0;
+    }
+
+    .bg-bblue {
+        background-color: #3a87ad !important;
+        color: #fff !important;
+        border: 1px solid #3a87ad;
+    }
+
+    .fc-ltr .fc-time-area .fc-chrono th {
+        text-align: center;
+    }
+
+    .fc-scrollpane-scroller {
+        height: auto !important;
+    }
+    .fc-event{
+        cursor: pointer;
+    }
+</style>
+<div id="main-content">
+    <div class="modal fade" id="project-task-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-center p-10">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title"><strong>График төлөвлөгөөт ажил</strong></h4>
+                </div>
+                <div class="modal-body" id="project-task-modal-body">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END MODAL -->
+    <div class="modal fade" id="show-weather-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-red text-center">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title text-center"><strong>Ажлын саатал</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <table class="table table-bordered" id="tableWeather">
+                                <thead>
+                                <th style="width: 25px;">#</th>
+                                <th style="width: 100px;">Ажил</th>
+                                <th style="width: 100px;">Нөхцөл</th>
+                                <th colspan="2">Эхэлсэн</th>
+                                <th colspan="2">Дууссан</th>
+                                <th>Тэмдэглэл</th>
+                                </thead>
+                                <tbody id="tbodyWeatherShowBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END MODAL -->
+    <div class="widget-fullwidth row">
+        <div class="col-md-12 m-t-20">
+        #{if user.getUserPermissionType(controllers.Consts.permissionMyPlan)==3}
+            <div class="col-md-3">
+                <div style="display: none" id="sendUserTag">
+                </div>
+                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#modal-select"
+                        id="selectSendUserButton">Ажилчдаас сонгох
+                </button>
+            </div>
+        #{/if}
+            <div class="col-md-2">
+                <i class="fa fa-square" style="color:#18a689;"></i> &nbsp; Хийгдсэн ажил &nbsp; <br/>
+                <i class="fa fa-square" style="color:#0090d9;"></i> &nbsp; Төслийн ажил &nbsp; <br/>
+            </div>
+            <div class="col-md-3">
+                <i class="fa fa-square" style="color: #3a87ad;"></i> &nbsp; Хувийн төлөвлөгөө &nbsp; <br/>
+                <i class="fa fa-square" style="color: #b57ee0;"></i> &nbsp; Хурал &nbsp; <br/>
+            </div>
+            <div class="col-md-2">
+                <i class="fa fa-square" style="color:#c75757;"></i> &nbsp; Ажлын саатал &nbsp; <br/>
+            </div>
+        </div>
+        <div class="col-md-12 p-20 no-bd">
+            <div class="widget bg-white">
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <div id="calendar" style="height: 100%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form action="" id="formMyPlan" method="get" accept-charset="utf-8"></form>
+#{set title: 'Ажилчдын төлөвлөгөө'/}
+#{myPlan-blank-config /}
+#{set activeMenu: 'MyPlans'/}
+#{set activeMenuSub: 'MyPlanWorker'/}
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true /}
+<!-- END MAIN CONTENT -->
+<script>
+    var calendar;
+    var userIds = new Array();
+    function runCalendarTimeLine() {
+        calendar = $('#calendar').fullCalendar({
+            editable: false,
+            aspectRatio: 1.8,
+            scrollTime: '07:00:00',
+            resourceAreaWidth: '200px',
+            resourceLabelText: 'Багууд',
+            header: {
+                left: 'today prev,next',
+                center: 'title',
+                right: 'timelineMonth,timelineWeek,timelineDay'
+            },
+            defaultView: 'timelineMonth',
+            views: {
+                timelineDay: {
+                    slotDuration: '00:15',
+                    timelineHeader: [
+                        'H(:mm) цаг',
+                    ]
+                },
+                timelineWeek: {
+                    slotDuration: {hours: 4},
+                    timelineHeader: [
+                        'dddd M/D',
+                    ]
+                },
+                timelineMonth: {
+                    timelineHeader: [
+                        'ddd D',
+                    ]
+                }
+            },
+            monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+            monthNamesShort: ["1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар"],
+            dayNames: ["Ням", "Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"],
+            dayNamesShort: ["Ням", "Дав", "Мяг", "Лха", "Пүр", "Баа", "Бям"],
+            currentText: "Өнөөдөр",
+            dayNamesMin: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+            titleFormat: {
+                month: 'YYYY MMMM',
+                week: 'YYYY MMMM D',
+                day: 'YYYY MMMM D'
+            },
+            axisFormat: 'H(:mm) цаг',
+            timeFormat: { // for event elements
+                month: 'H:mm',
+                'default': 'H:mm',
+
+            },
+            buttonText: {
+                prevYear: "өмнөх жил",
+                nextYear: "дараагын жил",
+                today: 'өнөөдөр',
+                month: 'сар',
+                week: '7 хоног',
+                day: 'өдөр'
+            },
+            eventRender: function (event, element) {
+                $(element).tooltip({title: event.description,container: 'body'});
+                if (event.type == "ganttTask" || event.type == "myTask") {
+                    if (event.delay != "") {
+                        $(element).find('span.fc-title').after("<span class='badge badge-dark pull-right'> " + (parseInt(event.delay) > 0 ? "+" : "") + event.delay + " өдөр</span>");
+                    }
+                }
+                if (event.reminderDate != "" && event.reminderDate != null) {
+                    $(element).find('span.fc-title').before("<i class='fa fa-clock-o f-9'></i> ");
+                }
+            },
+            eventClick: function (calEvent, jsEvent, view) {
+                if (calEvent.className == "bg-blue" || calEvent.className == "bg-green" || calEvent.className =="bg-bblue") {
+                    showProjectTask(calEvent);
+                }
+                else if (calEvent.className == "bg-purple") {
+                    $("form#formMyPlan").attr("action", "/myPlanGotoPage/Meeting/" + calEvent.meetingId).submit();
+                }
+                else if (calEvent.className == "bg-red") {
+                    showWeather(calEvent.date, calEvent.isWeather);
+                }
+            },
+            resources: function (callback) {
+                $.ajax({
+                    type: "POST",
+                    data: {
+                        userIds: userIds,
+                    }, url: "/myPlan/resourcesWorker"
+                }).success(
+                        function (data) {
+                            callback(data);
+                        });
+            },
+            eventSources: [
+                // your event source
+                {
+                    url: "/myPlan/eventSourcesWorker",
+                    type: 'POST',
+                    data: function () { // a function that returns an object
+                        return {
+                            userIds: userIds
+                        };
+                    },
+                    error: function () {
+                        alert('Төлөвлөгөөг ачаалалахад алдаа гарлаа');
+                    },
+                    success: function (data) {
+                        // console.log(" data " + JSON.stringify(data));
+                    }
+                }
+            ],
+            loading: function (bool) {
+                //  $('#loading').toggle(bool);
+            }
+        });
+    }
+    function showWeather(date, isWeather) {
+        $.ajax({
+            type: "POST",
+            data: {
+                date: date,
+                isWeather: isWeather
+            }, url: "/myPlan/showWeatherModal"
+        }).success(
+                function (data) {
+                    $('div#show-weather-modal tbody#tbodyWeatherShowBody').html(data);
+                    $('#show-weather-modal').modal("show");
+                });
+    }
+    function showProjectTask(calEvent) {
+        $('div#project-task-modal div.modal-header').removeClass().addClass(calEvent.className +
+                " modal-header text-center p-10").find('h4').html((calEvent.type == 'ganttTask')?"График төлөвлөгөөт ажил":"Хувийн төлөвлөгөөт ажил");
+        $('#project-task-modal').modal({backdrop: 'static'});
+            $.ajax({
+                type: "POST",
+                data: {
+                    projectTask: calEvent.ganttTaskId,
+                    type: (calEvent.type == 'ganttTask')?'0':'2',
+                    selectedDay:calendar.fullCalendar('getDate').format()
+                }, url: "/myPlan/showProjectTask"
+            }).success(
+                    function (data) {
+                        $('div#project-task-modal div#project-task-modal-body').html(data);
+                    });
+
+    }
+    $(document).ready(function () {
+        runCalendarTimeLine();
+        $('div#modal-select div.modal-footer button.btn-success').click(function () {
+            userIds = new Array();
+            $("div#sendUserTag").find("li").each(function () {
+                userIds.push(this.id);
+            });
+            calendar.fullCalendar('destroy');
+            runCalendarTimeLine();
+
+
+        });
+    });
+</script>

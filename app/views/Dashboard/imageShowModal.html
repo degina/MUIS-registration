@@ -1,0 +1,126 @@
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <tr height="100%">
+        <td style="position: relative;">
+            <button type="button" class="modal-fullscreen-close" data-dismiss="modal" aria-hidden="true">
+                <span class="glyphicon glyphicon-remove"></span>
+            </button>
+            <div id="carouselImageShow" class="carousel slide" data-ride="carousel">
+                <ol class="carousel-indicators">
+                #{list items:post.attaches,as:'attach'}
+                    <li data-target="#carouselImageShow" data-slide-to="${attach_index -1}" class="${attach_index == number?'active':''}"></li>
+                #{/list}
+                </ol>
+                <!-- Wrapper for slides -->
+                <div class="carousel-inner" role="listbox">
+                #{list items:post.attaches,as:'attach'}
+                    <div class="item ${attach_index==number?'active':''}">
+                        <img src="${attach.dir}.${attach.extension}" class="img-responsive-full">
+                    </div>
+                #{/list}
+                </div>
+                <a class="carousel-control left" href="#carouselImageShow" data-slide="prev"><span class="carousel-control-arrow">&lsaquo;</span></a>
+                <a class="carousel-control right" href="#carouselImageShow" data-slide="next"><span class="carousel-control-arrow">&rsaquo;</span></a>
+            </div>
+        </td>
+        <td style="width: 400px; vertical-align: top; background-color: #f5f5f5;" align="top">
+            <div id="postArea" class="post-image">
+                <div class="post" id="postId${post.id}">
+                    <div class="post-head">
+                        #{if user.getPermissionType("dashboard") == 3 || user.id == post.owner.id}
+                            <div class="deletePostIcon">
+                                <div class="dropdown">
+                                    <i data-toggle="dropdown" class="dropdown-toggle fa fa-angle-down" style="font-weight: bold;"></i>
+                                    <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dLabel">
+                                        <li>
+                                            <a onclick="deletePost('${post.id}')">Устгах</a>
+                                        </li>
+                                        <li role="presentation" class="divider"></li>
+                                        <li>
+                                            <a onclick="editPostImage('${post.id}')">Нийтлэл засах</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        #{/if}
+                        <div class="media" style="margin-top: 0">
+                            <img src="${post.owner.profilePicture}" alt="avatar 12" width="50"
+                                 class="pull-left">
+                            <div class="media-body answer-info">
+                                <div><strong style="color: #262626;">${post.owner}</strong> <br/>
+                            <span class="c-gray" style="font-size: 12px;"><i class="fa fa-clock-o p-r-10"></i>
+                            ${controllers.Functions.monthName[Integer.parseInt(post.createdDate.format("MM"))-1]}
+                            ${post.createdDate.format("dd, HH:mm")}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-body">
+                        <div class="post-content" style="word-wrap: break-word;width: 300px">${post.getShortContent().raw()}</div>
+                    </div>
+                    <div class="post-like">
+                        <div class="pull-left" style="cursor: pointer;">
+                                <span class="badge badge-default m-l-10 f-15" onclick="likeThisPost('${post.id}')"
+                                      data-rel="tooltip" data-placement="bottom" title="${post.likeUsers}"
+                                      id="spanPostLike${post.id}"> <i class="fa fa-thumbs-up"></i> ${post.likes}</span>
+                        </div>
+                    </div>
+                    <div #{if post.comments == null || post.comments.size() == 0}style="display: none"#{/if} class="show-more-comment" onclick="showMoreComment('${post.id}','/dashboard/showMoreComment')">
+                        <span id="postSize${post.id}">${post.comments != null?post.comments.size():"0"} сэтгэгдлүүд</span>
+                    <span class="f-12 w-300" id="spanChevron${post.id}" style="color:#262626;"> <i
+                            class="fa fa-chevron-down"></i> </span>
+                    </div>
+                    <div class="post-comments" id="post-comments${post.id}">
+                    #{list items:post.getLastTwoComment(),as:'comment'}
+                        <div class="message-item" id="post-comment${comment.id}">
+                            #{if user.getPermissionType("dashboard") == 3 || user.id == comment.owner.id}
+                                <div class="deleteCommentIcon"  style="cursor: pointer;">
+                                    <div class="dropdown">
+                                        <i data-toggle="dropdown" class="fa fa-edit" style="font-weight: bold;"></i>
+                                        <ul style="position:static" class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dLabel">
+                                            <li>
+                                                <a onclick="deleteComment('${post.id}','${comment.id}')">Устгах</a>
+                                            </li>
+                                            <li>
+                                                <a onclick="editComment('${post.id}','${comment.id}')">Засах</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            #{/if}
+                            <div class="post-comment">
+                                <img src="${comment.owner.profilePicture}" alt="avatar 10" width="35"
+                                     class="pull-left m-t-5">
+                                <div class="media-body">
+                                    <div><span class="post-comment-owner">${comment.owner}</span>,
+                                        <span class="post-comment-created-time">${comment.createdDate.format("dd, HH:mm")}</span>
+                                    </div>
+                                    <div id="commentText" style="word-wrap: break-word">${comment.comment.raw()}</div>
+                                </div>
+                            </div>
+                        </div>
+                    #{/list}
+                    </div>
+                    <div class="post-add-comment" id="addComment${post.id}">
+                        <div class="small-comment">Сэтгэгдэл бичих...</div>
+                        <div class="full-comment">
+                            <img src="${user.profilePicture}" alt="avatar 10" width="35"
+                                 class="pull-left m-r-10">
+                            <div class="media-body">
+                            *{<div contentEditable="true" class="textComment"></div>}*
+                                <textarea class="form-control" id="textComment"></textarea>
+                        <span class="RR">
+                            <button type="button" class="btn btn-post" onclick="addComment('${post.id}')">
+                                Нийтлэх
+                            </button>
+                            <button type="button" class="btn btn-default btn-white m-l-5"
+                                    onclick="cancelComment('${post.id}')">Болих
+                            </button>
+                        </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>

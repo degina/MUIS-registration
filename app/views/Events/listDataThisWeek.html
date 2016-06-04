@@ -1,0 +1,24 @@
+#{if events.size() > 0}
+
+<div class="row">
+    <table id="events-table" class="table table-tools table-striped">
+    <thead>
+        <th style="width:100%" colspan="2">Үйл ажиллагаа</th>
+    </thead>
+    <tbody>
+    #{list items:events,as:'eventIndicator'}
+    <tr>
+        <td>%{attach=eventIndicator.getFirstAttach()}%
+            <span style="float: left">
+                        <img style="margin-left: 10px ;width: 80px;" src="${eventIndicator.imageDir!=null?eventIndicator.imageDir:'/public/images/simple.jpg'}"/>
+                     </span>
+        </td>
+       <td><a href="@{controllers.Events.show(eventIndicator.id)}" class="c-red">${eventIndicator.title}</a><br/>
+        ${eventIndicator.startDate.format("yyyy-MM-dd")}
+        </td>
+    </tr>
+    #{/list}
+    </tbody>
+</table>
+</div>
+#{/if}

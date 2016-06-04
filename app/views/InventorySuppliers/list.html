@@ -1,0 +1,901 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Inventory'/}
+#{set activeMenuSub:'InventorySupplier'/}
+#{blankConfig title:messages.get('UserPosition')/}
+#{flashCrud /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script src="/public/javascripts/jquery.resizableColumns.min.js"></script>
+
+%{inventoryPermission = user.getUserPermissionType(controllers.Consts.permissionInventory);}%
+<div id="main-content" class="dhidden" ${inventoryPermission==3 ? "" : "hidden=\"true\""}>
+    <div>
+        <div class="m-b-0 clearfix">
+            <div class="page-title pull-left">
+                <h3 class="pull-left"><strong>&{'Supplier'}</strong></h3>
+            </div>
+            <div class="pull-right">
+            #{if inventoryPermission==3}
+                <button class="btn btn-success m-t-10" data-toggle="modal" data-target="#modal-addsupplier"><i
+                        class="fa fa-plus p-r-10"></i> &{'add_new_supplier'}</button>
+            #{/if}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                <table id="products-table" class="table table-tools table-hover"
+                                       data-resizable-columns-id="inventorysupplier-resizalbe-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="min-width:30px;max-width: 100px" data-resizable-column-id="#">
+                                        </th>
+                                        <th data-resizable-column-id="name"><strong>&{'name'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="person"><strong>&{'person'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="address" style="min-width: 100px">
+                                            <strong>&{'address'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="phone" style="min-width: 150px">
+                                            <strong>&{'phone'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="mail">
+                                            <strong>&{'email'}</strong>
+                                        </th>
+                                        <th data-resizable-column-id="website">
+                                            <strong>&{'website'}</strong>
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:Suppliers, as: 'supplier'}
+                                    <tr>
+                                        <td><strong>${supplier.id}</strong></td>
+                                        <td>${supplier.name}</td>
+                                        <td>${supplier.person}</td>
+                                        <td>${supplier.address}</td>
+                                        <td>${supplier.phone}#{if supplier.phone_alternative!=null && supplier.phone_alternative>0} ${supplier.phone_alternative}#{/if}</td>
+                                        <td>${supplier.email}</td>
+                                        <td style="max-width: 200px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">${supplier.website}</td>
+                                    </tr>
+                                    #{/list}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    #{if MaxPageNumber>1}
+                        <div class="page-navigation" style="width: 100%; text-align: right;">
+                            <a style="text-decoration: none;"
+                               href="@{InventorySuppliers.list(CurrentPageNumber - 1)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber - 1 <= 0 ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="<"/>
+                            </a>
+                        %{
+                            int threeDots = 0;
+                            for(int i = 1; i <= MaxPageNumber; i++){
+                            if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                            (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                            (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                            }%
+                            <a style="text-decoration: none;"
+                               #{if CurrentPageNumber != i}href="@{InventorySuppliers.list(i)}"#{/if}>
+                                <input
+                                        class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="${i}"/>
+                            </a>
+                        %{ }else{
+                            if( i == 2 || i == MaxPageNumber - 1 ){
+                            threeDots = 1;
+                            }
+                            if(threeDots == 1){
+                            }%
+                            <span style="font-size: x-large;"><strong>...</strong></span>
+                        %{
+                            threeDots = 0;
+                            }
+                            }
+                            }
+                            }%
+                            <a style="text-decoration: none;"
+                               href="@{InventorySuppliers.list(CurrentPageNumber + 1)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber >= MaxPageNumber ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value=">"/>
+                            </a>
+                        </div>
+                    #{/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-addsupplier" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 650px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'add_new_supplier'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventorySuppliers.newSupplier()}" class="form-horizontal" method="get"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="tabcordion">
+                                    <div id="myTabContent" class="tab-content">
+                                        <div class="tab-pane fade active in" id="product_general">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'name'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'name'}...
+                                                                   required="true"
+                                                                   name="name" id="name_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'person'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'person'}...
+                                                                   required="true"
+                                                                   name="person" id="person_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'address'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                            <textarea rows="2" class="form-control valid" required="true"
+                                                      name="address" id="address_add" style="resize: none"
+                                                      placeholder=&{'address'}...></textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'phone'}<span
+                                                                class="asterisk">*</span>
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'phone'}...
+                                                                   maxlength="10"
+                                                                   required="true"
+                                                                   name="phone" id="phone_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'phone'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'phone'}...
+                                                                   maxlength="10"
+                                                                   name="phone_alternative" id="phone_alternative_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'email'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'email'}...
+                                                                   name="email" id="email_add">
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label class="col-sm-3 control-label">&{'website'}
+                                                        </label>
+
+                                                        <div class="col-sm-8">
+                                                            <input type="text" class="form-control"
+                                                                   placeholder=&{'website'}...
+                                                                   name="website" id="website_add">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                                <table class="table table-striped table-hover dataTable"
+                                                       style="overflow: visible"
+                                                       id="table-editable_add">
+                                                    <thead>
+                                                    <tr>
+                                                        <th style="width: 250px;" data-resizable-column-id="name">
+                                                            <strong>&{'name'}</strong>
+                                                        </th>
+                                                        <th style="width: 100px;" data-resizable-column-id="price">
+                                                            <strong>&{'price'}</strong>
+                                                        </th>
+                                                        <th style="width: auto;" data-resizable-column-id="price">
+                                                            <strong>&{'partnumber'}</strong>
+                                                        </th>
+                                                        <th style="width: 35px;" data-resizable-column-id="action">
+                                                            <strong></strong>
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tfoot>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td style="width: 35px;">
+                                                            <div class="text-center"><a
+                                                                    id="table-edit_new"
+                                                                    style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;"
+                                                                    class="add btn btn-icon-sm btn-rounded btn-default"
+                                                                    href="#"><i
+                                                                    class="fa fa-plus"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                                <button type="button" id="add_submit" class="btn btn-success m-t-10"><i
+                                        class="fa fa-check"></i> &{'save'}
+                                </button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="modal-editsupplier" aria-hidden="true">
+        <div class="modal-dialog modal-lg" style="width: 650px">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                    <h4 class="modal-title"><strong>&{'edit_supplier'}</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <form action="@{InventorySuppliers.saveSupplier()}" class="form-horizontal" method="get"
+                          accept-charset="utf-8"
+                          enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-12">
+                            <div class="tabcordion">
+                                <div id="myTabContent" class="tab-content">
+                                    <div class="tab-pane fade active in" id="product_general">
+                                        <div class="row">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'name'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input hidden="true" id="id_edit" name="id">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'name'}...
+                                                               required="true"
+                                                               name="name" id="name_edit">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'person'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'person'}...
+                                                               required="true"
+                                                               name="person" id="person_edit">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-sm-3 control-label">&{'address'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                            <textarea rows="2" class="form-control valid" required="true"
+                                                      name="address" id="address_edit" style="resize: none"
+                                                      placeholder=&{'address'}...></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'phone'}<span
+                                                            class="asterisk">*</span>
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'phone'}...
+                                                               maxlength="10"
+                                                               required="true"
+                                                               name="phone" id="phone_edit">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'phone'}
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'phone'}...
+                                                               maxlength="10"
+                                                               name="phone_alternative" id="phone_alternative_edit">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'email'}
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'email'}...
+                                                               name="email" id="email_edit">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+
+                                                    <label class="col-sm-3 control-label">&{'website'}
+                                                    </label>
+
+                                                    <div class="col-sm-8">
+                                                        <input type="text" class="form-control"
+                                                               placeholder=&{'website'}...
+                                                               name="website" id="website_edit">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-12 table-responsive">
+                                                <table class="table table-striped table-hover dataTable"
+                                                       style="overflow: visible"
+                                                       id="table-editable_edit">
+                                                    <thead>
+                                                    <tr>
+                                                        <th style="width: 250px;" data-resizable-column-id="name">
+                                                            <strong>&{'name'}</strong>
+                                                        </th>
+                                                        <th style="width: 100px;" data-resizable-column-id="price">
+                                                            <strong>&{'price'}</strong>
+                                                        </th>
+                                                        <th style="width: auto;" data-resizable-column-id="price">
+                                                            <strong>&{'partnumber'}</strong>
+                                                        </th>
+                                                        <th style="width: 35px!important;"
+                                                            data-resizable-column-id="action">
+                                                            <strong></strong>
+                                                        </th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tfoot>
+                                                    <tr>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td style="width: 35px">
+                                                            <div class="text-center"><a
+                                                                    id="table-edit_new"
+                                                                    style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;"
+                                                                    class="add btn btn-icon-sm btn-rounded btn-default"
+                                                                    href="#"><i
+                                                                    class="fa fa-plus"></i></a>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 m-t-20 m-b-40 align-center">
+                                <button type="button" id="edit_edit"
+                                        class="btn btn-default m-t-10 dhidden"><i
+                                        class="fa fa-pencil"></i> &{'edit'}
+                                </button>
+                                <button type="button" id="edit_save" class="btn btn-success m-t-10"><i
+                                        class="fa fa-check"></i> &{'save'}</button>
+                                <button type="button" id="edit_delete"
+                                        class="btn btn-danger m-t-10 dhidden"><i
+                                        class="fa fa-times-circle"></i> &{'delete'}
+                                </button>
+
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(window).load(function () {
+        $('div#main-content').removeClass('dhidden');
+        $(function () {
+            $("table").resizableColumns({
+                store: window.store
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        var opt = {};
+
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", 'sEmptyTable': "Үр дүн байхгүй байна."} ,
+                opt.iDisplayLength = 40,
+
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["csv", "xls", "pdf", "print"]
+                };
+        opt.aaSorting = [[0, 'desc']]
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': []}
+        ];
+
+        var dat = [""];
+        var prev_size_edit = 0;
+
+        var oTable = $('#products-table').dataTable(opt);
+        oTable.fnDraw();
+
+        /* Add a placeholder to searh input */
+        $('.dataTables_filter input').attr("placeholder", "Search a product...");
+
+        var oTable_add = $('#table-editable_add').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [0, 1, 2]
+            }
+            ]
+        });
+        var oTable_edit = $('#table-editable_edit').dataTable({
+            "aLengthMenu": [
+                [5, 15, 20, -1],
+                [5, 15, 20, "All"] // change per page values here
+            ],
+            "sDom": "",
+            "oTableTools": {
+                "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf"
+            },
+            // set the initial value
+            "iDisplayLength": 10,
+            "bPaginate": false,
+            "sPaginationType": "bootstrap",
+            "oLanguage": {
+                'sEmptyTable': "Үр дүн байхгүй байна.",
+                "sLengthMenu": "_MENU_ records per page",
+                "oPaginate": {
+                    "sPrevious": "Prev",
+                    "sNext": "Next"
+                },
+                "sSearch": ""
+            },
+            "aoColumnDefs": [{
+                'bSortable': false,
+                'aTargets': [0, 1, 2]
+            }
+            ]
+        });
+
+        function editableTable_add() {
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#modal-addsupplier #table-edit_new').live('click', function (e) {
+                e.preventDefault();
+                oTable_add.fnAddData(['<input type="text" readonly class="form-control small" name="item" value="">', '<input type="text" readonly class="form-control small" name="price">', '<input type="text" readonly class="form-control small" name="partnumber">',
+                    '<div class="text-center"><a style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+
+                var nRow = $('div#modal-addsupplier table#table-editable_add tbody tr:last-child td').parents('tr')[0];
+
+                var jqTds = $('>td', nRow);
+
+                var jqInputs = $('input', nRow);
+                jqTds[0].innerHTML = '<select data-live-search="true" name="item" class="form-control input-sm" title="&{'item'}" required="true"><option></option>#{list items:Inventorys,as:"inventory"}<option value="${inventory.item}" >${inventory.item}</option>#{/list}</select>';
+                $('select', jqTds[0]).val(jqInputs[0].value);
+                $('select', jqTds[0]).selectpicker('render');
+
+                jqTds[1].innerHTML = '<input type="text" class="numberic form-control small" name="price" value="' + jqInputs[1].value + '">';
+                $('input', jqTds[1]).forceNumericOnly(true);
+                jqTds[2].innerHTML = '<input type="text" class="numberic form-control small" name="partnumber" value="' + jqInputs[2].value + '">';
+                $('input', jqTds[2]).forceNumericOnly();
+                jqTds[3].innerHTML = '<div class="text-center"><a style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>';
+
+            });
+
+            $('div#modal-addsupplier #table-editable_add tbody a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parents('tr')[0];
+                oTable_add.fnDeleteRow(nRow);
+
+            });
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+        };
+        editableTable_add();
+
+
+        function editableTable_edit() {
+
+            jQuery('#table-edit_wrapper .dataTables_filter input').addClass("form-control medium"); // modify table search input
+            jQuery('#table-edit_wrapper .dataTables_length select').addClass("form-control xsmall"); // modify table per page dropdown
+
+
+            $('#modal-editsupplier #table-edit_new').live('click', function (e) {
+                e.preventDefault();
+                oTable_edit.fnAddData(['<input type="text" readonly class="form-control small" name="item" value="">', '<input type="text" readonly class="form-control small" name="price">', '<input type="text" readonly class="form-control small" name="partnumber">',
+                    '<div class="text-center"><a style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                ]);
+
+                var nRow = $('div#modal-editsupplier table#table-editable_edit tbody tr:last-child td').parents('tr')[0];
+
+                var jqTds = $('>td', nRow);
+
+                var jqInputs = $('input', nRow);
+                jqTds[0].innerHTML = '<select data-live-search="true" name="item" class="form-control input-sm" title="&{'item'}" required="true"><option></option>#{list items:Inventorys,as:"inventory"}<option value="${inventory.item}" >${inventory.item}</option>#{/list}</select>';
+                $('select', jqTds[0]).val(jqInputs[0].value);
+                $('select', jqTds[0]).selectpicker('render');
+
+                jqTds[1].innerHTML = '<input type="text" class="numberic form-control small" name="price" value="' + jqInputs[1].value + '">';
+                $('input', jqTds[1]).forceNumericOnly(true);
+                jqTds[2].innerHTML = '<input type="text" class="numberic form-control small" name="partnumber" value="' + jqInputs[2].value + '">';
+                $('input', jqTds[2]).forceNumericOnly();
+                jqTds[3].innerHTML = '<div class="text-center"><a style="height: 25px!important; padding-top: 1px!important;padding-left: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>';
+
+            });
+
+            $('div#modal-editsupplier #table-editable_edit tbody a.delete').live('click', function (e) {
+                e.preventDefault();
+
+                if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                    return;
+                }
+
+                var nRow = $(this).parents('tr')[0];
+                oTable_edit.fnDeleteRow(nRow);
+
+            });
+
+            $('.dataTables_filter input').attr("placeholder", "&{'search'}...");
+
+        };
+        editableTable_edit();
+
+
+        $('#products-table tbody tr').on('click', function (e) {
+            e.preventDefault();
+
+            var nRow = $(this);
+            if ($(this).html() != $(nRow).find('td:nth-child(8)').html()) {
+                var index = $(nRow).find('td:nth-child(1) strong').html();
+
+
+                $('div#modal-editsupplier button#edit_edit').addClass("dhidden");
+                $('div#modal-editsupplier button#edit_save').removeClass("dhidden");
+                $('div#modal-editsupplier button#edit_delete').removeClass("dhidden");
+
+                $.ajax({
+                    type: "POST",
+                    data: {id: index},
+                    url: "/inventorysupplierseditsupplier"
+                }).success(
+                        function (data) {
+                            if (data != null) {
+                                $('div#modal-editsupplier form input#id_edit').val(index);
+                                $('div#modal-editsupplier form input#name_edit').val(data[0]);
+                                $('div#modal-editsupplier form input#person_edit').val(data[1]);
+                                $('div#modal-editsupplier form textarea#address_edit').val(data[2]);
+                                $('div#modal-editsupplier form input#phone_edit').val(data[3]);
+                                $('div#modal-editsupplier form input#phone_alternative_edit').val(data[4]);
+                                $('div#modal-editsupplier form input#email_edit').val(data[5]);
+                                $('div#modal-editsupplier form input#website_edit').val(data[6]);
+                                for (var j = 7; j < prev_size_edit; j = j + 2)
+                                    oTable_edit.fnDeleteRow(0);
+                                dat = data;
+                                prev_size_edit = dat.length;
+                                for (var i = 7; i < data.length; i = i + 3) {
+                                    oTable_edit.fnAddData(['<input type="text" readonly class="form-control small" name="item" value="' + data[i] + '">', '<input type="text" readonly class="form-control small" name="price" value="' + data[i + 1] + '">', '<input type="text" readonly class="form-control small" name="partnumber" value="' + data[i + 2] + '">',
+                                        '<div class="text-center"><a style="height: 24px!important; padding-top: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>'
+                                    ]);
+                                    var nRow = $('div#modal-editsupplier table#table-editable_edit tbody tr:last-child td').parents('tr')[0];
+
+                                    var jqTds = $('>td', nRow);
+
+                                    var jqInputs = $('input', nRow);
+                                    jqTds[0].innerHTML = '<select data-live-search="true" name="item" class="form-control input-sm" title="&{'item'}" required="true"><option></option>#{list items:Inventorys,as:"inventory"}<option value="${inventory.item}" >${inventory.item}</option>#{/list}</select>';
+                                    $('select', jqTds[0]).val(jqInputs[0].value);
+                                    $('select', jqTds[0]).selectpicker('render');
+
+                                    jqTds[1].innerHTML = '<input type="text" class="numberic form-control small" name="price" value="' + jqInputs[1].value + '">';
+                                    $('input', jqTds[1]).forceNumericOnly(true);
+                                    jqTds[2].innerHTML = '<input type="text" class="numberic form-control small" name="partnumber" value="' + jqInputs[2].value + '">';
+                                    $('input', jqTds[2]).forceNumericOnly();
+                                    jqTds[3].innerHTML = '<div class="text-center"><a style="height: 24px!important; padding-top: 1px!important;" class="delete btn btn-icon-sm btn-rounded btn-default" href=""><i class="fa fa-times-circle"></i></a></div>';
+                                }
+
+                                $('div#modal-editsupplier').modal('show');
+                            }
+                            else
+                                $("button#supplier_failed").click();
+
+                        });
+            }
+        });
+
+        $('div#modal-editsupplier button#edit_edit').on('click', function (e) {
+            e.preventDefault();
+
+            $('div#modal-editsupplier button#edit_edit').addClass("dhidden");
+            $('div#modal-editsupplier button#edit_save').removeClass("dhidden");
+            $('div#modal-editsupplier button#edit_delete').addClass("dhidden");
+
+
+            $('div#modal-editsupplier form input#id_edit').removeAttr('readonly', false);
+            $('div#modal-editsupplier form input#name_edit').removeAttr('readonly', false);
+            $('div#modal-editsupplier form input#person_edit').removeAttr('readonly', false);
+            $('div#modal-editsupplier form textarea#address_edit').removeAttr('readonly', false);
+            $('div#modal-editsupplier form input#phone_edit').removeAttr('readonly', false);
+            $('div#modal-editsupplier form input#phone_alternative_edit').removeAttr('readonly', false);
+            $('div#modal-editsupplier form input#email_edit').removeAttr('readonly', false);
+            $('div#modal-editsupplier form input#website_edit').removeAttr('readonly', false);
+        });
+
+
+        $('div#modal-editsupplier button#edit_delete').on('click', function (e) {
+            e.preventDefault();
+            if (confirm("Are you sure to delete this product ?") == false) {
+                return;
+            }
+
+            var index = $('div#modal-editsupplier form input#id_edit').val();
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorysuppliersdeletesupplier"
+            }).complete(
+                    function () {
+                        location.reload();
+                    });
+
+        });
+
+        $('button#add_submit').on('click', function (e) {
+            e.preventDefault();
+            var is = 0;
+            $('table#table-editable_add tbody tr').each(function () {
+                if ($(this).find('td:first-child select').val() == "" || ($(this).find('td:nth-child(2) input').val() == "" && $(this).find('td:nth-child(3) input').val() == ""))
+                    is = 1;
+            });
+
+            if ($('div#modal-addsupplier form input#name_add').val() == "" ||
+                    $('div#modal-addsupplier form input#person_add').val() == "" ||
+                    $('div#modal-addsupplier form textarea#address_add').val() == "" ||
+                    $('div#modal-addsupplier form input#phone_add').val() == "" || is == 1) {
+                showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+            }
+            else if (isNaN($('div#modal-addsupplier form input#phone_add').val()) || isNaN($('div#modal-addsupplier form input#phone_alternative_add').val())) {
+                showErrorMessage("Утасны дугаарт тоо оруулна уу?");
+            } else {
+                $.ajax({
+                    type: "POST",
+                    data: $('div#modal-addsupplier form').serialize(),
+                    url: "/inventorysuppliersnewsupplier"
+                }).complete(
+                        function () {
+                            location.reload();
+                        });
+            }
+        });
+
+        $('button#edit_save').on('click', function (e) {
+            e.preventDefault();
+            var is = 0;
+            $('table#table-editable_edit tbody tr').each(function () {
+                if ($(this).find('td:first-child select').val() == "" || ($(this).find('td:nth-child(2) input').val() == "" && $(this).find('td:nth-child(3) input').val() == ""))
+                    is = 1;
+            });
+
+            if ($('div#modal-editsupplier form input#name_edit').val() == "" ||
+                    $('div#modal-editsupplier form input#person_edit').val() == "" ||
+                    $('div#modal-editsupplier form textarea#address_edit').val() == "" ||
+                    $('div#modal-editsupplier form input#phone_edit').val() == "" || is == 1) {
+                showErrorMessage("Шаардлагатай нүдийг бөглөнө үү?");
+            } else if (isNaN($('div#modal-editsupplier form input#phone_edit').val()) || isNaN($('div#modal-editsupplier form input#phone_alternative_edit').val())) {
+                showErrorMessage("Утасны дугаарт тоо оруулна уу?");
+            } else {
+                $.ajax({
+                type: "POST",
+                data: $('div#modal-editsupplier form').serialize(),
+                url: "/inventorysupplierssaveupplier"
+            }).complete(
+                    function () {
+                        location.reload();
+                    });
+            }
+        });
+
+        $('#products-table a.delete').live('click', function (e) {
+            e.preventDefault();
+
+            if (confirm("&{'are_you_sure_to_remove'}") == false) {
+                return;
+            }
+
+            var nRow = $(this).parents('tr')[0];
+            var index = parseInt($(this).parent('td').parent('tr').find('td:first-child strong').html());
+
+            oTable.fnDeleteRow(nRow);
+
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorysuppliersdeletesupplier"
+            }).complete(
+                    function () {
+                        location.reload();
+                    });
+        });
+        $('#products-table a.edit').live('click', function (e) {
+            e.preventDefault();
+
+            var nRow = $(this).parent('td').parent('tr');
+            var index = $(nRow).find('td:nth-child(1) strong').html();
+
+
+            $('div#modal-editsupplier button#edit_edit').addClass("dhidden");
+            $('div#modal-editsupplier button#edit_save').addClass("dhidden");
+            $('div#modal-editsupplier button#edit_delete').addClass("dhidden");
+
+        #{if user.getUserPermissionType('inventory')==3}
+            $('div#modal-editsupplier button#edit_edit').removeClass("dhidden");
+            $('div#modal-editsupplier button#edit_delete').removeClass("dhidden");
+        #{/if}
+
+            $('div#modal-editsupplier form input#id_edit').attr('readonly', true);
+            $('div#modal-editsupplier form input#name_edit').attr('readonly', true);
+            $('div#modal-editsupplier form input#person_edit').attr('readonly', true);
+            $('div#modal-editsupplier form textarea#address_edit').attr('readonly', true);
+            $('div#modal-editsupplier form input#phone_edit').attr('readonly', true);
+            $('div#modal-editsupplier form input#phone_alternative_edit').attr('readonly', true);
+            $('div#modal-editsupplier form input#email_edit').attr('readonly', true);
+            $('div#modal-editsupplier form input#website_edit').attr('readonly', true);
+
+
+            $.ajax({
+                type: "POST",
+                data: {id: index},
+                url: "/inventorysupplierseditsupplier"
+            }).success(
+                    function (data) {
+                        if (data != null) {
+                            $('div#modal-editsupplier form input#id_edit').val(index);
+                            $('div#modal-editsupplier form input#name_edit').val(data[0]);
+                            $('div#modal-editsupplier form input#person_edit').val(data[1]);
+                            $('div#modal-editsupplier form textarea#address_edit').val(data[2]);
+                            $('div#modal-editsupplier form input#phone_edit').val(data[3]);
+                            $('div#modal-editsupplier form input#phone_alternative_edit').val(data[4]);
+                            $('div#modal-editsupplier form input#email_edit').val(data[5]);
+                            $('div#modal-editsupplier form input#website_edit').val(data[6]);
+                            $('div#modal-editsupplier').modal('show');
+                        }
+                        else
+                            $("button#supplier_failed").click();
+
+                    });
+
+        });
+    });
+
+
+    $('div#modal-editsupplier form input#phone_edit').forceNumericInt();
+    $('div#modal-editsupplier form input#phone_alternative_edit').forceNumericInt();
+    $('div#modal-addsupplier form input#phone_add').forceNumericInt();
+    $('div#modal-addsupplier form input#phone_alternative_add').forceNumericInt();
+
+
+</script>
+<style>
+    .panel-body {
+        background-color: #FFF;
+        padding: 0px;
+        padding-left: 0px;
+    }
+
+    div#main-content body, div#main-content ul, div#main-content li {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 21px;
+        text-align: left;
+    }
+</style>
+
+
+
+#{inventory-config /}
+#{ImgThumbnail /}

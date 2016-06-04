@@ -1,0 +1,68 @@
+<div class="row">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+        <table class="table" id="tableDetails">
+            <tbody>
+            <tr>
+                <td style="border-top: none; width: 80px; "><strong>Төсөл:</strong></td>
+                <td style="border-top: none;">${task.projectObject.project.name}</td>
+                <td style="width: 80px; border-top: none;"><strong>Бүлэг:</strong></td>
+                <td style="border-top: none;">${task.projectObject.name}</td>
+            </tr>
+            <tr>
+                <td style="width: 80px;"><strong>Ажил:</strong></td>
+                <td colspan="3">${task.name}</td>
+            </tr>
+            <tr>
+                <td style="width: 80px;"><strong>Гүйцэтгэл:</strong></td>
+                <td>${task.completedPercent}%</td>
+                <td style="width: 80px;"><strong>Хоцролт:</strong></td>
+                <td>${diffDays}</td>
+            </tr>
+            <tr>
+                <td style="width: 80px;"><strong>Эхэлсэн:</strong></td>
+                <td>${task.startDate.format("yyyy-MM-dd")}</td>
+                <td style="width: 80px;"><strong>Дууссан:</strong></td>
+                <td>${task.finishDate.format("yyyy-MM-dd")}</td>
+            </tr>
+            <tr>
+                <td colspan="4"><a
+                        href="@{controllers.MyPlans.gotoProjectPage("Report",task.id,dateSelected.format('yyyy-MM-dd'),0)}">Тайлан
+                    үзэх</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+#{if type}
+<div class="row p-15">
+    <div class="row p-15" style="display: inline-flex; margin-top: -5px;">
+        <label class='control-label'
+               style="padding-left: 0; padding-right: 0; width:127px; margin-top: 8px;">
+            <i class="fa fa-clock-o f-18 c-blue"></i> Надад сануул:</label>
+
+        <div style="margin-top: 8px; width: 60px;">
+            <label>
+                <input style="display:none" type="checkbox"
+                       id="checkBoxReminderProject"   #{if task.reminderModel!=null}
+                       checked#{/if}>
+            </label>
+        </div>
+        <div id="divReminderDateProject" ${task.reminderModel == null? "style=display:none;":"style=display:inline-flex;"}>
+            <div class="input-group" style="width: 166px;">
+                                        <span class="input-group-addon bg-white">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                <input id="calendarPickerReminderProject" type="text" class="form-control"
+                       value="${task?.reminderModel?.reminderDate?.format("yyyy/MM/dd HH:mm")}"
+                       placeholder="Сануулах огноо...">
+            </div>
+            <input style="width: 200px; margin-left: 10px;" class='form-control' placeholder='Сануулах гарчиг'
+                   type='text'
+                   name='reminderTitle' value="${task?.reminderModel?.title}">
+        </div>
+    </div>
+</div>
+#{/if}
+
+
+

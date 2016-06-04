@@ -1,0 +1,120 @@
+<style type="text/css">
+    table {
+        width: 100% ;
+    }
+
+    th, td {
+        padding: 5px;
+        width: auto;
+    }
+    #date_timepicker_start6 {
+        background: url('/public/images/eventCal.png') no-repeat right center;
+        width: 200px;
+        cursor: pointer;
+        padding-left: inherit;
+    }
+    #date_timepicker_end6 {
+        background: url('/public/images/eventCal.png') no-repeat right center;
+        width: 200px;
+        cursor: pointer;
+        padding-left: inherit;
+    }
+    #eduusah {
+        width: 120px;
+        padding-left: inherit;
+        float: right;
+        margin-right: 0
+    }
+    #eremoveButton {
+        width: 10px;
+        height: 10px;
+        position: inherit;
+        float: right;
+        margin-right: 3px;
+    }
+    .textarea {
+        margin-top: 5px;
+        width: 437px;
+        padding-left: inherit;
+    }
+
+    input[type="text"] {
+        height: 30px;
+        width: 437px;
+        padding-left: inherit;
+    }
+
+</style>
+<script>
+    //    $(function() {
+    //        $( "#datepicker" ).datepicker();
+    //    });
+    $(document).ready(function () {
+        $('#someInput').on('input', function () {
+            $(this).val();// get the current value of the input field.
+        });
+
+        jQuery('#date_timepicker_start6').datetimepicker({
+            format: 'd/m/Y H:i',
+        });
+
+        jQuery('#date_timepicker_end6').datetimepicker({
+            format: 'd/m/Y H:i',
+            onShow: function (ct) {
+                this.setOptions({
+                    minDate: jQuery('#date_timepicker_start6').val() ? jQuery('#date_timepicker_start6').val() : false,
+                    minTime: jQuery('#date_timepicker_start6').val() == jQuery('#date_timepicker_end6').val() ? jQuery('#date_timepicker_start_time6').val() : false
+                })
+            },
+        });
+    });
+</script>
+
+<div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+            aria-hidden="true">&times;</span></button>
+    <h4 class="modal-title" id="myModalLabel">Үйл ажиллагаа засах </h4>
+
+</div>
+<div class="modal-body">
+<table cellpadding="1" cellspacing="1">
+    <tr>
+        <strong><td>Гарчиг</td></strong>
+        <td colspan="3"><input type="text" name="name" value="${event.title}" id="title" placeholder="Гарчиг"/></td>
+    </tr>
+    <tr>
+        <strong><td>Тайлбар</td></strong>
+        <td colspan="3">
+            <textarea rows="2" cols="10" id="desc" class="textarea"  placeholder="Нэмэлт тайлбар">${event.description}</textarea>
+        </td>
+    </tr>
+    <tr>
+        <strong><td>Хаана</td></strong>
+        <td colspan="3">
+            <input type="text" name="name" value="${event.location}" id="location" placeholder="Хаана зохион байгуулагдах"/>
+        </td>
+    </tr>
+    <tr>
+        <strong><td>Эхлэх</td></strong>
+        <td><input type="text" name="name" id="date_timepicker_start6" value="${event.startDate}"
+                   placeholder="Эхлэх өдөр"/></td>
+        <td><a id="eduusah" href="#"></a></td>
+    </tr>
+    <tr>
+        <strong><td class="enuugdah">Дуусах</td></strong>
+        <td><input type="text" class="enuugdah" id="date_timepicker_end6" name="startDate"
+                   placeholder="Дуусах өдөр" value="${event.endDate}"/></td>
+    </tr>
+</table>
+</div>
+<div class="modal-footer">
+	 #{if user.id == event.owner.id}
+        <button type="button" class="btn btn-white btn-default fa fa-delete"   onclick="eventDelete(${event.id})">
+            Устгах
+        </button>
+    #{/if}
+
+    <button type="button" class="btn btn-default" data-dismiss="modal">Цуцлах</button>
+    &nbsp;
+    <button type="button" class="btn btn-primary"  aria-label="Close" onclick="saveEditedEvent(${event.id})">Хадгалах</button>
+</div>

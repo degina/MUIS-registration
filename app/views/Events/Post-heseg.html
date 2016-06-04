@@ -1,0 +1,91 @@
+<script src="/assets/js/post.js"></script>
+<div class="col-md-8" id="postArea" style="padding-top: 20px; width: 100%">
+    <div class="post-area-small" style="width: 500px">
+        <div id="postAreaPadding">
+            <div class="row" >
+                <div class="post-new">
+                    <div class="post-new-body">
+                        <div>
+                            <img class="pull-left m-r-10" src="${user.profilePicture}" alt="avatar 12"
+                                 width="70">
+                            <div class="media-body">
+                                <div class="Rd">
+                                    <div class="eg">
+                                        <div class="yw oo"></div>
+                                        <div class="yw VK"></div>
+                                    </div>
+                                    <div class="textPostSmall" style="display: block;"> Нийтлэл нэмэх ...</div>
+                                    <textarea class="form-control" id="textPostFull" style="display: none"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="postHidden" style="display: none">
+                            <div id="attachPost" class="m-t-10">
+                                <div class="pull-left m-r-10"><strong style="margin-left: 24px;">Зураг:</strong>
+                                </div>
+                                <div class="media-body">
+                                    <ul class="uploadBox" id="uPost">
+                                        <li>
+                                                    <span> <button
+                                                            id="triggerClickUploadEvent"
+                                                            class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                            data-rel="tooltip" title="Хавсаргах"><i
+                                                            class="fa fa-cloud-upload"></i></button></span>
+                                        </li>
+                                    </ul>
+                                </div>
+
+                            </div>
+                            <div id="seeUsersPost" class="m-t-10"
+                                 style="display: inline-block;position:relative;width: 100%">
+                                <div class="pull-left"><strong
+                                        style="  margin-left: 28px;margin-top: 3px;margin-right: 15px;">Хэнд:</strong>
+                                </div>
+                                <div class="seeUserPost" id="sendUserTag">
+                                    <ul>
+                                        <li id="a-0" seltype="a" uid="0"><span
+                                                onclick="sendToUserRemoveSelection('a','0')">
+                                                <i class="fa fa-minus-circle asterisk"></i> Бүгд</span></li>
+                                    </ul>
+                                </div>
+                                <div class="post-select-user-icon"
+                                     data-toggle="modal" data-target="#modal-select" id="selectSendUserButton">
+                                    <i
+                                            class="fa fa-plus" style="  font-size: 11px;"></i><span
+                                        style="  font-size: 21px;"><i class="fa fa-user"></i></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="post-new-footer">
+                            <span class="RR">
+                                    <button type="button" class="btn btn-post" onclick="addPost('post','${event.id}')">Нийтлэх</button>
+                                     <button type="button" class="btn btn-default btn-white m-l-5"
+                                             onclick="cancelPost()">Болих
+                                     </button>
+                                </span>
+                    </div>
+                    <div class="progress" style="height: 30px;">
+                        <ul class="groupUl" id="u_jsonp_4_1">
+                            <li class="groupLi" onclick="addPostShow()">
+                                <a class="zocial" >
+                                    <i class="fa fa-camera-retro"></i>
+                                    Зураг/Видео
+                                </a>
+                            </li>
+                            <li class="groupLi" onclick="showQuestion()">
+                                <a class="zocial">
+                                    <i class="fa fa-bar-chart-o"></i>
+                                    Санал асуулга
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        #{include 'Dashboard/addPost.html'/}
+        </div>
+        <div class="load-more-animation">
+            <i class="fa fa-spinner faa-spin animated"></i>
+        </div>
+    </div>
+</div>

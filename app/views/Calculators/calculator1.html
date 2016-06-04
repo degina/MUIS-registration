@@ -1,0 +1,419 @@
+<head>
+    <!-- BEGIN META SECTION -->
+    <meta charset="utf-8">
+    <title>Progex</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta content="Cloud Based Construction Software" name="description">
+    <meta content="Progex Systems LLC" name="author" />
+    <link rel="shortcut icon" href="/assets/img/favicon.png">
+    <!-- END META SECTION -->
+    <!-- BEGIN MANDATORY STYLE -->
+    <link href="/assets/css/icons/icons.min.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/plugins.min.css" rel="stylesheet">
+    <link href="/assets/css/style.min.css" rel="stylesheet">
+    <link href="/public/stylesheets/main.css" rel="stylesheet">
+#{else }
+    <link rel="stylesheet" id="theme-color">
+#{/else}
+    <link rel="stylesheet" href="/assets/plugins/jnotify/jNotify.jquery.css">
+    <!-- END  MANDATORY STYLE -->
+#{get 'moreStyles' /}
+    <script src="/assets/plugins/modernizr/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+    <script src="@{'/public/javascripts/jquery-2.1.3.js'}" type="text/javascript" charset="utf-8"></script>
+    <script type="text/javascript" src="/public/javascripts/jQuery.print.js"></script>
+</head>
+#{jqueryui-config /}
+#{ckeditor-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+#{flashCrud /}
+
+
+<link rel="stylesheet" type="text/css" href="./assets/css/calculator1.css">
+<style>
+    #mainDiv {
+        margin: 0 auto;
+        width: 1000px;
+        padding-top: 20px;
+    }
+
+
+</style>
+<div id="mainDiv">
+    <div id="inputDiv">
+        <div class="panel panel-default">
+            <form>
+                <div class="calc_form">
+                    <h3>Барилгын бүтэц</h3>
+                    <h4>Суурь</h4>
+                    <div class="calc_row">
+                        <label for="">Суурийн төрөл</label>
+                        <select name="tip_fund" onchange="form2(form)">
+                            <option value="0" selected="">Утсан суурь</option>
+                            <option value="1">Овоолсон суурь</option>
+                        </select>
+                    </div>
+                    <div class="calc_row">
+                        <label for="">Суурийн өргөн [b], м</label>
+                        <input type="text" value="1.4" name="b_fund"><span class="mera">м</span> </div>
+                    <div class="calc_row">
+                        <label for="">Суурийн диаметр, м</label>
+                        <input type="text" value="" name="diam_fund" disabled=""><span class="mera">м</span> </div>
+                    <br>
+                    <h4>Зоорийн давхар</h4>
+                    <div class="calc_row">
+                        <label for="">Зоорийн давхар</label>
+                        <select name="podval" onchange="form2(form)">
+                            <option value="0">Байгаа</option>
+                            <option value="1" selected="">Байхгүй</option>
+                        </select>
+                    </div>
+                    <div class="calc_row">
+                        <label for="">Төлөвлөсөн суурийн түвшиний гүн[d], м</label>
+                        <input type="text" value="1.7" name="d_podval"><span class="mera">м</span> </div>
+                    <div class="calc_row">
+                        <label for="">Зоорийн давхар талаас сууриас дээш хөрсний давхрагын зузаан [h<sub>s</sub>], м</label>
+                        <input type="text" value="" name="hs_podval" disabled=""><span class="mera">м</span> </div>
+                    <div class="calc_row">
+                        <label for="">Зоорийн давхарын барилгын зузаан [h<sub>cf</sub>], м</label>
+                        <input type="text" value="" name="hcf_podval" disabled=""><span class="mera">м</span> </div>
+                    <div class="calc_row">
+                        <label for="">Зоорийн давхарын тоцоолсон хувийн жин [y<sub>cf</sub>], кН/м<sup>3</sup></label>
+                        <input type="text" value="" name="ycf_podval" disabled=""><span class="mera">кН/м<sup>3</sup></span> </div>
+                    <div class="calc_row">
+                        <label for="">Төлөвлөсөн түвшинээс подвалын шал хүртэлх гүн [d<sub>b</sub>], м</label>
+                        <input type="text" value="" name="db_podval" disabled=""><span class="mera">м</span> </div>
+                    <br>
+                    <br>
+                    <h4>Бүтцийн зохион байгуулах</h4>
+                    <p>
+                        <label for="shema_id" style="width:300px !important;">Нарийн бүтцийн схемтэй барилга</label>
+                        <input type="checkbox" name="shema" value="0" class="radio" id="shema_id" onclick="form2(form)">
+                    </p>
+                    <div class="calc_row">
+                        <label for="">Барилгын урт  [L], м</label>
+                        <input type="text" value="" name="l_shema" disabled=""><span class="mera">м</span> </div>
+                    <div class="calc_row">
+                        <label for="">Барилгын өндөр [H], м</label>
+                        <input type="text" value="" name="h_shema" disabled=""><span class="mera">м</span> </div>
+                    <br>
+                    <br>
+                    <h3>Газарын тухай үндсэн мэдээлэл</h3>
+                    <div class="calc_row">
+                        <label for="">Суурь хөрсний төрөл</label>
+                        <select name="grunt">
+                            <option value="0">Элсэрхэг жижиг ширхэгтэй элсээс гадна том ширхэгтэй элсээр дүүрсэн </option>
+                            <option value="1" selected="">Нарийн ширхэгтэй элс</option>
+                            <option value="2">Элсэрхэг элс: бага чийгтэй ба чийгтэй</option>
+                            <option value="3">Элсэрхэг элс: усаар ханасан</option>
+                            <option value="4">Шавар болон бүдүүн ширгэтэй шавараар дүүрсэн IL&lt;=0,25</option>
+                            <option value="5">Шавар болон бүдүүн ширгэтэй шавараар дүүрсэн 0,25&lt;=IL&lt;=0,5</option>
+                            <option value="6">Шавар болон бүдүүн ширгэтэй шавараар дүүрсэн IL&gt;0,5</option>
+
+                        </select>
+                    </div>
+                    <br>
+                    <div >
+                        <p>
+                            <label for="znach_grunt_0">Хөрсний бат бэх шинж чанарыг шууд туршилтаар тодорхойлно</label>
+                            <input type="radio" name="znach_grunt" value="0" class="radio" id="znach_grunt_0">
+                        </p>
+                        <p>
+                            <label for="znach_grunt_1">Хөрсний бат бэх шинж чанарыг хүснэгтээс харж тодорхойлно  <a href="http://www.gvozdem.ru/stroim-dom/kalkulyatory/calc_grunt_sopr/file/SP_22-13330-2011-prilozhenie-B.pdf" target="_blank">приложения Б СП 22.13330.2011 (Актуализированная редакция
+                                СНиП 2.02.01-83*)</a></label>
+                            <input type="radio" name="znach_grunt" value="1" class="radio" id="znach_grunt_1" checked="checked">
+                        </p>
+                    </div>
+                    <br>
+                    <div class="calc_row">
+                        <label for="">Сууртай нийлсэн доорх хэсгийн газрын хөрсний барьцалдны тогтоосон хэмжээ [c<sub><small>II</small></sub>], кПа</label>
+                        <input type="text" value="2" name="c2_grunt"><span class="mera">кПа</span> </div>
+                    <div class="calc_row">
+                        <label for="">Хөрсний үндсэн дотоод үрэлтийн өнцөг [&#966;<sub><small>II</small></sub>], °</label>
+                        <input type="text" value="32" name="fi_grunt"><span class="mera">°</span> </div>
+                    <div class="calc_row">
+                        <label for="">Суурийн доорх газрийн хөрсний жингийн дундаж хэмжээ [&#947;<sub><small>II</small></sub>], кН/м<sup>3</sup></label>
+                        <input type="text" value="18" name="y_grunt"><span class="mera">кН/м<sup>3</sup></span> </div>
+                    <div class="calc_row">
+                        <label for="">Суурийн дээрх газрийн хөрсний жингийн дундаж хэмжээ [&#947;'<sub><small>II</small></sub>], кН/м<sup>3</sup></label>
+                        <input type="text" value="17" name="y2_grunt"><span class="mera">кН/м<sup>3</sup></span> </div>
+          <span class="pdf_print">
+            <p id="rez"><a onclick="print(); return false;">Хэвлэх</a></p>
+        </span>
+                </div>
+                <div style="text-align: center" class="no-print">
+                    <button onclick="form1(form)" type="button" style="margin-bottom: 20px" class="btn btn-success">
+                        Тооцоолох
+                    </button>
+                </div>
+            </form>
+
+        <div id="rezultat" style="display:none;">
+            <div class="calc_form">
+                <h2>Үр дүн</h2>
+                <h3>Суурь хөрсний үндсэн эсэргүүцэл [R]</h3>
+                <p><span id="r_formula" class="color_green_bold"></span></p>
+                <br><br>
+                <h3>Өгөгдсөн</h3>
+        <span class="formula">
+        R = (&#947;<sub>c<small>1</small></sub>
+        &#947;<sub>c<small>2</small></sub>/k)
+        [M<sub>&#947;</sub>k<sub>z</sub>b&#947;<sub><small>II</small></sub>
+        + M<sub>q</sub>d<sub><small>1</small></sub>&#947;'<sub><small>II</small></sub>
+        + (M<sub>q</sub> - 1)d<sub><small>b</small></sub>&#947;'<sub><small>II</small></sub>
+        + M<sub>c</sub>c<sub><small>II</small></sub>]</span>
+                <p>Ажилын байрны нөхцөлийн коэффициент 5.4 хүснэгтийн дагуу <span class="formula">[&#947;<sub>c<small>1</small></sub>]</span>: <span class="color_green" id="yc1_formula"></span></p>
+                <p>Ажилын байрны нөхцөлийн коэффициент 5.4 хүснэгтийн дагуу <span class="formula">[&#947;<sub>c<small>2</small></sub>]</span>: <span class="color_green" id="yc2_formula"></span></p>
+                <p>Хэрвээ хөрсний бат бэх шинж чанарыг шууд туршилтаар тогтоосон бол 1 тэй тэнцүү эсвэл хавсралт Б-гийн хүснэгтээр авсан бол к=1,1 (<span class="formula">&#966;<sub><small>II</small></sub></span> и <span class="formula">c<sub><small>II</small></sub></span>) определены непосредственными испытаниями, и k = 1,1, если они приняты по таблицам приложения Б <span class="formula">[k]</span>: <span class="color_green" id="k_formula"></span></p>
+                <p>Суурийн өргөн, м <span class="formula">[b]</span>: <span class="color_green" id="b_formula"></span></p>
+                <p>Суурийн доорх газрийн хөрсний жингийн дундаж хэмжээ, кН/м3 <span class="formula">[&#947;<sub><small>II</small></sub>]</span>: <span class="color_green" id="y_formula"></span></p>
+                <p>Суурийн дээрх газрийн хөрсний жингийн дундаж хэмжээ, кН/м3 <span class="formula">[&#947;'<sub><small>II</small></sub>]</span>: <span class="color_green" id="y2_formula"></span></p>
+                <p>Сууртай нийлсэн доорх хэсгийн газрын хөрсний барьцалдны тогтоосон хэмжээ, кПа <span class="formula">[c<sub><small>II</small></sub>]</span>: <span class="color_green" id="c2_formula"></span></p>
+                <p>Хөрсний үндсэн дотоод үрэлтийн өнцөг <span class="formula">[&#966;<sub><small>II</small></sub>]</span>: <span class="color_green" id="fi_formula"></span></p>
+                <p>5.5 хүснэгтийн дагуу авсан коэффициентууд <span class="formula">[M<sub>&#947;</sub>]</span>: <span class="color_green" id="my_formula"></span></p>
+                <p>5.5 хүснэгтийн дагуу авсан коэффициентууд <span class="formula">[M<sub>q</sub>]</span>: <span class="color_green" id="mq_formula"></span></p>
+                <p>5.5 хүснэгтийн дагуу авсан коэффициентууд <span class="formula">[M<sub>c</sub>]</span>: <span class="color_green" id="mc_formula"></span></p>
+                <p>Хэрвээ b &lt; 10 м байвал коэффициентийг 1-тэй тэнцүү авна; хэрвээ b &gt;= 10 м (энд z0 = 8 м) байвал kz= z0/b+ 0,2 гэж авна.<span class="formula">[k<sub>z</sub>]</span>: <span class="color_green" id="kz_formula"></span></p>
+                <p>Суурь тавих гүн ,м, төвлөсөн түвшингээс зооргүй бүтэц хүртэл эсвэл зоорийн давхраас гадна болон дотор суурийн түвшин хүртэлх одоогин гун, (5.8) томъёоний дагуу <span class="formula">[d<sub><small>1</small></sub>]</span>: <span class="color_green" id="d1_formula"></span></p>
+		<span id="d1_rezultat">
+		<p style="padding-left: 30px;"><span class="formula">d<sub><small>1</small></sub> = h<sub>s</sub> + h<sub>cf</sub>*&#947;<sub>cf</sub> / &#947;'<sub><small>II</small></sub></span>: <span class="color_green" id="d1_formula"></span></p>
+        <p style="padding-left: 30px;">Зоорийн давхар талаас сууриас дээшх газрын хөрсний түвшингийн зузаан, м <span class="formula">[h<sub>s</sub>]</span>: <span class="color_green" id="hs_formula"></span></p>
+        <p style="padding-left: 30px;">Зоорийн давхарын барилгын зузаан, м <span class="formula">[h<sub>cf</sub>]</span>: <span class="color_green" id="hcf_formula"></span></p>
+        <p style="padding-left: 30px;">Зоорийн давхарын тоцоолсон хувийн жин, кН/м<sup>3</sup> <span class="formula">[&#947;<sub>cf</sub>]</span>: <span class="color_green" id="ycf_formula"></span></p>
+        <p style="padding-left: 30px;"><span class="formula"><span id="d1_all_formula"></span></span></p>
+		</span>
+                <p>Төлөвлөсөн түвшинээс подвалын шал хүртэлх гүн, м <span class="formula">[d<sub><small>b</small></sub>]</span>: <span class="color_green" id="db_formula"></span></p>
+                <br>
+                <p>Тооцоолж гаргасан суурь хөрсний үндсэн эсэргүүцэл <span class="formula">[R]</span>:</p>
+                <p><span class="formula"><span id="r_all_formula"></span></span></p>
+                <br>
+        <span class="pdf_print">
+            <p><a onclick="print(); return false;">Хэвлэх</a></p>
+        </span>
+            </div>
+        </div>
+    </div>
+    </div>
+
+</div>
+
+
+
+
+<script>
+
+    function form2(form) {
+        //Фундамент селект
+        var tip_fund_val=parseInt(form.tip_fund.value);
+        var b_fund_val_val=parseInt(form.b_fund.value);
+        var diam_fund_val=parseInt(form.diam_fund.value);
+        if(tip_fund_val==0){
+            form.b_fund.value=1.4;
+            form.b_fund.disabled=false;
+            form.diam_fund.value="";
+            form.diam_fund.disabled=true;
+        } else {
+            form.b_fund.value="";
+            form.b_fund.disabled=true;
+            form.diam_fund.value=0.6;
+            form.diam_fund.disabled=false;
+        }
+        //Подвал селект
+        var podval_val=parseInt(form.podval.value);
+        if(podval_val==1){
+            form.d_podval.disabled=false;
+            form.hs_podval.disabled=true;
+            form.hcf_podval.disabled=true;
+            form.ycf_podval.disabled=true;
+            form.db_podval.disabled=true;
+            form.d_podval.value=1.7;
+            form.hs_podval.value="";
+            form.hcf_podval.value="";
+            form.ycf_podval.value="";
+            form.db_podval.value="";
+        } else {
+            form.d_podval.disabled=true;
+            form.hs_podval.disabled=false;
+            form.hcf_podval.disabled=false;
+            form.ycf_podval.disabled=false;
+            form.db_podval.disabled=false;
+            form.d_podval.value="";
+            form.hs_podval.value=0.3;
+            form.hcf_podval.value=0.2;
+            form.ycf_podval.value=23;
+            form.db_podval.value=1.2;
+        }
+        //Конструктивная схема сооружения
+        if(document.getElementById("shema_id").checked==true){
+            form.l_shema.value=45;
+            form.h_shema.value=30;
+            form.l_shema.disabled=false;
+            form.h_shema.disabled=false;
+        } else {
+            form.l_shema.value="";
+            form.h_shema.value="";
+            form.l_shema.disabled=true;
+            form.h_shema.disabled=true;
+        }
+        /*Прочностные характеристики грунта
+        if(document.getElementById("znach_grunt_0").checked==true){
+            form.c2_grunt.disabled=false;
+            form.fi_grunt.disabled=false;
+        }
+        if(document.getElementById("znach_grunt_1").checked==true){
+            form.c2_grunt.disabled=true;
+            form.fi_grunt.disabled=true;
+        }*/
+    }
+    //
+    //
+    //
+    //
+    function form1(form){
+        //
+        //Начальные переменные
+        //select
+        var tip_fund_val=parseInt(form.tip_fund.value);
+        var podval_val=parseInt(form.podval.value);
+        //input
+        var b_fund_val=parseFloat(form.b_fund.value.replace(",","."));
+        var diam_fund_val=parseFloat(form.diam_fund.value.replace(",","."));
+        var d_podval_val=parseFloat(form.d_podval.value.replace(",","."));
+        var hs_podval_val=parseFloat(form.hs_podval.value.replace(",","."));
+        var hcf_podval_val=parseFloat(form.hcf_podval.value.replace(",","."));
+        var ycf_podval_val=parseFloat(form.ycf_podval.value.replace(",","."));
+        var db_podval_val=parseFloat(form.db_podval.value.replace(",","."));
+        var l_shema_val=parseFloat(form.l_shema.value.replace(",","."));
+        var h_shema_val=parseFloat(form.h_shema.value.replace(",","."));
+        var grunt_val=parseFloat(form.grunt.value.replace(",","."));
+        var c2_grunt_val=parseFloat(form.c2_grunt.value.replace(",","."));
+        var fi_grunt_val=parseFloat(form.fi_grunt.value.replace(",","."));
+        var y_grunt_val=parseFloat(form.y_grunt.value.replace(",","."));
+        var y2_grunt_val=parseFloat(form.y2_grunt.value.replace(",","."));
+        //
+        //
+        //Для свайного фундамента
+        if(tip_fund_val==1){b_fund_val=(Math.sqrt(diam_fund_val*diam_fund_val*3.14/4)).toFixed(2);}
+        //Коэффициенты yc1, yc2
+        var yc1, yc2;
+        var lh_shema;
+        if(document.getElementById("shema_id").checked==true){
+            lh_shema=(l_shema_val/h_shema_val).toFixed(1);
+        } else {lh_shema=0}
+        switch(grunt_val){
+            case 0: yc1=1.4; yc2=1.2; if(lh_shema==1.5 || lh_shema<1.5){yc2=1.4;} if(lh_shema==0){yc2=1;} break;
+            case 1: yc1=1.3; yc2=1.1; if(lh_shema==1.5 || lh_shema<1.5){yc2=1.3;} if(lh_shema==0){yc2=1;} break;
+            case 2: yc1=1.25; yc2=1; if(lh_shema==1.5 || lh_shema<1.5){yc2=1.2;} if(lh_shema==0){yc2=1;} break;
+            case 3: yc1=1.1; yc2=1; if(lh_shema==1.5 || lh_shema<1.5){yc2=1.2;} if(lh_shema==0){yc2=1;} break;
+            case 4: yc1=1.25; yc2=1; if(lh_shema==1.5 || lh_shema<1.5){yc2=1.1;} if(lh_shema==0){yc2=1;} break;
+            case 5: yc1=1.2; yc2=1; if(lh_shema==1.5 || lh_shema<1.5){yc2=1.1;} if(lh_shema==0){yc2=1;} break;
+            case 6: yc1=1.1; yc2=1; if(lh_shema==1.5 || lh_shema<1.5){yc2=1;} if(lh_shema==0){yc2=1;} break;
+        }
+        document.getElementById("yc1_formula").textContent=yc1;
+        document.getElementById("yc2_formula").textContent=yc2;
+        //Коэффициенты k
+        var k;
+        if(document.getElementById("znach_grunt_0").checked==true){
+            k=1;
+        } else {k=1.1}
+        document.getElementById("k_formula").textContent=k;
+        //Коэффициенты My, Mq, Mc
+        var my, mq, mc;
+        var fi_val=parseInt(form.fi_grunt.value);
+        switch(fi_val){
+            case 0: my=0; mq=1; mc=3.14; break;
+            case 1: my=0.01; mq=1.06; mc=3.23; break;
+            case 2: my=0.03; mq=1.12; mc=3.32; break;
+            case 3: my=0.04; mq=1.18; mc=3.41; break;
+            case 4: my=0.06; mq=1.25; mc=3.51; break;
+            case 5: my=0.08; mq=1.32; mc=3.61; break;
+            case 6: my=0.1; mq=1.39; mc=3.71; break;
+            case 7: my=0.12; mq=1.47; mc=3.82; break;
+            case 8: my=0.14; mq=1.55; mc=3.93; break;
+            case 9: my=0.16; mq=1.64; mc=4.05; break;
+            case 10: my=0.18; mq=1.73; mc=4.17; break;
+            case 11: my=0.21; mq=1.83; mc=4.29; break;
+            case 12: my=0.23; mq=1.94; mc=4.42; break;
+            case 13: my=0.26; mq=2.05; mc=4.55; break;
+            case 14: my=0.29; mq=2.17; mc=4.69; break;
+            case 15: my=0.32; mq=2.3; mc=4.84; break;
+            case 16: my=0.36; mq=2.43; mc=4.99; break;
+            case 17: my=0.39; mq=2.57; mc=5.15; break;
+            case 18: my=0.43; mq=2.73; mc=5.31; break;
+            case 19: my=0.47; mq=2.89; mc=5.48; break;
+            case 20: my=0.51; mq=3.06; mc=5.66; break;
+            case 21: my=0.56; mq=3.24; mc=5.84; break;
+            case 22: my=0.61; mq=3.44; mc=6.04; break;
+            case 23: my=0.66; mq=3.65; mc=6.24; break;
+            case 24: my=0.72; mq=3.87; mc=6.45; break;
+            case 25: my=0.78; mq=4.11; mc=6.67; break;
+            case 26: my=0.84; mq=4.37; mc=6.9; break;
+            case 27: my=0.91; mq=4.64; mc=7.14; break;
+            case 28: my=0.98; mq=4.93; mc=7.4; break;
+            case 29: my=1.06; mq=5.25; mc=7.67; break;
+            case 30: my=1.15; mq=5.59; mc=7.95; break;
+            case 31: my=1.24; mq=5.95; mc=8.24; break;
+            case 32: my=1.34; mq=6.34; mc=8.55; break;
+            case 33: my=1.44; mq=6.76; mc=8.88; break;
+            case 34: my=1.55; mq=7.22; mc=9.22; break;
+            case 35: my=1.68; mq=7.71; mc=9.58; break;
+            case 36: my=1.81; mq=8.24; mc=9.97; break;
+            case 37: my=1.95; mq=8.81; mc=10.37; break;
+            case 38: my=2.11; mq=9.44; mc=10.8; break;
+            case 39: my=2.28; mq=10.11; mc=11.25; break;
+            case 40: my=2.46; mq=10.85; mc=11.73; break;
+            case 41: my=2.66; mq=11.64; mc=12.24; break;
+            case 42: my=2.88; mq=12.51; mc=12.79; break;
+            case 43: my=3.12; mq=13.46; mc=13.37; break;
+            case 44: my=3.38; mq=14.50; mc=13.98; break;
+            case 45: my=3.66; mq=15.64; mc=14.64; break;
+        }
+        document.getElementById("fi_formula").textContent=fi_grunt_val;
+        document.getElementById("my_formula").textContent=my;
+        document.getElementById("mq_formula").textContent=mq;
+        document.getElementById("mc_formula").textContent=mc;
+        //Коэффициенты kz
+        var kz;
+        if(b_fund_val<10){kz=1;} else{kz=(8/b_fund_val+0.2).toFixed(2)}
+        document.getElementById("kz_formula").textContent=kz;
+        //Глубина заложения фундамента d1, hs, hcf, ycf
+        var d1;
+        if(podval_val==1){d1=d_podval_val} else{
+            d1=(hs_podval_val+hcf_podval_val*ycf_podval_val/y2_grunt_val).toFixed(2);
+        }
+        document.getElementById("d1_formula").textContent=d1;
+        document.getElementById("hs_formula").textContent=hs_podval_val;
+        document.getElementById("hcf_formula").textContent=hcf_podval_val;
+        document.getElementById("ycf_formula").textContent=ycf_podval_val;
+        document.getElementById("d1_all_formula").textContent="d1"+"="+hs_podval_val+"+"+hcf_podval_val+"*"+ycf_podval_val+"/"+y2_grunt_val+"="+d1;
+        if(podval_val==1){document.getElementById("d1_rezultat").style.display="none";}
+        else {document.getElementById("d1_rezultat").style.display="block";}
+        //db
+        if(podval_val==1){db_podval_val=0;}
+        if(db_podval_val>2){db_podval_val=2}
+        document.getElementById("db_formula").textContent=db_podval_val;
+        //Ширина подошвы фундамента b
+        document.getElementById("b_formula").textContent=b_fund_val;
+        //Осредненное значение y
+        document.getElementById("y_formula").textContent=y_grunt_val;
+        //Осредненное значение y2
+        document.getElementById("y2_formula").textContent=y2_grunt_val;
+        //Осредненное значение c2
+        document.getElementById("c2_formula").textContent=c2_grunt_val;
+        //Расчетное сопротивление грунта R
+        var r=(yc1*yc2/k*(my*kz*b_fund_val*y_grunt_val+mq*d1*y2_grunt_val+(mq-1)*db_podval_val*y2_grunt_val+mc*c2_grunt_val)).toFixed(2);
+        var r1=(r*0.101972).toFixed(2);
+        var r2=(r1/10).toFixed(1);
+        //
+        document.getElementById("r_formula").textContent="R"+" "+"= "+r+" "+"кПа"+" "+"="+" "+r1+" "+"т/м2"+" "+"="+" "+r2+" "+"кг/см2";
+        document.getElementById("r_all_formula").textContent="R"+"="+yc1+"*"+yc2+"/"
+        +k+"*"+"["+my+"*"+kz+"*"+b_fund_val+"*"+y_grunt_val+"+"+mq+"*"+d1+"*"
+        +y2_grunt_val+"+"+"("+mq+"-"+"1"+")"+"*"+db_podval_val+"*"+y2_grunt_val+"+"+mc+"*"+c2_grunt_val+"]"+"="+r;
+        //Показать результаты
+        document.getElementById("rezultat").style.display="block";
+        location.href="#rez";
+    }
+
+
+</script>

@@ -1,0 +1,217 @@
+<script>
+    function choosenAktStyle(sid) {
+        $.ajax({
+            type: "POST",
+            data: {sid: sid,ftype:${ftype},aid:${id},fid:${fid}},
+            url: "/aktBlank",
+            beforeSend: function () {
+                //$("div#modalAkt").modal('show');
+                $("div#modalAkt").find("div.modal-content").html("<div style='width:100%; text-align: center'><img src='/public/images/activity-indicator.gif'/></div>");
+            }
+        }).success(function (data) {
+                var modalDiv = $("div#modalAkt");
+                modalDiv.find('#akt').html("");
+                modalDiv.find("div.modal-content").html(data);
+        });
+    }
+
+    function cancelled() {
+        var modalDiv = $("div#modalAkt");
+        modalDiv.modal('hide');
+        modalDiv.find('#akt').html("");
+    }
+</script>
+
+<div class="modal-header bg-dark" style="height: 50px;!important;">
+    <span style="color: white; font-weight: 500; font-size: 16px;">Хавсралтын загварыг сонгоно уу!!!</span>
+    <i class="fa fa-times" onclick="cancelled()" data-dismiss="modal" aria-hidden="true" style="float:right; margin-right: 10px;"></i>
+</div>
+<div class="modal-body">
+    #{if aktStyles.size()>0}
+        #{if aktStyles.size()==1} <div style="width: 430px;"> #{/if}
+        #{else } <div style="width: 850px;"> #{/else}
+            #{if ftype==1}
+                <center>
+                    Одоо байгаа хавсралтын загвар!!!
+                    <div style="width: 400px;height: 450px;border:solid 1px slategrey;margin: 20px">
+                        <div class="thumbnail">
+                            <div class="overlay">
+                                <div class="thumbnail-actions">
+                                    <a href="#" onclick="choosenAktStyle(${akt.aktStyle.id})" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-check"></i></a>
+                                </div>
+                            </div>
+                            <table style="background-color: white;">
+                                <tr>
+                                    <td colspan="2">
+                                        <img src="${akt.aktStyle.logoAgent}" style = "display:inline-block;float:left;width: 100px;height:56px ">
+                                        <center style = "display:inline-block; font-size: xx-small;width: 198px;height:56px;padding-top:10px;" >${akt.aktStyle.name}</center>
+                                        <img src="${akt.aktStyle.logoClient}" style = "display:inline-block;float:right;width: 100px;height:56px" >
+                                    </td>
+                                </tr>
+
+                                #{if akt.aktStyle.aktType.id==1}
+                                    <tr>
+                                        <td style="padding: 10px" colspan="2">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${akt.aktStyle.aktType.id}.jpg" width="378px" height="322px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                #{/if}
+                                #{if akt.aktStyle.aktType.id==2}
+                                    <tr>
+                                        <td style="padding:10px" colspan="2" >
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${akt.aktStyle.aktType.id}_1.jpg" width="378px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:10px" colspan="2" >
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${akt.aktStyle.aktType.id}_2.jpg" width="378px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                #{/if}
+                                #{if akt.aktStyle.aktType.id==3}
+                                    <tr>
+                                        <td style="padding:10px">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${akt.aktStyle.aktType.id}_1.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                        <td style="padding:10px">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${akt.aktStyle.aktType.id}_2.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:10px">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${akt.aktStyle.aktType.id}_3.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                        <td style="padding:10px" >
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${akt.aktStyle.aktType.id}_4.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                #{/if}
+
+                                <tr>
+                                    <td style="font-size: xx-small;padding: 10px;width: 170px;height: 50px;">
+                                        <div style="border:solid 1px black;">
+                                            <p style="display: inline-block;float: left">${akt.aktStyle.agentStaffPos}:</p>
+                                            <p style="display: inline-block;float: right">/${akt.aktStyle.agentStaffName}/</p>
+                                        </div>
+                                    </td>
+                                    <td style="font-size: xx-small;padding: 3px;width: 170px;height: 50px;">
+                                        <div style="border:solid 1px black;">
+                                            <p style="display: inline-block;float: left">${akt.aktStyle.clientStaffPos}:</p>
+                                            <p style="display: inline-block;float: right">/${akt.aktStyle.clientStaffName}/</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </center>
+            #{/if}
+            <p>Доорх хавсралтын загваруудаас сонгоно уу!!!</p>
+            #{list items:aktStyles,as:'aktstyle'}
+                #{if ftype==1 && aktstyle.id==akt.aktStyle.id}
+                #{/if}
+                #{else }
+                    <div style="display:inline-block;width: 400px;height: 450px;border:solid 1px slategrey;margin: 10px">
+                        <div class="thumbnail">
+                            <div class="overlay">
+                                <div class="thumbnail-actions">
+                                    <a href="#" onclick="choosenAktStyle(${aktstyle.id})" class="btn btn-default btn-icon btn-rounded magnific" title=""><i class="fa fa-check"></i></a>
+                                </div>
+                            </div>
+                            <table style="background-color: white;">
+                                <tr>
+                                    <td colspan="2">
+                                        <img src="${aktstyle.logoAgent}" style = "display:inline-block;float:left;width: 100px;height:56px ">
+                                        <center style = "display:inline-block; font-size: xx-small;width: 198px;height:56px;padding-top:10px;" >${aktstyle.name}</center>
+                                        <img src="${aktstyle.logoClient}" style = "display:inline-block;float:right;width: 100px;height:56px" >
+                                    </td>
+                                </tr>
+
+                                #{if aktstyle.aktType.id==1}
+                                    <tr>
+                                        <td style="padding: 10px" colspan="2">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${aktstyle.aktType.id}.jpg" width="378px" height="322px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                #{/if}
+                                #{if aktstyle.aktType.id==2}
+                                    <tr>
+                                        <td style="padding:10px" colspan="2" >
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${aktstyle.aktType.id}_1.jpg" width="378px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:10px" colspan="2" >
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${aktstyle.aktType.id}_2.jpg" width="378px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                #{/if}
+                                #{if aktstyle.aktType.id==3}
+                                    <tr>
+                                        <td style="padding:10px">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${aktstyle.aktType.id}_1.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                        <td style="padding:10px">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${aktstyle.aktType.id}_2.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding:10px">
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${aktstyle.aktType.id}_3.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                        <td style="padding:10px" >
+                                            <center>
+                                                <img src="/public/images/akt/akt_image${aktstyle.aktType.id}_4.jpg" width="170px" height="151px">
+                                            </center>
+                                        </td>
+                                    </tr>
+                                #{/if}
+
+                                <tr>
+                                    <td style="font-size: xx-small;padding: 10px;width: 170px;height: 50px;">
+                                        <div style="border:solid 1px black;">
+                                            <p style="display: inline-block;float: left">${aktstyle.agentStaffPos}:</p>
+                                            <p style="display: inline-block;float: right">/${aktstyle.agentStaffName}/</p>
+                                        </div>
+                                    </td>
+                                    <td style="font-size: xx-small;padding: 3px;width: 170px;height: 50px;">
+                                        <div style="border:solid 1px black;">
+                                            <p style="display: inline-block;float: left">${aktstyle.clientStaffPos}:</p>
+                                            <p style="display: inline-block;float: right">/${aktstyle.clientStaffName}/</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                #{/else}
+            #{/list}
+        </div>
+    #{/if}
+</div>

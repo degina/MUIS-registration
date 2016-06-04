@@ -1,0 +1,18 @@
+<li class="sortable col-md-12 m-b-10 bd-3 bg-opacity-20 fade in ui-sortable" style="padding: 15px 10px 10px;">
+    <a tid="${toDoList.id}" style="cursor: pointer" class="deleteTodo pull-right c-white p-l-10" data-dismiss="alert"
+       data-original-title="Устгах"><i
+            class="fa fa-times f-18"></i></a>
+
+    <div class="sortable-item">
+        <div class="pos-rel">
+            <div class=" ui-checkbox"><input tabindex="13" type="checkbox"
+                                             class="pull-left task-item" ${toDoList.done?'checked':''}
+                                             tid="${toDoList.id}"></div>
+        </div>
+        <div class="p-l-40 pull-left">${toDoList.todo}</div>
+        <div class="reminderTag"
+             style="font-size: 10px;position: absolute;right: 10px;bottom: 0">#{if toDoList.reminder}<i
+                class="glyph-icon flaticon-notifications"></i> ${toDoList.reminderDate.format('yyyy-MM-dd HH:mm')}#{/if}
+        </div>
+    </div>
+</li>

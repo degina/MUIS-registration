@@ -1,0 +1,40 @@
+#{Dashboard-config /}
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cover Photo Example</title>
+  <link rel="stylesheet" href="./assets/plugins/spadin-coverphoto-9911450/build/coverphoto.css">
+  <script src="./assets/plugins/spadin-coverphoto-9911450/libs/jquery/jquery.js"></script>
+  <script src="./assets/plugins/spadin-coverphoto-9911450/libs/jquery/jquery-ui.custom.min.js"></script>
+  <script src="./assets/plugins/spadin-coverphoto-9911450/build/coverphoto.js"></script>
+
+  <style type="text/css">
+    .coverphoto, .output {
+      width: 1024px;
+      height: 200px;
+      border: 1px solid black;
+      margin: 10px auto;
+    }
+  </style>
+
+  <script type="text/javascript">
+    $(function() {
+      $(".coverphoto").CoverPhoto({
+        currentImage: 'images/funny.jpg',
+        editable: true
+      });
+      $(".coverphoto").bind('coverPhotoUpdated', function(evt, dataUrl) {
+        $(".output").empty();
+        $("<img>").attr("src", dataUrl).appendTo(".output");
+      });
+    });
+  </script>
+</head>
+<body>
+  <br><br><br><br><br><br>
+  <div class="coverphoto"></div>
+  <div class="output">
+    <h1>The output of your cover photo will appear here.</h1>
+  </div>
+</body>
+</html>

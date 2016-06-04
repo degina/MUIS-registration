@@ -1,0 +1,15 @@
+#{list items:assignRels,as:'assign'}
+<div id=fi-s${assign.id}  uid="u-${assign.user.id}" class="assinedUsers" style="border-bottom: 1px solid lightgrey">
+    <div id="${assign.id}" style="width: 250px;display: inline-block" uid="${assign.user.id}">
+    ${assign.user.toString()}
+    </div>
+    #{if controllers.CompanyConf.type==1}
+        <input id=0 type="text" style="width: 70px;height: 23px"
+               value="${controllers.Functions.getFloatFormat(assign.hours,1)}"/>
+        <span class="measure" style="margin-right: 2px">цаг</span>
+    #{/if}
+    #{else }
+        <input type="hidden" style="width: 70px;height: 23px" value="0"/>
+    #{/else}
+    <span class='teamworkIcon delAssig' style='cursor: pointer' onclick='removeUser("${assign.id}",1)'>d</span></div>
+#{/list}

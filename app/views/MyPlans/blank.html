@@ -1,0 +1,715 @@
+#{extends 'CRUD/layout.html' /}
+#{alertMessages /}
+#{set title: 'Миний төлөвлөгөө'/}
+#{myPlan-blank-config /}
+<style>
+    .ui-checkbox, .ui-radio {
+        margin: 0;
+        position: relative;
+    }
+
+    .btn {
+        font-size: 13px;
+        font-weight: 400;
+        padding: 5px 20px;
+    }
+
+    .ui-page-theme-a .ui-btn:hover {
+        background-color: transparent;
+    }
+
+    .badge {
+        z-index: 1001;
+        position: relative;
+        display: inline-block;
+        min-width: 10px;
+        margin-top: 1px;
+        padding: 2px 4px;
+        font-size: 9px;
+        font-weight: bold;
+        line-height: 1;
+        color: #fff;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        background-color: #999;
+        border-radius: 3px;
+    }
+
+    div#project-task-modal table#tableDetails {
+        border: none;
+    }
+
+    div#show-weather-modal .table, div#project-task-modal .table {
+        border: 1px solid #ddd;
+        margin-bottom: 0;
+    }
+
+    div#show-weather-modal .table > thead > tr > th, div#project-task-modal .table > thead > tr > th {
+        vertical-align: middle;
+        text-transform: none;
+        font-size: 13px;
+        padding: 4px 8px;
+    }
+
+    div#show-weather-modal .table > tbody > tr > td, div#project-task-moda .table > tbody > tr > td {
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    div#show-weather-modal .table-bordered thead th, div#project-task-moda .table-bordered thead th {
+        background-color: #EFEFEF;
+    }
+
+    .bg-gray {
+        background-color: #b6b6b6 !important;
+        color: #000 !important;
+        border: 1px solid #b6b6b6;
+    }
+
+    .bg-gray-light {
+        background-color: #ececec !important;
+        color: #000 !important;
+        border: 1px solid #ececec;
+    }
+
+    .bg-red {
+        background-color: #c75757 !important;
+        color: #fff !important;
+        border: 1px solid #c75757;
+    }
+
+    .bg-white {
+        background-color: #fff !important;
+        color: #000 !important
+    }
+
+    .bg-green {
+        background-color: #18a689 !important;
+        color: #fff !important;
+        border: 1px solid #18a689;
+    }
+
+    .bg-blue {
+        background-color: #0090d9 !important;
+        color: #fff !important;
+        border: 1px solid #0090d9;
+    }
+
+    .bg-orange {
+        background-color: #f27835 !important;
+        color: #fff !important;
+        border: 1px solid #f27835;
+    }
+
+    .bg-purple {
+        background-color: #b57ee0 !important;
+        color: #fff !important;
+        border: 1px solid #b57ee0;
+    }
+
+    .bg-bblue {
+        background-color: #3a87ad !important;
+        color: #fff !important;
+        border: 1px solid #3a87ad;
+    }
+
+    .panel-heading .panel-title > a.collapsed:before {
+        font-family: FontAwesome;
+        content: "\f067";
+        float: left;
+        margin-right: 10px;
+        color: #88a5c0;
+    }
+
+    .panel-heading a:before {
+        font-family: FontAwesome;
+        content: "\f068";
+        float: left;
+        color: grey;
+        margin-right: 10px;
+    }
+
+    .panel-heading .panel-title > a.collapsed:after {
+        content: close-quote;
+    }
+
+    .panel-body {
+        padding: 10px;
+    }
+
+    button.delete:hover {
+        background-color: #c75757;
+        color: #fff !important
+    }
+
+    button.add:hover {
+        background-color: #18a689;
+        color: #fff !important
+    }
+    div.fc-content{
+        cursor: pointer;
+    }
+    .fc-time-grid-container {
+        height: 884px!important;
+    }
+    .fc-event{
+        cursor: pointer;
+    }
+</style>
+<div id="main-content">
+    <div class="modal fade" id="project-task-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header text-center p-10">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title"><strong>График төлөвлөгөөт ажил</strong></h4>
+                </div>
+                <div class="modal-body" id="project-task-modal-body"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="buttonCreateReminderProject"><i
+                            class='fa fa-check'></i> Хадгалах
+                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END MODAL -->
+    <div class="modal fade" id="show-weather-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-red text-center">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title text-center"><strong>Ажлын саатал</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <table class="table table-bordered" id="tableWeather">
+                                <thead>
+                                <th style="width: 25px;">#</th>
+                                <th style="width: 100px;">Ажил</th>
+                                <th style="width: 100px;">Нөхцөл</th>
+                                <th colspan="2">Эхэлсэн</th>
+                                <th colspan="2">Дууссан</th>
+                                <th>Тэмдэглэл</th>
+                                </thead>
+                                <tbody id="tbodyWeatherShowBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="myPlan-modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="bg-bblue modal-header text-center p-10">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title"><strong>Ажил төлөвлөх</strong></h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class='col-md-12'>
+                            <div class='form-group'>
+                                <label class='control-label'>Ажлын нэр</label>
+                                <input class='form-control' placeholder='Ажлын нэр' type='text' name='title'/>
+                            </div>
+                            <div class='form-group'>
+                                <label class='control-label'>Товч тайлбар</label>
+                                <textarea class='form-control' placeholder='ажлын товч тайлбар' type='text'
+                                          name='description'></textarea>
+                            </div>
+
+                            <div class="form-group m-b-0">
+                                <label class='control-label col-md-3'
+                                       style="padding-left: 0; padding-right: 0; margin-top: 8px;min-height: 36px;"><i
+                                        class="fa fa-clock-o f-18 c-blue"></i> Надад сануул:</label>
+
+                                <div class="col-md-3" style="margin-top: 8px;">
+                                    <label>
+                                        <input style="display:none " type="checkbox" id="checkBoxReminder">
+                                    </label>
+                                </div>
+                                <div id="divReminderDate" class="input-group col-md-6" style="display: none">
+                                        <span class="input-group-addon bg-white">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                    <input id="calendarPickerReminder" type="text" class="form-control"
+                                           placeholder="Сануулах огноо...">
+                                </div>
+                            </div>
+                            <div class="col-md-12 m-t-15">
+                                <div class="row">
+                                    <label class='control-label col-md-3'
+                                           style="padding-left: 0; padding-right: 0; min-height: 36px;"><i
+                                            class="fa fa-link f-18 c-blue"></i> Ажилд холбох:</label>
+
+                                    <div class="col-md-3" style="margin-top: 2px;">
+                                        <label>
+                                            <input style="display:none " type="checkbox" id="checkBoxTaskRel">
+                                        </label>
+                                    </div>
+                                    <div id="divTaskRel" class="col-md-6" style="display: none">
+                                        <div class="row">
+                                            <button class="btn btn-default" type="button"
+                                                    style="width: 100%;text-align: left;" data-toggle="modal" data-target="#divSelTask"
+                                                    id="selectChooseTaskButton">Ажил сонгох</button>
+                                            <div id="selectTaskTag"></div>
+                                            <input id="selectTaskInputHidden" type="hidden" value="-1"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="buttonCreateMyPlan">Үүсгэх</button>
+                    <button type="button" class="btn btn-danger" id="buttonDeleteMyPlan" data-dismiss="modal">Устгах
+                    </button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="widget-fullwidth row">
+        <div class="col-md-12 p-20" style="padding-bottom: 0!important;">
+            <div class="col-md-3">
+                <i class="fa fa-square" style="color:#18a689;"></i> &nbsp; Хийгдсэн ажил &nbsp; <br/>
+                <i class="fa fa-square" style="color:#0090d9;"></i> &nbsp; Төслийн ажил &nbsp;
+            </div>
+            <div class="col-md-3">
+                <i class="fa fa-square" style="color: #3a87ad;"></i> &nbsp; Хувийн төлөвлөгөө &nbsp; <br/>
+                <i class="fa fa-square" style="color: #b57ee0;"></i> &nbsp; Хурал &nbsp;
+            </div>
+            <div class="col-md-3">
+                <i class="fa fa-square" style="color:#c75757;"></i> &nbsp; Ажлын саатал &nbsp; <br/>
+            </div>
+        </div>
+        <div class="col-md-12 p-20 no-bd">
+            <div class="widget bg-white">
+                <div class="widget-body">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form action="" id="formMyPlan" method="get" accept-charset="utf-8"></form>
+#{alertMessages /}
+#{selectTasks uid:"${user.id}", title:'Ажил сонгох' ,projectAll:'1', percent:'101'/}
+#{set activeMenu: 'MyPlans'/}
+#{set activeMenuSub: 'MyPlan'/}
+<!-- END MAIN CONTENT -->
+<script>
+    var calendar;
+    var currentTaskId = 0;
+    var deleteEventsId = [];
+    function runCalendar() {
+        var $myPlanModal = $('#myPlan-modal');
+        calendar = $('#calendar').fullCalendar({
+            slotDuration: '00:15:00', /* If we want to split day time each 15minutes */
+            scrollTime: '07:00:00',
+            allDayText: 'Өдрийн\nтурш',
+            minTime: '00:00:00',
+            maxTime: '24:00:00',
+            monthNames: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+            monthNamesShort: ["1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар"],
+            dayNames: ["Ням","Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба"],
+            dayNamesShort: ["Ням", "Дав", "Мяг", "Лха", "Пүр", "Баа", "Бям"],
+            currentText: "Өнөөдөр",
+            dayNamesMin:["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+            displayEventEnd: true,
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            titleFormat: {
+                month: 'YYYY MMMM',
+                week: 'YYYY MMMM D',
+                day: 'YYYY MMMM D'
+            },
+            axisFormat: 'H(:mm) цаг',
+            timeFormat: { // for event elements
+                month: 'H:mm',
+                'default': 'H:mm'
+
+            },
+            buttonText: {
+                prevYear: "өмнөх жил",
+                nextYear: "дараагын жил",
+                today: 'өнөөдөр',
+                month: 'сар',
+                week: '7 хоног',
+                day: 'өдөр'
+            },
+            forceEventDuration: true,
+            editable: true,
+            selectable: true,
+            eventResize: function (event, delta, revertFunc) {
+                event.className = "bg-gray";
+                calendar.fullCalendar('updateEvent', event);
+                saveMyPlan(event,"new");
+            },
+            eventRender: function (event, element) {
+                // console.log(element);
+                $(element).tooltip({title: event.description});
+                if (event.type == "ganttTask" || event.type =="myTask") {
+                    if (event.delay != "") {
+                        $(element).find('span.fc-title').after("<span class='badge badge-dark pull-right'> " + (parseInt(event.delay) > 0 ? "+" : "") + event.delay + " өдөр</span>");
+                    }
+                }
+                if (event.reminderDate != "" && event.reminderDate != null) {
+                    $(element).find('span.fc-title').before("<i class='fa fa-clock-o f-9'></i> ");
+                }
+            },
+            eventDrop: function (event, delta, revertFunc) {
+                if (event.start < ${tod} ) {
+                    revertFunc();
+                }
+                else {
+                    event.className = "bg-gray";
+                    calendar.fullCalendar('updateEvent', event);
+                }
+                // console.log(event.title + " start " + event.start + " end " + event.end);
+            },
+            eventClick: function (calEvent, jsEvent, view) {
+                if (calEvent.className == "bg-gray" || calEvent.className == "bg-bblue") {
+                    $myPlanModal.modal({
+                        backdrop: 'static'
+                    });
+                    currentTaskId = 't' + calEvent.taskId;
+                    var title = $myPlanModal.find("input[name='title']");
+                    var description = $myPlanModal.find("textarea[name='description']");
+                    var reminderDate = $myPlanModal.find("input[id='calendarPickerReminder']");
+                    var buttonDelete = $myPlanModal.find("button[id='buttonDeleteMyPlan']");
+                    title.val(calEvent.taskName);
+                    description.val(calEvent.description);
+                    if (calEvent.reminderDate != "" && calEvent.reminderDate != null) {
+                        $myPlanModal.find("input[id='checkBoxReminder']").prop('checked', true).checkboxradio("refresh");
+                        $myPlanModal.find("div#divReminderDate").show();
+                        console.log(calEvent.reminderDate);
+                        reminderDate.val(calEvent.reminderDate);
+                    }
+                    if (calEvent.taskRelId > 0 && calEvent.taskRelId != null) {
+                        $myPlanModal.find("input[id='checkBoxTaskRel']").prop('checked', true).checkboxradio("refresh");
+                        $myPlanModal.find("div#divTaskRel").show();
+                        $('div#myPlan-modal button#selectChooseTaskButton').html(calEvent.taskRelName);
+                        $('div#myPlan-modal input#selectTaskInputHidden').val(calEvent.taskRelId);
+                    }
+                    $myPlanModal.find("button[id='buttonCreateMyPlan']").html("Шинэчлэх");
+                    buttonDelete.show();
+                    buttonDelete.unbind('click').click(function () {
+                        calendar.fullCalendar('removeEvents', function (ev) {
+                            return (ev._id == calEvent._id);
+                        });
+                        saveMyPlan(calEvent,"delete");
+                        $myPlanModal.modal('hide');
+                    });
+                    $myPlanModal.find("button[id='buttonCreateMyPlan']").unbind('click').click(function () {
+                        console.log(calEvent.reminderDate);
+                        calEvent.title = $myPlanModal.find("input[name=title]").val();
+                        calEvent.taskName = calEvent.title;
+                        calEvent.description = $myPlanModal.find("textarea[name='description']").val();
+                        calEvent.className = "bg-gray";
+                        calEvent.reminderDate = reminderDate.val();
+                        calEvent.taskRelId = $myPlanModal.find('input#selectTaskInputHidden').val();
+                        calEvent.taskRelName = $myPlanModal.find('button#selectChooseTaskButton').html();
+                        calendar.fullCalendar('updateEvent', calEvent);
+                        $myPlanModal.modal('hide');
+                        saveMyPlan(calEvent,"new");
+                        $(this).html("Үүсгэх");
+                        return false;
+                    });
+                }
+                else if (calEvent.className == "bg-blue" || (calEvent.className == "bg-green" && calEvent.type == 'ganttTask')) {
+                    showProjectTask(calEvent);
+                }
+                else if(calEvent.className == 'bg-green'){
+                    showCompletedTask(calEvent);
+                }
+                else if (calEvent.className == "bg-purple") {
+                    $("form#formMyPlan").attr("action", "/myPlanGotoPage/Meeting/" + calEvent.meetingId).submit();
+                }
+                else if (calEvent.className == "bg-red") {
+                    showWeather(calEvent.date, calEvent.isWeather);
+                }
+            },
+            select: function (start, end, allDay) {
+                console.log("start: " + start + " end: "+end);
+                if (start < ${tod} ) {
+                    // Previous Day. show message if you want otherwise do nothing.
+                    // So it will be unselectable
+                }
+                else {
+                    // Its a right date
+                    // Do something
+                    $myPlanModal.modal({
+                        backdrop: 'static'
+                    });
+                    $myPlanModal.find("button[id='buttonDeleteMyPlan']").hide();
+                    $myPlanModal.find("button[id='buttonCreateMyPlan']").unbind('click').click(function () {
+                        var title = $myPlanModal.find("input[name='title']");
+                        var description = $myPlanModal.find("textarea[name='description']");
+                        var reminderDate = $myPlanModal.find("input[id='calendarPickerReminder']");
+                        if (title.val() !== null && title.val().length != 0) {
+                            var newEvent={
+                                title: title.val(),
+                                taskName: title.val(),
+                                start: start,
+                                end: end,
+                                taskId:0,
+                                //allDay: true,
+                                description: description.val(),
+                                reminderDate: reminderDate.val(),
+                                taskRelId: $myPlanModal.find('input#selectTaskInputHidden').val(),
+                                taskRelName: $myPlanModal.find('button#selectChooseTaskButton').html(),
+                                className: 'bg-gray'};
+                           var newEventObj = calendar.fullCalendar('renderEvent', newEvent, true)[0];
+                        }
+                        else {
+                            alert('Та төлвөлөх ажилдаа нэр өгнө үү');
+                        }
+                        $myPlanModal.modal('hide');
+                        saveMyPlan(newEventObj,"new");
+                        return false;
+                    });
+                    calendar.fullCalendar('unselect');
+                }
+            },
+            eventSources: [
+                // your event source
+                {
+                    url: "/myPlan/eventSources",
+                    type: 'POST',
+                    data: {
+                        custom_param1: 'something',
+                        custom_param2: 'somethingelse'
+                    },
+                    error: function () {
+                        alert('төлвөлгөөг ачаалалахад алдаа гарлаа');
+                    },
+                    success: function (data) {
+                        // console.log(" data " + JSON.stringify(data));
+                    }
+                    //  color: 'yellow',   // a non-ajax option
+                    // textColor: 'black' // a non-ajax option
+                }
+                // any other sources...
+            ]
+        });
+    }
+    function saveMyPlan(event,type) {
+        var eventObj= {
+                "taskName": event.taskName,
+                "description": event.description,
+                "reminderDate": event.reminderDate,
+                "taskRelId": event.taskRelId,
+                "id": event.taskId,
+                "start": event.start,
+                "end": event.end
+            };
+        $.ajax({
+            type: "POST",
+            data: {
+                type: type,
+                data: JSON.stringify(eventObj)
+            }, url: "/myPlan/savePlan"
+        }).success(
+                function (data) {
+                    if(type=='new'){
+                        event.className = "bg-bblue";
+                        if(event.taskId==0) event.taskId=data;
+                        calendar.fullCalendar('updateEvent', event);
+                    }
+                    showSuccessMessage("Хадгалагдлаа");
+                });
+    }
+    function showWeather(date, isWeather) {
+        $.ajax({
+            type: "POST",
+            data: {
+                date: date,
+                isWeather: isWeather
+            }, url: "/myPlan/showWeatherModal"
+        }).success(
+                function (data) {
+                    $('div#show-weather-modal tbody#tbodyWeatherShowBody').html(data);
+                    $('#show-weather-modal').modal("show");
+                });
+    }
+    function showProjectTask(calEvent) {
+        currentTaskId = calEvent.ganttTaskId;
+        $('div#project-task-modal div.modal-header').removeClass().addClass(calEvent.className + " modal-header text-center p-10");
+        $('#project-task-modal').modal({backdrop: 'static'});
+        loading2('div#project-task-modal div#project-task-modal-body');
+        $.ajax({
+            type: "POST",
+            data: {
+                projectTask: calEvent.ganttTaskId,
+                type:'1',
+                selectedDay:calendar.fullCalendar('getDate').format()
+               }, url: "/myPlan/showProjectTask"
+        }).success(
+                function (data) {
+                    $('div#project-task-modal div#project-task-modal-body').html(data);
+                    $('div#project-task-modal div#project-task-modal-body input#checkBoxReminderProject').checkboxradio({defaults: true});
+
+                    jQuery('#calendarPickerReminderProject').datetimepicker({lang: 'mn', step: 15});
+                    $('div#project-task-modal input#checkBoxReminderProject').click(function () {
+                        if ($(this).prop('checked')) {
+                            $('div#project-task-modal div#divReminderDateProject').css('display', 'inline-flex');
+                        }
+                        else {
+                            $('div#project-task-modal div#divReminderDateProject').hide();
+                            $('div#project-task-modal input#calendarPickerReminderProject').val("");
+                            $("div#project-task-modal input[name='reminderTitle']").val("");
+                        }
+                    });
+                    $("div#project-task-modal button#buttonCreateReminderProject").unbind('click').click(function () {
+                        $(this).find('i').removeClass().addClass("fa fa-spinner faa-spin animated");
+                        $.ajax({
+                            type: "POST",
+                            data: {
+                                taskId: calEvent.ganttTaskId,
+                                date: $('div#project-task-modal input#calendarPickerReminderProject').val(),
+                                title: $("div#project-task-modal input[name='reminderTitle']").val()
+                            }, url: "/myPlan/reminderTask"
+                        }).success(
+                                function (data) {
+                                    calEvent.reminderDate = $('div#project-task-modal input#calendarPickerReminderProject').val();
+                                    calendar.fullCalendar('updateEvent', calEvent);
+                                    $('#project-task-modal').modal('hide');
+                                    showSuccessMessage(data);
+                                    $(this).find('i').removeClass().addClass("fa fa-check");
+                                }).error(function () {
+                                    showErrorMessage("Өгөгдөл буруу байна!!!");
+                                    $(this).find('i').removeClass().addClass("fa fa-check");
+                                });
+                    });
+                });
+    }
+    function showCompletedTask(calEvent){
+        $('div#project-task-modal div.modal-header').removeClass().addClass(calEvent.className +
+                " modal-header text-center p-10").find('h4').html((calEvent.type == 'ganttTask')?"График төлөвлөгөөт ажил":"Хувийн төлөвлөгөөт ажил");
+        $('#project-task-modal').modal({backdrop: 'static'});
+        $('div#project-task-modal button#buttonCreateReminderProject').hide();
+        $.ajax({
+            type: "POST",
+            data: {
+                projectTask: calEvent.taskId,
+                type: (calEvent.type == 'ganttTask')?'0':'2',
+                selectedDay:calendar.fullCalendar('getDate').format()
+            }, url: "/myPlan/showProjectTask"
+        }).success(
+                function (data) {
+                    $('div#project-task-modal div#project-task-modal-body').html(data);
+                });
+
+    }
+    $(document).ready(function () {
+        runCalendar();
+        $('div#myPlan-modal input#checkBoxTaskRel').click(function () {
+            if ($(this).prop('checked'))
+                $('div#myPlan-modal div#divTaskRel').show();
+            else {
+                $('div#myPlan-modal div#divTaskRel').hide();
+                $('div#myPlan-modal input#selectTaskInputHidden').val(-1);
+                $('div#myPlan-modal button#selectChooseTaskButton').html("Ажил сонгох");
+            }
+        });
+
+        jQuery('#calendarPickerReminder').datetimepicker({lang: 'mn', step: 15});
+        $('div#myPlan-modal input#checkBoxReminder').click(function () {
+            if ($(this).prop('checked'))
+                $('div#myPlan-modal div#divReminderDate').show();
+            else {
+                $('div#myPlan-modal div#divReminderDate').hide();
+                $('div#myPlan-modal input#calendarPickerReminder').val("");
+            }
+        });
+        $('#myPlan-modal').on('hidden.bs.modal', function (e) {
+            $('div#myPlan-modal div#divReminderDate').hide();
+            $('div#myPlan-modal div#divTaskRel').hide();
+            $('div#myPlan-modal input#calendarPickerReminder').val("");
+            $("div#myPlan-modal input[name='title']").val("");
+            $("div#myPlan-modal textarea[name='description']").val("");
+            $('div#myPlan-modal input#selectTaskInputHidden').val(-1);
+            $('div#myPlan-modal button#selectChooseTaskButton').html("Ажил сонгох");
+            $("div#myPlan-modal input[id='checkBoxReminder']").prop('checked', false).checkboxradio("refresh");
+            $("div#myPlan-modal input[id='checkBoxTaskRel']").prop('checked', false).checkboxradio("refresh");
+            $("div#myPlan-modal button#buttonCreateMyPlan").html("Үүсгэх");
+        });
+        $('div#project-task-modal').on('hidden.bs.modal', function (e) {
+            $('div#project-task-modal button#buttonCreateReminderProject').show();
+        });
+    });
+    $(document).ready(function () {
+        $('.modal').on('hidden.bs.modal', function (event) {
+            $(this).removeClass('fv-modal-stack');
+            $('body').data('fv_open_modals', $('body').data('fv_open_modals') - 1);
+        });
+        $('.modal').on('shown.bs.modal', function (event) {
+
+            // keep track of the number of open modals
+            if (typeof( $('body').data('fv_open_modals') ) == 'undefined') {
+                $('body').data('fv_open_modals', 0);
+            }
+
+            // if the z-index of this modal has been set, ignore.
+
+            if ($(this).hasClass('fv-modal-stack')) {
+                return;
+            }
+
+            $(this).addClass('fv-modal-stack');
+
+            $('body').data('fv_open_modals', $('body').data('fv_open_modals') + 1);
+
+            $(this).css('z-index', 1040 + (10 * $('body').data('fv_open_modals')));
+
+            $('.modal-backdrop').not('.fv-modal-stack')
+                    .css('z-index', 1039 + (10 * $('body').data('fv_open_modals')));
+            $('.modal-backdrop').not('fv-modal-stack')
+                    .addClass('fv-modal-stack');
+        });
+    });
+    function sendToTaskFunc() {
+        var obj = $('div#divSelTask li.selected:first');
+        var tid = obj.attr('tid');
+        if (tid != undefined) {
+            $('div#myPlan-modal input#selectTaskInputHidden').val(tid);
+            $('div#myPlan-modal button#selectChooseTaskButton').html(obj.find('span.task').html());
+        }
+    }
+
+    function materialRequest(taskId) {
+        $('#material-request-modal').modal('show');
+        loading2('div#material-request-modal table#tableMaterialRequest tbody');
+        $.ajax({
+            type: "POST",
+            data: {
+                projectTask: taskId
+            }, url: "/myPlan/requestMaterialShow"
+        }).success(
+                function (data) {
+                    $('div#material-request-modal table#tableMaterialRequest tbody').html(data);
+                    jQuery('#calendarPickerRequest').datetimepicker({lang: 'mn', timepicker: false, format: 'Y/m/d'});
+                });
+
+
+    }
+</script>

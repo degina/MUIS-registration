@@ -1,0 +1,477 @@
+#{extends 'CRUD/layout.html' /}
+<style>
+    .table th{
+        text-transform: none;
+    }
+    .myTable > thead > tr > th,.myTable > tbody > tr > td{
+        padding: 4px;
+    }
+    .gur-group {
+        display: inline-flex;
+        color: white;
+        width: 100%;
+        height: 20px;
+    }
+
+    .gur-ulaan {
+        background-color: #d9534f;
+        text-align: center;
+    }
+
+    .gur-ulbar {
+        background-color: #f0ad4e;
+        text-align: center;
+    }
+
+    .gur-nogoon {
+        background-color: #5cb85c;
+        text-align: center;
+    }
+</style>
+<div id="main-content">
+    <div class="col-md-20 m-t-20">
+        <div class="panel panel-default">
+            <div class="panel-heading p-0">
+                <a href="@{controllers.PortfoliosHyundai.selectProject(portfolio.project.id)}">
+                    <div class="col-md-4 p-0">
+                        <img src="${portfolio.imageUrl}c.jpg" class="img-responsive" alt="">
+                    </div>
+                </a>
+
+                <div class="col-md-8">
+                    <div class="row">
+                        <div class="text-center bg-dark p-5"><h2 class="panel-title">
+                            <strong>${portfolio.project.name}</strong></h2></div>
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <table class="table">
+                                <tbody>
+                                <tr>
+                                    <td style="width: 130px;"><strong>Захиалагч: </strong></td>
+                                    <td class="text-left">${portfolioHyundai?.zoruilalt}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Эхэлсэн: </strong></td>
+                                    <td class="text-left">${portfolio.project?.startDate?.format("yyyy/MM/dd")}</td>
+                                    <td><strong>Дуусах: </strong></td>
+                                    <td class="text-left">${portfolio.project?.finishDate?.format("yyyy/MM/dd")}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Хоног: </strong></td>
+                                    <td class="text-left">${portfolio.project.duration}</td>
+                                    <td><strong>Төлөв: </strong></td>
+                                    <td class="text-left">${portfolio.stage?.name}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div class="row">
+                    <div class="col-md-12 m-t-20">
+                        <div class="col-md-6">
+                            <h3 class="m-t-0 m-b-10">Төслийн мэдээлэл</h3>
+
+                            <form class="form-horizontal p-20">
+                                <div class="form-group">
+                                    <div class="col-sm-4">Барилгын зориулалт :</div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.zoruilalt}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Барилгын хаяг:</div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolio.address}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Захиалагч:</div>
+                                    <div class="col-sm-7">
+                                        <strong><a href="#" data-rel="tooltip"
+                                                   title="Edit customer">${portfolioHyundai.zahialagch}</a></strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Захиалагчийг төлөөлөгч:</div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.zahialagchToloologch}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Албан тушаал:
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.zahialagchTushaal}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Утасны дугаар:
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.zahialagchUtas}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Барилга хариуцагч:
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.hariutsagch}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Албан тушаал:
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.hariutsagchTushaal}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">Утасны дугаар:
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.hariutsagchUtas}</strong>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="m-t-0 m-b-10">Үйлдвэрлэлийн мэдээлэл</h3>
+
+                            <form class="form-horizontal p-20">
+                                <div class="form-group">
+                                    <div class="col-sm-6">Борлуулалтын менежер:
+                                    </div>
+                                    <div class="col-sm-6">
+                                    %{borluulalt = portfolioHyundai?.borluulaltName?.split(',');}%
+                                        <strong>
+                                        #{list items:borluulalt,as:'userId'} ${controllers.Functions.getUserById(userId)}
+                                            &nbsp;#{/list}
+                                        </strong>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Үйлдвэр:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.factory?.name}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Гэрээ хийсэн огноо:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.gereeHiisen?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Зураг баталсан огноо:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.zuragBatalsan?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Үйлдвэрлэл эхэлсэн огноо:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.uildverlelEhelsen?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Үйлдвэрлэл дууссан огноо:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.uildverlelDuussan?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Тээвэрлэлт хийсэн огноо:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.teeverleltHiisen?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Гааль дээр ирсэн огноо:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.gaaliDeerIrsen?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-6">
+                                        Барилгын талбай дээр ирсэн огноо:
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <strong>${portfolioHyundai.talbaiDeerIrsen?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 m-t-20">
+                            <div class="form-horizontal" style="padding: 0 20px 0 20px">
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Бүтээгдэхүүний үйлдвэрийн дугаар:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.uildveriinDugaar}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">Бүтээгдэхүүний төрлүүд:</div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="myTable table table-bordered">
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Бүтээгдэхүүн</th>
+                                                <th>Техникикийн үзүүлэлт</th>
+                                                <th>Тоо</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            #{list items:portfolioHyundai.portfolioProductLists,as:'product'}
+                                            <tr>
+                                                    <td>${product_index}</td>
+                                                    <td>${product.product?.name}</td>
+                                                    <td>${product.rate}</td>
+                                                    <td>${product.amount}</td>
+                                            </tr>
+                                            #{/list}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 m-t-20">
+                        <div class="col-md-6">
+                            <h3 class="m-t-0 m-b-10">Угсралтын мэдээлэл</h3>
+                            <form class="form-horizontal p-20">
+                                <div class="form-group">
+                                    <div class="col-sm-5">Угсрах хэсэг:
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="myTable table table-bordered">
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Баг</th>
+                                                <th>Ахлагч</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            #{list items:portfolioHyundai.installTeams,as:'install'}
+                                            <tr>
+                                                <td>${install_index}</td>
+                                                <td>${install.teamName}</td>
+                                                <td>${install.leaderName}</td>
+                                            </tr>
+                                            #{/list}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-5">Эхэлсэн хугацаа:
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.ugsrahStartDate?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-5">Дуусах хугацаа:
+                                    </div>
+                                    <div class="col-sm-7">
+                                        <strong>${portfolioHyundai.ugsrahEndDate?.format("yyyy/MM/dd")}</strong>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="m-t-0 m-b-10">Ашиглалтын мэдээлэл</h3>
+                            <form class="form-horizontal p-20">
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Ашиглагч байгууллага:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.ashiglagch}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        Хариуцагч:
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <table class="myTable table table-bordered">
+                                            <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Нэр</th>
+                                                <th>Тушаал</th>
+                                                <th>Утас</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            #{list items:portfolioHyundai.portfolioServiceUsers,as:'services'}
+                                            <tr>
+                                                <td>${services_index}</td>
+                                                <td>${services.name}</td>
+                                                <td>${services.albanTushaal}</td>
+                                                <td>${services.utas}</td>
+
+                                            </tr>
+                                            #{/list}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Хариуцсан баг:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.ashiglaltBag}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Ахлагч:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.ashiglaltAhlagch}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Гэрээ хийсэн огноо:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.ashiglaltGereeHiisen?.format("yyyy-MM-dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Эхэлсэн огноо:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.ashiglaltEhelsen?.format("yyyy-MM-dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Дууссан огноо:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.ashiglaltDuusah?.format("yyyy-MM-dd")}</strong>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-4">
+                                        Магадлал хийсэн огноо:
+                                    </div>
+                                    <div class="col-sm-8">
+                                        <strong>${portfolioHyundai.ashiglaltMagdlal?.format("yyyy-MM-dd")}</strong>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <table class="table table-bordered">
+                            <thead>
+                            <tr>
+                                <th style="width: 200px;text-align: center;">Тойм</th>
+                                <th style="text-align: center;">
+                                    <i class="fa fa-square" style="color: #d9534f;"></i> Хугацаа хэтэрсэн &nbsp;
+                                    <i class="fa fa-square" style="color: #f0ad4e;"></i> < Долоо хоног &nbsp;
+                                    <i class="fa fa-square" style="color:#5cb85c;"></i> > Долоо хоног &nbsp;
+                                </th>
+                                <th style="width: 100px; text-align: center">Нийт</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            #{if portfolio.allRFIs != 0 }
+                            <tr>
+                                <td style="padding-left: 30px;"> Мэдээлэл хүсэлт</td>
+                                <td style="padding-left: 20px; padding-right: 20px;">
+                                    <div class="gur-group">
+                                        <div class="gur-ulaan"
+                                             style="width: ${100*portfolio.overdueRFIs/portfolio.allRFIs}%;">${portfolio.overdueRFIs}</div>
+                                        <div class="gur-ulbar"
+                                             style="width: ${100*portfolio.nextWeekRFIs/portfolio.allRFIs}%; ">${portfolio.nextWeekRFIs}</div>
+                                        <div class="gur-nogoon"
+                                             style="width:${100*portfolio.nNextWeekRFIs/portfolio.allRFIs}%;">${portfolio.nNextWeekRFIs}</div>
+                                    </div>
+                                </td>
+                                <td class="text-center">${portfolio.allRFIs}</td>
+                            </tr>
+                            </tr>
+                            #{/if}
+                            #{if portfolio.allPunchLists != 0 }
+                            <tr>
+                                <td style="padding-left: 30px;"> Үүрэг даалгавар</td>
+                                <td style="padding-left: 20px; padding-right: 20px;">
+                                    <div class="gur-group">
+                                        <div class="gur-ulaan"
+                                             style="width: ${100*portfolio.overduePunchLists/portfolio.allPunchLists}%;">${portfolio.overduePunchLists}</div>
+                                        <div class="gur-ulbar"
+                                             style="width: ${100*portfolio.nextWeekPunchLists/portfolio.allPunchLists}%; ">${portfolio.nextWeekPunchLists}</div>
+                                        <div class="gur-nogoon"
+                                             style="width:${100*portfolio.nNextWeekPunchLists/portfolio.allPunchLists}%;">${portfolio.nNextWeekPunchLists}</div>
+                                    </div>
+                                </td>
+                                <td class="text-center">${portfolio.allPunchLists}</td>
+                            </tr>
+                            #{/if}
+                            #{if portfolio.allMeetings != 0 }
+                            <tr>
+                                <td style="padding-left: 30px;"> Хурал уулзалт</td>
+                                <td style="padding-left: 20px; padding-right: 20px;">
+                                    <div class="gur-group">
+                                        <div class="gur-ulaan"
+                                             style="width: ${100*portfolio.overdueMeetings/portfolio.allMeetings}%;">${portfolio.overdueMeetings}</div>
+                                        <div class="gur-ulbar"
+                                             style="width: ${100*portfolio.nextWeekMeetings/portfolio.allMeetings}%; ">${portfolio.nextWeekMeetings}</div>
+                                        <div class="gur-nogoon"
+                                             style="width:${100*portfolio.nNextWeekMeetings/portfolio.allMeetings}%;">${portfolio.nNextWeekMeetings}</div>
+                                    </div>
+
+                                </td>
+                                <td class="text-center">${portfolio.allMeetings}</td>
+                            </tr>
+                            #{/if}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+#{portfolios-blank-config /}

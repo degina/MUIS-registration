@@ -1,0 +1,41 @@
+#{extends 'CRUD/layout.html' /}
+#{blankConfig title:messages.get('Equipments')/}
+#{set activeMenu: 'Admin'/}
+#{set activeMenuSub: 'Equipments'/}
+#{flashCrud /}
+<div id="main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <form action="@{create()}" class="form-horizontal" role="form" id="settings" method="post"
+                  accept-charset="utf-8" enctype="multipart/form-data">
+                <div class="row profile-classic">
+                    <div class="col-md-12">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="control-label c-gray col-md-3">Нэр:</div>
+                                    <div class="col-md-6">
+                                        <input type="text" name="object.name" id="object_name"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="align-center m-t-20">
+                                            <button type="submit" name="_save" class="btn btn-primary btn-transparent">
+                                                Хадгалах
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<script>
+    $('div#main-content').css('min-height', screen.height - 138);
+</script>

@@ -1,0 +1,61 @@
+<script>
+    function updateScheduledWork(taskId) {
+        var hours = $('table#tableScheduledWork input#scheduledWorkHours' + taskId).val();
+        var comment = $('table#tableScheduledWork textarea#scheduledWorkComments' + taskId).val();
+        var percent = $('table#tableScheduledWork input#scheduledWorkPercent' + taskId).val();
+        if (hours.length == 0 || hours == "") {
+            showErrorMessage("Зарцуулсан цагаа оруулна уу!");
+        }
+        else if (isNaN(parseFloat(percent))) {
+            showErrorMessage("Гүйцэтгэл хувь 0-100 хооронд тоо байх ёстой");
+        }
+        else if (parseFloat(hours) == 'NaN') {
+            showErrorMessage("Заавал тоо оруулна уу!");
+        }
+        else if (comment.length < 2 || comment == "") {
+            showErrorMessage("Тэмдэглэл бичнэ үү!");
+        }
+        else if (parseFloat(hours) > 24) {
+            showErrorMessage("Зарцуулсан цаг 24-с их байж болохгүй!");
+        }
+        else if (parseFloat(percent) > 100) {
+            showErrorMessage("Гүйцэтгэл хувь 100-с их байж болохгүй!");
+        }
+        else {
+            loading2("table#tableScheduledWork tr#trScheduledWork" + taskId + " td:last-child");
+            i = 0;
+            filename = [];
+            filedir = [];
+            extension = [];
+            filesize = [];
+            $("table#tableScheduledWork ul#uScheduledWork" + taskId + " img.imgIcon").each(function () {
+                filename[i] = $(this).attr('filename');
+                filedir[i] = $(this).attr('filedir');
+                extension[i] = $(this).attr('extension');
+                filesize[i] = $(this).attr('filesize');
+                i++;
+            });
+            $.ajax({
+                type: "POST",
+                data: {
+                    taskId: taskId,
+                    date: '${currentDate.format("yyyy-MM-dd")}',
+                    percent: percent,
+                    comments: comment,
+                    hours: hours,
+                    filename: filename,
+                    filedir: filedir,
+                    extension: extension,
+                    filesize: filesize
+                }, url: "/dailyLogUpdateScheduledWork"
+            }).success(function (data) {
+                $("table#tableScheduledWork tr#trScheduledWork" + taskId + " td:last-child").html("" +
+                        "<button onclick=deleteScheduledWork(" + data + ")  data-rel=tooltip title='Устгах' " +
+                        "class='delete btn btn-icon-sm btn-rounded btn-default'><i class='fa fa-times' ></i></button>" +
+                        "<button onclick=updateScheduledWork('" + taskId + "') data-rel=tooltip title='Шинэчлэх' " +
+                        "class='update btn btn-icon-sm btn-rounded btn-default' ><i class='fa fa-save'></i></button>");
+                $('[data-rel="tooltip"]').tooltip();
+                showSuccessMessage('Хадгалагдлаа');
+            });
+        }
+    }</script>

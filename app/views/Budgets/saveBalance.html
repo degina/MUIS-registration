@@ -1,0 +1,8 @@
+<script>
+    $('table#tableBalance td#tdCurrentAssets').html("${controllers.Functions.getDecimal(balance.currentAssets)}");
+    $('table#tableBalance td#tdLiabilities').html("${controllers.Functions.getDecimal(balance.totalLiabilities)}");
+    $('table#tableBalance td#tdNonCurrentAssets').html("${controllers.Functions.getDecimal(balance.nonCurrentAssets)}");
+    $('table#tableBalance td#tdTotalEquity').html("${controllers.Functions.getDecimal(balance.totalEquity)}");
+    $('table#tableBalance td#tdTotalAssets').html("${controllers.Functions.getDecimal(balance.totalAssets)}");
+    $('table#tableBalance td#tdTotalLiabilitiesAndEquity').html("${controllers.Functions.getDecimal(balance.totalLiabilitiesAndEquity)}");
+</script>

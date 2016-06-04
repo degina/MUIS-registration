@@ -1,0 +1,61 @@
+<style>
+    #myModalCome .modal-dialog {
+        width: 30%
+    }
+    .bs-example-modal-sm .modal-body {
+       max-height: calc(100vh - 210px);
+       overflow-y: auto;
+    }
+    #cssmenu ul li{
+        display:inline;
+        padding-left: 5px;
+    }
+    #cssmenu ul li:hover{
+        color: #000;
+    }
+    #cssmenu ul {
+        padding: 5px 0 5px 15px;
+        border-bottom: 2px solid #dcdee3;
+    }
+    #cssmenu ul li a{
+        text-decoration: none;
+    }
+    #cssmenu ul li a:hover {
+
+    }
+
+</style>
+<div class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" id="myModalCome">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Зочид</h4>
+            </div>
+            *{%{eventCounter=event.getEventCounter();}%}*
+            *{<div id='cssmenu'>}*
+                *{<ul>}*
+                    *{<li><a href='#' id="come" onclick="myModalCome(2)"><span>Оролцох (${eventCounter.come+1})</span></a></li>}*
+                    *{<li><a href='#' id="maybe" onclick="myModalCome(1)"><span>Магадгүй (${eventCounter.maybe})</span></a></li>}*
+                    *{<li><a href='#' id="notCome" onclick="myModalCome(3)"><span>Оролцохгүй (${eventCounter.notCome})</span></a></li>}*
+                    *{<li><a href='#' id="invited" onclick="myModalCome(0)"><span>Урьсан (${eventCounter.invited})</span></a></li>}*
+                *{</ul>}*
+            *{</div>}*
+            <div class="modal-body">
+                <div id="ownerPic"> <img src="${event.owner.profilePicture}" style="heigth:50px;width: 50px"  />
+                ${event.owner}</div>
+                <div id="guestList"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $("#cssmenu li").on("click", function() {
+        $("#cssmenu li").removeClass("active");
+        $(this).addClass("active");
+    });
+
+
+</script>

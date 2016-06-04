@@ -1,0 +1,189 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Drawing'/}
+#{set activeMenuSub:'DrawingThumb'/}
+<link rel="stylesheet" href="/assets/plugins/font-awesome-animation/font-awesome-animation.min.css">
+
+<div id="main-content" style="background-color: white">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="col-md-12">
+                <div style="width: 250px; float: left; margin-right: 50px;">
+                    <label>Төрлөөр шүүх:</label>
+                    <select name="drawing" id="disciplinepicker" class="form-control"
+                            onchange="disciplineSelectListener()">
+                        <option value="">Бүгд</option>
+                    #{list items:disciplines, as:'discipline'}
+                        #{if discipline.drawings.size() > 0}
+                            <option value="${discipline.id}">${discipline.name}</option>
+                        #{/if}
+                    #{/list}
+                    </select>
+                </div>
+                <div style="width: 250px; float: left;">
+                    <label>&nbsp;</label>
+                    <select name="drawing" id="drawingpicker" data-live-search="true" class="form-control"
+                            onchange="drawingSelectListener()" data-none-selected-text="Зураг хайх"
+                            data-none-results-text="Үр дүн байхгүй" data-caret="fa fa-search">
+
+                        <option value="">${drawings == null || drawings.size() == 0 ? "Зураг байхгүй байна." : ""}</option>
+                    #{list items:drawings, as:'drawing'}
+                        <option value="${drawing.lastRevision().id}">${drawing.Number + " - " + drawing.title}</option>
+                    #{/list}
+                    </select>
+                </div>
+                <div style="height: 80px; width: 300px; float: right;">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+
+                        <div class="form-control" style="margin: 0; padding: 0; border: none;">
+                            <div style="float: right;">
+                                <div id="drawingDetailsTool" class="dhidden">
+                                    <a href="" onclick="downloadDrawings();"
+                                       style="margin-right: 20px; font-size: 14px;"><i
+                                            class="fa fa-download m-r-5"></i>Татах</a>
+                                #{if user.getPermissionType(controllers.Consts.permissionMonitorDrawing) == 3}
+                                    <a href="" onclick="deleteDrawings();"
+                                       style="margin-right: 20px; font-size: 14px;"><i
+                                            class="fa fa-trash-o m-r-5"></i>Устгах</a>
+                                #{/if}
+                                    <button class="btn btn-default" id="viewTypeButton"
+                                            onclick="changeViewType()"
+                                            style="vertical-align: middle; padding-top: 5px; padding-bottom: 5px; padding-left: 8px; padding-right: 8px;">
+                                        <i class="fa fa-th-list f-18"></i>
+                                    </button>
+                                </div>
+                                <div id="drawingAddTool">
+                                #{if user.getPermissionType(controllers.Consts.permissionMonitorDrawing) == 3}
+                                    <a href="@{controllers.Drawings.history()}"
+                                       style="margin-right: 10px; font-size: 14px;"><i
+                                            class="fa fa-book m-r-5"></i>Түүх харах</a>
+                                    <a href="@{controllers.Drawings.uploader()}"
+                                       style="margin-right: 20px; font-size: 14px;"><i
+                                            class="fa fa-plus m-r-5"></i>Зураг хуулах</a>
+                                #{/if}
+                                    <button class="btn btn-default" id="viewTypeButton"
+                                            onclick="changeViewType()"
+                                            style="vertical-align: middle; padding-top: 5px; padding-bottom: 5px; padding-left: 8px; padding-right: 8px;">
+                                        <i class="fa fa-th-list f-18"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="DrawingViewerPanel">
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var isClean = false;
+    var action = "userLayer";
+    var viewType = "thumb";
+    var checkedArray = [];
+    $(document).ready(function () {
+        disciplineSelectListener();
+    });
+    function changeViewType() {
+        if ($("button#viewTypeButton i").hasClass("fa-th-large")) {
+            $("button#viewTypeButton i").removeClass("fa-th-large");
+            $("button#viewTypeButton i").addClass("fa-th-list");
+            viewType = "thumb";
+        } else {
+            $("button#viewTypeButton i").removeClass("fa-th-list");
+            $("button#viewTypeButton i").addClass("fa-th-large");
+            viewType = "list";
+        }
+        disciplineSelectListener();
+    }
+    function disciplineSelectListener() {
+        $.ajax({
+            type: "POST",
+            data: {
+                disciplineId: $('select#disciplinepicker').val(),
+                type: viewType
+            },
+            url: "/drawing/viewtype",
+            beforeSend: function () {
+
+            }
+        }).success(function (data) {
+            $("div#DrawingViewerPanel").html(data);
+        });
+    }
+    function drawingSelectListener() {
+        prepareToDraw($("select#drawingpicker").val());
+    }
+    function propCheckAll(ban) {
+        var check = false;
+        if (!$(ban).prop("checked"))
+            check = true;
+        $("div#DrawingFullView").find("input").each(function () {
+            if ($(this).attr("type") == "checkbox")
+                if (check)
+                    $(this).prop("checked", false);
+                else
+                    $(this).prop("checked", true);
+        });
+        propCheckList();
+    }
+    function propCheckList() {
+        if (allpropCheckList()) {
+            $("div#drawingDetailsTool").removeClass("dhidden");
+            $("div#drawingAddTool").addClass("dhidden");
+        } else {
+            $("div#drawingDetailsTool").addClass("dhidden");
+            $("div#drawingAddTool").removeClass("dhidden");
+        }
+
+
+    }
+    function allpropCheckList() {
+        var counter = 0;
+        checkedArray = [];
+        $("div#DrawingFullView").find("input").each(function () {
+            counter++;
+            if ($(this).attr("type") == "checkbox") {
+                if ($(this).prop("checked")) {
+                    checkedArray.push($(this).attr("did"));
+                }
+            }
+        });
+        if (counter == checkedArray.length)
+            $("input#propCheckAll").prop("checked", true);
+        else
+            $("input#propCheckAll").prop("checked", false);
+        if (checkedArray.length > 0)
+            return true;
+        return false;
+
+    }
+    function changeDrawingDet(val) {
+        if (val) {
+            $("div#drawingDetailsTool").removeClass("dhidden");
+            $("div#drawingAddTool").addClass("dhidden");
+        } else {
+            $("div#drawingDetailsTool").addClass("dhidden");
+            $("div#drawingAddTool").removeClass("dhidden");
+        }
+    }
+    function deleteDrawings() {
+    }
+    function downloadDrawings() {
+    }
+    function showPinPunchList(id){
+        window.open("/punchList/show?id=" + id,'_blank');
+    }
+    function sendPunchListAfter(data){
+        $("div#DrawingFieldModal").modal("hide");
+    }
+    function saveDrawingPathForDocument(id, dir, json){
+
+    }
+</script>
+#{include '/Drawings/modal.html'/}
+#{add-PunchList-RFI /}
+#{PunchList-RFI-upload/}
+#{drawing-config  name:"Drawings"/}

@@ -1,0 +1,69 @@
+#reportLoadData .panel-title {
+    width: 100%;
+    font-size: 12px;
+    margin: 0
+}
+
+#reportLoadData td.nametd {
+    font-size: 14px;
+}
+
+#reportLoadData .panel-heading .panel-title > a.collapsed:before {
+    font-family: FontAwesome;
+    content: "\f067";
+    float: left;
+    margin-right: 10px;
+    margin-top: 10px;
+    font-size: 16px;
+    color: #88a5c0;
+}
+
+#reportLoadData .panel-heading a:before {
+    font-family: FontAwesome;
+    content: "\f068";
+    float: left;
+    color: grey;
+    font-size: 16px;
+    margin-right: 10px;
+    margin-top: 10px;
+}
+
+#reportLoadData .panel-heading .panel-title > a.collapsed:after {
+    content: close-quote;
+}
+
+#reportLoadData .sortable .panel-default {
+    border-color: lightgrey;
+}
+
+#reportLoadData .sortable .panel-heading a {
+    padding: 10px 15px;
+    display: block;
+}
+
+#reportLoadData .panel-heading .panel-title {
+    font-family: arial;
+    display: block;
+}
+
+#reportLoadData .project div.panel-body,
+#reportLoadData .projectObject div.panel-body {
+    padding: 5px 4px 5px 15px;
+}
+
+#reportLoadData .panel-accordion .project a {
+    background-color: #90CAF9;
+}
+#reportLoadData .panel-accordion .projectObject a {
+    background-color: #BBDEFB;
+}
+#reportLoadData .panel-accordion .task a {
+    background-color: #E3F2FD;
+}
+#reportLoadData .panel-accordion .project a.collapsed {
+    background-color: #cfdae0;
+}
+
+#reportLoadData h3.panel-title{
+    font-size: 16px;
+}

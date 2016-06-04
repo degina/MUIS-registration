@@ -1,0 +1,35 @@
+<div class="modal fade modal-fullscreen" id="DrawingFieldModal" data-backdrop="static" tabindex="-1" role="dialog"
+     aria-hidden="true" style="top: 0; right: 0; left: 0; overflow: hidden;">
+    <div class="modal-dialog" style="width: 100%;">
+        <div class="modal-content" style="width: 100%;">
+
+        </div>
+    </div>
+</div>
+<script>
+    var drawingFieldHeight = 0;
+    function prepareToShow(layer) {
+        drawingFieldHeight = parseInt(window.innerHeight) - 30;
+        $.ajax({
+            type: "POST",
+            data: {
+                id: layer,
+                height : drawingFieldHeight
+            },
+            url: "/drawing/extendShowingModal",
+            beforeSend: function () {
+                $("div#DrawingFieldModal").find("div.modal-content").html('<div style="width:100%; text-align: center"><img src="/public/images/activity-indicator.gif"/></div>');
+                $("div#DrawingFieldModal").css("height", drawingFieldHeight + 30 + "px");
+                $("div#DrawingFieldModal").find("div.modal-content").css("height", drawingFieldHeight + "px");
+                $("div#DrawingFieldModal").find("div.modal-dialog").css("height", drawingFieldHeight + "px");
+            }
+        }).success(function (data) {
+            $("div#DrawingFieldModal").find("div.modal-content").html(data);
+            $("div#DrawingFieldModal").modal("show");
+        });
+    }
+    $("div#DrawingFieldModal").on("hide.bs.modal", function () {
+        $("div#DrawingFieldModal").find("div.modal-content").html("");
+        $("div#DrawingFieldModal").find("div.modal-body").html("");
+    });
+</script>

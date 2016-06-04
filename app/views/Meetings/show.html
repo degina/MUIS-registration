@@ -1,0 +1,505 @@
+#{extends 'CRUD/layout.html' /}
+#{fancybox-config /}
+<style>
+    tbody#topic-table-tbody .tooltip-inner {
+        white-space: pre-wrap;
+    }
+    div#meeting_general .ui-radio .ui-btn {
+        background-color: #2b2e33
+    }
+    button.edit:hover, a.edit:hover {
+        background-color: #18a689;
+        color: #fff !important
+    }
+    button.delete:hover {
+        background-color: #c75757;
+        color: #fff !important
+    }
+    button.view:hover {
+        background-color: #428bca;
+        color: #fff !important
+    }
+
+    table div.post-images img {
+        height: 50px;
+        width: 50px;
+    }
+
+    @media print {
+        body {
+            margin-top: 0
+        }
+
+        #main-content {
+            padding: 0;
+            background-color: transparent
+        }
+
+        #sidebar, .navbar, .no-print, .no-print * {
+            display: none !important
+        }
+
+        #meeting_general {
+            max-width: 100%;
+            max-height: 100%;
+            padding: 0 !important;
+            border: 0
+        }
+    }
+</style>
+%{ id= meeting?.getId()}%
+<div id="main-content">
+    <div class="m-b-20 clearfix no-print">
+        <div class="page-title pull-left">
+            <a href="@{controllers.Meetings.list()}"><i class="fa fa-angle-left"></i> <span>Жагсаалт руу буцах</span></a>
+        </div>
+        <div class="pull-right m-t-20">
+        #{if meeting.owner.id == user.id || permissionType == 3}
+            #{if meeting.status.id==1}
+                <a href="@{controllers.Meetings.agendaToMinutes(meeting?.id)}" class="btn btn-success m-r-10 m-b-10">
+                    <i class="fa fa-file-text-o m-r-10"></i>Тэмдэглэл болгох</a>
+                <a href="@{controllers.Meetings.cancelMeeting(meeting?.id)}" class="btn btn-default m-r-10 m-b-10"><i
+                        class="fa fa-times"></i> Цуцлах</a>
+            #{/if}
+            #{if meeting.status.id==3}
+                <a href="@{controllers.Meetings.sergeehMeeting(meeting?.id)}" class="btn btn-success m-r-10 m-b-10"><i
+                        class="fa fa-check"></i> Сэргээх</a>
+                <a href="@{controllers.Meetings.deleteMeeting(meeting.id)}" class="btn btn-danger m-r-10 m-b-10"><i class="fa fa-times"></i> Устгах</a>
+            #{/if}
+        #{/if}
+            <button type="button" class="btn btn-white m-r-10 m-b-10" onclick="window.print();"><i
+                    class="fa fa-file-text m-r-10"></i> PDF болгох
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="tabcordion">
+                <ul id="myTab" class="nav nav-tabs no-print">
+                    <li class="active"><a id="tab-general" href="#meeting_general"
+                                          data-toggle="tab">&{'GeneralInformation'}</a></li>
+                #{if !meeting.privateMeeting}
+                    #{if meeting.owner.id == user.id}
+                        <li><a id="tab-topic-add" href="#meeting_topic_add" data-toggle="tab">Хэлэлцэх асуудал нэмэх</a>
+                        </li>
+                    #{/if}
+                #{/if}
+                #{elseif oroltsogchMon || meeting.owner.id == user.id }
+                    <li><a id="tab-topic-add" href="#meeting_topic_add" data-toggle="tab">Хэлэлцэх асуудал нэмэх</a>
+                    </li>
+                #{/elseif}
+                </ul>
+                <div id="myTabContent" class="tab-content">
+                    <div class="tab-pane fade active in" id="meeting_general">
+                        <div class="row p-20">
+                            <div class="col-md-12">
+                                <table class="table table-tools ">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:150px"></th>
+                                        <th style="min-width:200px"></th>
+                                        <th style="width:150px"></th>
+                                        <th style="min-width:200px" class="text-right no-print">
+                                        #{if meeting.owner.id==user.id || permissionType == 3}
+                                            <a href="@{controllers.Meetings.blank(meeting?.id)}" data-rel="tooltip"
+                                               title="Ерөнхий мэдээллийг засах"
+                                               class="edit btn btn-sm btn-icon btn-rounded btn-default"><i
+                                                    class="fa fa-pencil"></i></a>
+                                        #{/if}
+                                        </th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td><strong>Хурал #:</strong></td>
+                                        <td>${meeting.id}</td>
+                                        <td><strong>Байршил:</strong></td>
+                                        <td>${meeting?.location}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Гарчиг:</strong></td>
+                                        <td>${meeting?.title}</td>
+                                        <td><strong>Харагдах байдал:</strong></td>
+                                        <td>#{if meeting.viewMeeting}Бүгдэд #{/if}
+                                        #{else }Оролцогчдод#{/else}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Ангилал:</strong></td>
+                                        <td>${meeting.status.status}</td>
+                                        <td><strong>Сэдэв дэвшүүлэх:</strong></td>
+                                        <td>#{if meeting.privateMeeting} Нээлттэй#{/if}
+                                        #{else } Хаалттай#{/else}
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Товлосон өдөр:</strong></td>
+                                        <td>${meeting?.meetingDate?.format("yyyy-MM-dd")}</td>
+                                        <td><strong>Зарласан:</strong></td>
+                                        <td>${meeting.owner.lastnameFirstCharacter}.${meeting.owner.firstName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Эхлэх цаг:</strong></td>
+                                        <td>${meeting.meetingDate.format("HH:mm")}</td>
+                                        <td><strong>Дуусах цаг:</strong></td>
+                                        <td>${meeting.finishDate.format("HH:mm")}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Тойм:</strong></td>
+                                        <td colspan="3">${meeting.overview.raw()}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Хавсралт:</strong></td>
+                                        <td colspan="3">
+                                        #{if meeting.meetingAttachments.size()>0}
+                                            <div class="post-images" id="post-images-show-attach">
+                                                #{list items:meeting.meetingAttachments, as:'attach'}
+                                                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension, attach.filesize).raw()}
+                                                #{/list}
+                                            </div>
+                                        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-show-attach").raw()}
+                                        #{/if}
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row p-20">
+                            <div class="col-md-12">
+                                <h4>Хуралд оролцох гишүүд</h4>
+                                <table class="table table-bordered">
+                                    <thead style="font-size: 12px;">
+                                    <tr>
+                                        <th style="width:50%" class="text-center"><strong>Нэр</strong></th>
+                                        <th style="width:50%" class="text-center"><strong>Баг</strong></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:userRels,as:'userR'}
+                                    <tr>
+                                        <td>${userR.user} (${userR.user.userPosition.name})</td>
+                                        <td>${userR.user.userTeam.name}</td>
+                                    </tr>
+                                    #{/list}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="row p-20">
+                            <div class="col-md-12">
+                                <h4>Хэлэлцэх асуудал</h4>
+                                <table id="event-review"
+                                       class="table table-tools table-striped sortable_table table-bordered">
+                                    <thead style="font-size: 12px;">
+                                    <tr>
+                                        <th style="max-width: 35px;"></th>
+                                        <th class="text-center">#</th>
+                                        <th style="width:30%">Гарчиг</th>
+                                        <th>Дэвшүүлсэн</th>
+                                        <th>Хариуцагч</th>
+                                        <th>Хамаарал</th>
+                                        <th class="text-center">Ач холбогдол</th>
+                                        <th class="text-center">Төлөв</th>
+                                        <th class="text-center">Ш/Х</th>
+                                        <th style="max-width: 15px;" class="text-center"></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody id="topic-table-tbody">
+                                      #{include '/Meetings/createTopic.html'/}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="meeting_topic_add">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div id="editTopicDiv" class="form-horizontal">
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Гарчиг<span
+                                                class="asterisk">:</span>
+                                        </label>
+
+                                        <div class="col-sm-8">
+                                            <input type="text" class="form-control" id="topic-title" value="">
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label">Хариуцагч:</label>
+
+                                        <div class="col-sm-3">
+                                            <div id="sendUserTag">
+
+                                            </div>
+                                            <button class="btn btn-default" data-toggle="modal"
+                                                    data-target="#modal-select"
+                                                    style="width: 100%;text-align: left;"
+                                                    id="selectSendUserButton">Хүн нэмэх
+                                            </button>
+                                        </div>
+                                        <label class="col-sm-2 control-label">Хамаарал:</label>
+
+                                        <div class="col-sm-3">
+                                            <button class="btn btn-default"
+                                                    style="width: 100%;text-align: left;"  data-toggle="modal" data-target="#divSelTask"
+                                                    id="selectChooseTaskButton">Ажил сонгох
+                                            </button>
+                                            <div id="selectTaskTag"></div>
+                                            <input id="selectTaskInputHidden" type="hidden" value="-1"/>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label m-t-10">Ач холбогдол:</label>
+
+                                        <div class="col-sm-3">
+                                            <select class="form-control" id="topic-priority">
+                                                <option data-content="<span class='label label-danger' style='display: inline-block; width: 54px;' >Өндөр</span>"
+                                                        value="1">Өндөр
+                                                </option>
+                                                <option data-content="<span class='label label-warning' style='display: inline-block; width: 54px;' >Дунд</span>"
+                                                        value="2">Дунд
+                                                </option>
+                                                <option data-content="<span class='label label-primary' style='display: inline-block; width: 54px;' >Бага</span>"
+                                                        value="3">Бага
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <label class="col-sm-2 control-label">Төлөв:</label>
+
+                                        <div class="col-sm-3">
+                                            <select class="form-control" id="topic-status">
+                                                <option data-content="<span class='label label-success' >Нээлттэй</span>"
+                                                        value="1">Нээлттэй
+                                                </option>
+                                                <option data-content="<span class='label label-primary'>Хаагдсан</span>"
+                                                        value="2">Хаагдсан
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label m-t-10">Тайлбар:</label>
+                                        <div class="col-sm-8">
+                                                <textarea rows="6" class="form-control" id="topic-description"
+                                                          placeholder="Хэлэлцэх сэдвийн товч тайлбар..."></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="col-sm-2 control-label m-t-10">Хавсаргах<span
+                                                class="asterisk">:</span>
+                                        </label>
+                                        <div class="col-sm-8">
+                                        #{include "SharedView/Attachs.html"/}
+                                        #{ImgThumbnail /}
+                                            <div id="attachs"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-md-10 align-right">
+                                            <button class="btn btn-default m-t-10 m-r-10" onclick="clearTopic()">
+                                                <i class="fa fa-reply"></i> Болих
+                                            </button>
+                                            <button class="btn btn-success m-t-10" id="addTopicId" onclick="addTopic()">
+                                                <i class="fa fa-check"></i> Хадгалах
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 m-t-20 m-b-80"></div>
+    </div>
+</div>
+<div class="modal fade" id="modal-basic" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="padding: 15px;">
+            <h4 class="modal-title text-center"><strong>Хэлэлцэх сэдэв</strong></h4>
+
+            <div class="modal-body" id="modal-body-div">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="modal-delete" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" style="padding: 20px 20px 5px 20px;">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            <h4 class="modal-title text-center m-t-10"><strong>Та энэ сэдвийг устгах уу?</strong></h4>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default m-r-10 " data-dismiss="modal">Үгүй</button>
+                <button type="button" class="btn btn-success " data-dismiss="modal" id="yesDelete">Тийм</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="editTopicHtml" style="display: none"></div>
+#{selectTasks uid:"${user.id}", title:'Ажил сонгох', effect:10 /}
+#{meeting-show-config /}
+#{set activeMenu: 'Meeting'/}
+#{set activeMenuSub: 'MeetingList'/}
+#{checkFileExtension /}
+#{ImgThumbnail div:'div.post-images'/}
+#{AttachScript uploadPath:controllers.Consts.uploadMeetingTopicPath /}
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+
+<script>
+
+    $('input.numberic').forceNumericOnly(true);
+    var topicDeleteId = 0;
+    var filename = [];
+    var filedir = [];
+    var extension = [];
+    var filesize = [];
+    var i = 0;
+    var picOpt = {
+        monthsFull: ["Нэгдүгээр сар", "Хоёрдугаар cар", "Гуравдугаар сар", "Дөрөвдүгээр сар", "Тавдугаар сар", "Зургаадугаар сар", "Долоодугаар сар", "Наймдугаар сар", "Есдүгээр сар", "Аравдугаар сар", "Арваннэгдүгээр сар", "Арванхоёрдугаар сар"],
+        monthsShort: ["1 сар", "2 cар", "3 сар", "4 сар", "5 сар", "6 сар", "7 сар", "8 сар", "9 сар", "10 сар", "11 сар", "12 сар"],
+        weekdaysFull: ["Даваа", "Мягмар", "Лхагва", "Пүрэв", "Баасан", "Бямба", "Ням"],
+        weekdaysShort: ["Ня", "Да", "Мя", "Лх", "Пү", "Ба", "Бя"],
+
+        // Today and clear
+        today: 'Өнөөдөр',
+        clear: 'Цэвэрлэх',
+
+        // The format to show on the `input` element
+        format: 'yyyy-mm-d'
+
+    };
+    $(document).ready(function () {
+        $(".sortable_table").sortable({
+            itemPath: '> tbody',
+            itemSelector: 'tbody tr',
+            handle: 'div',
+            placeholder: '<tr class="placeholder"/>',
+            onDrop: function ($item, container, _super) {
+                $item.removeClass("dragged").removeAttr("style");
+                $("body").removeClass("dragging");
+                numberTable();
+            }
+        });
+        $('#yesDelete').on("click", function () {
+            loading2("tbody#topic-table-tbody tr#trMeTopic"+topicDeleteId+" td:last-child");
+            $.ajax({
+                type: "POST",
+                data: {
+                    deleteTopicId: topicDeleteId
+                }, url: "/meetingDeleteTopic"
+            }).success(
+                    function (data) {
+                        $("tbody#topic-table-tbody tr#trMeTopic"+topicDeleteId).remove();
+                    });
+        });
+    });
+    function numberTable() {
+        var i = 1;
+        var $row = $(".sortable_table").find("tr"),        // Finds the closest row <tr>
+                $tds = $row.find("td:nth-child(2)"); // Finds the 2nd <td> element
+
+        $.each($tds, function () {                // Visits every single <td> element
+            $(this).text(i + "");         // Prints out the text within the <td>
+            i++;
+        });
+    }
+    function showMore(id) {
+        $('div#modal-basic').modal('show');
+        loading2('div#modal-basic div#modal-body-div');
+        $.ajax({
+            type: "POST",
+            data: {
+                topicId: id
+            }, url: "/meetingShowModal"
+        }).success(
+                function (data) {
+                    $("div#modal-basic div#modal-body-div").html(data);
+                });
+    }
+
+    function addTopic(editId) {
+        $('a#tab-general').click();
+        loading2("tbody#topic-table-tbody");
+
+        $("div#attachContainer ul#uploadBox img.imgIcon").each(function () {
+            filename[i] = $(this).attr('filename');
+            filedir[i] = $(this).attr('filedir');
+            extension[i] = $(this).attr('extension');
+            filesize[i] = $(this).attr('filesize');
+            i++;
+        });
+        i = 0;
+        var IDs = [];
+        $("div#sendUserTag").find("li").each(function () {
+            IDs.push(this.id);
+        });
+        $.ajax({
+            type: "POST",
+            data: {
+                title: $('input#topic-title').val(),
+                tid: $('input#selectTaskInputHidden').val(),
+                priority: $('select#topic-priority option:checked').val(),
+                status: $('select#topic-status option:checked').val(),
+                category: $('select#topic-category option:checked').val(),
+                description: $('textarea#topic-description').val(),
+                filename: filename,
+                filedir: filedir,
+                extension: extension,
+                filesize: filesize,
+                userIds: IDs,
+                editTopicID: editId,
+                meetingId: '${meeting.id}'
+            }, url: "/meetingCreateTopic"
+        }).success(
+                function (data) {
+                    $("tbody#topic-table-tbody").html(data);
+                    tid = -1;
+                    $('[data-rel="tooltip"]').tooltip();
+                });
+        clearTopic();
+    }
+    function deleteTopic(topicId) {
+        topicDeleteId = topicId;
+        $('#modal-delete').modal('show');
+    }
+    function editTopic(topicId) {
+        $('a#tab-topic-add').click();
+        $.ajax({
+            type: "POST",
+            data: {
+                editTopicId: topicId
+            }, url: "/meetingEditTopic"
+        }).success(
+                function (data) {
+                    $("div#editTopicHtml").html(data);
+                });
+    }
+    function clearTopic() {
+        $('a#tab-general').click();
+        $('input#topic-title').val("");
+        $('button#selectChooseTaskButton').html("Ажил сонгох");
+        $('input#selectTaskInputHidden').html('');
+        $('div#sendUserTag').html("");
+        $('select#topic-priority').selectpicker('val', 1);
+        $('select#topic-status').selectpicker('val', 1);
+        $('textarea#topic-description').val("");
+        $('ul#uploadBox').html("<li><span> <span></span> </span></li>");
+    }
+    function sendToTaskFunc() {
+        var obj = $('div#divSelTask li.selected:first');
+        var tid = obj.attr('tid');
+        if (tid != undefined) {
+            $('input#selectTaskInputHidden').val(tid);
+            $('button#selectChooseTaskButton').html(obj.find('span.task').html());
+        }
+    }
+</script>

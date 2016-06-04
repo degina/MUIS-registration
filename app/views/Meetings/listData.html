@@ -1,0 +1,56 @@
+<table class="table table-tools table-hover tableMeeting">
+    <thead>
+    <tr>
+        <th style="width: 20px;text-align: center"><strong>#</strong></th>
+        <th><strong>Гарчиг</strong></th>
+        <th><strong>Огноо</strong></th>
+        <th><strong>Хурлын цаг</strong></th>
+        <th><strong>Хаана</strong></th>
+        <th class="text-center"><strong>Төлөв</strong></th>
+        <th class="text-center"><strong>Асуудал</strong></th>
+        <th class="text-center"><strong>Зарласан</strong></th>
+    </tr>
+    </thead>
+    <tbody>
+    #{if meetings.empty}
+    <tr>
+        <td colspan="6">Үр дүн байхгүй байна</td>
+    </tr>#{/if}
+    #{list items:meetings,as:'meeting'}
+    <tr class="clickable-row" data-href="@{Meetings.show(meeting.id)}">
+        <td class="text-center"> ${meeting.id} </td>
+        <td><a href="@{Meetings.show(meeting.id)}">${meeting.title}</a>  #{if meeting.checkNew()}<span
+                class="label label-danger pull-right m-r-20 w-300">&{'new'}</span>#{/if}</td>
+        <td>${meeting.meetingDate.format("yyyy-MM-dd")}</td>
+        <td>${meeting.meetingDate.format("HH:mm")} - ${meeting.finishDate.format("HH:mm")}</td>
+        <td>${meeting.location}</td>
+        <td class="text-center">
+        %{ String ongo="";
+            if (meeting.status.id == 1)ongo='success';
+            else if (meeting.status.id ==2) ongo='warning';
+            else if (meeting.status.id ==3) ongo='dark';
+            else ongo='info';
+            }%
+            <div class="label label-${ongo} w-300"
+                 style="display: inline-block; width: 70px;">${meeting.status.status.raw()}</div>
+        </td>
+        <td class="text-center"> ${meeting.meetingTopics.size()}</td>
+        <td class="text-center">${meeting.owner.lastnameFirstCharacter}.${meeting.owner.firstName}
+        </td>
+    </tr>
+    #{/list}
+    </tbody>
+</table>
+<script>
+    $(".clickable-row").click(function() {
+        window.document.location = $(this).data("href");
+    });
+</script>
+#{if MaxPageNumber>1}
+    #{include '/SharedView/pageNavigation.html'/}
+<script>
+    $("div#listDataTable input.number-button").click(function () {
+        searchFilter($(this).attr('pagenumber'));
+    });
+</script>
+#{/if}

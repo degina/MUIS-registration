@@ -1,0 +1,30 @@
+#{if type==3}
+    #{list items:budgetOpexDetails,as:'opex'}
+    <tr class="trNetSalesDetails${type}" style="background-color: #fff;">
+        <td ><label  style="margin-left: 20px;">${opex.name}</label></td>
+            <td class="text-right">${opex.budget}</td>
+            <td class="text-right">${opex.actual}</td>
+        <td colspan="3">${opex.description}</td>
+    </tr>
+    #{/list}
+#{/if}
+#{else }
+    #{list items:budgetActivities,as:'activity'}
+    <tr class="trNetSalesDetails${type}" style="background-color: #fff;">
+        <td><label  style="margin-left: 20px;">${activity.name}</label></td>
+        #{if type==0}
+            <td class="text-right">${activity.salesBudget}</td>
+            <td class="text-right">${activity.salesActual}</td>
+        #{/if}
+        #{elseif type==1}
+            <td class="text-right">${activity.cogsBudget}</td>
+            <td class="text-right">${activity.cogsActual}</td>
+        #{/elseif}
+        #{else }
+            <td class="text-right">${activity.profitBudget}</td>
+            <td class="text-right">${activity.profitActual}</td>
+        #{/else}
+        <td colspan="3">${activity.description}</td>
+    </tr>
+    #{/list}
+#{/else}

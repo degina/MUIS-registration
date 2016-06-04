@@ -1,0 +1,462 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'PunchList'/}
+#{fancybox-config /}
+<div id="main-content" style="font-weight: 500;padding-top: 20px">
+    <div class="row ">
+
+        <div class="col-md-12">
+        #{if punchList.questionReceivedFrom.id == user.id}
+            #{if punchList.status.status=='Resolved'}
+                <div class="alert alert-success fade in"
+                     style="display: block;margin:0px 0px 10px 0px; padding: 5px 20px 5px 20px; height: 35px !important;width: 100% !important;">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true"><i
+                            class="fa fa-times"></i></button>
+                    <strong><i class="fa fa-info-circle"></i></strong> &nbsp; &{'YourPunchResolved'}
+                </div>
+                <div class="panel bd-0 bd-l-dark">
+                    <div class="panel-heading" style="height: 60px;">
+                        <p style="width: 70%;" class="pull-left">&{'NotResolvedContent'}</p>
+                        <a type="button" href="@{controllers.PunchLists.close(punchList.id)}"
+                           class="btn btn-dark pull-right">
+                        &{'NotResolved'}
+                        </a>
+                        </button>
+                    </div>
+                </div>
+            #{/if}
+            #{elseif punchList.status.status=='NotResolved'}
+                <div class="panel bd-0 bd-l-dark">
+                    <div class="panel-heading alert-warning" style="height: 60px;">
+                        <p style="width: 70%;" class="pull-left">&{'ResolvedContent'}</p>
+                        <a type="button" href="@{controllers.PunchLists.close(punchList.id)}"
+                           class="btn btn-dark pull-right">
+                        &{'Resolved'}
+                        </a>
+                        </button>
+                    </div>
+                </div>
+            #{/elseif}
+        #{/if}
+            <div style="padding-left: 1%; height: 34px; vertical-align: middle; margin-top: 10px;margin-bottom: 10px;">
+                <h4 style="float: left;"><strong>PunchItem #${punchList.No}:</strong> ${punchList.name}</h4>
+            *{<button class="btn btn-default" onclick="historyPreviousPage()"}*
+            *{style="float: right; padding-right: 10px">}*
+            *{&{'Back'}}*
+            *{<i class="fa fa-angle-double-right m-r-5"></i>}*
+            *{</button>}*
+            </div>
+            <!-- end Header -->
+
+            <!-- General info -->
+            <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+        <span style="float: left;">
+            &{'PunchLists'} #${punchList.No} &{'MoreInfo'}
+        </span>
+            </div>
+            <div class="panel no-bd" style="padding-left: 1%;padding-right: 1%;">
+                <div class="panel-body" style="padding: 1% 4% 10px 4%; ">
+                    <div class="row">
+                        <form class="form-horizontal">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'CreatedDate'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${punchList.createDate.format("yyyy-MM-dd HH:mm")}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'ScheduleImpact'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        &{punchList.scheduleImpact.impact}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'CostImpact'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        &{punchList.costImpact.impact}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Priority'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        &{punchList.priority.priority}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5">
+                                            <strong>&{'IssuedBy'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${punchList.questionReceivedFrom}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'DueDate'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${punchList.dueDate.format("yyyy-MM-dd")}
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Project'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${punchList.project.name}
+                                        </div>
+                                    </div>
+                                #{if punchList.task != null}
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Task'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${punchList.task.projectObject.name + ", " + punchList.task.name}
+                                        </div>
+                                    </div>
+                                #{/if}
+                                #{if punchList.location != null}
+                                    <div class="form-group">
+                                        <div class="col-sm-5"><strong>&{'Location'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        ${punchList.location}
+                                        </div>
+                                    </div>
+                                #{/if}
+                                    <div class="form-group">
+                                        <div class="col-sm-5">
+                                            <strong>&{'Distribution'}:</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        #{if punchList.distributions.size()}
+                                            #{list items:punchList.distributions, as:'dist'}
+                                            ${dist_index == 1 ? dist.getName() : ", " + dist.getName()}
+                                            #{/list}
+                                        #{/if}
+                                        #{else }
+                                        &{'NoDistribution'}
+                                        #{/else}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group" style="margin-left: 0px">
+                                    <div class="col-sm-2"><strong>&{'Daalgavar'}:</strong>
+                                    </div>
+                                    <div class="col-sm-10" style="text-align: justify">
+                                        <p>${punchList.description.raw()}</p>
+                                    </div>
+                                </div>
+                            #{if punchList.attaches.size() > 0}
+                                <div class="form-group" style="margin-left: 0px">
+                                    <div class="col-sm-2"><strong>&{'Attachments'}:</strong>
+                                    </div>
+                                    <div class="col-sm-12" id="post-images-punchList-${punchList.id}">
+                                        #{list items:punchList.attaches, as:'attach'}
+                                            <div class="punchList-images align-center"
+                                                 style="float:left;  margin-right: 10px; padding: 0;">
+                                            ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                            </div>
+                                        #{/list}
+                                    </div>
+                                ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-punchList-"+punchList.id).raw()}
+                                </div>
+                            #{/if}
+                            #{if punchList.pins.size() > 0}
+                                <div class="form-group" style="margin-left: 0px">
+                                    <div class="col-sm-2"><strong>&{'DrawingLocation'}:</strong>
+                                    </div>
+                                    <div class="col-sm-12">
+                                        #{list items:punchList.pins, as:'dpin'}
+                                            <div class="btn btn-default drewImg"
+                                                 title="${dpin.revision.drawing.title}"
+                                                 onclick="prepareToShow(${dpin.id})"
+                                                 style="vertical-align: middle; width: 100px; height: 100px; background: url('${dpin.revision.dir + "t.jpg"}') no-repeat center; background-size: 100px 100px; margin-right: 5px;">
+                                                                                            </div>
+                                        #{/list}
+                                    </div>
+                                </div>
+                            #{/if}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- end General info -->
+
+            <!-- Subject info -->
+            <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+        <span style="float: left;">
+            &{'PunchAssignee'}
+        </span>
+            </div>
+            <div class="panel no-bd" style="padding-left: 1%;padding-right: 1%;">
+                <div class="panel-body" style="padding: 1% 4% 10px 4%; ">
+                    <div class="row">
+                        <form class="form-horizontal">
+                            <div class="col-md-12">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <div class="col-sm-5">
+                                            <strong>${punchList.assignee}
+                                                :</strong>
+                                        </div>
+                                        <div class="col-sm-7">
+                                        #{if punchList.status.status=='NotResolved'}
+                                        &{'NotResolved'}
+                                        #{/if}
+                                #{elseif punchList.status.status=='Resolved'}
+                                        &{'Resolved'}
+                                        #{/elseif}
+                                #{else }
+                                        &{'Draft'}
+                                        #{/else}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- end Subject info -->
+
+            <!-- chats-->
+        #{if replies.size() == 0 && punchList.status.status == 'Resolved'}
+        #{/if}
+        #{else }
+            <div class="col-md-12" style="padding:0px">
+                <div class="panel panel-default chat">
+                    <div style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+                <span style="float: left;">
+                    &{'Replies'}
+                </span>
+                    </div>
+                    #{if replies.size()>0}
+                        <div class="panel-body withScroll mCustomScrollbar _mCS_3" style="height: auto;">
+                            <div class="mCustomScrollBox mCS-dark-2" id="mCSB_3"
+                                 style="position:relative; height:100%; overflow:hidden; max-width:100%;">
+                                <div class="mCSB_container" style="position: relative; top: 0px;">
+                                    <ul>
+                                        #{list items:replies, as:'reply'}
+                                            #{if reply.author.id == user.id }
+                                                <li class="left clearfix">
+                                            <span class="chat-img pull-left">
+                                                <img src="${reply.author.profilePicture}" alt="avatar 6" width="50">
+                                            </span>
+
+                                                    <div class="chat-body clearfix">
+                                                        <div class="header">
+                                                            <strong class="primary-font">${reply.author.userPosition.name + ": " + reply.author}</strong>
+                                                            <small class="pull-right text-muted"><span
+                                                                    class="glyphicon glyphicon-time"></span>${reply.createDate.format("yyyy-MM-dd HH:mm")}
+                                                            </small>
+                                                        </div>
+                                                        <p style="text-align: left"> ${reply.response.raw()} </p>
+
+                                                        #{if reply.attaches.size() > 0}
+                                                            <div class="header">
+                                                                <i class="primary-font">&{'Attachments'}:</i>
+                                                            </div>
+                                                            <div style="margin-bottom: 10px;height: 50px;"
+                                                                 id="post-images-reply-${reply.id}">
+                                                                #{list items:reply.attaches, as:'attach'}
+                                                                    <div class="punchList-images align-center"
+                                                                         style="float:left;  margin-right: 10px;">
+                                                                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension, attach.filesize).raw()}
+                                                                    </div>
+                                                                #{/list}
+                                                            </div>
+                                                        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-reply-"+reply.id).raw()}
+                                                        #{/if}
+                                                    </div>
+                                                </li>
+                                            #{/if}
+                                            #{else }
+                                                <li class="right clearfix">
+                                            <span class="chat-img pull-right">
+                                                <img src="${reply.author.profilePicture}" alt="avatar 3" width="50">
+                                            </span>
+
+                                                    <div class="chat-body clearfix">
+                                                        <div class="header">
+                                                            <small class="text-muted"><span
+                                                                    class="glyphicon glyphicon-time"></span>${reply.createDate.format("yyyy-MM-dd HH:mm")}
+                                                            </small>
+                                                            <strong class="pull-right primary-font">${reply.author.userPosition.name + ": "+reply.author}
+                                                            *{<i class="fa fa-times" title="&{'Delete'}"></i>}*
+                                                            </strong>
+
+                                                        </div>
+                                                        <p style="text-align: right">${reply.response.raw()}</p>
+
+                                                        #{if reply.attaches.size() > 0}
+                                                            <div class="header pull-right">
+                                                                <i class="primary-font">&{'Attachments'}:</i>
+                                                            </div>
+                                                            <br/>
+
+                                                            <div style="margin-bottom: 10px;height: 50px;"
+                                                                 class="pull-right" id="post-images-reply-${reply.id}">
+                                                                #{list items:reply.attaches, as:'attach'}
+                                                                    <div class="punchList-images align-center"
+                                                                         style="float:right;  margin-left: 10px;">
+                                                                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                                                                    </div>
+                                                                #{/list}
+                                                            </div>
+                                                        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-reply-"+reply.id).raw()}
+                                                        #{/if}
+                                                    </div>
+                                                </li>
+                                            #{/else}
+
+                                        #{/list}
+                                    </ul>
+                                </div>
+                                <div class="mCSB_scrollTools" style="position: absolute; display: block; opacity: 0;">
+                                    <div class="mCSB_draggerContainer">
+                                        <div class="mCSB_dragger" style="position: absolute; height: 159px; top: 0px;"
+                                             oncontextmenu="return false;">
+                                            <div class="mCSB_dragger_bar"
+                                                 style="position: relative; line-height: 159px;">
+                                            </div>
+                                        </div>
+                                        <div class="mCSB_draggerRail">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    #{/if}
+                    #{if punchList.status.status == "NotResolved" && punchList.isAllowReply(user.id)}
+                        <div class="panel-footer">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <form action="@{controllers.PunchLists.reply()}" id="punchListReplyFeild"
+                                          role="form" method="post">
+                                        <div class="form-group">
+                                            <input type="hidden" name="id" id="replyid" value="${punchList.id}"/>
+                                            <textarea name="response" id="replytext" rows="5" style="resize: vertical;"
+                                                      class="form-control"></textarea>
+                                        </div>
+                                        <div style="width: 100%;min-height: 50px;">
+                                            <div style="">
+                                                <div style="display:none">
+                                                    <div id="showPictureZoom">
+                                                        <img id="zoomedPicture" src=""/>
+                                                    </div>
+                                                    <a id="showPictureZoomA" href="#showPictureZoom"></a>
+                                                </div>
+                                                <div id="punchListRFIAttachContainer" style="height: 25px;">
+                                                    <div style="display: none" id="documentImageTemplate">
+                                                        <li>
+                                                        <span>
+                                                            <span></span>
+                                                        </span>
+                                                        </li>
+                                                    </div>
+                                                    <div style="display: none" id="deleteImageTemplate">
+                                                        <img height='12' class='deleteUploadedImage' width='12'
+                                                             src="@{'/public/images/delete-image.png'}"
+                                                             fileDir='#fileDir' extension='#extension'/>
+                                                    </div>
+                                                    <ul id="uploadBox" id="post-images-punchList-${punchList.id}">
+                                                        <li>
+                                                        <span>
+                                                            <span></span>
+                                                        </span>
+                                                        </li>
+                                                    </ul>
+                                                ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-punchList-"+punchList.id).raw()}
+
+                                                </div>
+                                                <div id="punchListAttachs"></div>
+                                            </div>
+                                        </div>
+                                        <div style="width: 30%; padding-top: 20px;">
+                                            <button style="" type="button" id="send"
+                                                    onclick="writeReplyToPunchList()"
+                                                    class="btn btn-danger ">&{'Send'}</button>
+                                            <button style=" margin-right: 2%" id="formClear" type="reset"
+                                                    class="btn btn-default">
+                                            &{'Clear'}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    #{/if}
+                    #{else}
+                        <div style="height: 30px!important;"></div>
+                    #{/else}
+                </div>
+            </div>
+        #{/else}
+
+        </div>
+
+    </div>
+</div>
+
+
+<script>
+    #{if stat != null && stat != ""}
+    $(window).load(function () {
+        notificationOn("success", "${stat}");
+    });
+    #{/if}
+    function writeReplyToPunchList() {
+        var obj = $('div#punchListAttachs');
+        $("div#punchListRFIAttachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type='hidden' name='filename' value='" + $(this).attr('filename') + "'>" +
+                    "<input type='hidden' name='filedir' value='" + $(this).attr('filedir') + "'>" +
+                    "<input type='hidden' name='extension' value='" + $(this).attr('extension') + "'>" +
+                    "<input type='hidden' name='filesize' value='" + $(this).attr('filesize') + "'>");
+        });
+        $("form#punchListReplyFeild").submit();
+    }
+    $("button#formClear").click(function () {
+        $("div#punchListRFIAttachContainer ul#uploadBox").html($("div#punchListRFIAttachContainer div#documentImageTemplate").html());
+    });
+    //            function uploadPunchListClick(ban) {
+    //                var image = $(ban).find('img');
+    //                if (image.length > 0) {
+    //                    var ext = checkFileExtension(image.attr('extension'));
+    //                    if (ext == imageFile && image.attr('nowUpload') != undefined)$.fancybox.open(image.attr('fileDir') + "." + image.attr('extension'));
+    //                    else handleAttachmentClick(image, ext);
+    //                } else {
+    //                    selectedUbox = "punchListFileAttach";
+    //                    $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").click();
+    //                }
+    //            }
+    $(document).ready(function () {
+        $("#mCSB_3").mCustomScrollbar({
+            theme: "dark-2"
+        });
+    });
+</script>
+<style>
+    div.punchList-images img {
+        height: 40px !important;
+        width: 40px !important;
+        cursor: pointer;
+        margin: 5px 5px 0 0;
+        box-shadow: 0 0 1px gray;
+        border: 1px solid #333;
+        border-radius: 2px;
+        background: white;
+    }
+</style>
+#{include '/Drawings/showingModal.html'/}
+#{ImgThumbnail div:'div.punchList-images', divid:'plp'/}
+#{PunchList-RFI-upload /}
+#{punchList-rfi-config name:'PunchList' /}

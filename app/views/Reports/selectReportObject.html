@@ -1,0 +1,134 @@
+%{
+projects=controllers.TaskUsers.getMyProjectRels();
+if(projects.size()==0){
+projectObjects=controllers.TaskUsers.getMyProjectObRels();
+if(projectObjects.size()==0){
+tasks=controllers.TaskUsers.getMyTaskRels();
+}
+}
+count=0;count2=0;count3=0;
+}%
+<div class="md-modal md-effect-10" id="modal-select-task">
+    <div class="md-content md-content-white noselect">
+        <div style="max-height: 500px;overflow-x: hidden;overflow-y:auto;padding: 0" id="divSelTask">
+            <h3>&nbsp;
+                <button type="button" class="close" style="font-size: 20px" aria-hidden="true"
+                        onclick="closeModalDialog()">×
+                </button>
+            </h3>
+            <ul>
+                <li id="Task-0-0" class="selTaskTr" expand="0" style="cursor: pointer"
+                    onclick="clickTaskLi('Task',0,0)"><span class="taskMain">Ажил</span><span
+                        class="loadget"></span>
+                </li>
+                <li id="User-0-0" class="selTaskTr" expand="0" style="cursor: pointer"
+                    onclick="clickTaskLi('User',0,0)"><span class="userMain">Ажилтан</span><span
+                        class="loadget"></span>
+                </li>
+            </ul>
+        </div>
+        <div>
+            <button class="btn btn-modal btn-default" style="display: none;">Сонгох</button>
+        </div>
+    </div>
+</div>
+<div class="md-overlay"></div> <!-- Overlay Element. Important: place just after last modal -->
+<script type="text/javascript">
+    var getMyTaskObjects = #{jsAction @FunctionController.getTaskUserObjects(":stype",":otype",":oid") /};
+    function clickTaskLi(stype, otype, oid) {
+        var obj = $('div#divSelTask li#' + stype + '-' + otype + '-' + oid);
+        if (obj.attr('expand') == 0) {
+            obj.find('span.loadget').html("<img src='/public/images/loading.gif'>");
+            $.post(getMyTaskObjects({stype: stype, otype: parseInt(otype), oid: parseInt(oid)}), function (data) {
+                obj.find('span.loadget').html("");
+                obj.after(data);
+                obj.attr('expand', 1);
+            });
+        } else {
+            obj.attr('expand', 0);
+            obj.parent().find("div.exp-" + stype + '-' + otype + "-" + oid).each(function () {
+                $(this).remove();
+            });
+        }
+    }
+    function closeModalDialog() {
+        $('button.btn-modal').click();
+    }
+    function chooseTaskLi(stype, otype, oid) {
+        var obj = $('div#divSelTask li#' + stype + '-' + otype + '-' + oid);
+        obj.find('span.choose').remove();
+        if (stype == "Task") {
+            if (otype == 1)stype = "Project";
+            else if (otype == 2)stype = "ProjectObject";
+            else stype = "Task";
+        } else if (stype == "User") {
+            if (otype == 1)stype = "UserTeam";
+            else if (otype == 2)stype = "User";
+        }
+        obj.find('span.loadget').before("<div style='text-align: right'>" +
+        "<span class='choose' onclick=choosedTask('" + stype + "',0," + oid + ")>Сар,&nbsp;</span>" +
+        "<span class='choose' onclick=choosedTask('" + stype + "',1," + oid + ")>7 Хоног,&nbsp;</span>" +
+        "<span class='choose' onclick=choosedTask('" + stype + "',2," + oid + ")>Өдөр</span></div>");
+    }
+    function choosedTask(stype, timeType, oid) {
+        closeModalDialog();
+        $('div#divSelTask .expandDivs').each(function () {
+            $(this).remove();
+        });
+        if (stype == "Task" || stype == "User") {
+            if (firstHided) {
+                $('div#main-content .firstHide').each(function () {
+                    $(this).removeClass("firstHide");
+                });
+            }
+            changeDateReport(stype, timeType, selectedDate, oid);
+        }
+        else alert("Coming soon");
+    }
+
+</script>
+
+<style>
+    div#divSelTask h3 {
+        font-size: 18px;
+    }
+
+    div#divSelTask ul {
+        padding: 0;
+        border-top: 1px solid #ddd;
+        width: 100%;
+    }
+
+    div#divSelTask li {
+        padding: 4px 8px;
+        border-bottom: 1px solid #d3d3d3;
+    }
+
+    div#divSelTask li.selTaskTr:hover {
+        background-color: #eee;
+    }
+
+    div#divSelTask span.expDiv1 {
+        color: #0572ff;
+    }
+
+    div#divSelTask span.expDiv3 {
+        color: #0572ff;
+    }
+
+    div#divSelTask li.even {
+        background-color: #f9f9f9;
+    }
+
+    div#divSelTask span.choose {
+        color: #0090d9;
+        font-style: italic;
+        font-size: 11px;
+        cursor: pointer;
+    }
+
+    div#divSelTask span.choose:hover {
+        color: #2a6496;
+        text-decoration: underline;
+    }
+</style>

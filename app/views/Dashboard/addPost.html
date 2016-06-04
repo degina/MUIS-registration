@@ -1,0 +1,333 @@
+<div class="modal fade modal-fullscreen" id="imageShowModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-body">
+            </div>
+        </div>
+    </div>
+</div>
+#{list items:posts,as:'post'}
+    #{if post.pin}
+        <div class="row" id="pin">Пин нийтлэл</div>
+    #{/if}
+    #{if post.type != 'question'}
+        <div class="row">
+            <div class="post" id="postId${post.id}">
+                <div class="post-head">
+                    #{if user.getPermissionType("dashboard") == 3 || user.id == post.owner.id}
+                        <div class="deletePostIcon"  style="cursor: pointer;">
+                            <div class="dropdown">
+                                <i data-toggle="dropdown" class="dropdown-toggle fa fa-angle-down"
+                                   style="font-weight: bold;"></i>
+                                <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dLabel" style="-webkit-box-shadow: 0 2px 40px rgba(0,0,0,.4);box-shadow: 0 2px 40px rgba(0,0,0,.4);">
+                                    <li>
+                                        <a onclick="deletePost('${post.id}')">Устгах</a>
+                                    </li>
+                                    <li>
+                                        <a onclick="editPost('${post.id}')">Нийтлэл засах </a>
+                                    </li>
+                                    #{if admin && post.event == null}
+                                        #{if post.pin}
+                                            <li>
+                                                <a onclick="pinPost('${post.id}',0)">Пин болих</a>
+                                            </li>
+                                        #{/if}
+                                        #{else}
+                                            <li>
+                                                <a onclick="pinPost('${post.id}',1)">Пин болгох</a>
+                                            </li>
+                                        #{/else}
+                                    #{/if}
+                                </ul>
+                            </div>
+                        </div>
+                    #{/if}
+                    #{if post.type == null || post.type.equals("") || post.type.equals("post") || post.type.equals("question") || post.type.equals("event")}
+                        <div class="media" style="margin-top: 0">
+                            <img src="${post.owner.profilePicture}" alt="avatar 12" width="50"
+                                 class="pull-left">
+
+                            <div class="media-body answer-info">
+                                <div><strong style="color: #262626;">${post.owner}</strong> <br/>
+                                <span class="c-gray" style="font-size: 12px;"><i class="fa fa-clock-o p-r-10"></i>
+                                ${controllers.Functions.monthName[Integer.parseInt(post.createdDate.format("MM"))-1]}
+                                ${post.createdDate.format("dd, HH:mm")}</span>
+                                </div>
+                            </div>
+                        </div>
+                    #{/if}
+                    #{else }
+                        <div class="media" style="margin-top: 0">
+                            <img src="${post.owner.profilePicture}" alt="avatar 12" width="50"
+                                 class="pull-left">
+
+                            <div class="media-body answer-info">
+                                <div><strong style="color: #262626;">${post.owner} <span style="margin-left:5px;"><i
+                                        class="fa fa-caret-right"></i> </span> <img
+                                        src="/public/images/image/${post.typeIconName}" width="25px;"/> ${post.type}</strong>
+                                    <br/>
+                            <span class="c-gray" style="font-size: 12px;"><i class="fa fa-clock-o p-r-10"></i>
+                            ${post.createdDate.format("yyyy-MM-dd")}</span>
+                                </div>
+                            </div>
+                        </div>
+                    #{/else}
+                </div>
+                <div class="post-body">
+                    <div class="post-content">${post.getShortContent().raw()}</div>
+                    %{attach = post.getFirstAttach();}%
+                    #{if attach != null}
+                        #{if attach.extension == 'mp4'}
+                            <video width="100%" style="border:2px solid" controls >
+                                <source src="${attach.dir}.${attach.extension}" type="video/mp4">
+                                Your browser does not support HTML5 video.
+                            </video>
+                        #{/if}
+                        #{else}
+                            <div class="post-attach" onclick="showfullPost('${post.id}',1)">
+                                <img src="${attach.dir}.${attach.extension}" alt="" class="img-responsive-my"/>
+                            </div>
+                            <div class="post-attach-all">
+                                #{list post.getFirstFiveAttach(),as:'attach'}
+                                    <img src="${attach.dir}t.jpg" onclick="showfullPost('${post.id}','${attach_index+1}')"
+                                         class="img-responsive-my-small"/>
+                                #{/list}
+                            %{attachSize = post.attachSize();}%
+                                #{if attachSize > 5}
+                                    <div class="post-plus-attach" onclick="showfullPost('${post.id}',6)"><span
+                                            style="margin: 0 auto;">+${attachSize -5}</span></div>
+                                #{/if}
+                            </div>
+                        #{/else}
+                    #{/if}
+                </div>
+                <div class="post-like">
+                    <div class="pull-left">
+                        <span class="badge badge-default m-l-10 f-15" onclick="likeThisPost('${post.id}')"
+                              data-rel="tooltip" data-placement="bottom" title="${post.likeUsers}"
+                              id="spanPostLike${post.id}" style="cursor: pointer">
+                            #{if post.likeUsers.contains(user.toString())}
+                                <i class="fa fa-thumbs-up"></i>
+                            #{/if}
+                            #{else }
+                                <i class="fa fa-thumbs-o-up"></i>
+                            #{/else}  ${post.likes}
+                        </span>
+                    </div>
+                </div>
+                <div #{if post.comments == null || post.comments.size() == 0}style="display: none"#{/if} class="show-more-comment" onclick="showMoreComment('${post.id}','/dashboard/showMoreComment')">
+                    <span id="postSize${post.id}">${post.comments != null?post.comments.size():"0"} сэтгэгдлүүд</span>
+                    <span class="f-12 w-300" id="spanChevron${post.id}" style="color:#262626;"> <i
+                            class="fa fa-chevron-down"></i> </span>
+                </div>
+                <div class="post-comments" id="post-comments${post.id}">
+                    #{list items:post.getLastTwoComment(),as:'comment'}
+                        <div class="message-item" id="post-comment${comment.id}">
+                            #{if user.getPermissionType("dashboard") == 3 || user.id == comment.owner.id}
+                                <div class="deleteCommentIcon"  style="cursor: pointer;">
+                                    <div class="dropdown">
+                                        <i data-toggle="dropdown" class="fa fa-edit" style="font-weight: bold;"></i>
+                                        <ul style="position:static" class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dLabel">
+                                            <li>
+                                                <a onclick="deleteComment('${post.id}','${comment.id}')">Устгах</a>
+                                            </li>
+                                            <li>
+                                                <a onclick="editComment('${post.id}','${comment.id}')">Засах</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            #{/if}
+                            <div class="post-comment">
+                                <img src="${comment.owner.profilePicture}" alt="avatar 10" width="35"
+                                     class="pull-left m-t-5">
+                                <div class="media-body">
+                                    <div><span class="post-comment-owner">${comment.owner}</span>,
+                                        <span class="post-comment-created-time">${comment.createdDate.format("dd, HH:mm")}</span>
+                                    </div>
+                                    <div id="commentText" style="word-wrap: break-word">${comment.comment.raw()}</div>
+                                </div>
+                            </div>
+                        </div>
+                    #{/list}
+                </div>
+                <div class="post-add-comment" id="addComment${post.id}">
+                    <div class="small-comment">Сэтгэгдэл бичих...</div>
+                    <div class="full-comment">
+                        <img src="${user.profilePicture}" alt="avatar 10" width="35"
+                             class="pull-left m-r-10">
+                        <div class="media-body">
+                        *{<div contentEditable="true" class="textComment"></div>}*
+                            <textarea class="form-control" id="textComment"></textarea>
+                        <span class="RR">
+                            <button type="button" class="btn btn-post" onclick="addComment('${post.id}')">
+                                Нийтлэх
+                            </button>
+                            <button type="button" class="btn btn-default btn-white m-l-5"
+                                    onclick="cancelComment('${post.id}')">Болих
+                            </button>
+                        </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    #{/if}
+    #{elseif post.type == 'question'}
+    <div class="row">
+        <div class="post" id="postId${post.id}">
+            <div class="post-head">
+                #{if user.getPermissionType("dashboard") == 3 || user.id == post.owner.id}
+                    <div class="deletePostIcon"  style="cursor: pointer;">
+                        <div class="dropdown">
+                            <i data-toggle="dropdown" class="dropdown-toggle fa fa-angle-down"
+                               style="font-weight: bold;"></i>
+                            <ul class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dLabel" style="-webkit-box-shadow: 0 2px 40px rgba(0,0,0,.4);box-shadow: 0 2px 40px rgba(0,0,0,.4);">
+                                <li>
+                                    <a onclick="deletePost('${post.id}')">Устгах</a>
+                                </li>
+                                <li>
+                                    <a onclick="editPost('${post.id}')">Нийтлэл засах</a>
+                                </li>
+                                #{if admin && post.event == null}
+                                    #{if post.pin}
+                                        <li>
+                                            <a onclick="pinPost('${post.id}',0)">Пин болих</a>
+                                        </li>
+                                    #{/if}
+                                    #{else}
+                                        <li>
+                                            <a onclick="pinPost('${post.id}',1)">Пин хийх</a>
+                                        </li>
+                                    #{/else}
+                                #{/if}
+                            </ul>
+                        </div>
+                    </div>
+                #{/if}
+                <div class="media" style="margin-top: 0">
+                    <img src="${post.owner.profilePicture}" alt="avatar 12" width="50"
+                         class="pull-left">
+
+                    <div class="media-body answer-info">
+                        <div><strong style="color: #262626;">${post.owner} </strong> асуулт асуусан. <br/>
+                        <span class="c-gray" style="font-size: 12px;"><i class="fa fa-clock-o p-r-10"></i>
+                        ${controllers.Functions.monthName[Integer.parseInt(post.createdDate.format("MM"))-1]}
+                        ${post.createdDate.format("dd, HH:mm")}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="post-body" id="askBody">
+                <div class="post-content" style="">${post.getShortContent().raw()}</div>
+                #{list items:post.choices,as:'choice'}
+                    <div id="choice${choice.id}" style="height: 31px;margin-bottom: 10px">
+                        <div class="askImage" style="float: right; list-style-type: none; width: 34%">
+                            #{list items:choice.getVotes(),as:'vote'}
+                                <img id="askUserImage${vote.user.id}" src="${vote.user.profilePicture}" width="30" data-rel="tooltip" data-original-title="${vote.user.toString()}">
+                            #{/list}
+                            #{if choice.getVotesSize() > 3}
+                                <div class="pull-right" style="cursor: pointer;">
+                                <span style="margin-top: 5px" class="badge badge-default m-l-10 f-15" onclick="showVoteSize(${choice.id})">+${choice.getVotesSize()-3}
+                                </span>
+                                </div>
+                            #{/if}
+                        </div>
+                        <div class="progress" style="width: 65%;height: 30px">
+                            <div id="divChoice${choice.id}" class="progress-bar ${choice.userVoteColor(user.id, choice.id)}"  style="width:${choice.procent}%;cursor:default;">
+                                <div class="pull-left" style="position: absolute;margin: 4px 0 0 8px">
+                                    <input style="vertical-align: middle;margin: 0 0 0 0" type="checkbox"  onclick="addVote('${post.id}','${choice.id}', '${user.profilePicture}', '${user.toString()}')" ${choice.userVote(user.id, choice.id)}>
+                                    <span style="color: black;vertical-align: middle;">${choice.choice}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                #{/list}
+                <input class="form-control" style="width: 65%;height: 25px" id="addNewChoice" placeholder="Сонголт нэмэх..." type="text" name="${post.id}">
+            </div>
+            <div class="post-like">
+                <div class="pull-left">
+                        <span class="badge badge-default m-l-10 f-15" onclick="likeThisPost('${post.id}')"
+                              data-rel="tooltip" data-placement="bottom" title="${post.likeUsers}"
+                              id="spanPostLike${post.id}" style="cursor: pointer">
+                            #{if post.likeUsers.contains(user.toString())}
+                                <i class="fa fa-thumbs-up"></i>
+                            #{/if}
+                            #{else }
+                                <i class="fa fa-thumbs-o-up"></i>
+                            #{/else}  ${post.likes}
+                        </span>
+                </div>
+            </div>
+            <div #{if post.comments == null || post.comments.size() == 0}style="display: none"#{/if} class="show-more-comment" onclick="showMoreComment('${post.id}','/dashboard/showMoreComment')">
+                <span id="postSize${post.id}">${post.comments != null?post.comments.size():"0"} сэтгэгдлүүд</span>
+                    <span class="f-12 w-300" id="spanChevron${post.id}" style="color:#262626;"> <i
+                            class="fa fa-chevron-down"></i> </span>
+            </div>
+            <div class="post-comments" id="post-comments${post.id}">
+                #{list items:post.getLastTwoComment(),as:'comment'}
+                    <div class="message-item" id="post-comment${comment.id}">
+                        #{if user.getPermissionType("dashboard") == 3 || user.id == comment.owner.id}
+                            <div class="deleteCommentIcon" style="cursor:pointer">
+                                <div class="dropdown">
+                                    <i data-toggle="dropdown" class="fa fa-edit" style="font-weight: bold;"></i>
+                                    <ul style="position:static" class="dropdown-menu dropdown-menu-right" role="menu" aria-labelledby="dLabel">
+                                        <li>
+                                            <a onclick="deleteComment('${post.id}','${comment.id}')">Устгах</a>
+                                        </li>
+                                        <li>
+                                            <a onclick="editComment('${post.id}','${comment.id}')">Засах</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        #{/if}
+                        <div class="post-comment">
+                            <img src="${comment.owner.profilePicture}" alt="avatar 10" width="35"
+                                 class="pull-left m-t-5">
+                            <div class="media-body">
+                                <div><span class="post-comment-owner">${comment.owner}</span>,
+                                    <span class="post-comment-created-time">${comment.createdDate.format("dd, HH:mm")}</span>
+                                </div>
+                                <div id="commentText" style="word-wrap: break-word">${comment.comment.raw()}</div>
+                            </div>
+                        </div>
+                    </div>
+                #{/list}
+            </div>
+            <div class="post-add-comment" id="addComment${post.id}">
+                <div class="small-comment">Сэтгэгдэл бичих...</div>
+                <div class="full-comment">
+                    <img src="${user.profilePicture}" alt="avatar 10" width="35"
+                         class="pull-left m-r-10">
+                    <div class="media-body">
+                    *{<div contentEditable="true" class="textComment"></div>}*
+                        <textarea class="form-control" id="textComment"></textarea>
+                        <span class="RR">
+                            <button type="button" class="btn btn-post" onclick="addComment('${post.id}')">
+                                Нийтлэх
+                            </button>
+                            <button type="button" class="btn btn-default btn-white m-l-5"
+                                    onclick="cancelComment('${post.id}')">Болих
+                            </button>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    #{/elseif}
+    <script>
+        $('div#addComment' + '${post.id}').find('div.small-comment').click(function () {
+                $(this).css('border', '2px solid #0090d9');
+                var currentDiv = $(this);
+                setTimeout(function () {
+                    currentDiv.hide();
+                    currentDiv.next('.full-comment').show().find('#textComment').focus();
+            }, 100);
+        });
+        $(function () {
+            $('span[data-rel="tooltip"]').tooltip();
+        });
+    </script>
+#{/list}

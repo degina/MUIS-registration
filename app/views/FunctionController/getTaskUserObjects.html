@@ -1,0 +1,33 @@
+<div class="expandDivs exp-${stype}-${otype}-${oid}">
+#{list items:objects,as:'obj'}
+    <li id=${stype}-${otype+1}-${obj.id} class="selTaskTr" expand="0"
+        style="padding-left: ${(otype+1)*15}px">
+        <span class="expDiv${otype+1}" style="cursor: pointer" onclick="clickTaskLi('${stype}',${otype+1},${obj.id})">
+        #{if stype.equals('Task')}
+            #{if otype==0}
+            ${obj.name}&nbsp;(${obj.projectObjects.size()})
+            #{/if}
+            #{elseif otype==1}
+            ${obj.name}&nbsp;(${obj.tasks.size()})
+            #{/elseif}
+            #{elseif otype==2}
+            ${obj.name}&nbsp;(${obj.tasks.size()})
+            #{/elseif}
+            #{elseif otype==3}
+            ${obj.name}&nbsp;(${obj.tasks.size()})
+            #{/elseif}
+        #{/if}
+            #{else }
+                #{if otype==0}
+                ${obj.name}&nbsp;(${obj.users.size()})
+                #{/if}
+                #{elseif otype==1}
+                ${obj.toString()}
+                #{/elseif}
+            #{/else}
+            </span>
+        <span class="loadget"></span>
+        <span class="choose" style="float: right" onclick="chooseTaskLi('${stype}',${otype+1},${obj.id})">Сонгох</span>
+    </li>
+#{/list}
+</div>

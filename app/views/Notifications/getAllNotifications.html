@@ -1,0 +1,13 @@
+<ul>
+#{include '/Notifications/notificationsHeader.html'/}
+</ul>
+#{if MaxPageNumber>1}
+<div style="margin: 10px 2px">
+    #{include '/SharedView/pageNavigation.html'/}
+</div>
+<script>
+    $("div#loadNotificationData input.number-button").click(function () {
+        loadNotificationData($(this).attr('pagenumber'));
+    });
+</script>
+#{/if}

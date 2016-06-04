@@ -1,0 +1,35 @@
+<script>
+    selectedDate = "${dateBetween.dateS.format('yyyy-MM-dd')}";
+    if (selectReportObjType == "Project") {
+        $('td#selectReportType span').each(function () {
+            $(this).hide();
+        });
+    } else {
+        $('td#selectReportType span').each(function () {
+            $(this).show();
+        });
+    }
+    var todayButtonSpan = $('table#mainHeader span#todayButton');
+    if (selectReportTimeType == 0) {
+        $('table#mainHeader h2#dateTitle').html('${dateBetween.title}');
+        todayButtonSpan.html("Энэ сар");
+        if (selectedDate != nowMonth)todayButtonSpan.removeClass('fc-state-disabled');
+        else todayButtonSpan.addClass('fc-state-disabled');
+    } else if (selectReportTimeType == 1) {
+        $('table#mainHeader h2#dateTitle').html('${dateBetween.title}');
+        todayButtonSpan.html("Энэ 7 хоног");
+        if (selectedDate != nowWeek)todayButtonSpan.removeClass('fc-state-disabled');
+        else todayButtonSpan.addClass('fc-state-disabled');
+    } else {
+        todayButtonSpan.html("Өнөөдөр");
+        if (selectedDate != todayDate)todayButtonSpan.removeClass('fc-state-disabled');
+        else todayButtonSpan.addClass('fc-state-disabled');
+        var inputDay = $('table#mainHeader h2#dateTitle');
+        inputDay.html("<span>Өдөр: <input type='text' style='background: transparent;border: none;width: 180px;cursor:pointer' value='${dateBetween.dateS.format('yyyy-MM-dd')}'/></span>");
+        inputDay.find("input").pickadate(picOpt).on('change', function () {
+            selectedDate = $(this).val();
+            changeReportData(0);
+        });
+
+    }
+</script>

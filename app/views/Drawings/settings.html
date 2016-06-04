@@ -1,0 +1,19 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Drawing'/}
+#{set activeMenuSub:'DrawingHistory'/}
+<script src="/assets/plugins/currentset/d3.js"></script>
+<link rel="stylesheet" href="/assets/plugins/font-awesome-animation/font-awesome-animation.min.css">
+<div id="main-content"
+     style="background-image: url('/public/images/drawing/background.jpg'); background-attachment: fixed; background-size: cover;">
+    <div class="row">
+        <div class="col-md-12">
+        #{else}
+        #{/else}
+        </div>
+    </div>
+</div>
+#{drawing-config /}
+#{include '/Drawings/modal.html'/}
+#{checkFileExtension /}
+#{ImgThumbnail div:'div#pros'/}
+#{fancybox-config /}

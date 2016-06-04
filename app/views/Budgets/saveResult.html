@@ -1,0 +1,64 @@
+${budget.netIncomeBudget}
+<script>
+    var currentTd= $('td#tdOperatingProfitActual');
+    %{ value = budget.operatingProfitVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    $('td#tdOperatingProfitVariancePercent').html("${controllers.Functions.getFloatFormat(budget.operatingProfitVariancePercent,2)}%");
+
+    currentTd= $('td#tdOtherExpensesVariance');
+    %{ value = budget.otherExpensesVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    $('td#tdOtherExpensesVariancePercent').html("${controllers.Functions.getFloatFormat(budget.otherExpensesVariancePercent,2)}%");
+
+    currentTd= $('td#tdOtherIncomeVariance');
+    %{ value = budget.otherIncomeVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    $('td#tdOtherIncomeVariancePercent').html("${controllers.Functions.getFloatFormat(budget.otherIncomeVariancePercent,2)}%");
+
+    currentTd= $('td#tdTaxBeforeProfitBudget');
+    %{ value = budget.taxBeforeProfitBudget;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+    currentTd= $('td#tdTaxBeforeProfitActual');
+    %{ value = budget.taxBeforeProfitActual;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+    currentTd= $('td#tdTaxBeforeProfitVariance');
+    %{ value = budget.taxBeforeProfitVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    $('td#tdTaxBeforeProfitVariancePercent').html("${controllers.Functions.getFloatFormat(budget.taxBeforeProfitVariancePercent,2)}%");
+    currentTd= $('td#tdTaxVariance');
+    %{ value = budget.taxVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    $('td#tdTaxVariancePercent').html("${controllers.Functions.getFloatFormat(budget.taxVariancePercent,2)}%");
+
+    currentTd= $('td#tdNetIncomeBudget');
+    %{ value = budget.netIncomeBudget;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+    currentTd= $('td#tdNetIncomeActual');
+    %{ value = budget.netIncomeActual;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+
+    currentTd= $('td#tdNetIncomeVariance');
+    %{ value = budget.netIncomeVariance;
+        if (value < 0){ value*=-1; }% currentTd.html("(${controllers.Functions.getDecimal(value)})"); %{ }
+    else{ }% currentTd.html("${controllers.Functions.getDecimal(value)}"); %{ }}%
+    $('td#tdNetIncomeVariancePercent').html("${controllers.Functions.getFloatFormat(budget.netIncomeVariancePercent,2)}%");
+
+    $('td#tdEbitdaBudget').html("${controllers.Functions.getDecimal(budget.ebitdaBudget)}");
+
+    $('td#tdEbitdaActual').html("${controllers.Functions.getDecimal(budget.ebitdaActual)}");
+
+</script>
+
+

@@ -1,0 +1,204 @@
+#{list items:tasks,as:'task'}
+%{work = task.getScheduledWork(currentDate); }%
+%{contractorNotes = work?.getContractorWorkNote()}%
+<tr id="trScheduledWorkt${task.id}">
+<td class="text-center"><span>${task_index}</span>
+    #{if contractorNotes?.size()>0 && !contractorUser}
+        <button onclick="showContractor(${task.id})" style="margin-left: 0;margin-top: 15px; vertical-align: bottom;"
+                data-rel="tooltip" title="Туслан гүйцэтгэгчдийн тэмдэглэлүүдийг үзэх" data-container='body'
+                type="button" class="btn btn-default btn-icon-sm btn-info"><i class="fa fa-plus"></i></button></td>
+    #{/if}
+    <td> ${task?.projectObject?.project?.name} <i class="fa fa-angle-right"></i> <br/>
+        <p class="c-gray m-0">${task?.projectObject.name} ${task.getParentsName(" > ",true)} </p>
+    </td>
+    <td>
+    %{ long diffDays = task?.actualFinish?.getTime() - task?.finishDate?.getTime();
+        diffDays = diffDays / (24 * 60 * 60 * 1000);}%
+        <div data-rel="tooltip"
+             title="${task?.name} (${work?work.completedPercent:task.completedPercent}%) хоцролт: ${diffDays}">
+            <div class="progress" style=" position: relative;">
+                <div style="position: absolute;top: 0;left: 0;" class="progress-bar progress-bar-success"
+                     data-aria-valuetransitiongoal="${work?work.completedPercent:task.completedPercent}"></div>
+                <div style="position: absolute;top: 0;left: 2px;">${task?.name}
+                    (${work?work.completedPercent:task.completedPercent}%)
+                </div>
+            </div>
+        </div>
+        <div style="margin-left: 10px">
+            Эхэлсэн: ${task?.startDate?.format("yyyy/MM/dd")}
+            <br/> Дуусах: ${task?.finishDate?.format("yyyy/MM/dd")}
+        </div>
+    </td>
+%{myWorkNote =work?work.getMyWorkNote():null;}%
+    #{if controllers.CompanyConf.type==0}
+        <td>
+            <button class="btn btn-default btn-effect btn-transparent" id="showManPowerModalt${task.id}"
+                    style="display: block;text-align: left;"
+                    onclick="showManPowerModal('t${task.id}')">
+                Ажилчид: ${work?work.totalWorkers:0} </br> Хүн-цаг:${work?(controllers.Functions.getFloatFormat(work.totalManHours,1)):'0'}</button>
+        </td>
+        <td>
+            <button class="btn btn-default btn-effect btn-transparent" id="showEquipmentModalt${task.id}"
+                    style="text-align: left;" onclick="showEquipmentModal('t${task.id}')">
+                Техник: ${work?work.countEquipment():0} </br> Мот-цаг: ${work?(controllers.Functions.getFloatFormat(work.totalMotHours,1)):'0'}</button>
+        </td>
+        <td>
+            <button class="btn btn-default btn-effect btn-transparent" id="showMaterialModalt${task.id}"
+                    data-modal="modal-Material" style="text-align: center;"
+                    onclick="showMaterialModal('t${task.id}')">
+                Материал:</br> ${work?work.countMaterial():0} </button>
+        </td>
+        #{if !contractorUser}
+            <td><input id="scheduledWorkPercentt${task.id}" style="width: 58px;"
+                       class="form-control numberic" type="number" max="100" min="0" step="0.1"
+                       value="${work?work.completedPercent:task.completedPercent}">%</td>
+        #{/if}
+    #{/if}
+    #{else}
+        <td><input id="scheduledWorkPercentt${task.id}" style="width: 58px;"
+                   class="form-control numberic" type="number" max="100" min="0" step="0.1"
+                   value="${work?work.completedPercent:task.completedPercent}">%</td>
+        <td>
+            <input id="scheduledWorkHourst${task.id}" style="width: 58px;"
+                   class="form-control numberic" type="number" max="10" min="0" step="0.1"
+                   value="${myWorkNote?.hours}">цаг
+        </td>
+    #{/else}
+    <td><textarea class="form-control" id="scheduledWorkCommentst${task.id}" cols="40"
+                  rows="3">${myWorkNote?.notes}</textarea></td>
+    </td>
+    <td>
+        <ul class="uploadBox" id="uScheduledWorkt${task.id}">
+            #{list items:myWorkNote?.attaches, as:'attach'}
+                <li>
+                    <span>
+                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                        ${controllers.Functions.handleDocumentAttachmentNonDel(attach.dir,attach.name,attach.extension).raw()}
+                    </span>
+                </li>
+            #{/list}
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("uScheduledWorkt"+task.id).raw()}
+            <li>
+                <span> <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                               data-rel="tooltip" title="Хавсаргах">
+                    <i class="fa fa-cloud-upload"></i></button></span>
+            </li>
+        </ul>
+    </td>
+    <td class="tdAddButton">
+        <button onclick="deleteScheduledWork('t${task.id}',${myWorkNote?myWorkNote.id:0})" data-rel="tooltip" data-container='body'
+                title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+        <button onclick="updateScheduledWork('t${task.id}')" data-rel="tooltip" title="Хадгалах"
+                class="update btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-save"></i></button>
+    </td>
+</tr>
+    #{if controllers.CompanyConf.type==0 && !contractorUser}
+        #{list items: contractorNotes,as:'workNote'}
+        <tr class="trWork${task.id}" style="display: none;" id="trWorkNote${workNote.id}">
+            <td colspan="3" style="border: none;"></td>
+            <td colspan="2" class="text-right" style="background-color: #f9f9f9;"><strong>${workNote.owner}:</strong>
+            </td>
+            <td colspan="3" style="background-color: #f9f9f9;cursor: text;">${workNote.notes}</td>
+            <td style="background-color: #f9f9f9;">
+                #{if workNote.attaches.size()>0}
+                    <div class="post-images" id="contractorUser${workNote.id}">
+                        #{list items:workNote.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                    #{/list}
+                    </div>
+                ${controllers.Functions.handleDocumentAttachmentImgGallery("contractorUser"+workNote.id).raw()}
+                #{/if}
+            </td>
+            <td style="background-color: #f9f9f9;">
+                <button onclick="copyWorkNote('t${task.id}','${workNote.id}')" data-rel="tooltip" title="Хуулах"
+                        class="add btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-check"></i></button>
+            </td>
+        </tr>
+        #{/list}
+    #{/if}
+#{/list}
+#{list items: myPlans,as:'myPlan'}
+%{work = myPlan.getScheduledWork(currentDate); size=tasks.size();}%
+<tr id="trScheduledWorkm${myPlan.id}">
+    <td class="text-center"><span>${myPlan_index +size}</span>
+    <td>Хувийн төлөвлөгөөт</td>
+    <td>
+    %{ long diffDays = myPlan?.actualFinish?.getTime() - myPlan?.finishDate?.getTime();
+        diffDays = diffDays / (24 * 60 * 60 * 1000);}%
+        <div data-rel="tooltip"
+             title="${myPlan?.name} (${work?work.completedPercent:myPlan?.completedPercent}%) хоцролт: ${diffDays}">
+            <div class="progress" style=" position: relative;">
+                <div style="position: absolute;top: 0;left: 0;" class="progress-bar progress-bar-success"
+                     data-aria-valuetransitiongoal="${work?work.completedPercent:myPlan?.completedPercent}"></div>
+                <div style="position: absolute;top: 0;left: 2px;">${myPlan?.name}
+                    (${work?work.completedPercent:myPlan?.completedPercent}%)
+                </div>
+            </div>
+        </div>
+        <div style="margin-left: 10px">
+            Эхэлсэн: ${myPlan?.startDate?.format("yyyy/MM/dd")}
+            <br/> Дуусах: ${myPlan?.finishDate?.format("yyyy/MM/dd")}
+        </div>
+    </td>
+    #{if controllers.CompanyConf.type==0}
+        <td>
+            <button class="btn btn-default btn-effect btn-transparent" id="showManPowerModalm${myPlan.id}"
+                    style="display: block;text-align: left;"
+                    onclick="showManPowerModal('m${myPlan.id}')">
+                Ажилчид: ${work?work.totalWorkers:0} </br> Хүн-цаг: ${work?work.totalManHours:'0'}</button>
+        </td>
+        <td>
+            <button class="btn btn-default btn-effect btn-transparent" id="showEquipmentModalm${myPlan.id}"
+                    style="text-align: left;" onclick="showEquipmentModal('m${myPlan.id}')">
+                Техник: ${work?work.countEquipment():0} </br> Мот-цаг: ${work?(controllers.Functions.getFloatFormat(work.totalMotHours,1)):'0'}</button>
+        </td>
+        <td>
+            <button class="btn btn-default btn-effect btn-transparent" id="showMaterialModalm${myPlan.id}"
+                    data-modal="modal-Material" style="text-align: center;"
+                    onclick="showMaterialModal('m${myPlan.id}')">
+                Материал: </br> ${work?work.countMaterial():0} </button>
+        </td>
+    #{/if}
+%{myNote=work?.getMyWorkNote();}%
+    <td><input id="scheduledWorkPercentm${myPlan.id}" style="width: 58px;"
+               class="form-control numberic" type="number" max="100" min="0" step="0.1"
+               value="${work?work.completedPercent:myPlan?.completedPercent}">%</td>
+    #{else }
+        <td>
+            <input id="scheduledWorkHoursm${myPlan.id}" style="width: 58px;"
+                   class="form-control numberic" type="number" max="10" min="0" step="0.1"
+                   value="${myNote?.hours}"> цаг
+        </td>
+    #{/else}
+    <td><textarea class="form-control" id="scheduledWorkCommentsm${myPlan.id}" cols="40"
+                  rows="3">${myNote?.notes}</textarea></td>
+    </td>
+    <td>
+        <ul class="uploadBox" id="uScheduledWorkm${myPlan.id}">
+            #{list items:myNote?.attaches, as:'attach'}
+                <li>
+                    <span>
+                        ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+                        ${controllers.Functions.handleDocumentAttachmentNonDel(attach.dir,attach.name,attach.extension).raw()}
+                    </span>
+                </li>
+            #{/list}
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("uScheduledWorkm"+myPlan.id).raw()}
+            <li>
+                <span> <button class="btn upload btn-default btn-icon-sm btn-rounded"
+                               data-rel="tooltip" title="Хавсаргах">
+                    <i class="fa fa-cloud-upload"></i></button></span>
+            </li>
+        </ul>
+    </td>
+    <td class="tdAddButton">
+        <button onclick="deleteScheduledWork('m${myPlan.id}',${workNoteId?workNoteId.id:0})" data-rel="tooltip" data-container='body' title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+        <button onclick="updateScheduledWork('m${myPlan.id}')" data-rel="tooltip" title="Хадгалах"
+                class="update btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-save"></i></button>
+    </td>
+</tr>
+#{/list}
+
+

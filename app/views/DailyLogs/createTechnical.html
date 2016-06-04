@@ -1,0 +1,59 @@
+#{if isList}
+#{list items:technicalDelays,as:'technical'}
+%{contractor = technical.owner.userTeam.contractor && !user.userTeam.contractor;}%
+    <tr id="technical${technical.id}" class="${contractor?'warning':''}" >
+        <td></td>
+        <td taskId="t${technical.task?.id}">${(technical.task)?(technical.task?.name):(technical.myPlan?.name)}</td>
+        <td >${technical?.conditionTechnical}</td>
+        <td >${technical?.startDate?.format("HH:mm")}</td>
+        <td >${technical?.finishDate?.format("HH:mm")}</td>
+        <td><strong>${contractor?(technical.owner.toString() +":  "):''}</strong><span>${technical?.notes?.raw()}</span></td>
+        <td>
+            #{if technical.attaches.size()>0}
+                <div class="post-images" id="post-images-technical-${technical.id}">
+                    #{list items:technical.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+                </div>
+            ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-technical-"+technical.id).raw()}
+            #{/if}
+        </td>
+        <td >
+            #{if contractor}
+                <button onclick="copyTechnical(${technical.id})" data-rel="tooltip" title="Хуулах"
+                        class="add btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-check"></i></button>
+            #{/if}
+            #{else }
+                <button onclick="deleteTechnical(${technical.id})" data-rel="tooltip" title="Устгах"
+                        class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+            #{/else}
+
+        </td>
+    </tr>
+    #{/list}
+#{/if}
+
+#{else }
+<tr id="technical${technical.id}" >
+    <td></td>
+    <td >${(technical.task)?(technical.task?.name):(technical.myPlan?.name)}</td>
+    <td>${technical?.conditionTechnical}</td>
+    <td >${technical?.startDate?.format("HH:mm")}</td>
+    <td >${technical?.finishDate?.format("HH:mm")}</td>
+    <td>${technical?.notes?.raw()}</td>
+    <td>
+        #{if technical.attaches.size()>0}
+            <div class="post-images" id="post-images-technical-${technical.id}">
+                #{list items:technical.attaches, as:'attach'}
+                    ${controllers.Functions.handleDocumentAttachment(attach.dir,attach.name,attach.extension,attach.filesize).raw()}
+            #{/list}
+            </div>
+        ${controllers.Functions.handleDocumentAttachmentImgGallery("post-images-technical-"+technical.id).raw()}
+        #{/if}
+    </td>
+    <td >
+        <button onclick="deleteTechnical(${technical.id})" data-rel="tooltip" title="Устгах"
+                class="delete btn btn-icon-sm btn-rounded btn-default"><i class="fa fa-times"></i></button>
+    </td>
+</tr>
+#{/else}

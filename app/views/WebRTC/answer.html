@@ -1,0 +1,91 @@
+#{extends 'CRUD/layout.html' /}
+
+<div class="main-content">
+
+    <video id="local_video" autoplay></video>
+
+    <video id="remote_video" autoplay></video>
+
+</div>
+
+#{webRTC-config /}
+
+<script>
+
+    var signalingChannel = null;
+    var mediaConstraints = {
+        "audio": {"optional": [{"googNoiseReduction": "true"},{"googEchoCancellation":"true"}], "mandatory": {}},
+        "video": {"optional": [{"minWidth": "1280"}, {"minHeight": "720"}], "mandatory": {}}
+    };
+
+    var pc = null;
+    var servers = {
+        "iceServers": [
+            {"url": "stun:stun.l.google.com:19302"},
+            {"url": "turn:turnserver.com", "username": "user", "credential": "pass"}
+        ]
+    };
+
+    $(document).ready(function () {
+        signalingChannel = socket;
+
+        signalingChannel.onmessage = function (msg) {
+            console.log(msg);
+            var response = JSON.parse(msg.data);
+            if (response.id == '1' && response.data && response.data.sdp) {
+                pc = new RTCPeerConnection(servers, null);
+
+                var remote_descr = new RTCSessionDescription();
+                remote_descr.type = "offer";
+                remote_descr.sdp = response.data.sdp;
+
+                pc.setRemoteDescription(remote_descr, function () {
+                    logSuccess(" offer add");
+                }, logError);
+
+                pc.onicecandidate = function (evt) {
+                    if (evt.candidate) {
+                        signalingChannel.send(JSON.stringify({data: evt.candidate, id: '2', mainType: "webRTC"}));
+                    }
+                };
+
+                pc.onaddstream = function (evt) {
+                    var remote_video = document.getElementById('remote_video');
+                    remote_video.src = window.URL.createObjectURL(evt.stream);
+                };
+
+                navigator.getUserMedia(mediaConstraints, gotStream, logError);
+
+            } else if (response.id == '1' && response.data.candidate) {
+                var candidate = {};
+                candidate.candidate = response.data.candidate;
+                candidate.sdpMid = response.data.sdpMid;
+                candidate.sdpMLineIndex = response.data.sdpMLineIndex;
+
+                pc.addIceCandidate(new RTCIceCandidate(candidate), function () {
+                    logSuccess(" add candidate");
+                }, logError);
+            }
+        };
+
+        function gotStream(stream) {
+            pc.addStream(stream);
+
+            var local_video = document.getElementById('local_video');
+            local_video.src = window.URL.createObjectURL(stream);
+
+            pc.createAnswer(function (answer) {
+                pc.setLocalDescription(answer);
+                signalingChannel.send(JSON.stringify({data: answer, id: '2', mainType: "webRTC"}));
+            });
+        }
+    });
+    function logSuccess(msg) {
+        console.log("success: " + msg);
+    }
+
+    function logError(error) {
+        console.log("error: " + error.toString());
+    }
+
+</script>

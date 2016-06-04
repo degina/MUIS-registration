@@ -1,0 +1,268 @@
+#{extends 'CRUD/layout.html' /}
+#{set activeMenu:'Inventory'/}
+#{set activeMenuSub:'InventoryStockList'/}
+#{jqueryui-config /}
+#{ckeditor-config /}
+#{fancybox-config /}
+#{checkFileExtension /}
+#{flashCrud /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<script src="/public/javascripts/jquery.resizableColumns.min.js"></script>
+
+%{inventoryProjectPermission = user.getPermissionType(controllers.Consts.permissionInventory);}%
+<div id="main-content" class="dhidden" ${inventoryProjectPermission>0 ?  "" : "hidden=\"true\""}>
+    <div>
+        <div class="m-b-0 clearfix">
+            <div class="page-title pull-left">
+                <h3 class="pull-left"><strong>&{'ItemStock'}</strong></h3>
+            </div>
+        </div>
+
+        <form id="filterForm" action="@{InventoryStocks.list()}" method="get">
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="inventory_filter"
+                        class="form-control" name="inventory_filter">
+                    <option value="0">&{'AllInventory'}</option>
+                    <option data-divider="true"></option>
+                #{list items:items,as: 'Item'}
+                    <option value="${Item.id}" ${Item.id.toString() == inventory_filter ? 'selected' : ''}>${Item.item}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="location_filter"
+                        class="form-control" name="location_filter">
+                    <option value="0">&{'AllLocation'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Locations,as: 'location'}
+                    <option value="${location.id}" ${location.id.toString() == location_filter ? 'selected' : ''}>${location.name}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="category_filter"
+                        class="form-control" name="category_filter">
+                    <option value="0">&{'AllCategory'}</option>
+                    <option data-divider="true"></option>
+                #{list items:Categories,as: 'category'}
+                    <option value="${category.id}" ${category.id.toString() == category_filter ? 'selected' : ''}>${category.name}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <select data-live-search="true" id="subcategory_filter"
+                        class="form-control" name="subcategory_filter">
+                    <option value="0">&{'AllSubCategory'}</option>
+                    <option data-divider="true"></option>
+                #{list items:SubCategories,as: 'subcategory'}
+                    <option value="${subcategory.id}" ${subcategory.id.toString() == subcategory_filter ? 'selected' : ''}>${subcategory.name}</option>
+                #{/list}
+                </select>
+            </div>
+            <div class="col-md-2" style="padding: 0; padding-right: 6px;">
+                <input type="text" class="form-control" style=";"
+                       placeholder="&{'Search'}!" name="keyword" value="${keyword}"/>
+            </div>
+            <div class="col-md-1" style="padding: 0;">
+                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
+                <input type="hidden" name="CurrentPageNumber" value="1"/>
+            </div>
+        </form>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 table-responsive">
+                                <table id="item-list-table" class="table table-tools table-hover"
+                                       data-resizable-columns-id="inventorystock-resizalbe-table">
+                                    <thead>
+                                    <tr>
+                                        <th style="width:70px" class="text-center" data-resizable-column-id="#">
+                                        </th>
+                                        <th style="width:auto" class="text-center" data-resizable-column-id="item">
+                                            <strong>&{'item'}</strong>
+                                        </th>
+                                        <th style="width:auto" class="text-center" data-resizable-column-id="category">
+                                            <strong>&{'category'}</strong>
+                                        </th>
+                                        <th style="width:100px" class="text-center"
+                                            data-resizable-column-id="project_planned">
+                                            <strong>&{'project_planned'}</strong>
+                                        </th>
+                                        <th style="width:100px" class="text-center"
+                                            data-resizable-column-id="inventory_in">
+                                            <strong>&{'inventory_in'}</strong>
+                                        </th>
+                                        <th style="width:100px" class="text-center"
+                                            data-resizable-column-id="inventory_out">
+                                            <strong>&{'inventory_out'}</strong>
+                                        </th>
+                                        <th style="width:100px" class="text-center"
+                                            data-resizable-column-id="waste">
+                                            <strong>&{'waste'}</strong>
+                                        </th>
+                                        <th style="width:100px" class="text-center" data-resizable-column-id="quantity">
+                                            <strong>&{'location_quantity'}</strong>
+                                        </th>
+                                        <th style="width: 150px" class="text-center" data-resizable-column-id="sales">
+                                            <strong>&{'sales'}</strong>
+                                        </th>
+
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    #{list items:Inventorys, as: 'inventory'}
+                                        <tr style="height: 50px">
+                                            <td style="vertical-align: middle"><strong>${inventory.id}</strong></td>
+                                            <td style="vertical-align: middle;max-width: 300px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap">${inventory.item}
+                                                /${inventory.inventoryMeasure.measure}/
+                                            </td>
+                                            <td style="max-width: 400px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">${inventory.inventorySubCategory.category.name} /
+                                            ${inventory.inventorySubCategory.name}</td>
+                                            <td style="vertical-align: middle"> ${inventory.project_planned().toBigDecimal()}</td>
+                                            <td style="vertical-align: middle"> ${inventory.project_in(location_filter).toBigDecimal()}</td>
+                                            <td style="vertical-align: middle"> ${inventory.project_out(location_filter).toBigDecimal()}</td>
+                                            <td style="vertical-align: middle"> ${inventory.project_waste(location_filter).toBigDecimal()}</td>
+                                            <td class="color-success" style="vertical-align: middle">
+                                                <div class="progress">
+                                                    <div style="color: #000000;width: ${location_filter == "" ? 100 : (location_filter == "0" ? 100 : inventory.idealPercent(location_filter))}%"
+                                                         class="progress-bar progress-bar-${location_filter == "" ? 100 : (location_filter == "0" ? "primary" : inventory.quantityStatus(location_filter))}" role="progressbar"
+                                                         aria-valuenow="${location_filter == "" ? 100 : (location_filter == "0" ? 100 : inventory.idealPercent(location_filter))}" aria-valuemin="0" aria-valuemax="100">${inventory.quantity_sum_project(location_filter)}</div>
+                                                </div>
+
+                                            </td>
+                                            <td style="vertical-align: middle">
+                                                <div class="sparkline"
+                                                     data-sparkline-color="${inventory_index%3 ==0 ? '#7BB2B4' :(inventory_index%3==1 ? '#c3a8db' : '#8dae24') }"
+                                                     data-sparkline-value="${inventory.MRs(location_filter)}"></div>
+                                            </td>
+                                        </tr>
+                                    #{/list}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    #{if MaxPageNumber>1}
+                        <div class="page-navigation" style="width: 100%; text-align: right;">
+                            <a style="text-decoration: none;"
+                               href="@{InventoryStocks.list(CurrentPageNumber - 1,keyword,inventory_filter,location_filter,category_filter,subcategory_filter,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber - 1 <= 0 ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="<"/>
+                            </a>
+                        %{
+                            int threeDots = 0;
+                            for(int i = 1; i <= MaxPageNumber; i++){
+                            if( i == 1 || i == MaxPageNumber || (CurrentPageNumber < 3 && i < 5) ||
+                            (CurrentPageNumber - 1 <= i && i <= CurrentPageNumber + 1) ||
+                            (CurrentPageNumber > MaxPageNumber - 2 && i > MaxPageNumber - 4) ){
+                            }%
+                            <a style="text-decoration: none;"
+                               #{if CurrentPageNumber != i}href="@{InventoryStocks.list(i,keyword,inventory_filter,location_filter,category_filter,subcategory_filter,message)}"#{/if}>
+                                <input
+                                        class="number-button btn btn-${CurrentPageNumber == i ? 'dark':'default'}"
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value="${i}"/>
+                            </a>
+                        %{ }else{
+                            if( i == 2 || i == MaxPageNumber - 1 ){
+                            threeDots = 1;
+                            }
+                            if(threeDots == 1){
+                            }%
+                            <span style="font-size: x-large;"><strong>...</strong></span>
+                        %{
+                            threeDots = 0;
+                            }
+                            }
+                            }
+                            }%
+                            <a style="text-decoration: none;"
+                               href="@{InventoryStocks.list(CurrentPageNumber + 1,keyword,inventory_filter,location_filter,category_filter,subcategory_filter,message)}">
+                                <input
+                                        class="number-button btn btn-default" ${ CurrentPageNumber >= MaxPageNumber ? 'disabled': ''}
+                                        style="padding-top: 5px; padding-bottom: 5px; padding-left: 10px; padding-right: 10px;"
+                                        type="button"
+                                        value=">"/>
+                            </a>
+                        </div>
+                    #{/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(window).load(function () {
+        $('div#main-content').removeClass('dhidden');
+        $(function () {
+            $("table").resizableColumns({
+                store: window.store
+            });
+        });
+    });
+
+    $(document).ready(function () {
+        var opt = {};
+
+        // Tools: export to Excel, CSV, PDF & Print
+        opt.sDom = "",
+                opt.oLanguage = {"sSearch": "", 'sEmptyTable': "Үр дүн байхгүй байна."} ,
+                opt.iDisplayLength = 40,
+
+                opt.oTableTools = {
+                    "sSwfPath": "/assets/plugins/datatables/swf/copy_csv_xls_pdf.swf",
+                    "aButtons": ["csv", "xls", "pdf", "print"]
+                };
+        opt.aaSorting = [[0, 'desc']]
+        opt.aoColumnDefs = [
+            {'bSortable': false, 'aTargets': []}
+        ];
+
+
+        var oTable = $('#products-table').dataTable(opt);
+        oTable.fnDraw();
+    });
+    $('select#category_filter').change(function () {
+        $.ajax({
+            type: "POST",
+            data: {id: $(this).val()},
+            url: "/inventoryShowSubCategoryFilter"
+        }).success(
+                function (data) {
+                    $('select#subcategory_filter').html('<option value="0">&{'AllSubCategory'}</option>');
+                    for (var i = 0; i < data.length; i = i + 2) {
+                        $('select#subcategory_filter').html($('select#subcategory_filter').html() + '<option value="' + data[i + 1] + '">' + data[i] + '</option>');
+
+                    }
+                    $('select#subcategory_filter').selectpicker('refresh');
+                });
+    });
+</script>
+<script>
+</script>
+
+<style>
+    .panel-body {
+        background-color: #FFF;
+        padding: 0px;
+        padding-left: 0px;
+    }
+
+    div#main-content body, div#main-content ul, div#main-content li {
+        font-size: 12px;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 21px;
+        text-align: left;
+    }
+</style>
+
+
+#{inventory-config /}

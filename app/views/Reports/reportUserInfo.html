@@ -1,0 +1,90 @@
+<div class="col-md-12" style="margin-top:0;margin-bottom: 7px">
+    <div class="panel panel-default" style="border: none">
+        <div class="panel-body"
+             style="padding: 26px;border-top-left-radius: 6px;border-top-right-radius: 6px;width:49%;float: left;height: 170px">
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                %{organizationChart=ownerUser.getOrganizationChart();}%
+                    <table class="table table-hover" style="margin-bottom: 0">
+                        <tbody>
+                        <tr>
+                            <td rowspan="3" style="border: none"><img src="${organizationChart.user.profilePicture}"
+                                                                      style="height: 70px;"></td>
+                            <td><strong>Нэр</strong></td>
+                            <td>${organizationChart.user.toString()}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Баг</strong></td>
+                            <td>${organizationChart.team.name}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Албан тушаал</strong></td>
+                            <td>${organizationChart.userPosition.name}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    %{rfi_check=reportInfo.rfi_all > 0;
+        punch_check=reportInfo.punch_all>0;}%
+        <div class="panel-body"
+             style="width: 50%;border-top-left-radius: 6px;border-top-right-radius: 6px;padding: 24px 14px 4px 14px;float: right;height: 170px">
+            <div class="col-md-12 col-sm-12 col-xs-12 p-0">
+                <table class="table table-bordered">
+                    <thead>
+                    <tr>
+                        <th colspan="2" style="text-align: center;">
+                        #{if rfi_check || punch_check}
+                            <span style="white-space: nowrap"><i class="fa fa-square" style="color: #d9534f;"></i> Хугацаа хэтэрсэн &nbsp;</span>
+                            <span style="white-space: nowrap"><i class="fa fa-square" style="color: #f0ad4e;"></i> < 7 хоног &nbsp;</span>
+                            <span style="white-space: nowrap"><i class="fa fa-square" style="color:#2f85b8;"></i> > 7 хоног &nbsp;</span>
+                            <span style="white-space: nowrap"><i class="fa fa-square" style="color:#5cb85c;"></i> Хаагдсан</span>
+                        #{/if}
+                        </th>
+                        <th style="width: 40px;text-align: center;">Нийт</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td style="padding-left: 8px;width: 160px"> Мэдээлэл хүсэлт</td>
+                        <td style="text-align: center">
+                        #{if rfi_check}
+                            <div class="gur-group">
+                                <div class="gur-ulaan"
+                                     style="width: ${100*reportInfo.rfi_over/reportInfo.rfi_all}%;">${reportInfo.rfi_over}</div>
+                                <div class="gur-ulbar"
+                                     style="width: ${100*reportInfo.rfi_inweek/reportInfo.rfi_all}%; ">${reportInfo.rfi_inweek}</div>
+                                <div class="gur-huh"
+                                     style="width:${100*reportInfo.rfi_nextWeek/reportInfo.rfi_all}%;">${reportInfo.rfi_nextWeek}</div>
+                                <div class="gur-nogoon"
+                                     style="width:${100*reportInfo.rfi_closed/reportInfo.rfi_all}%;">${reportInfo.rfi_closed}</div>
+                            </div>
+                        #{/if}
+                        </td>
+                        <td class="text-center">${reportInfo.rfi_all}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding-left: 8px;width: 160px"> Үүрэг даалгавар</td>
+                        <td style="text-align: center">
+                        #{if punch_check}
+                            <div class="gur-group">
+                                <div class="gur-ulaan"
+                                     style="width: ${100*reportInfo.punch_over/reportInfo.punch_all}%;">${reportInfo.punch_over}</div>
+                                <div class="gur-ulbar"
+                                     style="width: ${100*reportInfo.punch_inweek/reportInfo.punch_all}%; ">${reportInfo.punch_inweek}</div>
+                                <div class="gur-huh"
+                                     style="width:${100*reportInfo.punch_nextWeek/reportInfo.punch_all}%;">${reportInfo.punch_nextWeek}</div>
+                                <div class="gur-nogoon"
+                                     style="width:${100*reportInfo.punch_resolved/reportInfo.punch_all}%;">${reportInfo.punch_resolved}</div>
+                            </div>
+                        #{/if}
+                        </td>
+                        <td class="text-center">${reportInfo.punch_all}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

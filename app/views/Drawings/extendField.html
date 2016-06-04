@@ -1,0 +1,1179 @@
+<table class="table table-tools" border="1" cellpadding="0" cellspacing="0"
+       style="border-color: lightgrey; margin: 0; padding: 0; height: ${height}px; width: 100%;">
+    <tr style="">
+        <td style="padding: 0;">
+            <svg id="svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                 style="width: 100%; height: ${height}px;overflow: hidden;">
+                <foreignObject ${controllers.Drawings.getSize(revision.dir + "." +revision.extension)} class="imgPanel"
+                                                                                                       id="outer_group"
+                                                                                                       style="border: solid lightgrey 1px; stroke-width: 1.5px; background: url('${revision.dir + "." +revision.extension}') no-repeat center;"
+                                                                                                       transform="translate(0,0)scale(1)"
+                                                                                                       scaler="1">
+                    <svg id="stage" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"></svg>
+                </foreignObject>
+            </svg>
+        </td>
+        <td style="width: 300px; padding: 8px; vertical-align: top;">
+        %{drawing = revision.drawing;}%
+            <div>
+                <div class="clearfix" data-no-turbolink="">
+                    <p class="group-label pull-left">Зургийн мэдээлэл:</p>
+
+                    <div class="dropdown-light dropdown pull-right">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-caret-down"></i>
+                        </a>
+
+                        <div class="dropdown-menu">
+                            <ul>
+                            #{if user.getUserPermissionType(controllers.Consts.permissionMonitorDrawing) > 3 || revision.pdf.uploader.id == user.id}
+                                <li style="cursor: pointer;">Засах</li>
+                                #{if revision.layers == null || revision.layers.size() == 0}
+                                    <li style="cursor: pointer;">Устгах</li>
+                                #{/if}
+                            #{/if}
+                                <li onclick="downloadPDF()" style="cursor: pointer;"> PDF татах</li>
+                                <li onclick="downloadPDFwithMarkUp()" style="cursor: pointer;"> Тэмдэглэгээтэй PDF
+                                    татах
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <table class="revision-info">
+                    <tbody>
+                    <tr>
+                        <td>Дугаар:</td>
+                        <td>${drawing.Number}</td>
+                    </tr>
+                    <tr>
+                        <td>Гарчиг:</td>
+                        <td>${drawing.title}</td>
+                    </tr>
+                    <tr>
+                        <td>Шифр:</td>
+                        <td>${drawing.cipher}</td>
+                    </tr>
+                    <tr>
+                        <td>Хувилбар:</td>
+                        <td>${revision.number}</td>
+                    </tr>
+                    <tr>
+                        <td>Төрөл:</td>
+                        <td>${drawing.discipline.name}</td>
+                    </tr>
+                    <tr>
+                        <td>Зурагдсан огноо:</td>
+                        <td>${revision.createdDate.format("yyyy-MM-dd")}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </td>
+    </tr>
+</table>
+<input id="jsonString" type="hidden" value="${path}"/>
+<input id="revisionId" type="hidden" value="${revision.id}"/>
+<svg id="cleanSVG" class="dhidden" ${controllers.Drawings.getSize(revision.dir + "." +revision.extension)}>
+    <image id="background" xlink:href="${revision.dir + "." +revision.extension}" x="0"
+           y="0" ${controllers.Drawings.getSize(revision.dir + "." +revision.extension)}/>
+</svg>
+
+<div class="modal fade" id="Greater" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="height: 50px;!important;">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="sendForm" method="post">
+                        <input type="hidden" id="jsonString" name="tag"/>
+                    </form>
+                #{if user.getPermissionType(controllers.Consts.permissionGreatePunchList) == 3}
+                    <button id="punch-submit" class="btn btn-primary">&{'CreatePunchList'}</button>
+                #{/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="Dtexter" style="display: none; z-index: 10000; position:fixed; ">
+    <div style="z-index: 10000; position:fixed; ">
+        <input id="textFont" type="range" min="12" max="36" step="3" value="12"/>
+    </div>
+    <textarea id="pinText"
+              style="line-height: 100%; overflow: hidden; z-index: 10000; position:fixed; background: transparent; resize: none; color: #ddd; padding: 2px;"></textarea>
+</div>
+<div id="draw-tools">
+    <ul class="navbar dark" id="editor_tools">
+        <li><i class="fa fa-arrows f-24" title="&{'Hand'}" style="color: lightgrey"></i></li>
+    #{if action != "punchList"}
+        <li><i id="fa-edit" class="fa fa-edit f-24" title="&{'Tool'}" style="color: lightgrey"></i>
+            <ul id="pen-tools" style="width: 308px!important;">
+                <li><i class="fa fa-pencil f-24" value="Path" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-minus f-24" value="Line" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-square-o f-24" value="Rectangle" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-circle-o f-24" value="Circle" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-long-arrow-right f-24" value="ArrowLine" style="color: lightgrey"></i></li>
+                <li><i class="fa fa-exchange f-24" value="DoubleArrowLine" style="color: lightgrey"></i></li>
+            </ul>
+        </li>
+        <li><i class="fa fa-color fa-circle f-24" title="&{'Color'}" style="color: red"></i>
+            <ul id="pen-color" style="width: 264px!important;">
+                <li><i class="fa fa-circle f-24" style="color: black;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: red;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: blue;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: green;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: yellow;"></i></li>
+                <li><i class="fa fa-circle f-24" style="color: brown;"></i></li>
+            </ul>
+        </li>
+        <li>
+            <i style="height: 44px; vertical-align: middle;" title="&{'Width'}">
+                <i class="fa fa-circle"
+                   style=" padding-top: 0!important;; padding-bottom: 0!important;color: lightgrey; font-size: 4px"></i></i>
+            <ul id="pen-width" style="width: 200px;">
+                <li style="width: 92%; padding-left: 4%; padding-right: 4%;">
+                    <i class="f-24">
+                        <input id="width" type="range" min="2" max="8" step="3" value="2"/>
+                    </i>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <i style="height: 44px; vertical-align: middle; color:lightgrey" class="fillAlpha" title="&{'Aplha'}">
+                <span>0</span>%
+            </i>
+            <ul id="pen-opacity" style="width: 280px;">
+                <li>
+                    <i class="f-16" style="color:lightgrey"><span>0</span>%</i>
+                </li>
+                <li>
+                    <i class="f-16" style="color:lightgrey"><span>30</span>%</i>
+                </li>
+                <li>
+                    <i class="f-16" style="color:lightgrey"><span>60</span>%</i>
+                </li>
+                <li>
+                    <i class="f-16" style="color:lightgrey"><span>100</span>%</i>
+                </li>
+            </ul>
+        </li>
+        <li><i class="fa fa-font f-24" title="&{'Text'}" style="color: lightgrey"></i>
+        </li>
+        <li>
+            <i class="fa fa-mail-reply f-24" title="&{'Undo'}" style="color: #696969" onclick="undo()"></i>
+        </li>
+        <li>
+            <i class="fa fa-mail-forward f-24" title="&{'Redo'}" style="color: #696969" onclick="redo()"></i>
+        </li>
+        <li>
+            <i class="fa fa-trash-o f-24" title="&{'Clean'}" style="color: #696969" onclick="cleaning()"></i>
+        </li>
+    #{/if}
+    #{if action == "punchList"}
+        <li>
+            <i class="fa fa-thumb-tack f-24" title="&{'Punch'}" style="color: lightgrey"></i>
+        </li>
+    #{/if}
+    </ul>
+</div>
+<div id="shapeGroup" class="dhidden" style="border: solid orange 2px; position: absolute; z-index: 20000;">
+    <button class="btn btn-sm btn-warning" style="margin: auto;"><i class="fa-fa-arrows" style="color: white;"></i>
+    </button>
+</div>
+<script>
+    var updateLayer = false;
+    var _type = "Path";
+    var _color = "red";
+    var _opacity = 0.0;
+    var _width = 4;
+    var _text = "";
+    var _fontSize = 12;
+    var _offset = $("#outer_group").offset();
+    var _drawing = false;
+    var _clicking = false;
+    var newElement = null;
+    var _fillAplha = 0;
+    var _points = [];
+    var startPoint = [];
+    var endPoint = [];
+    var movePoint = [0, 0];
+    var moveStartPoint = [0, 0];
+    var activityHistory = [];
+    var activityJson = [];
+    var svg = d3.select("#svg");
+    var svg_group = d3.select('#outer_group');
+    var group = document.getElementById('stage');
+    var _mouseEnter = false;
+    var _keyDown = false;
+    var displayCounter = 0;
+    var displayLimiter = 0;
+    var erasing = false;
+    var moving = false;
+    var selectedElement = -1;
+    var factorResetJson = null;
+    var textarea = $("div#Dtexter").find("textarea#pinText");
+    var textrect = null;
+    var shapeJson = null;
+    var zoom = d3.behavior.zoom()
+            .translate([0, 0])
+            .scale(1)
+            .scaleExtent([.5, 4])
+            .on("zoom", zoomed);
+    var no_zoom = d3.behavior.zoom();
+    zooming();
+    function zoomed() {
+        svg_group.style("stroke-width", 1.5 / d3.event.scale + "px");
+        svg_group.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+        svg_group.attr("scaler", d3.event.scale);
+    }
+    function sector(ban) {
+        if (_drawing)
+            selectedElement = ban;
+    }
+    readPersonalLayer();
+    function addHistory(element) {
+        var factorHistory = activityHistory;
+        activityHistory = [];
+        var factorJson = activityJson;
+        activityJson = [];
+        for (var i = 0; i < displayCounter; i++) {
+            activityHistory.push(factorHistory[i]);
+            activityJson.push(factorJson[i]);
+        }
+        if (element != null) {
+            var jsonElement = getJsonElement();
+            activityHistory.push(element);
+            if (element.type == "CLEAN" || element.type == "erase") {
+                activityJson.push("");
+            }
+            else {
+                activityJson.push(jsonElement);
+            }
+            displayCounter++;
+        }
+        factorJson = toDisplay();
+        toStringer(factorJson);
+    }
+    function toStringer(factorJson) {
+        if (updateLayer) {
+            saveDrawingPath(JSON.stringify(factorJson));
+        }
+    #{if action != "punchList"}
+        if (displayCounter == 0) $("i.fa-mail-reply").css("color", "#696969");
+        else  $("i.fa-mail-reply").css("color", "lightgrey");
+        if (displayCounter == activityHistory.length) $("i.fa-mail-forward").css("color", "#696969");
+        else $("i.fa-mail-forward").css("color", "lightgrey");
+        if (displayCounter == 0)
+            $("i.fa-trash-o").css("color", "#696969");
+        else {
+            if (activityHistory[displayCounter - 1].type == "CLEAN")
+                $("i.fa-trash-o").css("color", "#696969");
+            else
+                $("i.fa-trash-o").css("color", "lightgrey");
+        }
+    #{/if}
+    }
+    function getJsonElement() {
+        var jsonElement = {
+            type: _type,
+            color: _color
+        };
+        var dan = svg_group.attr("scaler");
+    #{if action != "punchList"}
+        if (_type == "Line" || _type == "ArrowLine" || _type == "DoubleArrowLine" || _type == "Rectangle" || _type == "Circle") {
+            jsonElement.startX = startPoint[0] / dan;
+            jsonElement.startY = startPoint[1] / dan;
+            jsonElement.endX = endPoint[0] / dan;
+            jsonElement.endY = endPoint[1] / dan;
+            jsonElement.strokeWidth = _width;
+        } else if (_type == "Path") {
+            jsonElement.path = points_to_string(dan);
+            jsonElement.strokeWidth = _width;
+        }
+        if (_type == "Rectangle" || _type == "Circle") {
+            jsonElement.fillAlpha = _opacity;
+        }
+        if (_type == "Text") {
+            jsonElement.startX = startPoint[0] / dan;
+            jsonElement.startY = startPoint[1] / dan;
+            jsonElement.endX = endPoint[0] / dan;
+            jsonElement.endY = endPoint[1] / dan;
+            jsonElement.text = _text;
+            jsonElement.fontSize = parseInt(_fontSize);
+        }
+    #{/if}
+    #{if action == "punchList"}
+        if (_type == "Punch") {
+            jsonElement.startX = startPoint[0] / dan;
+            jsonElement.startY = startPoint[1] / dan;
+        }
+    #{/if}
+        return jsonElement;
+    }
+    function readPersonalLayer() {
+        readerJsonArray($("input#jsonString").val());
+        _type = "Path";
+        _color = "red";
+        _opacity = 0.0;
+        _width = 4;
+        _text = "";
+        _fontSize = 12;
+        newElement = null;
+        _points = [];
+        startPoint = [];
+        endPoint = [];
+        updateLayer = true;
+    }
+    function readerJson(json, count) {
+        var dan = svg_group.attr("scaler");
+    #{if action != "punchList"}
+        if (json.type != null) {
+            _type = json.type;
+            _color = json.color;
+            if (_type == "Line" || _type == "ArrowLine" || _type == "DoubleArrowLine" || _type == "Rectangle" || _type == "Circle") {
+                startPoint = [json.startX + movePoint[0], json.startY + movePoint[1]];
+                endPoint = [json.endX + movePoint[0], json.endY + movePoint[1]];
+                _width = json.strokeWidth;
+            }
+            else if (_type == "Path") {
+                _width = json.strokeWidth;
+            }
+            if (_type == "Rectangle" || _type == "Circle") {
+                _opacity = json.fillAlpha;
+            }
+            if (_type == "Text") {
+                startPoint = [json.startX + movePoint[0], json.startY + movePoint[1]];
+                endPoint = [json.endX + movePoint[0], json.endY + movePoint[1]];
+                _text = json.text;
+                _fontSize = json.fontSize;
+            }
+            if (_type == "Path") {
+                var path = "";
+                _points = [];
+                var p = json.path;
+                path = "M" + (p[0].x + movePoint[0]) / dan + "," + (p[0].y + movePoint[1]) / dan;
+                path += "L" + (p[0].x + movePoint[0] + 1.0) / dan + "," + (p[0].y + movePoint[1] + 1) / dan;
+                _points.push([p[0].x + movePoint[0], p[0].y + movePoint[1]]);
+                for (var j = 1; j < p.length; j++) {
+                    path += "L" + (p[j].x + movePoint[0]) / dan + "," + (p[j].y + movePoint[1]) / dan;
+                    _points.push([p[j].x + movePoint[0], p[j].y + movePoint[1]]);
+                }
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Path");
+                newElement.setAttributeNS(null, 'onmousedown', 'sector(' + count + ')');
+                var pather = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+                pather.setAttribute("fill", "none");
+                pather.setAttribute("d", path);
+                pather.style.strokeLinecap = "round";
+                pather.style.strokeLinejoin = "round";
+                pather.style.stroke = _color;
+                pather.style.strokeWidth = _width;
+                newElement.appendChild(pather);
+            }
+            if (_type == "Rectangle") {
+                var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Rectangle");
+                newElement.setAttributeNS(null, 'onmousedown', 'sector(' + count + ')');
+                var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                recter.setAttribute("fill", _color);
+                recter.setAttribute("fill-opacity", _opacity);
+                recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+                recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+                recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+                recter.style.stroke = _color;
+                recter.style.strokeWidth = _width;
+                newElement.appendChild(recter);
+            }
+            if (_type == "Circle") {
+                var a = (startPoint[0] - endPoint[0]) / 2, b = (startPoint[1] - endPoint[1]) / 2;
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Circle");
+                newElement.setAttributeNS(null, 'onmousedown', 'sector(' + count + ')');
+                var circler = document.createElementNS("http://www.w3.org/2000/svg", 'ellipse');
+                circler.setAttribute("fill", _color);
+                circler.setAttribute("fill-opacity", _opacity);
+                circler.setAttribute("cx", (startPoint[0] + endPoint[0]) / (2 * dan));
+                circler.setAttribute("cy", (startPoint[1] + endPoint[1]) / (2 * dan));
+                circler.setAttribute("rx", a < 0 ? -a / dan : a / dan);
+                circler.setAttribute("ry", b < 0 ? -b / dan : b / dan);
+                circler.style.strokeLinecap = "round";
+                circler.style.strokeLinejoin = "round";
+                circler.style.stroke = _color;
+                circler.style.strokeWidth = _width;
+                newElement.appendChild(circler);
+            }
+            if (_type == "Line") {
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Line");
+                newElement.setAttributeNS(null, 'onmousedown', 'sector(' + count + ')');
+                var liner = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                liner.setAttribute("fill", "none");
+                liner.setAttribute("x1", startPoint[0] / dan);
+                liner.setAttribute("y1", startPoint[1] / dan);
+                liner.setAttribute("x2", endPoint[0] / dan);
+                liner.setAttribute("y2", endPoint[1] / dan);
+                liner.style.strokeLinecap = "round";
+                liner.style.strokeLinejoin = "round";
+                liner.style.stroke = _color;
+                liner.style.strokeWidth = _width;
+                newElement.appendChild(liner);
+            }
+            if (_type == "ArrowLine") {
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "ArrowLine");
+                newElement.setAttributeNS(null, 'onmousedown', 'sector(' + count + ')');
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 3) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "DoubleArrowLine") {
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "DoubleArrowLine");
+                newElement.setAttributeNS(null, 'onmousedown', 'sector(' + count + ')');
+                var line = document.createElementNS("http://www.w3.org/2000/svg", 'line');
+                line.setAttribute("x1", startPoint[0] / dan);
+                line.setAttribute("y1", startPoint[1] / dan);
+                line.setAttribute("x2", endPoint[0] / dan);
+                line.setAttribute("y2", endPoint[1] / dan);
+                line.style.stroke = _color;
+                line.style.strokeWidth = _width;
+                newElement.appendChild(line);
+                var D = Math.sqrt((endPoint[0] - startPoint[0]) * (endPoint[0] - startPoint[0]) + (endPoint[1] - startPoint[1]) * (endPoint[1] - startPoint[1]));
+                if (D > _width * 5) {
+                    var angle = 20 * Math.PI / 180;
+                    var lineangle = Math.atan2(endPoint[1] - startPoint[1], endPoint[0] - startPoint[0]);
+                    var h = Math.abs(_width * 2 / Math.cos(angle));
+                    var angle1 = lineangle + Math.PI + angle;
+                    var topx = endPoint[0] + Math.cos(angle1) * h;
+                    var topy = endPoint[1] + Math.sin(angle1) * h;
+                    var angle2 = lineangle + Math.PI - angle;
+                    var botx = endPoint[0] + Math.cos(angle2) * h;
+                    var boty = endPoint[1] + Math.sin(angle2) * h;
+                    var trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + endPoint[0] / dan + "," + endPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                    lineangle = Math.atan2(startPoint[1] - endPoint[1], startPoint[0] - endPoint[0]);
+                    angle1 = lineangle + Math.PI + angle;
+                    topx = startPoint[0] + Math.cos(angle1) * h;
+                    topy = startPoint[1] + Math.sin(angle1) * h;
+                    angle2 = lineangle + Math.PI - angle;
+                    botx = startPoint[0] + Math.cos(angle2) * h;
+                    boty = startPoint[1] + Math.sin(angle2) * h;
+                    trangle = null;
+                    trangle = document.createElementNS("http://www.w3.org/2000/svg", 'polygon');
+                    trangle.setAttribute("points", topx / dan + "," + topy / dan + " " + botx / dan + "," + boty / dan + " " + startPoint[0] / dan + "," + startPoint[1] / dan);
+                    trangle.style.stroke = _color;
+                    trangle.style.strokeWidth = _width;
+                    newElement.appendChild(trangle);
+                }
+            }
+            if (_type == "Text") {
+                var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+                newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+                newElement.setAttribute("type", "Text");
+                newElement.setAttributeNS(null, 'onmousedown', 'sector(' + count + ')');
+                var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+                recter.setAttribute("fill", "none");
+                recter.setAttribute("stroke-dasharray", "15,15");
+                recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+                recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+                recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+                recter.style.stroke = "grey"; //Set stroke colour
+                recter.style.strokeWidth = 2;
+                newElement.appendChild(recter);
+                var texter = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+                texter.setAttributeNS(null, "fill", _color);
+                texter.setAttribute("id", "rectWrap" + count);
+                texter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan + 3);
+                texter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+                texter.setAttribute("font-size", _fontSize);
+                var textNode = document.createTextNode(_text);
+                texter.appendChild(textNode);
+                newElement.appendChild(texter);
+            }
+        }
+    #{/if}
+    #{if action == "punchList"}
+        var pinPunchListId = 0;
+        var punchNumber = "";
+        var punchStat = "";
+        if (json.punchlist != null) {
+            var jsonpin = json.pin;
+            _type = jsonpin.type;
+            _color = jsonpin.color;
+            _points = [];
+            startPoint = [jsonpin.startX, jsonpin.startY];
+            pinPunchListId = json.punchlist;
+            punchNumber = json.number;
+            punchStat = json.status;
+            var a = startPoint[0] - 20, b = startPoint[1] - 25;
+            if (b < 0)
+                b += 75;
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Punch");
+            newElement.setAttributeNS(null, 'class', 'pinned');
+            newElement.setAttributeNS(null, 'onclick', 'showPinPunchList(' + pinPunchListId + ')');
+            var puncher = document.createElementNS("http://www.w3.org/2000/svg", 'image');
+            puncher.setAttributeNS(null, 'height', 50);
+            puncher.setAttributeNS(null, 'width', 50);
+            if (punchStat == "NotResolved")
+                puncher.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/redPunch.png');
+            else
+                puncher.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/greyPunch.png');
+            puncher.setAttributeNS(null, 'x', a / dan);
+            puncher.setAttributeNS(null, 'y', b / dan);
+            newElement.appendChild(puncher);
+            var c = 0
+            if (33 + 11 * punchNumber.length > 50)
+                c = (32 + 11 * punchNumber.length - 50) / 2;
+            var texter = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+            if (punchStat == "NotResolved")
+                texter.setAttributeNS(null, "fill", "red");
+            else
+                texter.setAttributeNS(null, "fill", "black");
+            texter.setAttribute("x", a - c + 1 / dan);
+            texter.setAttribute("y", b / dan);
+            texter.setAttribute("font-size", 20);
+            var textNode = document.createTextNode("ҮД " + punchNumber);
+            texter.appendChild(textNode);
+            newElement.appendChild(texter);
+            startPoint = [a - c, b - 20];
+            endPoint = [startPoint[0] + 50 + 2 * c, startPoint[1] + 25];
+            var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+            var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+            recter.setAttribute("fill", "none");
+            recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+            recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+            recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+            recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+            if (punchStat == "NotResolved")
+                recter.style.stroke = "red";
+            else
+                recter.style.stroke = "black";
+            recter.style.strokeWidth = 1;
+            newElement.appendChild(recter);
+        }
+    #{/if}
+    }
+    function readerJsonArray(stringer) {
+        if (stringer == "") return;
+        var factorJson = jQuery.parseJSON(stringer);
+        for (var i = 0; i < factorJson.length; i++) {
+            newElement = null;
+            readerJson(factorJson[i], i);
+            if (newElement != null) {
+                var jsonElement = {type: "element", element: newElement};
+                addHistory(jsonElement);
+            }
+            _points = [];
+            startPoint = [];
+            endPoint = [];
+        }
+    }
+    function toDisplay() {
+        var factorHistory = [];
+        var factorJson = [];
+        for (var i = 0; i < displayCounter; i++) {
+            if (activityHistory[i].type == "CLEAN") {
+                factorHistory = [];
+                factorJson = [];
+            }
+            else {
+                if (activityHistory[i].type == "erase") {
+                    var element = activityHistory[i].element;
+                    for (var j = 0; j < factorHistory.length; j++) {
+                        if (factorHistory[j].element == element) {
+                            factorHistory.splice(j, 1);
+                            factorJson.splice(j, 1);
+                        }
+                    }
+                } else {
+                    factorHistory.push(activityHistory[i]);
+                    factorJson.push(activityJson[i]);
+                }
+            }
+        }
+        $("svg#stage").empty();
+        for (var i = 0; i < factorHistory.length; i++) {
+            group.appendChild(factorHistory[i].element);
+            if (factorHistory[i].element.getAttribute("type") == "Text")
+                textWrapPublish(i);
+        }
+        return factorJson;
+    }
+
+    #{if action != "punchList"}
+    function undo() {
+        if (displayCounter != 0) {
+            displayCounter--;
+            var factorJson = toDisplay();
+            toStringer(factorJson);
+        }
+    }
+
+    function redo() {
+        if (displayCounter < activityHistory.length) {
+            displayCounter++;
+            var factorJson = toDisplay();
+            toStringer(factorJson);
+        }
+    }
+
+    function textWrapPublish(count) {
+        d3plus.textwrap().container(d3.select("#rectWrap" + count)).draw();
+        $("text#rectWrap" + count).removeAttr("id");
+    }
+
+    function cleaning() {
+        if (displayCounter != 0) {
+            if (activityHistory[displayCounter - 1].type != "CLEAN") {
+                addHistory({type: "CLEAN"});
+            }
+        }
+
+    }
+
+    $("ul#pen-tools li i.fa").click(function () {
+        $("#pen-tools").parent().find("i#fa-edit").attr("class", $(this).attr("class"));
+        svg.call(no_zoom);
+        _type = $(this).attr("value");
+        editing(true);
+    });
+    $("div#Dtexter div input#textFont").mousemove(function () {
+        _fontSize = $(this).val();
+        $(this).parent().parent().find("span").html(_fontSize);
+        var dan = svg_group.attr("scaler");
+        textarea.css("font-size", _fontSize * dan + "px");
+    });
+    $("ul#editor_tools i.fa-font").click(function () {
+        svg.call(no_zoom);
+        _type = "Text";
+        editing(true);
+    });
+    $("ul#pen-color li i").click(function () {
+        _color = $(this).css("color");
+        $("#pen-color").parent().find("i.fa-color").css("color", $(this).css("color"));
+        $("#svg").unbind("mousedown", _mousedown);
+        $("#svg").unbind("mousemove", _mousemove);
+        $("#svg").unbind("mouseup", _mouseup);
+        editing(_drawing);
+    });
+    $("ul#pen-opacity li i").click(function () {
+        $("#pen-opacity").parent().find("i.fillAlpha").find("span").html($(this).find("span").html());
+        _opacity = parseFloat($(this).find("span").html()) / 100;
+    });
+    $("input#width").mousemove(function () {
+        _width = $(this).val();
+        $("#pen-width").parent().find("i:first-child i").css("font-size", $(this).val() + "px");
+    });
+
+    function _touchmove(e) {
+        e = e.originalEvent;
+        e.preventDefault();
+
+        if (e.touches.length == 1) {
+            var touch = e.touches[0];
+            _mousemove(touch);
+        }
+    }
+
+    function _touchend(e) {
+        e = e.originalEvent;
+        e.preventDefault();
+
+        _mouseup(e);
+    }
+
+    function _mousemove(e) {
+        if (selectedElement == -1) {
+            if (_clicking == true) {
+                move(e);
+            }
+        } else {
+            if (moveStartPoint[0] == 0 && moveStartPoint[1] == 0)
+                moveStartPoint = [e.pageX, e.pageY];
+            movePoint = [e.pageX - moveStartPoint[0], e.pageY - moveStartPoint[1]];
+            readerJson(shapeJson, selectedElement);
+            activityHistory[selectedElement].element = newElement;
+            activityJson[selectedElement].element = getJsonElement();
+            addHistory(null);
+//            if (newElement != null)
+//                newElement.remove();
+//            readerJson(shapeJson, displayCounter);
+//            group.appendChild(newElement);
+//            if (shapeJson.type == "Text")
+//                textWrapPublish(displayCounter);
+
+        }
+    }
+
+    function finishAddText(e) {
+        if (textarea.val().trim() == "") {
+            var factorJson = toDisplay();
+            toStringer(factorJson);
+            textarea.parent().css("display", "none");
+            textarea.val("");
+        } else {
+            _text = textarea.val();
+            textarea.val("");
+            textarea.parent().css("display", "none");
+            var dan = svg_group.attr("scaler");
+            var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+            var texter = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+            texter.setAttributeNS(null, "fill", _color);
+            texter.setAttribute("id", "rectWrap" + displayCounter);
+            texter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+            texter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+            texter.setAttribute("font-size", _fontSize);
+            var textNode = document.createTextNode(_text);
+            texter.appendChild(textNode);
+            newElement.appendChild(texter);
+            var jsonElement = {type: "element", element: newElement};
+            addHistory(jsonElement);
+            _fontSize = 12;
+            $("div#Dtexter div input#textFont").val(_fontSize);
+        }
+        $("#svg").unbind("mousedown", finishAddText);
+        newElement = null;
+        _points = [];
+        no_zooming();
+    }
+
+    function _mouseup(e) {
+        if (selectedElement == -1) {
+            if (_clicking == true) {
+                _clicking = false;
+                if (_type == "Text") {
+                    var dan = svg_group.attr("scaler");
+                    var scrolledHeight = $(window).scrollTop();
+                    textarea.css("top", Math.min(startPoint[1], endPoint[1]) + _offset.top - 30 - scrolledHeight + "px");
+                    textarea.css("left", Math.min(startPoint[0], endPoint[0]) + _offset.left + 1 + "px");
+                    textarea.css("width", Math.abs(startPoint[0] - endPoint[0]) - 1 + "px");
+                    textarea.css("height", Math.abs(startPoint[1] - endPoint[1]) + "px");
+                    textarea.css("font-size", _fontSize * dan + "px");
+
+                    textarea.parent().find("div:first-child").css("top", Math.min(startPoint[1], endPoint[1]) + _offset.top - 50 - scrolledHeight + "px");
+                    textarea.parent().find("div:first-child").css("left", Math.min(startPoint[0], endPoint[0]) + _offset.left + "px");
+                    textarea.parent().find("div:first-child").css("width", Math.abs(startPoint[0] - endPoint[0]) + "px");
+                    textarea.parent().find("div:first-child").css("height", "20px");
+
+                    textarea.parent().css("display", "block");
+                    editing(false);
+                    $("#svg").mousedown(finishAddText);
+                }
+                else {
+                    var jsonElement = {type: "element", element: newElement};
+                    addHistory(jsonElement);
+                    _points = [];
+                    newElement = null;
+                }
+            }
+        } else {
+//            var jsonElement = {type: "element", element: newElement};
+            activityHistory[selectedElement].element = newElement;
+            activityJson[selectedElement] = getJsonElement();
+            addHistory(null);
+            selectedElement = -1;
+            movePoint = [0, 0];
+            moveStartPoint = [0, 0];
+            _points = [];
+            newElement = null;
+            _type = factorResetJson.type;
+            _color = factorResetJson.color;
+            _opacity = factorResetJson.opacity;
+            _fontSize = factorResetJson.fontSize;
+            _width = factorResetJson.width;
+        }
+    }
+
+    function move(e) {
+        var x = e.pageX - _offset.left,
+                y = e.pageY - _offset.top;
+        if (_type == "Path") {
+            _points.push([x, y]);
+            draw();
+        }
+        if (_type == "Rectangle" || _type == "Circle" || _type == "Line" || _type == "ArrowLine" || _type == "DoubleArrowLine" || _type == "Text") {
+            endPoint = [x, y];
+            draw();
+        }
+    }
+
+    function draw() {
+        if (newElement != null) {
+            newElement.remove();
+        }
+        var dan = svg_group.attr("scaler");
+        newElement = null;
+        if (_type != "Text") {
+            var json = getJsonElement();
+            readerJson(json, displayCounter);
+        }
+        if (_type == "Text") {
+            var a = startPoint[0] - endPoint[0], b = startPoint[1] - endPoint[1];
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Text");
+            newElement.setAttributeNS(null, 'onmousedown', 'sector(' + displayCounter + ')');
+            var recter = document.createElementNS("http://www.w3.org/2000/svg", 'rect');
+            recter.setAttribute("fill", "none");
+            recter.setAttribute("stroke-dasharray", "15,15");
+            recter.setAttribute("x", a > 0 ? endPoint[0] / dan : startPoint[0] / dan);
+            recter.setAttribute("y", b > 0 ? endPoint[1] / dan : startPoint[1] / dan);
+            recter.setAttribute("width", a < 0 ? -a / dan : a / dan);
+            recter.setAttribute("height", b < 0 ? -b / dan : b / dan);
+            recter.style.stroke = "grey"; //Set stroke colour
+            recter.style.strokeWidth = 2; //Set stroke width
+            newElement.appendChild(recter);
+        }
+        group.appendChild(newElement);
+    }
+
+    function points_to_string(dan) {
+        var _path = [];
+        if (_points.length > 1) {
+            for (var i = 0; i < _points.length; i++) {
+                var jsonPoint = {x: _points[i][0] / dan, y: _points[i][1] / dan};
+                _path.push(jsonPoint);
+            }
+        }
+        return _path;
+    }
+
+    $(document).ready(function () {
+
+        $('textArea#pinText').keypress(function (event) {
+            if (event.keyCode == 10 || event.keyCode == 13)
+                event.preventDefault();
+        });
+    });
+    #{/if}
+
+    #{if action == "punchList"}
+    $("ul#editor_tools i.fa-thumb-tack").click(function () {
+        _type = "Punch";
+        no_zooming();
+    });
+    $('div#PunchListModal').on('hide.bs.modal', function () {
+        if (newElement != null) {
+            newElement.remove();
+        }
+    });
+    #{/if}
+    $("ul#editor_tools li i.fa-arrows").click(function () {
+        $("#pen-tools").parent().find("i#fa-edit").attr("class", "fa fa-edit f-24");
+        zooming();
+    #{if action == "punchList"}
+        if (newElement != null) {
+            newElement.remove();
+        }
+    #{/if}
+    });
+
+    function _touchstart(e) {
+        e = e.originalEvent;
+        e.preventDefault();
+
+        if (e.touches.length == 1) {
+            var touch = e.touches[0];
+            _mousedown(touch);
+        }
+    }
+
+
+    function _mousedown(e) {
+        if (selectedElement == -1) {
+            if (_drawing == true) {
+                _clicking = true;
+                start(e, self);
+                movePoint = [0, 0];
+            }
+        } else {
+            shapeJson = activityJson[selectedElement];
+//            activityHistory.splice(selectedElement, 1);
+//            activityJson.splice(selectedElement, 1);
+            moveStartPoint = [e.pageX, e.pageY];
+            movePoint = [0, 0];
+//            displayCounter--;
+//            if (newElement != null)
+//                newElement.remove();
+//            addHistory(null);
+//            readerJson(shapeJson, displayCounter);
+//            group.appendChild(newElement);
+//            if (shapeJson.type == "Text")
+//                textWrapPublish(displayCounter);
+            factorResetJson = {
+                type: _type,
+                color: _color,
+                opacity: _opacity,
+                fontSize: _fontSize,
+                width: _width
+            };
+        }
+    }
+
+    function editing(mode) {
+        _drawing = mode;
+        if (_drawing) {
+            _offset = $("#outer_group").offset();
+            $("#svg").css("cursor", "crosshair");
+            $("#svg").mousedown(_mousedown);
+        #{if action != "punchList"}
+            $("#svg").mousemove(_mousemove);
+            $("#svg").mouseup(_mouseup);
+        #{/if}
+            // iPhone Events
+            var agent = navigator.userAgent;
+            if (agent.indexOf("iPhone") > 0 || agent.indexOf("iPod") > 0 || agent.indexOf("iPad") > 0) {
+                $("#svg").bind("touchstart", _touchstart);
+            #{if action != "punchList"}
+                $("#svg").bind("touchmove", _touchmove);
+                $("#svg").bind("touchend", _touchend);
+            #{/if}
+            }
+
+        } else {
+            $("#svg").css("cursor", "move");
+            $("#svg").unbind("mousedown", _mousedown);
+        #{if action != "punchList"}
+            $("#svg").unbind("mousemove", _mousemove);
+            $("#svg").unbind("mouseup", _mouseup);
+        #{/if}
+            // iPhone Events
+            var agent = navigator.userAgent;
+            if (agent.indexOf("iPhone") > 0 || agent.indexOf("iPod") > 0 || agent.indexOf("iPad") > 0) {
+                $("#svg").unbind("touchstart", _touchstart);
+            #{if action != "punchList"}
+                $("#svg").unbind("touchmove", _touchmove);
+                $("#svg").unbind("touchend", _touchend);
+            #{/if}
+            }
+        }
+    }
+
+    function zooming() {
+        svg.call(zoom);
+        editing(false);
+    }
+
+    function no_zooming() {
+        svg.call(no_zoom);
+        editing(true);
+    }
+
+    function alerter() {
+        alert("clicked");
+    }
+
+    function start(e) {
+        _drawing = true;
+        var x = e.pageX - _offset.left,
+                y = e.pageY - _offset.top;
+        startPoint = [x, y];
+        _points.push(startPoint);
+    #{if action == "punchList"}
+        if (newElement != null) {
+            newElement.remove();
+        }
+        if (_type == "Punch") {
+            var dan = svg_group.attr("scaler");
+            newElement = document.createElementNS("http://www.w3.org/2000/svg", 'g');
+            newElement.setAttribute("type", "Punch");
+            var puncher = document.createElementNS("http://www.w3.org/2000/svg", 'image');
+            puncher.setAttributeNS(null, 'height', 50);
+            puncher.setAttributeNS(null, 'width', 50);
+            puncher.setAttributeNS('http://www.w3.org/1999/xlink', 'href', '/public/images/drawing/redPunch.png');
+            puncher.setAttributeNS(null, 'x', (startPoint[0] - 30) / dan);
+            puncher.setAttributeNS(null, 'y', (startPoint[1] - 25) / dan);
+            puncher.setAttributeNS(null, 'class', 'pinned');
+            newElement.appendChild(puncher);
+            group.appendChild(newElement);
+            $("input#jsonString").attr("value", "[" + JSON.stringify(getJsonElement()) + "]");
+            _points = [];
+            newPunchList(0, 0, 0, $("input#jsonString").attr("value"), $("input#revisionId").attr("value"));
+        }
+    #{/if}
+        if (_type == "Text") {
+            textarea.css("color", _color);
+            textarea.css("border", "none");
+        }
+    }
+
+    function saveDrawingPath(jsonString) {
+    #{if action == "userLayer"}
+        $.ajax({
+            type: "POST",
+            data: {
+                path: jsonString,
+                revisionId: ${revision.id}
+            },
+            url: "/drawing/update"
+        }).success(function (data) {
+        });
+    #{/if}
+    #{else}
+        $("input#jsonString").attr("value", jsonString);
+        saveDrawingPathForDocument(${revision.id}, '${revision.dir}', jsonString);
+    #{/else}
+    }
+
+    function downloadPDFwithMarkUp(name) {
+        var cleanSVG = $("svg#cleanSVG");
+        var imageBack = cleanSVG.find("image#background");
+        cleanSVG.html("");
+        cleanSVG.append(imageBack);
+        cleanSVG.append($("svg#stage").html());
+        svg_to_pdf(document.getElementById("cleanSVG"), function (pdf) {
+            download_pdf('${drawing.Number + " - " + drawing.title + " (Хувилбар " + revision.id + ") [Тэмдэглэгээтэй].pdf"}', pdf.output('dataurlstring'));
+        });
+    }
+
+    function downloadPDF(name) {
+        var cleanSVG = $("svg#cleanSVG");
+        var imageBack = cleanSVG.find("image#background");
+        cleanSVG.html("");
+        cleanSVG.append(imageBack);
+        svg_to_pdf(document.getElementById("cleanSVG"), function (pdf) {
+            download_pdf('${drawing.Number + " - " + drawing.title + " (Хувилбар " + revision.id + ").pdf"}', pdf.output('dataurlstring'));
+        });
+    }
+</script>
+<style type="text/css">
+    img.imgIcon {
+        width: 50px;
+        height: 50px;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    div#pros {
+        vertical-align: middle;
+        padding: auto;
+        box-shadow: 0 0.5px 5px gray;
+        border-radius: 8px;
+    }
+
+    svg#svgView {
+        cursor: move;
+    }
+
+    svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    .pinned:hover {
+        cursor: pointer;
+    }
+
+    #draw-tools {
+        top: 80px;
+        left: 20px;
+        width: 44px;
+        height: 360px;
+        margin: 0;
+        z-index: 6000;
+        position: fixed;
+        border-radius: 3px !important;
+    }
+
+    #draw-tools .navbar {
+        height: 44px;
+        padding: 0;
+        padding-bottom: 10px;
+        margin: 0;
+        position: fixed;
+        border-radius: 3px !important;
+    }
+
+    #draw-tools .navbar li {
+        height: 44px;
+        width: 44px;
+        /*float: left;  */
+        object-position: top;
+        text-align: center;
+        list-style: none;
+        font: normal bold 12px/1.2em Arial, Verdana, Helvetica;
+        padding: 0;
+        margin: 0;
+        background-color: #313335;
+    }
+
+    #draw-tools .navbar i {
+        padding: 10px 0;
+        text-decoration: none;
+        color: #000;
+        display: block;
+    }
+
+    #pen-tools li {
+        float: left;
+    }
+
+    #draw-tools .navbar li:hover {
+        background-color: #515151;
+    }
+
+    #draw-tools .navbar li ul {
+        display: none;
+        margin-left: 44px;
+        margin-top: -44px;
+        float: left;
+        height: 44px;
+    }
+
+    #draw-tools .navbar li:hover ul {
+        float: left;
+        display: block;
+        z-index: 6000;
+        padding-left: 0;
+
+    }
+
+    #draw-tools .navbar li ul li {
+        float: left;
+        background-color: #313335;
+    }
+
+    #draw-tools .navbar li ul li:hover {
+        background-color: #515151;
+        border-color: #515151;
+    }
+
+    #draw-tools .navbar li ul li i {
+        z-index: 7001;
+    }
+
+    i.fa-plus:hover {
+        background-color: transparent;
+    }
+</style>

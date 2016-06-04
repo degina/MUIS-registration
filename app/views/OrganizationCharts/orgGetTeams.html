@@ -1,0 +1,26 @@
+<div style="text-align: left">
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>
+                <button class="btn btn-success btn-transparent" onclick="addTeam()"><i class="fa fa-plus p-r-10"></i>
+                    Баг нэмэх
+                </button>
+            </th>
+        </tr>
+        </thead>
+    <tbody>
+    #{list items:teams,as:'team'}
+    <tr id="tr-${team.id}">
+        <td><input id=${team.id} type="text" value="${team.name}" style="width: 95%;border: none"/>
+            #{if team.id!=1}
+                <i class="fa fa-times f-18" style="font-size: 13px;color: darkgrey;cursor: pointer;margin-left: 4px"
+                   title="Устгах"
+                   onclick="deleteTeam(${team.id})"></i>
+            #{/if}
+        </td>
+    </tr>
+    </tbody>
+    #{/list}
+    </table>
+</div>

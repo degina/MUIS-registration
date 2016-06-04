@@ -1,0 +1,925 @@
+#{extends 'CRUD/layout.html' /}
+#{Dashboard-config /}
+#{alertMessages /}
+<style>
+    .output {
+        width: 100%;
+        height: 200px;
+        position:relative;
+    }
+
+    .post-new .progress {
+        height: 40px;
+    }
+
+    ul.groupUl{
+        text-align: center;
+    }
+
+    ul.groupUl li {
+        display: inline;
+        height: 39px;
+        cursor: pointer
+    }
+
+    ul.groupUl li .zocial {
+        text-decoration:none;
+        color: #3C3C3C;
+        background-color: grey;
+        border:0;
+        margin:5px;
+    }
+
+    ul.groupUl li .groupsCleanLink i{
+        color: black;
+    }
+
+
+
+    div#todoListDiv li {
+        list-style: none;
+    }
+    div#addQuestion li {
+        list-style: none;
+    }
+
+    div#addQuestion {
+        margin-top: 20px;
+    }
+
+    #weather i {
+        color: #fff;
+        font-family: weather;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1.0;
+    }
+
+    div.post-images img {
+        height: 25px !important;
+        width: 25px !important;
+        margin: 5px 1px 0 0 !important;
+    }
+
+    ul.uploadBox {
+        padding: 0;
+        margin-top: 0px;
+        margin-top: -2px;
+    }
+
+    ul.uploadBox li span img.imgIcon {
+        height: 25px !important;
+        width: 25px !important;
+        border-radius: 4px !important;
+    }
+
+    ul.uploadBox li span img.deleteUploadedImage {
+        left: 10px !important;
+        top: 10px !important;
+    }
+
+    ul.uploadBox li span img.deleteImage {
+        left: 10px !important;
+        top: 10px !important;
+        height: 18px !important;
+        position: absolute;
+        width: 18px;
+    }
+
+    .fc-event-icons {
+        width: 45px !important;
+        height: auto;
+    }
+
+    .carousel-inner img {
+        width: 100%;
+        margin: auto;
+    }
+
+    button.upload:hover {
+        background-color: #18a689;
+        color: #fff !important
+    }
+
+    div#postArea .post-like {
+        height: 30px;
+        margin: 10px 0 0 0;
+        padding: 0 0 0px 12px;
+    }
+
+    #eventList .row {
+        border: 1px solid #d8d8d8;
+        -webkit-border-radius: 3px;
+        border-radius: 4px !important;
+        background-color: #fff;
+        border-bottom-width: 2px;
+        margin-top: 10px;
+        padding: 10px;
+    }
+
+    div#postArea .Sbhd {
+        -webkit-animation: ozShareboxSlide .5s ease-out;
+        animation: ozShareboxSlide .5s ease-out;
+        -webkit-border-radius: 0;
+        border-radius: 0;
+        -webkit-box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 0 1px 11px 0 rgba(0, 0, 0, 0.4);
+        -webkit-transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+        transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+        border: 0;
+        border-color: transparent;
+        z-index: 4;
+    }
+
+    div#postArea .small-comment {
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        color: #999;
+        cursor: text;
+        font-size: 12px;
+        height: auto;
+        margin: 0 0 0 0;
+        padding: 6px 8px;
+    }
+
+    div#postArea .message-item {
+        border: 0 !important;
+        margin: 0;
+        padding: 0 0 15px 0px;
+        display: block;
+        position: relative;
+    }
+    .post-comment > .pull-left{
+        margin-right: 10px;
+    }
+
+    .deleteCommentIcon {
+        top: 0;
+        font-size: 13px;
+        font-weight: 100;
+        position: absolute;
+        display: none;
+        right: 0;
+        color: #737373;
+    }
+    div#postArea .message-item:hover .deleteCommentIcon {
+        display: block
+    }
+
+    div#postArea .post-comments {
+        padding: 0px 20px 10px 20px;
+        background-color: #f5f5f5;
+        max-height: 500px;
+        overflow-y: auto;
+    }
+
+    div#postArea .post-comment{
+        overflow: auto;
+        zoom: 1;
+    }
+
+    div#postArea .post-add-comment {
+        padding: 20px 20px 20px 20px;
+        background-color: #f5f5f5;
+        border-top: 1px solid #ddd;
+    }
+
+    div#postArea .post-head {
+        padding: 15px 15px 10px 15px;
+        position: relative;
+        border-bottom: 1px solid transparent;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+    }
+
+    div#postArea .post {
+        border: 1px solid #d8d8d8;
+        -webkit-border-radius: 3px;
+        border-radius: 4px !important;
+        background-color: #fff;
+        border-bottom-width: 2px;
+        margin-bottom: 20px;
+    }
+
+    div#postArea .post:hover .deletePostIcon {
+        display: block
+    }
+
+    div#postArea .deletePostIcon {
+        position: absolute;
+        display: none;
+        top: 10px;
+        right: 15px;
+        font-size: 18px;
+        color: #737373;
+    }
+
+    div#postArea .post-body {
+        padding: 0 20px 0 20px;
+        background-color: #FFF;
+    }
+
+    div#postArea .post-add-comment .full-comment {
+        display: none;
+    }
+
+    div#postArea #textComment {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        margin-bottom: 7px;
+        min-height: 4.9em;
+        padding: 6px 6px;
+        width: 100%;
+    }
+
+    div#postArea .show-more-comment {
+        cursor: pointer;
+        color: #262626;
+        font-size: 12px;
+        padding: 10px 20px 10px 20px;
+        background-color: #f5f5f5;
+        border-top: 1px solid #ddd;
+    }
+
+    div#postArea .show-more-comment:hover {
+        color: #427fed;
+
+    }
+
+    div#postArea .btn-post {
+        background-color: #53a93f;
+        color: #fff;
+    }
+
+    div#postArea .RR {
+        display: inline-block;
+    }
+
+    div#postArea .btn-white {
+        background-color: #fff;
+    }
+
+    div#postArea .btn {
+        padding: 4px 23px;
+    }
+
+    div#postArea div.post-new {
+        margin: 15px 0px 20px 0px;
+        min-width: 320px;
+        -webkit-box-shadow: 0 2px 40px 0 rgba(0, 0, 0, .4);
+        box-shadow: 0 2px 40px 0 rgba(0, 0, 0, .4);
+        -webkit-transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+        transition: left .4s cubic-bezier(0.175, 0.885, 0.320, 1.275), width .4s ease, padding .4s ease, box-shadow .4s ease, margin .4s ease, border .4s ease;
+    }
+
+    div#postArea div.post-new-body {
+        background-color: #f5f5f5;
+        padding: 20px;
+    }
+
+    div#postArea div.post-new-footer {
+        padding: 15px;
+        background-color: #fff;
+        display: none;
+    }
+
+    .Rd {
+        color: #404040;
+        cursor: text;
+        padding: 10px;
+        position: relative;
+        vertical-align: top;
+        background-color: white;
+        border: 1px solid #e4e4e4;
+        -webkit-box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, .08);
+        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, .08);
+    }
+
+    .Rd:hover {
+        box-shadow: inset 2px 2px 4px 0 rgba(0, 0, 0, .04);
+        -webkit-box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, .04);
+    }
+
+    .eg {
+        -webkit-box-shadow: inset 2px 2px 4px 0 rgba(0, 0, 0, .04);
+        box-shadow: inset 2px 2px 4px 0 rgba(0, 0, 0, .04);
+        background-color: white;
+        border-top: 1px solid #e4e4e4;
+        cursor: text;
+        display: none;
+        height: 15px;
+        left: -15px;
+        position: absolute;
+        top: -1px;
+        width: 20px;
+    }
+
+    .oo {
+        border-bottom: 16px solid #e4e4e4;
+        border-right: 16px solid transparent;
+        left: -1px;
+        top: -1px;
+    }
+
+    .yw {
+        height: 0;
+        position: absolute;
+        width: 0;
+    }
+
+    .VK {
+        border-bottom: 15px solid #f5f5f5;
+        border-right: 15px solid transparent;
+        left: -1px;
+    }
+
+    .textPostSmall {
+        background: transparent;
+        position: relative;
+        min-height: 3.9em;
+        z-index: 1;
+        color: #999;
+        cursor: text;
+    }
+
+    #textPostFull {
+        border: none;
+        resize: none;
+        background: transparent;
+        min-height: 3.9em;
+        z-index: 1;
+    }
+
+    div #postArea .seeUserPost {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        margin-bottom: 7px;
+        min-height: 2.9em;
+        padding: 6px 6px;
+        display: block;
+        margin-right: 40px;
+        overflow: hidden;
+    }
+
+    div#sendUserTag li {
+        list-style-type: none;
+        padding: 2px 4px;
+        border-bottom: 0 !important;
+        display: inline;
+        list-style-type: none;
+    }
+
+    div.post-select-user-icon {
+        width: 31px;
+        right: 0px;
+        top: 3px;
+        position: absolute;
+    }
+
+    .textareaDiv {
+        font-family: Consolas, monospace;
+        text-align: center;
+        vertical-align: baseline;
+    }
+
+    div#main-content ul.itemsSource {
+        display: none;
+    }
+
+    .load-more-animation {
+        display: none;
+        text-align: center;
+        vertical-align: middle;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    div#postArea .triangle {
+        width: 0;
+        height: 0;
+        border-top: 170px solid #000;
+        border-left: 170px solid transparent;
+    }
+
+    div#postArea .post-content {
+        word-wrap: break-word;
+        padding-bottom: 10px;
+    }
+    div#postArea span.post-read-more {
+        -webkit-user-select: none;
+        color: #999;
+        display: inline-block;
+        font-size: 12px;
+        margin-top: 2px;
+        vertical-align: middle;
+        cursor: pointer;
+    }
+
+    div#postArea .post:hover span.post-read-more {
+        text-decoration: underline;
+        color: #427fed;
+        cursor: pointer;
+    }
+
+    *{div#calendar h2 {}*
+        *{width: 100%;}*
+        *{margin: 6px 0;}*
+    *{}}*
+
+    *{div#calendar .fc-clear {}*
+        *{display: none;}*
+    *{}}*
+
+    div.post .tooltip-inner {
+        white-space: pre-wrap;
+    }
+
+    div.post-area-small {
+        width: 500px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    div.post-attach-all{
+        width: 100%;
+        margin-top: 2px;
+        margin-left: -10px;
+        margin-right: -10px;
+        cursor: pointer;
+    }
+    div.post-attach{
+        margin-left: -10px;
+        margin-right: -10px;
+        cursor: pointer;
+    }
+    div.post-plus-attach{
+        width: 19%;
+        font-size: 24px;
+        display: inline-flex;
+    }
+    button.modal-fullscreen-close {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1001;
+        background-color: transparent;
+        border: 0;
+    }
+    .post-comment-owner{
+        color: #404040;
+        font-size: 13px;
+        font-weight: bold;
+    }
+    .post-comment-created-time{
+        font-size: 12px;
+        color: #8f8f8f;
+    }
+    .modal.modal-fullscreen .modal-dialog,
+    .modal.modal-fullscreen .modal-content {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
+
+    .modal.modal-fullscreen .modal-dialog {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow:hidden;
+    }
+    .modal.modal-fullscreen .modal-content {
+        border: none;
+        -moz-border-radius: 0;
+        border-radius: 0;
+        -webkit-box-shadow: inherit;
+        -moz-box-shadow: inherit;
+        -o-box-shadow: inherit;
+        box-shadow: inherit;
+        background-color: #191919;
+        overflow:auto;
+        width: 100%;
+        height: 100%;
+    }
+
+    .modal.modal-fullscreen .modal-body, .modal.modal-fullscreen table, .modal.modal-fullscreen td {
+        height: 100%;
+    }
+    .dropdown-menu > li > a{
+        cursor: pointer;
+    }
+    .carousel-control {
+        width: 10%;
+        font-size: 24px;
+    }
+    .modal-body .glyphicon-remove{
+        color: #ffffff!important;
+    }
+    .modalVoteUsers{
+        width: 30px;
+    }
+    .carousel-control-arrow{
+        position: absolute;
+        top: 50%;
+        z-index: 5;
+        display: inline-block;
+    }
+    .carousel-control.right,.carousel-control.left{
+        background-image: none;
+    }
+    .img-responsive-my{
+        width: auto;
+        height: auto;
+        max-height: 300px;
+        max-width: 100%;
+    }
+    .img-responsive-my-small{
+        width: auto;
+        height: auto;
+        max-height: 100px;
+        max-width: 19%;
+    }
+    .img-responsive-full{
+        width: auto!important;
+        height: auto!important;
+        max-width: 100%!important;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -webkit-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }
+    .carousel,.carousel-inner,.carousel-inner > .item {
+        height: 100%;
+    }
+    .panel-body td{
+        padding: 5px 0px 5px 0px;
+    }
+</style>
+
+<div class="modal fade" id="todoListAdd" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Хийх зүйлс нэмэх</h4>
+            </div>
+            <div class="modal-body">
+                <input class="form-control m-b-10" id="new-todo" placeholder="Хийх зүйл..."
+                       type="text" style="width: 95%">
+                <input id="todoTextPickerReminder" type="text" class="form-control" placeholder="Хэрэв сануулах бол..."
+                       style="width: 95%">
+                <i class="fa fa-times f-18" style="font-size: 13px;color: darkgrey;cursor: pointer;" title="Арилгах"
+                   onclick="todoListPickerReminderClear()"></i>
+            </div>
+            <div class="modal-footer" style="margin-top: 0">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Хаах</button>
+                <button type="button" class="btn btn-success" onclick="todoListAddAction()">Нэмэх</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+#{include '/Events/openEvent.html'/}
+#{addQuestionBox par:'NULL'/}
+#{include '/Events/eventModal.html'/}
+
+<div id="main-content" class="dashboard">
+        <div class="col-md-4" style="padding-right: 10px;float:right;">
+            <div style="padding: 10px 20px 20px 20px">
+                <div class="row">
+                    <div class="panel-heading no-bd bg-red">
+                        <strong>Миний шийдэх асуудлууд</strong>
+                    </div>
+                    <div class="panel-body" style="padding: 10px">
+                        <table style="width:100%">
+                        #{if Rifs_Punchlis.rfi_all>0}
+                            <tr>
+                                <td style="width:40%;font-size:12px">Мэдээлэл хүсэлт</td>
+                                <td>
+                                    <div class="gur-group">
+                                        <div class="gur-ulaan"
+                                             style="width: ${100*Rifs_Punchlis.rfi_over/Rifs_Punchlis.rfi_all}%;">${Rifs_Punchlis.rfi_over}</div>
+                                        <div class="gur-ulbar"
+                                             style="width: ${100*Rifs_Punchlis.rfi_inweek/Rifs_Punchlis.rfi_all}%;">${Rifs_Punchlis.rfi_inweek}</div>
+                                        <div class="gur-huh"
+                                             style="width:${100*Rifs_Punchlis.rfi_nextWeek/Rifs_Punchlis.rfi_all}%;">${Rifs_Punchlis.rfi_nextWeek}</div>
+                                        <div class="gur-nogoon"
+                                             style="width:${100*Rifs_Punchlis.rfi_closed/Rifs_Punchlis.rfi_all}%;">${Rifs_Punchlis.rfi_closed}</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        #{/if}
+                        #{if Rifs_Punchlis.punch_all>0}
+                            <tr>
+                                <td style="width: 40%;font-size:12px">Үүрэг даалгавар</td>
+                                <td>
+                                    <div class="gur-group">
+                                        <div class="gur-ulaan"
+                                             style="width: ${100*Rifs_Punchlis.punch_over/Rifs_Punchlis.punch_all}%;">${Rifs_Punchlis.punch_over}</div>
+                                        <div class="gur-ulbar"
+                                             style="width: ${100*Rifs_Punchlis.punch_inweek/Rifs_Punchlis.punch_all}%;">${Rifs_Punchlis.punch_inweek}</div>
+                                        <div class="gur-huh"
+                                             style="width:${100*Rifs_Punchlis.punch_nextWeek/Rifs_Punchlis.punch_all}%;">${Rifs_Punchlis.punch_nextWeek}</div>
+                                        <div class="gur-nogoon"
+                                             style="width:${100*Rifs_Punchlis.punch_resolved/Rifs_Punchlis.punch_all}%;">${Rifs_Punchlis.punch_resolved}</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        #{/if}
+                        </table>
+                    </div>
+                    <div class="panel-footer no-bd" style="font-size: 13px">
+                        <span><i class="fa fa-square" style="color: #d9534f;"></i> Хугацаа хэтэрсэн</span>
+                        <span style="white-space: nowrap"><i class="fa fa-square" style="color: #f0ad4e;margin-left: 10px"></i> Долоо хоногоос их</span>
+                        <span style="white-space: nowrap"><i class="fa fa-square" style="color:#5cb85c"></i> Долоо хоногоос бага</span>
+                    </div>
+                </div>
+                <div class="row" id="todoListDiv" style="margin-top: 20px">
+                    <div class="panel no-bd bg-green">
+                        <div class="panel-heading clearfix pos-rel" style="padding-bottom: 0">
+                            <div class="pos-abs t-10 r-5 f-18 cursor-pointer" onclick="todoListAdd()">
+                                <div class="glyph-icon flaticon-plus16 f-32"></div>
+                            </div>
+                            <h2 class="panel-title width-100p text-center w-500 f-20 carrois">Хийх зүйлс</h2>
+                        *{<div class="pos-abs t-10 l-15 f-18"><i class="fa fa-list"></i>}*
+                        *{</div>}*
+                        </div>
+                        <div class="panel-body bg-green p-t-0 p-b-10">
+                            <div class="row">
+                                <div class="col-md-12">
+                                *{<div class="row m-b-10">}*
+                                *{<input class="form-control" id="new-todo" placeholder="Жагсаалт нэмэх..."}*
+                                *{type="text">}*
+                                *{</div>}*
+                                    <div class="row" id="task-manager">
+                                        <ul id="sortable-todo" class="ui-sortable">
+                                        #{list items:toDoLists,as:'toDoList'}
+                                    #{include '/Dashboard/newTodoList.html'/}
+                                #{/list}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="margin-top: 20px">
+                    <div class="list-notes">
+                        <div class="panel panel-default">
+                            <div class="panel-body notes">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="input-group input-group-lg border-bottom">
+                                        <span class="input-group-btn">
+                                            <a href="" class="btn"><i class="fa fa-search c-gray-light"></i></a>
+                                        </span>
+                                            <input type="text" class="form-control bd-0 bd-white" id="notes-finder"
+                                                   placeholder="Тэмдэглэлээс хайх...">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div data-rel="tooltip" data-placement="left" data-original-title="Add a note"
+                                             id="add-note">
+                                            <i class="fa fa-plus"></i>ТЭМДЭГЛЭЛ БИЧИХ
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="notes-list" class="panel panel-default withScroll"
+                                     data-padding="129">
+                                #{list items:notes,as:'note'}
+                                    <div class="note-item media current fade in">
+                                        <button class="close noteDelete" data-dismiss="alert" data-rel="tooltip"
+                                                data-placement="left"
+                                                data-original-title="Устгах" nid="${note.id}">×
+                                        </button>
+                                        <div>
+                                            <div>
+                                                <h4 class="note-name" nid="${note.id}">${note.title}</h4>
+                                            </div>
+                                            <p class="note-desc">${note.notes.raw()}</p>
+
+                                            <p>
+                                                <small class="pull-right">${controllers.Functions.getDateTime(note.date)}</small>
+                                            </p>
+                                        </div>
+                                    </div>
+                                #{/list}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-9 col-md-8 detail-note note-hidden-sm" id="noteContents"
+                         style="position: fixed;z-index: 1;width: 600px;display: none;box-shadow: 0 2px 40px 0 rgba(0, 0, 0, .4);">
+                        <div id="note-detail" class="panel panel-default withScroll" data-height="window"
+                             data-padding="40">
+                            <div class="panel-body note-write">
+                                <div class="row">
+                                    <div class="col-md-12 col-sm-12 col-xs-12">
+                                        <div style="width: 100%;background:#852e2e;height: 40px">
+                                            <button class="close" id="hideContent" title="Хаах"
+                                                    style="margin: 10px;color: white;opacity: 1">×
+                                            </button>
+                                        </div>
+                                        <textarea class="form-control" placeholder="Энд тэмдэглэл бичнэ үү"
+                                      style="resize: none"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="eventList">
+                </div>
+                <div class="row m-t-20">
+                    <div class="panel no-bd bd-3 panel-weather" id="weather">
+                        <div class="panel-body weather-bg"
+                             style="background-image: url('${weatherImg}');background-repeat: no-repeat;background-size: 530px;">
+                            <div class="row weather-body" id="weather-bg">
+                                <div class="col-md-12 p-40">
+                                    <div class="clearfix">
+                                        <div class="pull-left weather-left">
+                                            <div class="today-img text-center"></div>
+                                            <h1 class="text-center today-temp c-white w-500">&nbsp;</h1>
+                                        </div>
+                                        <div class="pull-right weather-place">
+                                            <div class="clearfix">
+                                                <h1 class="weather-city">&nbsp;</h1>
+                                            </div>
+                                            <div class="weather-region"></div>
+                                            <h3 class="weather-currently">&nbsp;</h3>
+
+                                            <h3 class="weather-speed" style="color: white">&nbsp;</h3>
+                                        </div>
+                                    </div>
+                                    <div class="h-100"></div>
+                                    <div class="weather-footer">
+                                        <div class="col-md-3 col-sm-3 col-xs-3 weather-footer-block">
+                                            <div class="1-days-day"></div>
+                                            <div class="1-days-image"></div>
+                                            <div class="1-days-temp"></div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-3 col-xs-3 weather-footer-block">
+                                            <div class="2-days-day"></div>
+                                            <div class="2-days-image"></div>
+                                            <div class="2-days-temp"></div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-3 col-xs-3 weather-footer-block">
+                                            <div class="3-days-day"></div>
+                                            <div class="3-days-image"></div>
+                                            <div class="3-days-temp"></div>
+                                        </div>
+                                        <div class="col-md-3 col-sm-3 col-xs-3 weather-footer-block">
+                                            <div class="4-days-day"></div>
+                                            <div class="4-days-image"></div>
+                                            <div class="4-days-temp"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div style="width: 63%;height: 150px;margin:10px 15px 40px 20px;">
+            <div class="output">
+                *{#{if user.getPermissionType(controllers.Consts.permissionDashboard) == 3} <a}*
+                    *{href="@{controllers.Dashboard.settings()}"}*
+                    *{style="position:absolute;bottom:0;right:0;margin: 0px 5px 5px 0px;"}*
+                    *{class='btn edit btn-default btn-icon-sm btn-rounded'}*
+                    *{data-rel='tooltip' title='Хавтасны зураг нэмэх'><i}*
+                    *{class='fa fa-pencil'></i></a>}*
+                *{#{/if}}*
+            </div>
+
+        </div>
+        <div class="col-md-8" id="postArea" style="margin-top: 15px;">
+            <div class="post-area-small">
+                <div id="postAreaPadding">
+                    <div class="row" >
+                        <div class="post-new">
+                            <div class="post-new-body">
+                                <div>
+                                    <img class="pull-left m-r-10" src="${user.profilePicture}" alt="avatar 12"
+                                         width="70">
+
+                                    <div class="media-body">
+                                        <div class="Rd">
+                                            <div class="eg">
+                                                <div class="yw oo"></div>
+                                                <div class="yw VK"></div>
+                                            </div>
+                                            <div class="textPostSmall" style="display: block;"> Нийтлэл нэмэх ...</div>
+                                            <textarea class="form-control" id="textPostFull" style="display: none"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="postHidden" style="display: none">
+                                    <div id="attachPost" class="m-t-10">
+                                        <div class="pull-left m-r-10"><strong style="margin-left: 24px;">Зураг:</strong>
+                                        </div>
+                                        <div class="media-body">
+                                            <ul class="uploadBox" id="uPost">
+                                                <li>
+                                                    <span> <button
+                                                           id="triggerClickUploadEvent"
+                                                           class="btn upload btn-default btn-icon-sm btn-rounded"
+                                                           data-rel="tooltip" title="Хавсаргах"><i
+                                                           class="fa fa-cloud-upload"></i></button></span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div id="seeUsersPost" class="m-t-10" style="display: inline-block;position:relative;width: 100%">
+                                        <div class="pull-left"><strong
+                                                style="  margin-left: 28px;margin-top: 3px;margin-right: 15px;">Хэнд:</strong>
+                                        </div>
+                                        <div class="seeUserPost" id="sendUserTag">
+                                            <ul>
+                                                <li id="a-0" seltype="a" uid="0"><span
+                                                        onclick="sendToUserRemoveSelection('a','0')">
+                                                <i class="fa fa-minus-circle asterisk"></i> Бүгд</span></li>
+                                            </ul>
+                                        </div>
+                                        <div class="post-select-user-icon"
+                                             data-toggle="modal" data-target="#modal-select" id="selectSendUserButton">
+                                            <i class="fa fa-plus" style="  font-size: 11px;"></i>
+                                            <span style="  font-size: 21px;"><i class="fa fa-user"></i></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="post-new-footer">
+                            <span class="RR">
+                                    <button type="button" class="btn btn-post" onclick="addPost('post', null)">Нийтлэх</button>
+                                     <button type="button" class="btn btn-default btn-white m-l-5"
+                                             onclick="cancelPost()">Болих
+                                     </button>
+                                </span>
+                            </div>
+                            <div class="progress">
+                                <ul class="groupUl" id="u_jsonp_4_1">
+                                    <li class="groupLi" onclick="addPostShow()">
+                                        <a class="zocial" >
+                                            <i class="fa fa-camera-retro"></i>
+                                            Зураг/Видео
+                                        </a>
+                                    </li>
+                                    <li class="groupLi" onclick="showQuestion()">
+                                        <a class="zocial">
+                                            <i class="fa fa-bar-chart-o"></i>
+                                            Санал асуулга
+                                        </a>
+                                    </li>
+                                    <li class="groupLi">
+                                        <a class="zocial" data-toggle="modal" data-target="#myOpenModal">
+                                            <i class="fa fa-calendar"></i>
+                                            Үйл ажиллагаа
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    #{include 'Dashboard/addPost.html'/}
+                    <div class="load-more-animation">
+                    <i class="fa fa-spinner faa-spin animated"></i>
+                </div>
+            </div>
+        </div>
+
+    <div id="modalEvent"></div>
+    <form action="" id="formEvent" method="get" accept-charset="utf-8"></form>
+</div>
+#{selectSentUsers containTag:"div#sendUserTag", title:'Хүн сонгох',showTeam:true, effect:13 /}
+#{include "SharedView/AttachsMulti.html"/}
+#{checkFileExtension /}
+#{AttachScriptMulti uploadPath:controllers.Consts.uploadPostPath /}
+#{ImgThumbnail div:'div.post-images'/}
+
+<script>
+    var total_groups = '${total_groups}';
+    $(document).ready(function () {
+        $(".output").CoverPhoto({
+            postUrl: '/upload',
+            currentImage: '${dashboardManagement!=null?dashboardManagement.imageDir: '/public/images/simple.jpg'}',
+            editable: ${admin?true:false}
+        });
+        $(".output").bind('coverPhotoUpdated', function(evt, dataUrl) {
+            $(".output").empty();
+            $("<img>").attr("src", dataUrl).appendTo(".output");
+            $.ajax({
+                type: "POST",
+                data: {
+                    fileData: dataUrl,
+                }, url: "/userCoverPicture"
+            });
+        });
+    });
+</script>

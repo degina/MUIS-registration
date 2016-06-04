@@ -1,0 +1,134 @@
+<div class="modal fade" id="modalAktInfo" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="false">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" id="akt">
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 text-left" style="float: right;">
+    #{if aktStyles.size()>0}
+        <button type="submit" onclick="aktBlank(this,2)" fileId="null" id="createaktstyle" class="btn btn-success" style="font-size: 10px; padding: 7px 24px; float: right">
+            <i class="fa fa-plus p-r-10"></i> Хавсралт үүсгэх
+        </button>
+    #{/if}
+    #{else }
+        <button type="submit" onclick="aktStyleBlank(this,2)" fileId="null" id="createaktstyle" class="btn btn-success" style="font-size: 10px; padding: 7px 24px; float: right">
+            <i class="fa fa-plus m-r-10"></i> Хавсралтын загвар үүсгэх
+        </button>
+    #{/else}
+</div>
+<br />
+
+#{if akts.size()==0}
+<h3>Хоосон</h3>
+#{/if}
+#{else }
+%{count=1;}%
+<table id="products-table" class="table table-tools table-hover" style="margin-bottom: 8px">
+    <thead>
+    <tr>
+        <th style="width:40px"><strong>#</strong></th>
+        <th><strong>Дугаар</strong></th>
+        <th><strong>Загварын нэр</strong>
+            <th></th>
+        </th>
+        <th class="text-center"><strong>Хуулсан</strong></th>
+        <th style="text-align: center"><strong>Үйлдэл</strong></th>
+    </tr>
+    </thead>
+    <tbody id="loadData">
+        #{list items:akts,as:'akt'}
+        <tr class="loadData">
+            <td class="showInfo" fileId="${akt.id}" fileSid="${akt.aktStyle.id}" >${count}</td>
+            <td class="showInfo" fileId="${akt.id}" fileSid="${akt.aktStyle.id}">${akt.queue}</td>
+            <td class="showInfo" fileId="${akt.id}" fileSid="${akt.aktStyle.id}">${akt.aktStyle.name}</td>
+            <td>
+                <span class="downloadTag label label-dark w-300" fileId="${akt.id}" fileDir="${akt.dir}"
+                      fileName="${akt.aktStyle.name}"
+                      extension="pdf" openType="0"
+                      style="cursor: pointer">Нээх</span>
+                <span class="downloadTag label label-warning w-300" fileId="${akt.id}" fileDir="${akt.dir}"
+                      fileName="${akt.aktStyle.name}"
+                      extension="pdf" openType="1"
+                      style="cursor: pointer">Татах</span>
+            </td>
+
+            <td class="showInfo" fileId="${akt.id}" fileSid="${akt.aktStyle.id}" style="text-align: center">${akt.uploader}</td>
+
+            <td style="text-align: center">
+                #{if user.id==akt.uploader.id}
+                    <span class="edit btn btn-sm btn-default" fileId="${akt.id}" style="font-size: 11px">
+                        <i class="fa fa-pencil"></i> Засах
+                    </span>
+                    <span class="delete btn btn-sm btn-default" fileId="${akt.id}" style="font-size: 11px">
+                        <i class="fa fa-times-circle"></i>Устгах
+                    </span>
+                #{/if}
+            </td>
+        </tr>
+        %{count++}%
+        #{/list}
+    </tbody>
+</table>
+    #{if MaxPageNumber>1}
+        #{include '/SharedView/pageNavigation.html'/}
+    #{/if}
+<script>
+
+    $('tbody#loadData span.delete').on('click', function (e) {
+        var x = confirm("Энэ хавсралтыг устгах уу?");
+        if (x) {
+            $.ajax({
+                type: "POST",
+                data: {
+                    id: $(this).attr('fileId')
+                },
+                url: "/aktDelete"
+            }).success(function (data) {
+                //  $.fancybox.close();
+                loadFiles(${fid},1); //Invoking your data function
+            });
+        }
+    });
+
+    $('tbody#loadData span.edit').on('click', function () {
+        aktBlank($(this), 1);
+    });
+
+    *{$('tbody#loadData td.showInfo').on('click', function () {}*
+        *{//alert($(this).attr('fileId'));}*
+         *{$.ajax({}*
+             *{type: "POST",}*
+             *{data: {sid: $(this).attr('fileSid'),aid:$(this).attr('fileId')},}*
+             *{url: "/aktInfo",}*
+             *{beforeSend: function () {}*
+                 *{$("div#modalAktInfo").modal('show');}*
+                 *{$("div#modalAktInfo").find("div.modal-content").html("<div style='width:100%; text-align: center'><img src='/public/images/activity-indicator.gif'/></div>");}*
+             *{}}*
+         *{}).success(function (data) {}*
+                *{var modalDiv = $("div#modalAktInfo");}*
+                *{//modalDiv.modal('show');}*
+                *{modalDiv.find('div.modal-content').html("");}*
+                *{modalDiv.find("div.modal-content").html(data);}*
+         *{});}*
+    *{});}*
+
+    $('tbody#loadData span.downloadTag').on('click', function () {
+        handleAttachmentClickFileCenter($(this));
+    });
+
+    #{if MaxPageNumber>1}
+    $("div#loaderDiv input.number-button").click(function () {
+        var pagenumber = $(this).attr('pagenumber');
+        if (pagenumber != ${CurrentPageNumber}) {
+            #{if loadType==1}
+                loadFiles(selectedFolder, pagenumber);
+            #{/if}
+            #{else}
+                searchFile('${search}', pagenumber);
+            #{/else}
+        }
+    });
+    #{/if}
+</script>
+#{/else}

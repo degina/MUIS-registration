@@ -1,0 +1,64 @@
+#{extends 'CRUD/layout.html' /}
+#{blankConfig title:messages.get('UserPosition')/}
+#{set activeMenu: 'Users'/}
+#{set activeMenuSub: 'UserPositions'/}
+
+#{flashCrud /}
+<script type="text/javascript" src="@{'/public/javascripts/validateOnlyNumber.js'}"></script>
+<div id="main-content">
+    <div class="row">
+        <div class="col-md-12">
+            <form action="@{save(object.id)}" class="form-horizontal" role="form" id="settings" method="post"
+                  accept-charset="utf-8" enctype="multipart/form-data">
+                <div class="row profile-classic">
+                    <div class="col-md-12">
+                        <div class="panel">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="control-label c-gray col-md-3">Нэр:</div>
+                                    <div class="col-md-6">
+                                        <input type="text" name="object.name" id="object_name"
+                                               value="${object.name}"
+                                               class="form-control">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="control-label c-gray col-md-3">Эрэмбэ:
+                                    </div>
+                                    <div class="col-md-6">
+                                        <input type="text" class="form-control" id="object_rate"
+                                               value="${object.rate}"
+                                               name="object.rate">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12">
+                                        <div class="align-center m-t-20">
+                                            <button type="submit" class="btn btn-primary btn-transparent">Хадгалах
+                                            </button>
+                                            <button type="button" name="_save" onclick="deleteObject()" class="btn btn-danger btn-transparent">&nbsp;&nbsp;Устгах&nbsp;&nbsp;</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="deleteUser" style="display: none">
+#{form @delete(object._key())}
+    link
+#{/form}</div>
+
+<script>
+    $('div#main-content').css('min-height', screen.height - 138);
+    $('div#main-content input#object_rate').forceNumericInt();
+    function deleteObject() {
+        if (confirm("${object} -г устгах уу?")) {
+            $('div#deleteUser form').submit();
+        }
+    }
+</script>

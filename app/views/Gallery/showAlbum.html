@@ -1,0 +1,289 @@
+<style>
+    #backFilter:hover{
+        color:darkorange;
+        cursor: pointer;
+    }
+</style>
+<script>
+
+    function backGallery(){
+        if(menu_active=="dailylog"){
+            window.location.href = "@{controllers.Gallery.center("dailylog")}";
+        }
+        else if(menu_active=="general"){
+            window.location.href = "@{controllers.Gallery.center("general")}";
+        }
+        else{
+            window.location.href = "@{controllers.Gallery.center("all")}";
+        }
+    }
+
+    function uploadRFIClick(ban) {
+        var image = $(ban).find('img');
+        if (image.length > 0) {
+            handleAttachmentClick(image);
+        } else {
+            selectedUbox = "gallery";
+            $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").removeAttr("accept");
+            $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").attr("multiple", "multiple");
+            $("div#rfi_punchlist_show_file_uploader").find("div.qq-upload-button").find("input").click();
+        }
+    }
+
+    $("button#formClear").click(function () {
+        $("div#punchListRFIAttachContainer ul#uploadBox").html($("div#punchListRFIAttachContainer div#documentImageTemplate").html());
+        var obj = $('div#rfiAttachs');
+        obj.html("");
+    });
+
+    $("button#close_add_file").click(function () {
+        $("div#punchListRFIAttachContainer ul#uploadBox").html($("div#punchListRFIAttachContainer div#documentImageTemplate").html());
+        var obj = $('div#rfiAttachs');
+        obj.html("");
+    });
+
+    function uploadImgToGallery() {
+
+        var div= $('div#add-file');
+        var obj = $('div#rfiAttachs');
+
+        var countImg  = 0;
+        $("div#punchListRFIAttachContainer ul#uploadBox img.imgIcon").each(function () {
+            obj.append("<input type='hidden' name='filename' value='" + $(this).attr('filename') + "'>" +
+                    "<input type='hidden' name='filedir' value='" + $(this).attr('filedir') + "'>" +
+                    "<input type='hidden' name='extension' value='" + $(this).attr('extension') + "'>");
+            countImg++;
+        });
+        if(countImg!=0){
+            $.ajax({
+                type: "POST",
+                data: $("form#rfiTrackingFeild").serialize(),
+                url: "/upload_img_to_album"
+            }).success(function (data) {
+                var modalDiv = $("div#add-file");
+                $("div#punchListRFIAttachContainer ul#uploadBox").html($("div#punchListRFIAttachContainer div#documentImageTemplate").html());
+                obj.html("");
+                modalDiv.modal('hide');
+
+                $('div#album_images_parent div#album_images').prepend(data);
+                $('div#album_images_parent div#album_images h4#empty_album').html("");
+
+            });
+        }
+        else showErrorMessageCustom("Зураг оруулна уу!", "center", "top", 2000);
+    }
+
+    function edit_picture(picID){
+        $.ajax({
+            type: "POST",
+            data: {pic_id: picID},
+            url: "/gallery_edit_pic",
+        }).success(function (data) {
+            var modalDiv = $("div#edit_file");
+            modalDiv.find('.modal-content').html(data);
+            modalDiv.modal('show');
+        });
+    }
+
+    function delete_picture(picID){
+        var x = confirm("Энэ зургийг устгах уу?");
+        if (x) {
+
+            //count ynzalj bui
+            var allCount = parseInt($('#all_count').attr("val"));
+            var type = parseInt(${album.type});
+            allCount--;
+            $('#all_count').attr("val",allCount).html(allCount);
+
+            if(type==2){
+                var gCount = parseInt( $('#g_count').attr("val"));
+                gCount--;
+                $('#g_count').attr("val",gCount).html(gCount);
+            }
+            else{
+                var dCount = parseInt($('#d_count').attr("val"));
+                dCount--;
+                $('#d_count').attr("val",dCount).html(dCount);
+            }
+
+            $.ajax({
+                type: "POST",
+                data: {pic_id: picID},
+                url: "/gallery_delete_pic"
+            }).success(function (data) {
+                $("div").remove("#gal_pic_"+picID);
+            });
+        }
+    }
+
+    function download_picture(id){
+        handleAttachmentClickFileCenter($('#gal_down_pic_'+id));
+    }
+
+    $(document).ready(function() {
+        $(".fancybox-button").fancybox({
+            prevEffect		: 'none',
+            nextEffect		: 'none',
+            closeBtn		: false,
+
+            beforeShow: function () {
+                this.title = $(this.element).attr('title');
+                this.title = '<h4>' + this.title + '</h4>' + '<br /> <p>' + $(this.element).attr('alt') + '</p>';
+            },
+            helpers		: {
+                title	: { type : 'over'},
+                buttons	: {}
+            },
+            afterShow: function() {
+                var imageWidth = $(".fancybox-image").width();
+                $(".fancybox-title-over-wrap").css({
+                    "width": imageWidth,
+                    "paddingLeft": 0,
+                    "paddingRight": 0,
+                    "textAlign": "center"
+                });
+            }
+        });
+    });
+
+</script>
+
+<div class="modal fade" id="add-file" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" id="close_add_file" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">Зураг хуулах</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form id="rfiTrackingFeild" role="form">
+                        <div style="padding: 5px 10px;">
+                            <select name="byTask" id="byTask" class="form-control" data-live-search="true"  style="padding-top:5px; padding-bottom:5px;">
+                                <option value="0">Ажилд хамааралгүй</option>
+                            #{list items:projectObjects, as:'object'}
+                                #{if object.tasks.size()}
+                                    <optgroup label="${object.name}">
+                                        #{list items:object.tasks, as:'task'}
+                                            <option value="${task.id}" ${task.id==byTask?'selected':''}>${task.name}</option>
+                                        #{/list}
+                                    </optgroup>
+                                #{/if}
+                            #{/list}
+                            </select>
+                        </div>
+                        <input type="hidden" name="id" id="rfiId" value="${album.id}"/>
+                        <div style="padding: 5px 10px;width: 100%;min-height: 50px;">
+                            <div style="">
+                                <div style="display:none">
+                                    <div id="showPictureZoom">
+                                        <img id="zoomedPicture" src=""/>
+                                    </div>
+                                    <a id="showPictureZoomA" href="#showPictureZoom"></a>
+                                </div>
+                                <div id="punchListRFIAttachContainer" style="height: 25px;">
+                                    <div style="display: none" id="documentImageTemplate">
+                                        <li onclick="uploadRFIClick(this)">
+                                            <span>
+                                                <span></span>
+                                            </span>
+                                        </li>
+                                    </div>
+                                    <div style="display: none" id="deleteImageTemplate">
+                                        <img height='12' class='deleteUploadedImage' width='12'
+                                             src="@{'/public/images/delete-image.png'}"
+                                             fileDir='#fileDir' extension='#extension'/>
+                                    </div>
+                                    <ul id="uploadBox">
+                                        <li onclick="uploadRFIClick(this)">
+                                            <span>
+                                                <span></span>
+                                            </span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div id="rfiAttachs"></div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer text-center">
+                <button id="formClear" type="button" class="btn btn-default" data-dismiss="modal"><i class="fa fa-times"></i> Болих</button>
+                <button onclick="uploadImgToGallery()" type="button" class="btn btn-success" ><i class="fa fa-check"></i> Хуулах</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="edit_file" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div>
+    </div>
+</div>
+
+<div id="album_header" style="border-radius: 3px; padding-left: 1%; height: 34px; font-size: 13px; line-height: 34px; vertical-align: middle; background-color: #2b2e33; color: white;">
+    <span id="album_name" class="pull-left">${album.name} </span>
+    <span class="pull-right m-r-10" onclick="backGallery()" id="backFilter" >
+         Буцах <i class="fa fa-angle-double-right"></i>
+    </span>
+    <input type="hidden" id="album_type" value="${album.type}"/>
+</div>
+
+<div class="row" style="padding: 0px 1% 10px 1%;">
+    <div id="album_images_parent" class="row media-manager" style="padding: 0px 6% 10px 5%; " >
+        <div id="album_images" class="gallery row" style="">
+            #{if galleryPicture.size()>0}
+                #{list items:galleryPicture,as:'picture'}
+                    <div class="mix col-xs-6 col-sm-4 col-md-3" id="gal_pic_${picture.id}" style="display:block;">
+                        <div class="btn-group media-group" >
+                            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu media-menu" role="menu">
+                                #{if picture.uploader.id == user.id}
+                                    <li onclick="edit_picture('${picture.id}')"><a href="#"><i class="fa fa-pencil"></i> Засах</a>
+                                    </li>
+                                    <li onclick="delete_picture('${picture.id}')"><a href="#"><i class="fa fa-trash-o"></i> Устгах</a>
+                                    </li>
+                                #{/if}
+                                <li id="gal_down_pic_${picture.id}" onclick="download_picture(${picture.id})"
+                                    fileId="${picture.id}" fileDir="${picture.path}"
+                                    fileName="${picture.name}"
+                                    extension="${picture.extension}" openType="1"><a href="#"><i class="fa fa-download"></i> Татах</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <div class="thmb">
+                                    <div class="thmb-prev">
+                                        <a id="fancyBox_data_${picture.id}" class="fancybox-button" rel="fancybox-button" href="${picture.path}.${picture.extension}" title="${picture.name}" alt="${picture.description}">
+                                            <img src="${picture.pathTumb}.jpg"  class="img-responsive" alt="">
+                                        </a>
+                                    </div>
+                                    <h5 class="media-title">
+                                        <a style="font-size: small;" href="#" data-rel="tooltip" data-placement="bottom" id="gal_pic_title_${picture.id}"
+                                           data-original-title="#{if !picture.name.equals(picture.getNameMax())}${picture.name}#{/if}"
+                                                title="#{if !picture.name.equals(picture.getNameMax())}${picture.name}#{/if}">
+                                            ${picture.getNameMax()}
+                                        </a>
+                                    </h5>
+                                    <small class="text-muted pull-left">${picture.uploader.toString()}</small>
+                                    <small class="text-muted pull-right" title="${picture.date.format("yyyy-MM-dd")}">${picture.date.format("dd/MM")}</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                #{/list}
+            #{/if}
+            #{else }
+                <h4 id="empty_album">Хоосон</h4>
+            #{/else}
+        </div>
+    </div>
+</div>
+
+#{Gallery-Uploader /}
+#{ImgThumbnail div:'div.rfi-images', divid:'rfishowp'/}

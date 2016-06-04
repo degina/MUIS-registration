@@ -1,0 +1,585 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Phone
+POST     /appDelegateLogin                                    App.Delegate.login
+POST     /appDelegatePortfolios                               App.Delegate.portfolios
+POST     /appDelegatePortfolioUsers                           App.Delegate.portfolioUsers
+POST     /appDelegateGcmRegistration                          App.Delegate.gcmRegistration
+POST     /appDelegateUpload                                   App.Delegate.upload
+POST     /appDelegateUsers                                    App.Delegate.users
+GET      /appDelegateMobileFiles/{body}                       App.Delegate.AttachRedirect
+
+POST     /appDelegateLogWeatherList                           App.DelegateDailyLog.weatherList
+POST     /appDelegateLogWeatherNew                            App.DelegateDailyLog.weatherNew
+POST     /appDelegateWeatherList                              App.DelegateDailyLog.weatherConditionList
+POST     /appDelegateWorkProgressLogList                      App.DelegateDailyLog.workList
+POST     /appDelegateWorkProgressLogNew                       App.DelegateDailyLog.workNew
+POST     /appDelegateTechnicalProblemLogList                  App.DelegateDailyLog.technicalProblemList
+POST     /appDelegateTechnicalProblemLogNew                   App.DelegateDailyLog.technicalProblemNew
+POST     /appDelegateMaterialLossLogNew                       App.DelegateDailyLog.materialLossNew
+POST     /appDelegateMaterialLossLogList                      App.DelegateDailyLog.materialLossList
+POST     /appDelegateMaterialList                             App.DelegateDailyLog.materialList
+POST     /appDelegateMaterialGroupList                        App.DelegateDailyLog.materialGroupList
+POST     /appDelegateInspectionLogList                        App.DelegateDailyLog.inspectionList
+POST     /appDelegateInspectionLogNew                         App.DelegateDailyLog.inspectionNew
+POST     /appDelegateSafetyViolationLogList                   App.DelegateDailyLog.safetyViolationLogList
+POST     /appDelegateSafetyViolationLogNew                    App.DelegateDailyLog.safetyViolationLogNew
+POST     /appDelegateDeliveryReceivedLogNew                   App.DelegateDailyLog.deliveryReceivedLogNew
+POST     /appDelegateDeliveryReceivedLogList                  App.DelegateDailyLog.deliveryReceivedLogList
+POST     /appDelegateProblemNoteLogNew                        App.DelegateDailyLog.problemNoteLogNew
+POST     /appDelegateProblemNoteLogList                       App.DelegateDailyLog.problemNoteLogList
+POST     /appDelegateIdeaLogList                              App.DelegateDailyLog.ideaLogList
+POST     /appDelegateIdeaLogNew                               App.DelegateDailyLog.ideaLogNew
+POST     /appDelegateGuestLogList                             App.DelegateDailyLog.guestLogList
+POST     /appDelegateGuestLogNew                              App.DelegateDailyLog.guestLogNew
+POST     /appDelegateWasteLogList                             App.DelegateDailyLog.wasteLogList
+POST     /appDelegateWasteLogNew                              App.DelegateDailyLog.wasteLogNew
+POST     /appDelegateWorkProgressTechnicalHourLogList         App.DelegateDailyLog.workProgressTechnicalHourLogList
+POST     /appDelegateWorkProgressTechnicalHourLogNew          App.DelegateDailyLog.workProgressTechnicalHourLogNew
+POST     /appDelegateWorkProgressManHourLogNew                App.DelegateDailyLog.workProgressManHourLogNew
+POST     /appDelegateWorkProgressManHourLogList               App.DelegateDailyLog.workProgressManHourLogList
+POST     /appDelegateWorkProgressMaterialSpentLogNew          App.DelegateDailyLog.workProgressMaterialSpentLogNew
+POST     /appDelegateWorkProgressMaterialSpentLogList         App.DelegateDailyLog.workProgressMaterialSpentLogList
+POST     /appDelegateServerTime                               App.DelegateDailyLog.serverTime
+POST     /appDelegateDepartmentList                           App.DelegateDailyLog.orgTeamList
+POST     /appDelegateOccupationList                           App.DelegateDailyLog.manPowerList
+POST     /appDelegateTechnicalMachineList                     App.DelegateDailyLog.equipmentList
+
+POST     /appDelegateMeetingList                              App.DelegateMeeting.meetingList
+POST     /appDelegateMeetingAgendaList                        App.DelegateMeeting.meetingTopicList
+POST     /appDelegateMeetingAgendaNew                         App.DelegateMeeting.meetingTopicNew
+POST     /appDelegateDeleteModel                              App.DelegateMeeting.deleteModel
+
+POST     /appDelegateRFIList                                  App.DelegateRFI.RFIList
+POST     /appDelegateRFINew                                   App.DelegateRFI.RFINew
+POST     /appDelegateRFIReplyList                             App.DelegateRFI.RFIReplyList
+POST     /appDelegateRFIReplyNew                              App.DelegateRFI.RFIReplyNew
+
+POST     /appDelegatePunchList                                App.DelegatePunchList.PunchListList
+POST     /appDelegatePunchListNew                             App.DelegatePunchList.PunchListNew
+POST     /appDelegatePunchListReplyList                       App.DelegatePunchList.PunchListReplyList
+POST     /appDelegatePunchListReplyNew                        App.DelegatePunchList.PunchListReplyNew
+
+POST     /appDelegateDrawingGroup                             App.DelegateDrawing.disciplineList
+POST     /appDelegateDrawingItems                             App.DelegateDrawing.drawingList
+POST     /appDelegateUpdateDrawingItem                        App.DelegateDrawing.updateDrawingItem
+
+POST     /appDelegatePostList                                 App.DelegatePost.postList
+POST     /appDelegatePostCommentNew                           App.DelegatePost.commentNew
+POST     /appDelegatePostLike                                 App.DelegatePost.likePost
+POST     /appDelegatePostNew                                  App.DelegatePost.postNew
+POST     /appDelegatePostCommentList                          App.DelegatePost.commentList
+
+POST     /appDelegateTaskNew                                  App.DelegateTask.myPlanNew
+POST     /appDelegateMainJobs                                 App.DelegateTask.projectList
+POST     /appDelegateSubJobs                                  App.DelegateTask.taskList
+POST     /appDelegateJobs                                     App.DelegateTask.taskListUser
+
+
+
+
+
+
+# Home page
+GET     /                                       MainRoot.root
+
+# For secure module
+*       /                                       module:secure
+
+# Crud module routing
+*      /  					                    module:crud
+
+# For file upload
+POST /upload                                            FileUploader.uploadFile
+POST /deleteFile/${qqFile}                              FileUploader.deleteUploadedFile
+POST /deleteUploadFile                                  FileUploader.deleteUploadFile
+GET  /downloadFile                                      FunctionController.downloadFile
+POST /functionControllerGetMyTaskRels                   FunctionController.getMyTaskRels
+POST /functionCGetTaskUserObjects                       FunctionController.getTaskUserObjects
+
+# For users' control
+POST  /userSavePassword                                      Users.savePassword
+POST  /users/resetpassword/{id}                              Users.resetPassword
+GET   /companyOrganizationChart                              Users.companyOrg
+POST  /companyOrgGetUsers                                    Users.orgCompGetUsers
+POST  /companyOrgSave                                        Users.orgCompSave
+GET   /usersDeleteUser/{id}                                  Users.deleteUser
+GET   /projectsSetDates/{pid}                                Projects.setDates
+POST  /setProjectDateVal                                     Projects.setProjectDateVal
+GET   /sendtouserteam                                        SampleDocs.sendToUserTeam
+POST  /getObjectFloors                                       Projects.getObjectFloors
+POST  /objectFloorOperation                                  Projects.objectFloorOperation
+POST  /objectOperation                                       Projects.objectOperation
+GET   /projectAdd/{name}                                     Projects.projectAdd
+GET   /deleteProject                                         GanttChart.deleteProject
+POST  /changeName                                            Projects.changeName
+
+GET   /ganttChart                                            GanttChart.showProject
+POST  /ganttChartSaveProject                                 GanttChart.saveProject
+POST  /ganttSaveTemplate                                     GanttChart.saveTemplate
+POST  /ganttLoadTemplates                                    GanttChart.loadTemplates
+POST  /ganttSaveProjectTemp                                  GanttChart.saveTemplateProject
+POST  /ganttLoadProjectTemp                                  GanttChart.loadTemplateProject
+POST  /ganttGetTemplate                                      GanttChart.getTemplate
+GET   /ganttViewer                                           GanttChart.ganttViewer
+POST  /ganttViewInfo                                         GanttChart.ganttViewInfo
+POST  /ganttGetFloors                                        GanttChart.getFloors
+POST  /ganttDelFloors                                        GanttChart.delFloors
+POST  /ganttUptFloors                                        GanttChart.uptFloors
+POST  /ganttGetFloor                                         GanttChart.getFloor
+POST  /ganttSetFloor                                         GanttChart.setFloor
+POST  /ganttGetUsers                                         GanttChart.getUsers
+POST  /ganttDelUsers                                         GanttChart.delUsers
+POST  /ganttAddUser                                          GanttChart.addUser
+POST  /ganttUptUsers                                         GanttChart.uptUsers
+POST  /ganttAddResource                                      GanttChart.addResource
+POST  /ganttGetResources                                     GanttChart.getResource
+POST  /ganttDelResource                                      GanttChart.delResource
+POST  /ganttUptResource                                      GanttChart.uptResource
+POST  /ganttDeleteTemplate                                   GanttChart.deleteTemplate
+POST  /ganttGetAssignFilter                                  GanttChart.getAssignFilter
+POST  /ganttDeleteCheck                                      GanttChart.deleteCheck
+
+GET   /accountSettings/{uid}                                 AccountSettings.panel
+GET   /accountSettingsSave/{uid}                             AccountSettings.saveSettings
+POST  /accountSettingsSaveMenu                               AccountSettings.saveMenu
+
+POST  /folderShareTree                                       FolderShare.getTree
+POST  /folderShareFileAlreadyNamed                           FolderShare.fileAlreadyNamed
+POST  /saveShareFile                                         FolderShare.saveFiles
+POST  /folderShareLoadFiles                                  FolderShare.loadFiles
+POST  /folderShareShowMoreInfo                               FolderShare.showMoreInfo
+POST  /fSharedownloadHistorySave                             FolderShare.downloadHistorySave
+POST  /folderShareDelete                                     FolderShare.delete
+POST  /folderShareEditShow                                   FolderShare.editShow
+POST  /folderShareFRename                                    FolderShare.folderRename
+POST  /folderShareFDelete                                    FolderShare.folderDelete
+POST  /folderShareFSettings                                  FolderShare.folderSettings
+POST  /folderShareFPermission                                FolderShare.folderPermission
+POST  /folderShareFPermissionSave                            FolderShare.folderPermissionSave
+POST  /folderShareFSettingSave                               FolderShare.folderSettingsSave
+POST  /folderShareSearchFiles                                FolderShare.searchFiles
+POST  /folderGetPermissionedUsers                            FolderShare.getPermissionedUsers
+
+GET     /rfi                             RFIs.viewAll
+GET     /rfiQueue                        RFIs.list
+POST    /rfiQueueAjax                    RFIs.listAjax
+POST    /rfiLoadGraphic                  RFIs.loadGraphic
+POST    /rfi/blank                        RFIs.blank
+POST    /rfi/create                       RFIs.create
+GET     /rfi/show                         RFIs.show
+POST    /rfi/track                        RFIs.track
+GET     /rfi/close                        RFIs.close
+POST    /rfi/delete                       RFIs.delete
+POST    /rfi/drawing                       RFIs.drawingAttach
+
+GET     /punchList                             PunchLists.viewAll
+GET     /punchListQueue                        PunchLists.list
+POST    /punchListQueueAjax                    PunchLists.listAjax
+POST    /punchListLoadGraphic                  PunchLists.loadGraphic
+POST    /punchList/blank                        PunchLists.blank
+POST    /punchList/create                       PunchLists.create
+GET     /punchList/show                         PunchLists.show
+POST    /punchList/reply                        PunchLists.reply
+POST    /punchList/deleteReply                 PunchLists.deleteReply
+GET    /punchList/close                        PunchLists.close
+POST    /punchList/delete                       PunchLists.delete
+GET     /punchListPrint                        PunchLists.print
+
+GET     /drawing                                Drawings.thumbnails
+POST    /drawing/viewtype                       Drawings.viewType
+GET     /drawing/uploader                       Drawings.uploader
+GET     /drawing/history                        Drawings.history
+GET     /drawing/settings                       Drawings.settings
+POST    /drawing/draw                           Drawings.draw
+GET     /drawing/pdf                            Drawings.pdf
+POST    /drawing/update                         Drawings.updatePersonalLayer
+POST    /drawing/checkDrawingRevision           Drawings.checkDrawingRevision
+POST    /drawing/createDrawingRevision          Drawings.createDrawingRevision
+POST    /drawing/extendPDFSlider                Drawings.extendPDFSlider
+POST    /drawing/extendModal                    Drawings.extendModal
+POST    /drawing/extendField                    Drawings.extendField
+POST    /drawing/extendShowingModal             Drawings.extendShowingModal
+POST    /uploading                              Drawings.handleDocumentAttachment
+
+POST    /getItem                               PunchLists.getItem
+POST    /handleDocumentAttachment              PunchLists.handleDocumentAttachment
+
+POST  /contractListFilter                                    Contracts.listFilter
+GET   /contractsSettings                                     Contracts.settings
+GET   /contractsEditContract                                 Contracts.editContract
+GET   /contractsDeleteContract/{id}                          Contracts.deleteContract
+POST  /contract/saveStatus                                   Contracts.saveStatus
+POST  /contract/CreateStatus                                 Contracts.createStatus
+POST  /contract/deleteStatus                                 Contracts.deleteStatus
+GET   /contractsChart                                        Contracts.chart
+GET   /meetingShow                                           Meetings.show
+POST  /meetingCreateTopic                                    Meetings.createTopic
+POST  /meetingEditTopic                                      Meetings.editTopic
+POST  /meetingDeleteTopic                                    Meetings.deleteTopic
+POST  /meetingShowModal                                      Meetings.showModal
+POST  /meetingMinutesTopic                                   Meetings.minutesTopic
+POST  /meetingMinutesIrts                                    Meetings.attendeesIrts
+POST  /meetingMinutesTopicStatus                             Meetings.topicStatus
+POST  /meetingListFilter                                     Meetings.listData
+GET   /meetingMinutes                                        Meetings.minutes
+GET   /meetingDelete/{id}                                    Meetings.deleteMeeting
+GET   /meetingCancel/{id}                                    Meetings.cancelMeeting
+GET   /meetingSergeeh/{id}                                   Meetings.sergeehMeeting
+GET   /meetingMinuteClose/{id}/{urgeljlel}                   Meetings.minutesToClose
+GET   /meetingMinuteClosed/{id}                              Meetings.minutesClosed
+GET   /meetingAgendaToMinutes/{id}                           Meetings.agendaToMinutes
+
+POST  /dailyLogCreateWeather                                 DailyLogs.createWeather
+POST  /dailyLogDeleteWeather                                 DailyLogs.deleteWeather
+POST  /dailyLogCreateTechnical                               DailyLogs.createTechnical
+POST  /dailyLogDeleteTechnical                               DailyLogs.deleteTechnical
+POST  /dailyLogCreateManPower                                DailyLogs.createManPower
+POST  /dailyLogDeleteManPower                                DailyLogs.deleteManPower
+POST  /dailyLogCreateScheduledWork                           DailyLogs.createScheduledWork
+POST  /dailyLogDeleteScheduledWork                           DailyLogs.deleteScheduledWork
+POST  /dailyLogCreateExtraWork                               DailyLogs.createExtraWork
+POST  /dailyLogDeleteExtraWork                               DailyLogs.deleteExtraWork
+POST  /dailyLogCreateEquipment                               DailyLogs.createEquipment
+POST  /dailyLogDeleteEquipment                               DailyLogs.deleteEquipment
+POST  /dailyLogCreateInspection                              DailyLogs.createInspection
+POST  /dailyLogDeleteInspection                              DailyLogs.deleteInspection
+POST  /dailyLogCreateSafety                                  DailyLogs.createSafety
+POST  /dailyLogDeleteSafety                                  DailyLogs.deleteSafety
+POST  /dailyLogCreateDelivery                                DailyLogs.createDelivery
+POST  /dailyLogDeleteDelivery                                DailyLogs.deleteDelivery
+POST  /dailyLogCreateNotes                                   DailyLogs.createNotes
+POST  /dailyLogDeleteNotes                                   DailyLogs.deleteNotes
+POST  /dailyLogCreateVisitor                                 DailyLogs.createVisitor
+POST  /dailyLogDeleteVisitor                                 DailyLogs.deleteVisitor
+POST  /dailyLogCreateAccident                                DailyLogs.createAccident
+POST  /dailyLogDeleteAccident                                DailyLogs.deleteAccident
+POST  /dailyLogCreateWaste                                   DailyLogs.createWaste
+POST  /dailyLogDeleteWaste                                   DailyLogs.deleteWaste
+POST  /dailyLogCreateDumpster                                DailyLogs.createDumpster
+POST  /dailyLogDeleteDumpster                                DailyLogs.deleteDumpster
+POST  /dailyLogCreateSanaachlaga                             DailyLogs.createSanaachlaga
+POST  /dailyLogDeleteSanaachlaga                             DailyLogs.deleteSanaachlaga
+GET   /dailyLogBlankView/{date}/{type}                       DailyLogs.blankView
+GET   /dailyLogDocumentView/{date}/{type}                    DailyLogs.documentView
+POST  /dailyLogShowManPowerModal                             DailyLogs.showManPower
+POST  /dailyLogShowEquipmentModal                            DailyLogs.showEquipment
+POST  /dailyLogUpdateScheduledWork                           DailyLogs.updateScheduledWork
+POST  /dailyLog/print                                        DailyLogs.printOperation
+POST  /dailyLogCreateMaterial                                DailyLogs.createMaterial
+POST  /dailyLogShowMaterialModal                             DailyLogs.showMaterial
+POST  /dailyLogDeleteMaterial                                DailyLogs.deleteMaterial
+POST  /dailyLogSaveMaterial                                  DailyLogs.saveMaterial
+
+POST /budget/CreateActivity                                  Budgets.createActivity
+POST /budget/CreateProject                                   Budgets.createProject
+POST /budget/DeleteActivity                                  Budgets.deleteActivity
+POST /budget/DeleteProject                                   Budgets.deleteProject
+POST /budget/CreateOpex                                      Budgets.createOpex
+POST /budget/DeleteOpex                                      Budgets.deleteOpex
+POST /budget/saveResult                                      Budgets.saveResult
+POST /budget/saveBalance                                     Budgets.saveBalance
+POST /budget/CreateCash                                      Budgets.createCash
+POST /budget/CreateCashSub                                   Budgets.createCashSub
+POST /budget/DeleteCashSub                                   Budgets.deleteCashSub
+POST /budget/DeleteCash                                      Budgets.deleteCash
+POST /budget/showNetSalesDetails                             Budgets.showNetSalesDetails
+POST /budget/loadMonthBudget                                 Budgets.showMonthBudget
+GET  /budget/{year}/{month}                                  Budgets.blank
+GET  /budget/chartView                                       Budgets.chartView
+
+GET  /emailFolders                                           Emails.folders
+GET  /emailSet                                               Emails.setFolders
+POST /emailFolderAction                                      Emails.setFolderAction
+POST /emailGetContentData                                    Emails.getContentData
+POST /emailGetAttachment                                     Emails.getAttachment
+POST /emailLoadGetMails                                      Emails.folderGetMails
+GET  /sendEmail                                              Emails.sendEmail
+GET  /composeNewMail                                         Emails.composeNewMail
+POST /uploadEmail                                            Emails.uploadFile
+POST /directSendEmail                                        Emails.directSendEmail
+POST /deleteEmail                                            Emails.deleteEmail
+
+POST /myPlan/savePlan                                        MyPlans.savePlan
+POST /myPlan/eventSources                                    MyPlans.eventSources
+POST /myPlan/showWeatherModal                                MyPlans.showWeatherModal
+POST /myPlan/reminderTask                                    MyPlans.reminderTask
+POST /myPlan/eventSourcesWorker                              MyPlans.eventSourcesWorker
+POST /myPlan/resourcesWorker                                 MyPlans.resourcesWorker
+POST /myPlan/showProjectTask                                 MyPlans.showProjectTaskModal
+GET  /myPlanGotoPage/{type}/{id}                             MyPlans.gotoProjectPage
+
+
+GET  /portfolioSelect/{id}                                   Portfolios.selectProject
+GET  /portfolioDelete/{id}                                   Portfolios.delete
+GET  /portfolio/settings                                     Portfolios.settings
+POST /portfolio/deleteSettings                               Portfolios.deleteSettings
+POST /portfolio/saveSettings                                 Portfolios.saveSettings
+POST /portfolio/filter                                       Portfolios.filter
+
+GET  /portfolioHyundaiSelect/{id}                                   PortfoliosHyundai.selectProject
+GET  /portfolioHyundaiDelete/{id}                                   PortfoliosHyundai.delete
+GET  /portfolioHyundai/settings                                     PortfoliosHyundai.settings
+POST /portfolioHyundai/deleteSettings                               PortfoliosHyundai.deleteSettings
+POST /portfolioHyundai/saveSettings                                 PortfoliosHyundai.saveSettings
+POST /portfolioHyundai/filter                                       PortfoliosHyundai.filter
+
+GET   /reports                                                Reports.reportMain
+POST  /reportTree                                             Reports.getTree
+POST  /reportLoadTask2                                        Reports.loadReportTask2
+POST  /reportLoadTask1                                        Reports.loadReportTask1
+POST  /reportLoadTask0                                        Reports.loadReportTask0
+POST  /reportLoadUser2                                        Reports.loadReportUser2
+POST  /reportLoadUser1                                        Reports.loadReportUser1
+POST  /reportLoadUser0                                        Reports.loadReportUser0
+POST  /reportLoadProject0                                     Reports.loadReportProject0
+POST  /reportChangeSummary                                    Reports.changeReportSummary
+
+#new Gallery
+POST    /gallery_add_album                          Gallery.addAlbum
+POST    /gallery_name_equal                         Gallery.nameEqual
+POST    /gallery_show_album                         Gallery.showAlbum
+POST    /gallery_delete_album                       Gallery.deleteAlbum
+POST    /upload_img_to_album                        Gallery.addImgAlbum
+POST    /gallery_delete_pic                         Gallery.deletePic
+POST    /gallery_edit_pic                           Gallery.editPic
+POST    /gallery_save_pic                           Gallery.savePic
+POST    /gallery_filter                             Gallery.filter
+
+POST /dashboard/saveText                                     Dashboard.saveText
+POST /dashboard/saveBee                                      Dashboard.saveBee
+POST /dashboard/settings                                     Dashboard.settings
+POST /dashboardAddPost                                       Dashboard.addPost
+POST /dashboard/addComment                                   Dashboard.addComment
+POST /dashboard/showMoreComment                              Dashboard.showMoreComment
+POST /dashboard/showMoreQuestionComment                      Dashboard.showMoreQuestionComment
+POST /dashboard/likePost                                     Dashboard.likePost
+POST /dashboard/saveImage                                    Dashboard.saveImage
+POST /dashboard/loadMorePost                                 Dashboard.loadMorePost
+POST /dashboard/readMorePost                                 Dashboard.readMorePost
+POST /dashboard/deleteComment                                Dashboard.deleteComment
+POST /dashboard/deletePost                                   Dashboard.deletePost
+POST /dashboard/saveEditPost                                 Dashboard.saveEditPost
+POST /dashboard/saveEditComment                              Dashboard.saveEditComment
+POST /dashboardNoteDelete                                    Dashboard.updateDelete
+POST /dashboardTodoNew                                       Dashboard.newTodoList
+POST /dashboardTodoDelete                                    Dashboard.deleteTodo
+POST /dashboardTodoUpdate                                    Dashboard.updateTodo
+POST /dashboardPinPost                                       Dashboard.PinPost
+POST /dashboard/addVote                                      Dashboard.addVote
+POST /userCoverPicture                                       Dashboard.coverImage
+POST /dashboard/showVoteSize                                 Dashboard.showVoteSize
+POST /dashboardAddChoice                                     Dashboard.AddChoice
+
+POST /event/addComment                                       Events.addComment
+GET  /events                                                 Events.list
+POST /event/newEvent                                         Events.createEvent
+POST /event/saveEditedEvent                                  Events.saveEditedEvent
+POST /event/saveAttach                                       Events.saveAttach
+GET  /event/settings                                         Events.settings
+POST /event/eventDelete                                      Events.eventDelete
+POST /event/saveCategory                                     Events.saveCategory
+POST /event/deleteCategory                                   Events.deleteCategory
+POST /eventEventPicture                                      Events.eventPicture
+POST /event/edit                                             Events.edit
+POST /event/eventListData                                    Events.listData
+POST /event/listDataThisWeek                                 Events.listDataThisWeek
+POST /event/eventCome                                        Events.eventCome
+POST /event/eventFilter                                      Events.listData
+POST /event/people                                           Events.people
+POST /event/eventGuests                                      Events.eventGuests
+
+GET     /inventorysviewall                                Inventorys.viewAll
+GET     /inventoryslist                                   Inventorys.list
+GET     /inventorysadditem                                Inventorys.addItem
+POST    /inventoryssaveitem                               Inventorys.saveItem
+POST    /inventorysnewitem                                Inventorys.newItem
+POST    /inventorysnewitemmodal                           Inventorys.newItemModal
+POST    /inventorysdeleteitem                             Inventorys.deleteItem
+POST    /inventorysedititem                               Inventorys.editItemGet
+POST    /inventoryspreviewitem                            Inventorys.previewItem
+POST    /inventoryschecktransfer                          Inventorys.checkTransfer
+POST    /inventoryspreviewlocation                        Inventorys.previewLocation
+POST    /inventoryhandleattachment                        Inventorys.handleAttachment
+POST    /inventoryhandleattachmentedit                    Inventorys.handleAttachmentEdit
+POST    /inventoryCheckInventory                          Inventorys.inventoryCheckInventory
+POST    /inventoryCheckInventoryEdit                      Inventorys.inventoryCheckInventoryEdit
+POST    /inventoryLikeInventory                           Inventorys.inventoryLikeInventory
+POST    /inventoryShowSubCategory                         Inventorys.inventoryShowSubCategory
+POST    /inventoryShowSubCategoryFilter                   Inventorys.inventoryShowSubCategoryFilter
+POST    /inventorycheckpermission                         Inventorys.checkPermission
+POST    /inventorysupplierdetails                         Inventorys.supplierDetails
+POST    /inventoryattachs                                 Inventorys.attachs
+
+GET     /inventorystocksviewall                           InventoryStocks.viewAll
+GET     /inventorystockslist                              InventoryStocks.list
+
+POST    /inventorydepositsnewdeposit                      InventoryDeposits.newDeposit
+GET     /inventorydepositsviewall                         InventoryDeposits.viewAll
+GET     /inventorydepositslist                            InventoryDeposits.list
+POST    /inventorydepositspreviewdeposit                  InventoryDeposits.previewDeposit
+POST    /inventorydepositsdeletedeposit                   InventoryDeposits.deleteDeposit
+POST    /inventorydeposits/savedeposit                    InventoryDeposits.saveDeposit
+GET     /inventorydepositsdeposit                         InventoryDeposits.depositFromSupplier
+POST    /inventorydepositsgetsupplierprice                InventoryDeposits.supplierPrice
+POST    /inventorydepositsprint                           InventoryDeposits.printDeposit
+
+GET     /inventoryordersneworder                          InventoryOrders.newOrder
+GET     /inventoryordersbuyerorder                        InventoryOrders.buyerOrder
+GET     /inventoryordersorderview                         InventoryOrders.orderView
+GET     /inventoryordersviewall                           InventoryOrders.viewAll
+GET     /inventoryorderslist                              InventoryOrders.list
+GET     /inventoryordersprevieworder                      InventoryOrders.previewOrder
+GET     /inventoryorderssaveorder                         InventoryOrders.saveOrder
+POST    /inventoryordersneworder                          InventoryOrders.newOrder
+POST    /inventoryordersapproveorder                      InventoryOrders.approveOrder
+GET     /inventoryorderssendorder                         InventoryOrders.sendOrder
+POST    /inventoryordersreadyorder                        InventoryOrders.readyOrder
+POST    /inventoryordersrecieveorder                      InventoryOrders.recieveOrder
+POST    /inventoryorderscancelorder                       InventoryOrders.cancelOrder
+POST    /inventoryordersdeleteorder                       InventoryOrders.deleteOrder
+POST    /inventoryorderseditorder                         InventoryOrders.editOrder
+POST    /inventoryordersgetmeasure                        InventoryOrders.getMeasure
+POST    /inventoryordersgetsupplier                       InventoryOrders.getSupplier
+POST    /inventoryordersgetlocationquantity               InventoryOrders.getLocationQuantity
+GET     /inventoryordersorderlog                          InventoryOrders.orderLog
+GET     /inventoryorderspreviewlog                        InventoryOrders.previewLog
+POST    /inventoryordersgetlocationinventorys             InventoryOrders.getLocationInventorys
+
+GET     /inventorymeasuresviewall                         InventoryMeasures.viewAll
+GET     /inventorymeasureslist                            InventoryMeasures.list
+POST    /inventorymeasuresdeletemeasure                   InventoryMeasures.deleteMeasure
+GET     /inventorymeasuressavemeasure                     InventoryMeasures.saveMeasure
+POST    /inventorymeasuresaddmeasure                      InventoryMeasures.newMeasureModal
+GET     /inventorymeasuresnewmeasure                      InventoryMeasures.newMeasure
+POST    /inventorycategoryeditmeasure                     InventoryMeasures.editMeasure
+POST    /inventoryCheckMeasure                            InventoryMeasures.inventoryCheckMeasure
+POST    /inventoryCheckMeasureEdit                        InventoryMeasures.inventoryCheckMeasureEdit
+
+GET     /inventorycategorysaddcategory                    InventoryCategorys.addCategory
+GET     /inventorycategorysviewall                        InventoryCategorys.viewAll
+GET     /inventorycategoryslist                           InventoryCategorys.list
+POST    /inventorycategorysnewcategory                    InventoryCategorys.newCategory
+POST    /inventorycategorysdeletecategory                 InventoryCategorys.deleteCategory
+POST    /inventorycategoryaddcategory                     InventoryCategorys.newCategoryModal
+POST    /inventorycategoryeditcategory                    InventoryCategorys.editCategory
+POST    /inventorycategoryeditcategoryedit                InventoryCategorys.inventoryCheckCategoryEdit
+POST    /inventoryCheckCategory                           InventoryCategorys.inventoryCheckCategory
+POST    /inventoryCheckCategoryEdit                       InventoryCategorys.inventoryCheckCategoryEdit
+POST    /inventoryCheckSubCategory                        InventoryCategorys.inventoryCheckSubCategory
+POST    /inventorycategoryssavecategory                   InventoryCategorys.saveCategory
+
+GET     /inventorylocationsaddlocation                    InventoryLocations.addLocation
+GET     /inventorylocationsviewall                        InventoryLocations.viewAll
+GET     /inventorylocationslist                           InventoryLocations.list
+GET     /inventorylocationsnewlocation                    InventoryLocations.newLocation
+POST    /inventorylocationsdeletelocation                 InventoryLocations.deleteLocation
+POST    /inventorylocationseditlocation                   InventoryLocations.editLocation
+POST    /inventorylocationseditstatus                     InventoryLocations.editStatus
+POST    /inventorylocationspreviewlocation                InventoryLocations.previewLocation
+POST    /inventorylocationspreviewitems                   InventoryLocations.previewItems
+POST    /inventorylocationssavelocation                   InventoryLocations.saveLocation
+GET     /inventorylocationssavestatus                     InventoryLocations.saveStatus
+POST    /inventoryCheckLocation                           InventoryLocations.inventoryCheckLocation
+POST    /inventoryCheckLocationEdit                       InventoryLocations.inventoryCheckLocationEdit
+POST    /inventorylocationschecklocationpermission        InventoryLocations.inventoryCheckLocationPermission
+
+GET     /inventorysuppliersaddsupplier                    InventorySuppliers.addSupplier
+GET     /inventorysuppliersviewall                        InventorySuppliers.viewAll
+GET     /inventorysupplierslist                           InventorySuppliers.list
+POST    /inventorysuppliersnewsupplier                    InventorySuppliers.newSupplier
+POST    /inventorysuppliersnewsuppliermodal               InventorySuppliers.newSupplierModal
+POST    /inventorysuppliersdeletesupplier                 InventorySuppliers.deleteSupplier
+POST    /inventorysupplierseditsupplier                   InventorySuppliers.editSupplier
+POST    /inventorysupplierssaveupplier                    InventorySuppliers.saveSupplier
+POST    /inventorysupplierspreviewsupplier                InventorySuppliers.previewSupplier
+GET     /inventorysupplierssavesupplier                   InventorySuppliers.saveSupplier
+
+GET     /inventorytransferstransferitem                   InventoryTransfers.transferItem
+GET     /inventorytransfersviewall                        InventoryTransfers.viewAll
+GET     /inventorytransferstransfer                       InventoryTransfers.transfer
+POST    /inventorytransferstransferitem                   InventoryTransfers.transferItem
+POST    /inventorytransfersrecievetransfer                InventoryTransfers.recieveTransfer
+POST    /inventorytransferscanceltransfer                 InventoryTransfers.cancelTransfer
+POST    /inventorytransfersedittransfer                   InventoryTransfers.editTransfer
+POST    /inventorytransfersgetadmins                      InventoryTransfers.getAdmins
+GET     /inventorytransferstestall                        InventoryTransfers.testAll
+GET     /inventorytransferstest                           InventoryTransfers.test
+POST    /inventorytransfersgetmylcations                  InventoryTransfers.getMyLocations
+
+GET     /calculator1                                      Calculators.calculator1
+
+
+GET     /ssnlist                                         SSN.list
+GET     /ssnprofile                                      SSN.profile
+GET     /ssnsingle                                       SSN.single
+GET     /ssnlogin                                        SSN.login
+GET     /ssnsignup                                       SSN.signup
+GET     /ssnpostnew                                      SSN.postnew
+
+GET     /test                                             Tests.index
+GET     /test1                                            Tests.index1
+
+GET     /inventorywastesviewall                        InventoryWastes.viewAll
+GET     /inventorywasteslist                           InventoryWastes.list
+POST    /inventorywastesaddwaste                       InventoryWastes.addWaste
+POST    /inventorywastesgetmeasure                     InventoryWastes.getMeasure
+POST    /inventoryspreviewwaste                        InventoryWastes.previewWaste
+POST    /inventorywastesgetwaste                       InventoryWastes.getWaste
+POST    /inventorywastescheckquantity                  InventoryWastes.checkQuantity
+
+#WebRTC test
+GET /webrtc                                                  WebRTC.blank
+
+POST  /websocketTestPort                                     WebSocketTest.testPort
+# WebSocket
+WS     /websocket/socket                                     WebSocket.join
+
+POST  /notificationHeader                                    Notifications.notificationsHeader
+POST  /notificationCheckReminder                             Notifications.checkMoreReminder
+GET   /showAllNotifications                                  Notifications.showallnotifications
+POST  /getAllNotifications                                   Notifications.getAllNotifications
+GET   /notificationSee                                       Notifications.notificationSee
+
+POST  /dashboardNoteUpdate                                   Dashboard.updateNote
+POST  /dashboardNoteDelete                                   Dashboard.updateDelete
+POST  /dashboardTodoNew                                      Dashboard.newTodoList
+POST  /dashboardTodoDelete                                   Dashboard.deleteTodo
+POST  /dashboardTodoUpdate                                   Dashboard.updateTodo
+
+GET   /projectOrganizationChart                              OrganizationCharts.organization
+GET   /projectPermissions                                    OrganizationCharts.permission
+POST  /projectOrgGetUsers                                    OrganizationCharts.orgGetUsers
+POST  /projectOrgSaveUsers                                   OrganizationCharts.orgSaveUsers
+POST  /projectOrgGetTeams                                    OrganizationCharts.orgGetTeams
+POST  /projectOrgSaveTeams                                   OrganizationCharts.orgSaveTeams
+POST  /projectOrgSavePermissions                             OrganizationCharts.permissionSave
+
+POST  /aktList                                               FolderShare.loadAktList
+POST  /aktStyleChoose                                        FolderShare.aktStyleChoose
+POST  /aktBlank                                              FolderShare.aktBlank
+POST  /aktCreate                                             FolderShare.aktCreate
+POST  /uploadPdfData                                         FileUploader.uploadPDF
+POST  /aktDelete                                             FolderShare.aktDelete
+POST  /aktStyleList                                          FolderShare.loadAktStyleList
+POST  /aktStyleBlank                                         FolderShare.aktStyleBlank
+POST  /aktStyleCreate                                        FolderShare.aktStyleCreate
+POST  /aktStyleDelete                                        FolderShare.aktStyleDelete
+POST  /aktInfo                                               FolderShare.aktInfo
+POST  /chooseGalleryImages                                   FolderShare.chooseGalleryImages
+POST  /show_album                                            FolderShare.showAlbum
+POST  /choose_gallery_filter                                 FolderShare.picFilter
+
+# Ignore favicon requests
+GET     /favicon.ico                            404
+
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                    staticDir:public
+GET     /assets/                                    staticDir:assets
+GET     /FileCenter/                                staticDir:FileCenter
+GET     /FolderShare/                               staticDir:FolderShare
+
+# Catch all
+*       /{controller}/{action}                  {controller}.{action}
